@@ -34,7 +34,14 @@ export const ai = {
 
             // Clean markdown code blocks if present
             const jsonStr = text.replace(/```json|```/g, '').trim();
-            const result = JSON.parse(jsonStr);
+
+            let result;
+            try {
+                result = JSON.parse(jsonStr);
+            } catch (parseError) {
+                console.warn("AI returned invalid JSON. Raw text:", text);
+                return { verified: false, confidence: 0, reason: "AI Response Error" };
+            }
 
             return {
                 verified: result.is_valid && result.confidence > 0.85,

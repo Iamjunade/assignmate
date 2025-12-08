@@ -47,14 +47,17 @@ export const Profile = ({ user }: { user: any }) => {
     const coverInputRef = useRef<HTMLInputElement>(null);
     const avatarInputRef = useRef<HTMLInputElement>(null);
 
-    // Load Network Data
+    // Load Network Data - Optimized to only fetch when needed
     useEffect(() => {
         const loadNetwork = async () => {
             if (!user?.id) return;
-            const reqs = await db.getIncomingRequests(user.id);
-            setRequests(reqs);
-            const conns = await db.getMyConnections(user.id);
-            setConnections(conns);
+            // Only fetch if we haven't loaded yet or if we are on the network tab
+            if (activeTab === 'network' && connections.length === 0) {
+                const reqs = await db.getIncomingRequests(user.id);
+                setRequests(reqs);
+                const conns = await db.getMyConnections(user.id);
+                setConnections(conns);
+            }
         };
         loadNetwork();
     }, [user.id, activeTab]);
@@ -94,7 +97,7 @@ export const Profile = ({ user }: { user: any }) => {
                     is_verified: status
                 });
 
-                window.location.reload(); // Refresh to show badge
+                await refreshProfile(); // Soft refresh
             } catch (err: any) {
                 error("Failed to upload ID or AI verification failed.");
             } finally {
