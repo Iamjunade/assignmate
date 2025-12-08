@@ -57,10 +57,9 @@ function AppContent() {
 
     // 3. Fallback: Internal Firestore Listener (Legacy)
     const unsubscribe = notifications.listen(user.id, (data) => {
-      if (page === 'room' && chatId === data.chatId) return;
+      // Note: We removed the page/chatId check here to avoid re-subscribing constantly.
+      // Ideally, we'd check current route in a ref if we wanted to suppress notifications for active chat.
 
-      // Basic debounce/duplication check could go here if both are active
-      // For now, we allow the internal toast as well for reliability
       toast(
         `${data.senderName}: ${data.content.length > 30 ? data.content.substring(0, 30) + '...' : data.content}`,
         'info'
@@ -68,7 +67,7 @@ function AppContent() {
     });
 
     return () => unsubscribe();
-  }, [user, page, chatId]);
+  }, [user]); // Optimized: Only re-subscribe when user changes
 
   if (loading) {
     return (

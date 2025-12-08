@@ -42,6 +42,47 @@ export const userApi = {
     createProfile: async (id: string, metadata: any) => {
         const randomCollege = INDIAN_COLLEGES[Math.floor(Math.random() * INDIAN_COLLEGES.length)].name;
 
+        // Sanitize handle - ensure uniqueness
+        let handle = metadata.handle || metadata.full_name || 'Student';
+        handle = handle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+        if (handle.length < 3) handle = `Student_${id.slice(0, 4)}`;
+
+        // Uniqueness Check Helper
+        const checkUnique = async (h: string) => {
+            try {
+                const { data } = await supabase.from('profiles').select('id').eq('handle', h).single();
+                return !!data;
+            } catch { return false; }
+        };
+
+        let uniqueHandle = handle;
+        let counter = 1;
+
+        // Only append numbers if the handle ALREADY exists
+        while (await checkUnique(uniqueHandle)) {
+            uniqueHandle = `${handle}${Math.floor(Math.random() * 1000)}`;
+            counter++;
+            if (counter > 10) break;
+        }
+        handle = uniqueHandle;
+
+        const newProfile = {
+            id: id,
+            handle: handle,
+            email: metadata.email,
+            school: metadata.school || randomCollege,
+            avatar_url: metadata.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`,
+            cover_url: null,
+            balance: 100, // Signup bonus
+            xp: 0,
+            portfolio: [],
+            is_writer: metadata.is_writer ?? false,
+            bio: 'Student @ AssignMate',
+            tags: ['General'],
+            saved_writers: [],
+            created_at: new Date().toISOString()
+        };
+
         try {
             const { data, error } = await supabase.from('profiles').insert([newProfile]).select().single();
             if (error) throw error;
