@@ -350,46 +350,46 @@ export const Auth = () => {
                     </a>
                 </div>
             </div>
-        </div>
 
-            {/* Right: Branding (Hidden on Mobile) */ }
-    <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-orange-500 to-amber-600 relative overflow-hidden items-center justify-center p-12">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
 
-        {/* Floating Elements */}
-        <MotionDiv
-            animate={{ y: [0, -20, 0] }}
-            transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-            className="absolute top-20 right-20 bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-xl"
-        >
-            <Check className="text-white w-8 h-8" />
-        </MotionDiv>
-        <MotionDiv
-            animate={{ y: [0, 20, 0] }}
-            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}
-            className="absolute bottom-32 left-20 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-xl"
-        >
-            <div className="flex gap-2 mb-2">
-                <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                <div className="w-3 h-3 rounded-full bg-green-400"></div>
+            {/* Right: Branding (Hidden on Mobile) */}
+            <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-orange-500 to-amber-600 relative overflow-hidden items-center justify-center p-12">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
+
+                {/* Floating Elements */}
+                <MotionDiv
+                    animate={{ y: [0, -20, 0] }}
+                    transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+                    className="absolute top-20 right-20 bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-xl"
+                >
+                    <Check className="text-white w-8 h-8" />
+                </MotionDiv>
+                <MotionDiv
+                    animate={{ y: [0, 20, 0] }}
+                    transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}
+                    className="absolute bottom-32 left-20 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-xl"
+                >
+                    <div className="flex gap-2 mb-2">
+                        <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                        <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                        <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                    </div>
+                    <div className="w-32 h-2 bg-white/20 rounded mb-2"></div>
+                    <div className="w-20 h-2 bg-white/20 rounded"></div>
+                </MotionDiv>
+
+                <div className="relative z-10 text-white max-w-lg">
+                    <div className="mb-8 inline-block bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-4 py-1.5 text-sm font-bold shadow-sm">
+                        🚀 Trusted by 10,000+ Students
+                    </div>
+                    <h2 className="text-5xl font-extrabold mb-6 leading-tight">
+                        Your Campus <br /> <span className="text-orange-100">Marketplace.</span>
+                    </h2>
+                    <p className="text-lg text-orange-50 leading-relaxed font-medium opacity-90">
+                        Connect with peers from IITs, NITs, and top universities to get help with assignments, records, and projects.
+                    </p>
+                </div>
             </div>
-            <div className="w-32 h-2 bg-white/20 rounded mb-2"></div>
-            <div className="w-20 h-2 bg-white/20 rounded"></div>
-        </MotionDiv>
-
-        <div className="relative z-10 text-white max-w-lg">
-            <div className="mb-8 inline-block bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-4 py-1.5 text-sm font-bold shadow-sm">
-                🚀 Trusted by 10,000+ Students
-            </div>
-            <h2 className="text-5xl font-extrabold mb-6 leading-tight">
-                Your Campus <br /> <span className="text-orange-100">Marketplace.</span>
-            </h2>
-            <p className="text-lg text-orange-50 leading-relaxed font-medium opacity-90">
-                Connect with peers from IITs, NITs, and top universities to get help with assignments, records, and projects.
-            </p>
-        </div>
-    </div>
-    </div >
-  );
+        </div >
+    );
 };
