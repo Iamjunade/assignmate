@@ -55,22 +55,6 @@ export const Feed = ({ user, onChat }) => {
         const matchesCategory = filter === 'All' ||
             w.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())) ||
             w.bio?.toLowerCase().includes(filter.toLowerCase());
-
-        // Visibility Logic
-        // 1. If visibility is 'global' (or undefined), show it.
-        // 2. If visibility is 'college', ONLY show if:
-        //    a. Viewer is from the same college
-        //    b. OR Viewer is explicitly searching for that college
-        const isVisible = (!w.visibility || w.visibility === 'global') ||
-            (w.visibility === 'college' && (
-                (user && user.school === w.school) ||
-                (searchTerm.length > 3 && w.school.toLowerCase().includes(searchTerm.toLowerCase()))
-            ));
-
-        return matchesSearch && matchesCategory && isVisible;
-    });
-
-    return (
         <div className="min-h-full bg-slate-50">
             {/* Hero Section for Visitors */}
             {!user && (
