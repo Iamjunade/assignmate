@@ -40,23 +40,9 @@ export const Feed = ({ user, onChat }) => {
         await db.toggleSaveWriter(user.id, writerId);
         await refreshProfile(); // Refresh my saved list
     };
-
-    const handleConnect = async (writerId) => {
-        if (!user) return;
-        await db.sendConnectionRequest(user.id, writerId);
-        setNetworkMap(prev => ({ ...prev, [writerId]: 'pending_sent' }));
-        success("Connection request sent!");
-    };
-
-                        <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-white text-xs font-bold tracking-wide mb-6 border border-white/30 shadow-sm">
-                            🚀 #1 Student Marketplace in India
-                        </span>
-                        <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-sm">
-                            Assignments done, <br /> <span className="text-orange-100">Stress gone.</span>
-                        </h1>
-                        <p className="text-orange-50 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-medium leading-relaxed opacity-90">
-                            Connect with top peers from universities across India for help with assignments, records, and projects.
-                        </p>
+    <p className="text-orange-50 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-medium leading-relaxed opacity-90">
+        Connect with top peers from universities across India for help with assignments, records, and projects.
+    </p>
                     </div >
                 </div >
             )}
