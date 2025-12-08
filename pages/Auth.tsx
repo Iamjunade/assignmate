@@ -341,7 +341,7 @@ export const Auth = () => {
                                 {isReg ? "Sign In" : "Create Account"}
                             </button>
                         </p>
-                    </p>
+                    </div>
                 </div>
 
                 <div className="mt-6 text-center">
@@ -352,7 +352,7 @@ export const Auth = () => {
             </div>
         </div>
 
-      {/* Right: Branding (Hidden on Mobile) */ }
+            {/* Right: Branding (Hidden on Mobile) */ }
     <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-orange-500 to-amber-600 relative overflow-hidden items-center justify-center p-12">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
 
