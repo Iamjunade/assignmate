@@ -529,8 +529,7 @@ export const db = {
             });
             if (changed) setLocal(LOCAL_KEYS.MESSAGES, updated);
         }
-    }
-},
+    },
 
     // --- ADMIN METHODS ---
     getPendingVerifications: async () => {
@@ -543,9 +542,9 @@ export const db = {
         }
     },
 
-        verifyUser: async (userId: string, status: 'verified' | 'rejected') => {
-            return db.updateProfile(userId, { is_verified: status });
-        }
+    verifyUser: async (userId: string, status: 'verified' | 'rejected') => {
+        return db.updateProfile(userId, { is_verified: status });
+    }
 };
 
 function filterWriters(data: any[]) {
