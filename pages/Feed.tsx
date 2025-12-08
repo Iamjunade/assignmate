@@ -48,19 +48,6 @@ export const Feed = ({ user, onChat }) => {
         success("Connection request sent!");
     };
 
-    const filteredWriters = writers.filter(w => {
-        const matchesSearch = w.handle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            w.school.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesCategory = filter === 'All' ||
-            w.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())) ||
-            w.bio?.toLowerCase().includes(filter.toLowerCase());
-        <div className="min-h-full bg-slate-50">
-            {/* Hero Section for Visitors */}
-            {!user && (
-                <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 px-6 py-20 text-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-                    <div className="relative z-10">
                         <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-white text-xs font-bold tracking-wide mb-6 border border-white/30 shadow-sm">
                             🚀 #1 Student Marketplace in India
                         </span>
@@ -70,11 +57,11 @@ export const Feed = ({ user, onChat }) => {
                         <p className="text-orange-50 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-medium leading-relaxed opacity-90">
                             Connect with top peers from universities across India for help with assignments, records, and projects.
                         </p>
-                    </div>
-                </div>
+                    </div >
+                </div >
             )}
 
-            {/* Search Header */}
+{/* Search Header */ }
             <div className="sticky top-0 bg-white/80 backdrop-blur-xl z-20 border-b border-orange-100 shadow-sm">
                 <div className="p-4 md:p-6 max-w-5xl mx-auto">
                     <div className="flex items-center justify-between mb-4">
@@ -145,6 +132,6 @@ export const Feed = ({ user, onChat }) => {
                     </motion.div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
