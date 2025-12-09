@@ -84,35 +84,33 @@ export const Layout = ({ children, user, page, setPage, onLogout }: LayoutProps)
                 </div>
             </div>
 
+            {!user && (
+                <button onClick={() => setPage('auth')} className="text-xs bg-orange-600 text-white px-4 py-2 rounded-md font-bold shadow-md shadow-orange-200">
+                    Login
+                </button>
+            )}
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto relative bg-slate-50">
+            <div className="max-w-5xl mx-auto w-full min-h-full pb-20 md:pb-0">
+                {children}
+            </div>
+        </main>
+
+        {/* Mobile Bottom Nav */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex justify-around items-center z-30 pb-safe shadow-[0_-1px_10px_rgba(0,0,0,0.05)]">
+            <MobileNavBtn label="Find" icon={<Search size={20} />} active={page === 'feed'} onClick={() => setPage('feed')} />
             {user ? (
-
-            ): (
-                    <button onClick = { () => setPage('auth') } className = "text-xs bg-orange-600 text-white px-4 py-2 rounded-md font-bold shadow-md shadow-orange-200">
-              Login
-          </button>
-      )}
-    </header>
-
-    {/* Main Content */ }
-<main className="flex-1 overflow-y-auto relative bg-slate-50">
-    <div className="max-w-5xl mx-auto w-full min-h-full pb-20 md:pb-0">
-        {children}
-    </div>
-</main>
-
-{/* Mobile Bottom Nav */ }
-<nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex justify-around items-center z-30 pb-safe shadow-[0_-1px_10px_rgba(0,0,0,0.05)]">
-    <MobileNavBtn label="Find" icon={<Search size={20} />} active={page === 'feed'} onClick={() => setPage('feed')} />
-    {user ? (
-        <>
-            <MobileNavBtn label="Chats" icon={<MessageSquare size={20} />} active={page === 'chats'} onClick={() => setPage('chats')} />
-            <MobileNavBtn label="Profile" icon={<UserIcon size={20} />} active={page === 'profile'} onClick={() => setPage('profile')} />
-        </>
-    ) : (
-        <MobileNavBtn label="Login" icon={<LogIn size={20} />} active={page === 'auth'} onClick={() => setPage('auth')} />
-    )}
-</nav>
-  </div >
+                <>
+                    <MobileNavBtn label="Chats" icon={<MessageSquare size={20} />} active={page === 'chats'} onClick={() => setPage('chats')} />
+                    <MobileNavBtn label="Profile" icon={<UserIcon size={20} />} active={page === 'profile'} onClick={() => setPage('profile')} />
+                </>
+            ) : (
+                <MobileNavBtn label="Login" icon={<LogIn size={20} />} active={page === 'auth'} onClick={() => setPage('auth')} />
+            )}
+        </nav>
+    </div >
 );
 
 interface NavBtnProps {
