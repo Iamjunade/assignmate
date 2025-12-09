@@ -47,6 +47,22 @@ export const userApi = {
         handle = handle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
         if (handle.length < 3) handle = `Student_${id.slice(0, 4)}`;
 
+        // Check if email already exists
+        const checkEmail = async (email: string) => {
+            try {
+                const { data } = await supabase.from('profiles').select('id').eq('email', email).single();
+                return !!data;
+            } catch {
+                // Local fallback check
+                const profiles = getLocal<any>(LOCAL_KEYS.PROFILES);
+                return profiles.some(p => p.email === email);
+            }
+        };
+
+        if (await checkEmail(metadata.email)) {
+            throw new Error("This email is already registered. Please login instead.");
+        }
+
         // Uniqueness Check Helper
         const checkUnique = async (h: string) => {
             try {

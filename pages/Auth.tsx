@@ -34,6 +34,13 @@ export const Auth = () => {
         e.preventDefault();
         setLoad(true);
 
+        // Password Validation
+        if (form.password.length < 6) {
+            error("Password must be at least 6 characters long.");
+            setLoad(false);
+            return;
+        }
+
         let res;
         if (isReg) {
             if (!form.school) {
@@ -52,7 +59,16 @@ export const Auth = () => {
         }
 
         if (res?.error) {
-            const msg = res.error.message || "Authentication failed";
+            let msg = res.error.message || "Authentication failed";
+            // Professional Error Mapping
+            if (msg.includes('auth/email-already-in-use') || msg.includes('already registered')) {
+                msg = "This email is already associated with an account. Please login.";
+            } else if (msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found') || msg.includes('invalid-credential')) {
+                msg = "Invalid email or password. Please try again.";
+            } else if (msg.includes('auth/weak-password')) {
+                msg = "Password is too weak. Please use a stronger password.";
+            }
+
             error(msg.replace('Firebase:', '').trim());
             setLoad(false);
         } else if (isReg && !res?.data?.session) {
