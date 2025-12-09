@@ -58,13 +58,45 @@ export const userApi = {
         let uniqueHandle = handle;
         let counter = 1;
 
-        // Only append numbers if the handle ALREADY exists
-        while (await checkUnique(uniqueHandle)) {
-            await supabase.from('profiles').delete().eq('id', id);
+        try {
+            // Only append numbers if the handle ALREADY exists
+            while (await checkUnique(uniqueHandle)) {
+                uniqueHandle = `${handle}${counter++}`;
+            }
+
+            const newProfile = {
+                id,
+                handle: uniqueHandle,
+                full_name: metadata.full_name,
+                email: metadata.email,
+                avatar_url: metadata.avatar_url,
+                school: randomCollege,
+                created_at: new Date().toISOString(),
+                is_verified: 'pending',
+                xp: 0,
+                tags: ['Student']
+            };
+
+            const { error } = await supabase.from('profiles').insert([newProfile]);
+            if (error) throw error;
+            return newProfile;
         } catch (e) {
             // Local fallback
             const profiles = getLocal<any>(LOCAL_KEYS.PROFILES);
-            setLocal(LOCAL_KEYS.PROFILES, profiles.filter(p => p.id !== id));
+            const newProfile = {
+                id,
+                handle: uniqueHandle,
+                full_name: metadata.full_name,
+                email: metadata.email,
+                avatar_url: metadata.avatar_url,
+                school: randomCollege,
+                created_at: new Date().toISOString(),
+                is_verified: 'pending',
+                xp: 0,
+                tags: ['Student']
+            };
+            setLocal(LOCAL_KEYS.PROFILES, [...profiles, newProfile]);
+            return newProfile;
         }
     }
 };
