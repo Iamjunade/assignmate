@@ -60,48 +60,6 @@ export const userApi = {
 
         // Only append numbers if the handle ALREADY exists
         while (await checkUnique(uniqueHandle)) {
-            uniqueHandle = `${handle}${Math.floor(Math.random() * 1000)}`;
-            counter++;
-            if (counter > 10) break;
-        }
-        handle = uniqueHandle;
-
-        const newProfile = {
-            id: id,
-            handle: handle,
-            email: metadata.email,
-            school: metadata.school || randomCollege,
-            avatar_url: metadata.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`,
-            cover_url: null,
-            balance: 100, // Signup bonus
-            xp: 0,
-            portfolio: [],
-            is_writer: metadata.is_writer ?? false,
-            bio: 'Student @ AssignMate',
-            tags: ['General'],
-            saved_writers: [],
-            created_at: new Date().toISOString()
-        };
-
-        try {
-            const { data, error } = await supabase.from('profiles').insert([newProfile]).select().single();
-            if (error) throw error;
-            return data;
-        } catch (e) {
-            console.error("CRITICAL: Supabase Write Failed.", e);
-            console.warn("HINT: Did you run the 'SUPABASE_SETUP.sql' script in your Supabase Dashboard?");
-
-            // Save locally
-            const profiles = getLocal<any>(LOCAL_KEYS.PROFILES);
-            const updated = [newProfile, ...profiles.filter(p => p.id !== id)];
-            setLocal(LOCAL_KEYS.PROFILES, updated);
-
-            return newProfile;
-        }
-    },
-
-    deleteProfile: async (id: string) => {
-        try {
             await supabase.from('profiles').delete().eq('id', id);
         } catch (e) {
             // Local fallback

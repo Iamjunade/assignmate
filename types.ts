@@ -5,7 +5,7 @@ export interface User {
   school: string;
   avatar_url?: string;
   cover_url?: string; // Custom profile cover image
-  balance: number;
+
   xp: number;
   portfolio?: string[]; // Array of image URLs (Handwriting samples)
   rate_per_page?: number; // Optional: For future expansion
@@ -15,6 +15,7 @@ export interface User {
   saved_writers?: string[]; // IDs of writers this user has bookmarked
   is_incomplete?: boolean; // Flag for Google users who haven't set handle/school
   fcm_token?: string; // Firebase Cloud Messaging Token for Push Notifications
+  visibility?: 'global' | 'college'; // Visibility setting for the profile
 }
 
 export interface Chat {
