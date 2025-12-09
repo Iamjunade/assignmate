@@ -114,6 +114,18 @@ export const userApi = {
             setLocal(LOCAL_KEYS.PROFILES, [...profiles, newProfile]);
             return newProfile;
         }
+    },
+
+    deleteProfile: async (id: string) => {
+        try {
+            const { error } = await supabase.from('profiles').delete().eq('id', id);
+            if (error) throw error;
+        } catch (e) {
+            // Fallback: Remove from local storage
+            const profiles = getLocal<any>(LOCAL_KEYS.PROFILES);
+            const newProfiles = profiles.filter(p => p.id !== id);
+            setLocal(LOCAL_KEYS.PROFILES, newProfiles);
+        }
     }
 };
 
