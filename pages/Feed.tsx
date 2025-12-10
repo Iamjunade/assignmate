@@ -1,13 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../services/mockSupabase';
-import { Loader2, Filter, Sparkles, GraduationCap } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Loader2, Filter, Sparkles, GraduationCap, Award, Users, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import WriterCard from '../components/WriterCard';
 import { useAuth } from '../contexts/AuthContext';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
 import { useToast } from '../contexts/ToastContext';
 
 const CATEGORIES = ['All', 'Practical Records', 'Assignments', 'Blue Books', 'Viva Prep', 'Final Year Project', 'Coding', 'Design'];
+
+// Animation variants for stagger effect
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.08,
+            delayChildren: 0.1
+        }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 100,
+            damping: 12
+        }
+    }
+};
 
 export const Feed = ({ user, onChat }) => {
     const { refreshProfile } = useAuth();
@@ -67,23 +92,96 @@ export const Feed = ({ user, onChat }) => {
     });
 
     return (
-        <div className="min-h-full bg-slate-50">
+        <div className="min-h-full bg-slate-50 relative">
+            {/* Floating India's #1 Badge */}
+            <motion.div
+                className="fixed top-20 right-4 z-50 hidden md:block"
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
+                transition={{
+                    opacity: { duration: 0.5 },
+                    x: { duration: 0.5 },
+                    y: { repeat: Infinity, duration: 3, ease: "easeInOut" }
+                }}
+            >
+                <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-full shadow-xl border border-orange-300/50 backdrop-blur-sm flex items-center gap-2">
+                    <Award size={16} className="animate-pulse" />
+                    <span className="text-xs font-bold">India's #1 Marketplace</span>
+                </div>
+            </motion.div>
+
             {/* Hero Section for Visitors */}
             {!user && (
-                <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 px-6 py-20 text-center relative overflow-hidden">
+                <motion.div
+                    className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 px-6 py-20 text-center relative overflow-hidden"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6 }}
+                >
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+
+                    {/* Animated Floating Elements */}
+                    <motion.div
+                        className="absolute top-20 left-10 w-20 h-20 bg-white/10 backdrop-blur-md rounded-full"
+                        animate={{ y: [0, -20, 0], rotate: [0, 180, 360] }}
+                        transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
+                    />
+                    <motion.div
+                        className="absolute bottom-20 right-10 w-16 h-16 bg-white/10 backdrop-blur-md rounded-full"
+                        animate={{ y: [0, 20, 0], rotate: [0, -180, -360] }}
+                        transition={{ repeat: Infinity, duration: 6, ease: "easeInOut", delay: 1 }}
+                    />
+
                     <div className="relative z-10">
-                        <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-white text-xs font-bold tracking-wide mb-6 border border-white/30 shadow-sm">
+                        <motion.span
+                            className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-white text-xs font-bold tracking-wide mb-6 border border-white/30 shadow-sm"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
+                        >
                             🚀 #1 Student Marketplace in India
-                        </span>
-                        <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-sm">
+                        </motion.span>
+
+                        <motion.h1
+                            className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-sm"
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.3, duration: 0.6 }}
+                        >
                             Assignments done, <br /> <span className="text-orange-100">Stress gone.</span>
-                        </h1>
-                        <p className="text-orange-50 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-medium leading-relaxed opacity-90">
+                        </motion.h1>
+
+                        <motion.p
+                            className="text-orange-50 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-medium leading-relaxed opacity-90"
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.4, duration: 0.6 }}
+                        >
                             Connect with top peers from universities across India for help with assignments, records, and projects.
-                        </p>
+                        </motion.p>
+
+                        {/* Trust Indicators */}
+                        <motion.div
+                            className="flex flex-wrap justify-center gap-6 md:gap-8 mt-8"
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.5, duration: 0.6 }}
+                        >
+                            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
+                                <Users size={18} className="text-orange-100" />
+                                <span className="text-white font-bold text-sm">10,000+ Students</span>
+                            </div>
+                            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
+                                <GraduationCap size={18} className="text-orange-100" />
+                                <span className="text-white font-bold text-sm">500+ Universities</span>
+                            </div>
+                            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
+                                <CheckCircle size={18} className="text-orange-100" />
+                                <span className="text-white font-bold text-sm">50K+ Assignments</span>
+                            </div>
+                        </motion.div>
                     </div>
-                </div>
+                </motion.div>
             )}
 
             {/* Search Header */}
@@ -130,31 +228,43 @@ export const Feed = ({ user, onChat }) => {
                         <Loader2 className="animate-spin text-orange-500 w-10 h-10" />
                     </div>
                 ) : (
-                    <motion.div>
+                    <AnimatePresence mode="wait">
                         {filteredWriters.length === 0 ? (
-                            <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300 shadow-sm">
+                            <motion.div
+                                className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300 shadow-sm"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ duration: 0.3 }}
+                            >
                                 <Sparkles className="mx-auto text-amber-400 mb-4" size={40} />
                                 <p className="font-bold text-slate-700 text-lg">No students found.</p>
                                 <p className="text-sm text-slate-500 mt-1">Try searching for a different college or skill.</p>
                                 <button onClick={() => { setFilter('All'); setSearchTerm('') }} className="mt-6 text-orange-600 hover:text-orange-700 text-sm font-bold underline decoration-2 underline-offset-4">View All Students</button>
-                            </div>
+                            </motion.div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            <motion.div
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+                                variants={containerVariants}
+                                initial="hidden"
+                                animate="visible"
+                            >
                                 {filteredWriters.map((writer, i) => (
-                                    <WriterCard
-                                        key={writer.id}
-                                        writer={writer}
-                                        onChat={onChat}
-                                        index={i}
-                                        onToggleSave={user ? handleToggleSave : undefined}
-                                        isSaved={user?.saved_writers?.includes(writer.id)}
-                                        connectionStatus={networkMap[writer.id] as any || 'none'}
-                                        onConnect={handleConnect}
-                                    />
+                                    <motion.div key={writer.id} variants={itemVariants}>
+                                        <WriterCard
+                                            writer={writer}
+                                            onChat={onChat}
+                                            index={i}
+                                            onToggleSave={user ? handleToggleSave : undefined}
+                                            isSaved={user?.saved_writers?.includes(writer.id)}
+                                            connectionStatus={networkMap[writer.id] as any || 'none'}
+                                            onConnect={handleConnect}
+                                        />
+                                    </motion.div>
                                 ))}
-                            </div>
+                            </motion.div>
                         )}
-                    </motion.div>
+                    </AnimatePresence>
                 )}
             </div>
         </div>
