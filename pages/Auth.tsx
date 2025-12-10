@@ -4,10 +4,11 @@ import { useToast } from '../contexts/ToastContext';
 import { Loader2, Mail, Lock, ArrowRight, GraduationCap, Check, PenTool, Search, Phone, MessageCircle } from 'lucide-react';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
 import { motion } from 'framer-motion';
+import { GlassCard } from '../components/ui/GlassCard';
+import { GlassInput } from '../components/ui/GlassInput';
+import { GlassButton } from '../components/ui/GlassButton';
 
 const MotionDiv = motion.div as any;
-
-const inputClasses = "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 pl-11 outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 text-slate-800 transition-all placeholder-slate-400 text-sm font-bold";
 
 export const Auth = () => {
     const { user, login, register, loginWithGoogle, completeGoogleSignup, resetPassword } = useAuth();
@@ -25,7 +26,6 @@ export const Auth = () => {
     // Pre-fill if we have partial data
     useEffect(() => {
         if (user?.is_incomplete) {
-            // Strip existing handle if it looks like a name, or keep it if empty
             setCompletionForm(prev => ({ ...prev, handle: user.handle || '' }));
         }
     }, [user]);
@@ -34,7 +34,6 @@ export const Auth = () => {
         e.preventDefault();
         setLoad(true);
 
-        // Password Validation
         if (form.password.length < 6) {
             error("Password must be at least 6 characters long.");
             setLoad(false);
@@ -60,7 +59,6 @@ export const Auth = () => {
 
         if (res?.error) {
             let msg = res.error.message || "Authentication failed";
-            // Professional Error Mapping
             if (msg.includes('auth/email-already-in-use') || msg.includes('already registered')) {
                 msg = "This email is already associated with an account. Please login.";
             } else if (msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found') || msg.includes('invalid-credential')) {
@@ -73,7 +71,7 @@ export const Auth = () => {
             setLoad(false);
         } else if (isReg && !res?.data?.session) {
             success("Account created! Please login to continue.");
-            setIsReg(false); // Switch to login mode
+            setIsReg(false);
             setLoad(false);
         }
     };
@@ -85,7 +83,6 @@ export const Auth = () => {
             error(gError.message || "Google Login Failed");
             setLoad(false);
         }
-        // Context handles the redirection or profile check
     };
 
     const handleForgotPassword = async () => {
@@ -120,200 +117,146 @@ export const Auth = () => {
     // View for completing profile (Google Signups)
     if (user?.is_incomplete) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-                <div className="bg-white rounded-3xl shadow-xl border border-slate-200 max-w-md w-full p-8 md:p-10 relative overflow-visible">
+            <div className="min-h-screen flex items-center justify-center p-4">
+                <GlassCard className="max-w-md w-full p-8 md:p-10 relative overflow-visible">
                     <div className="text-center mb-8 flex flex-col items-center">
-                        <img
-                            src="https://i.ibb.co/0pVsZCnx/assignmate.png"
-                            alt="AssignMate"
-                            className="w-24 h-24 object-contain mb-4 drop-shadow-sm"
-                            onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                                document.getElementById('setup-logo-fallback')?.classList.remove('hidden');
-                            }}
-                        />
-                        <div id="setup-logo-fallback" className="hidden text-6xl mb-4">📚</div>
-                        <h2 className="text-2xl font-bold text-slate-900">Setup your Profile</h2>
-                        <p className="text-slate-500">Claim your unique handle to join the community.</p>
+                        <div className="text-6xl mb-4">📚</div>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Setup your Profile</h2>
+                        <p className="text-slate-500 dark:text-slate-400">Claim your unique handle to join the community.</p>
                     </div>
 
                     <form onSubmit={handleCompleteProfile} className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wide">Choose a Handle</label>
-                            <div className="relative group">
-                                <div className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-orange-500 font-bold z-10 text-sm">@</div>
-                                <input
-                                    required
-                                    placeholder="username"
-                                    className={`${inputClasses} pl-9`} // Adjusted padding for @ symbol
-                                    value={completionForm.handle}
-                                    onChange={e => {
-                                        // simple sanitation
-                                        const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
-                                        setCompletionForm({ ...completionForm, handle: val });
-                                    }}
-                                />
-                            </div>
-                            <p className="text-[10px] text-slate-400 ml-1">Only letters, numbers, and underscores.</p>
-                        </div>
+                        <GlassInput
+                            label="Choose a Handle"
+                            placeholder="username"
+                            value={completionForm.handle}
+                            onChange={e => {
+                                const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                                setCompletionForm({ ...completionForm, handle: val });
+                            }}
+                            icon={<span className="font-bold text-sm">@</span>}
+                        />
+                        <p className="text-[10px] text-slate-400 ml-1 -mt-4">Only letters, numbers, and underscores.</p>
 
                         <div className="space-y-2 relative z-50">
-                            <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wide">Select your University</label>
+                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">Select your University</label>
                             <CollegeAutocomplete
                                 value={completionForm.school}
                                 onChange={(val) => setCompletionForm({ ...completionForm, school: val })}
                                 placeholder="Search your college"
                                 className="w-full"
-                                inputClassName={inputClasses}
-                                icon={<GraduationCap className="absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-orange-500 transition-colors z-10" size={18} />}
+                                inputClassName="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 pl-10 outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all duration-200 placeholder:text-slate-400 text-slate-900 dark:text-white"
+                                icon={<GraduationCap className="absolute left-3.5 top-2.5 text-slate-400" size={18} />}
                             />
                         </div>
 
-                        {/* Role Selection */}
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wide">What is your goal?</label>
+                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">What is your goal?</label>
                             <div className="grid grid-cols-2 gap-3">
                                 <div
                                     onClick={() => setIsWriter(false)}
-                                    className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${!isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:border-orange-200'}`}
+                                    className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${!isWriter ? 'bg-orange-500/10 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
                                 >
-                                    <Search className={!isWriter ? 'text-orange-600' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-700' : 'text-slate-600'}`}>Find Help</span>
+                                    <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                    <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-500' : 'text-slate-500'}`}>Find Help</span>
                                 </div>
                                 <div
                                     onClick={() => setIsWriter(true)}
-                                    className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:border-orange-200'}`}
+                                    className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${isWriter ? 'bg-orange-500/10 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
                                 >
-                                    <PenTool className={isWriter ? 'text-orange-600' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-700' : 'text-slate-600'}`}>Earn Money</span>
+                                    <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                    <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-500' : 'text-slate-500'}`}>Earn Money</span>
                                 </div>
                             </div>
                         </div>
 
-                        <button disabled={load} className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
-                            {load ? <Loader2 className="animate-spin" /> : <>Finish Setup <ArrowRight size={18} /></>}
-                        </button>
+                        <GlassButton type="submit" isLoading={load} className="w-full">
+                            Finish Setup <ArrowRight size={18} className="ml-2" />
+                        </GlassButton>
                     </form>
-                </div>
+                </GlassCard>
             </div>
         );
     }
 
-    // Standard Login / Register
     return (
-        <div className="min-h-screen flex bg-white">
+        <div className="min-h-screen flex w-full">
             {/* Left: Form */}
-            <div className="w-full lg:w-1/2 p-6 md:p-12 xl:p-24 flex flex-col justify-center relative">
+            <div className="w-full lg:w-1/2 p-6 md:p-12 xl:p-24 flex flex-col justify-center relative z-10">
                 <div className="max-w-md w-full mx-auto">
                     <div className="mb-10 text-center lg:text-left">
-                        <div className="flex justify-center lg:justify-start">
-                            <img
-                                src="https://i.ibb.co/0pVsZCnx/assignmate.png"
-                                alt="AssignMate"
-                                className="w-24 h-24 object-contain mb-6 drop-shadow-sm"
-                                onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                    document.getElementById('auth-logo-fallback')?.classList.remove('hidden');
-                                }}
-                            />
-                            <div id="auth-logo-fallback" className="hidden text-5xl mb-6">📚</div>
-                        </div>
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-3">{isReg ? 'Create Account' : 'Welcome Back'}</h1>
-                        <p className="text-slate-500 font-medium">{isReg ? 'Join the community of ambitious students.' : 'Please enter your details to sign in.'}</p>
+                        <div className="text-5xl mb-6 lg:hidden">📚</div>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white mb-3">{isReg ? 'Create Account' : 'Welcome Back'}</h1>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium">{isReg ? 'Join the community of ambitious students.' : 'Please enter your details to sign in.'}</p>
                     </div>
 
                     <div className="space-y-4 mb-8">
-                        <button
-                            type="button"
-                            onClick={handleGoogle}
-                            disabled={load}
-                            className="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
-                        >
-                            {load ? <Loader2 className="animate-spin w-5 h-5" /> : <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />}
+                        <GlassButton variant="secondary" onClick={handleGoogle} isLoading={load} className="w-full justify-center">
+                            <img src="https://www.google.com/favicon.ico" className="w-5 h-5 mr-3" alt="Google" />
                             Continue with Google
-                        </button>
+                        </GlassButton>
 
-                        <button
-                            type="button"
-                            onClick={() => info("Mobile Login coming soon! Please use Google or Email.")}
-                            className="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-3"
-                        >
-                            <Phone size={20} className="text-slate-400" />
+                        <GlassButton variant="secondary" onClick={() => info("Mobile Login coming soon!")} className="w-full justify-center">
+                            <Phone size={20} className="mr-3 text-slate-400" />
                             Continue with Mobile Number
-                        </button>
+                        </GlassButton>
 
                         <div className="relative flex items-center gap-4">
-                            <div className="h-px bg-slate-200 flex-1"></div>
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">OR CONTINUE WITH</span>
-                            <div className="h-px bg-slate-200 flex-1"></div>
+                            <div className="h-px bg-slate-200 dark:bg-white/10 flex-1"></div>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">OR</span>
+                            <div className="h-px bg-slate-200 dark:bg-white/10 flex-1"></div>
                         </div>
                     </div>
 
                     <form onSubmit={submit} className="space-y-5 relative">
                         {isReg && (
                             <>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wide">Choose a Handle</label>
-                                    <div className="relative group">
-                                        <div className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-orange-500 font-bold z-10 text-sm">@</div>
-                                        <input
-                                            required={isReg}
-                                            placeholder="username"
-                                            className={`${inputClasses} pl-9`}
-                                            value={form.handle}
-                                            onChange={e => {
-                                                const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
-                                                setForm({ ...form, handle: val });
-                                            }}
-                                        />
-                                    </div>
-                                </div>
+                                <GlassInput
+                                    label="Choose a Handle"
+                                    placeholder="username"
+                                    value={form.handle}
+                                    onChange={e => {
+                                        const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                                        setForm({ ...form, handle: val });
+                                    }}
+                                    icon={<span className="font-bold text-sm">@</span>}
+                                />
 
                                 <div className="space-y-2 relative z-50">
-                                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wide">University</label>
+                                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">University</label>
                                     <CollegeAutocomplete
                                         value={form.school}
                                         onChange={(val) => setForm({ ...form, school: val })}
                                         placeholder="Select your college"
                                         className="w-full"
-                                        inputClassName={inputClasses}
-                                        icon={<GraduationCap className="absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-orange-500 transition-colors z-10" size={18} />}
+                                        inputClassName="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 pl-10 outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all duration-200 placeholder:text-slate-400 text-slate-900 dark:text-white"
+                                        icon={<GraduationCap className="absolute left-3.5 top-2.5 text-slate-400" size={18} />}
                                     />
                                 </div>
                             </>
                         )}
 
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wide">Email Address</label>
-                            <div className="relative group">
-                                <Mail className="absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-orange-500 transition-colors z-10" size={18} />
-                                <input
-                                    required
-                                    type="email"
-                                    className={inputClasses}
-                                    placeholder="name@college.edu.in"
-                                    value={form.email}
-                                    onChange={e => setForm({ ...form, email: e.target.value })}
-                                />
-                            </div>
-                        </div>
+                        <GlassInput
+                            label="Email Address"
+                            type="email"
+                            placeholder="name@college.edu.in"
+                            value={form.email}
+                            onChange={e => setForm({ ...form, email: e.target.value })}
+                            icon={<Mail size={18} />}
+                        />
 
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wide">Password</label>
-                            <div className="relative group">
-                                <Lock className="absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-orange-500 transition-colors z-10" size={18} />
-                                <input
-                                    required
-                                    type="password"
-                                    className={inputClasses}
-                                    placeholder="••••••••"
-                                    value={form.password}
-                                    onChange={e => setForm({ ...form, password: e.target.value })}
-                                />
-                            </div>
+                        <div>
+                            <GlassInput
+                                label="Password"
+                                type="password"
+                                placeholder="••••••••"
+                                value={form.password}
+                                onChange={e => setForm({ ...form, password: e.target.value })}
+                                icon={<Lock size={18} />}
+                            />
                             {!isReg && (
-                                <div className="flex justify-end">
-                                    <button type="button" onClick={handleForgotPassword} className="text-xs font-bold text-orange-600 hover:text-orange-700">
+                                <div className="flex justify-end mt-2">
+                                    <button type="button" onClick={handleForgotPassword} className="text-xs font-bold text-orange-500 hover:text-orange-600">
                                         Forgot Password?
                                     </button>
                                 </div>
@@ -322,38 +265,35 @@ export const Auth = () => {
 
                         {isReg && (
                             <div className="space-y-2 pt-2">
-                                <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wide">What is your goal?</label>
+                                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">What is your goal?</label>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div
                                         onClick={() => setIsWriter(false)}
-                                        className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${!isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:border-orange-200'}`}
+                                        className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${!isWriter ? 'bg-orange-500/10 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
                                     >
-                                        <Search className={!isWriter ? 'text-orange-600' : 'text-slate-400'} size={24} />
-                                        <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-700' : 'text-slate-600'}`}>Find Help</span>
+                                        <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                        <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-500' : 'text-slate-500'}`}>Find Help</span>
                                     </div>
                                     <div
                                         onClick={() => setIsWriter(true)}
-                                        className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:border-orange-200'}`}
+                                        className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${isWriter ? 'bg-orange-500/10 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
                                     >
-                                        <PenTool className={isWriter ? 'text-orange-600' : 'text-slate-400'} size={24} />
-                                        <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-700' : 'text-slate-600'}`}>Earn Money</span>
+                                        <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                        <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-500' : 'text-slate-500'}`}>Earn Money</span>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        <button
-                            disabled={load}
-                            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2 mt-4 disabled:opacity-70 disabled:cursor-not-allowed"
-                        >
-                            {load ? <Loader2 className="animate-spin" /> : <>{isReg ? 'Create Free Account' : 'Sign In'} <ArrowRight size={18} /></>}
-                        </button>
+                        <GlassButton type="submit" isLoading={load} className="w-full mt-4">
+                            {isReg ? 'Create Free Account' : 'Sign In'} <ArrowRight size={18} className="ml-2" />
+                        </GlassButton>
                     </form>
 
                     <div className="mt-8 text-center">
-                        <p className="text-slate-500 font-medium text-sm">
+                        <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">
                             {isReg ? "Already a member? " : "New to AssignMate? "}
-                            <button onClick={() => setIsReg(!isReg)} className="text-orange-600 font-bold hover:underline">
+                            <button onClick={() => setIsReg(!isReg)} className="text-orange-500 font-bold hover:underline">
                                 {isReg ? "Sign In" : "Create Account"}
                             </button>
                         </p>
@@ -361,7 +301,7 @@ export const Auth = () => {
                 </div>
 
                 <div className="mt-6 text-center">
-                    <a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-xs font-bold text-green-600 hover:text-green-700 bg-green-50 px-3 py-1.5 rounded-full border border-green-100 transition-colors">
+                    <a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-xs font-bold text-green-600 hover:text-green-700 bg-green-500/10 px-3 py-1.5 rounded-full border border-green-500/20 transition-colors">
                         <MessageCircle size={14} /> Need Help? Chat on WhatsApp
                     </a>
                 </div>
