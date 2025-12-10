@@ -1,12 +1,20 @@
 import React, { useState, Suspense, lazy, useEffect } from 'react';
-import { db } from './services/mockSupabase';
+import { db } from './services/supabaseService';
 import { notifications, fcm } from './services/firebase';
 import { GlassLayout } from './components/layout/GlassLayout';
 import { GlassNavigation } from './components/ui/GlassNavigation';
-import { Loader2, GraduationCap } from 'lucide-react';
+import { Loader2, GraduationCap, MessageSquare } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider, useToast } from './contexts/ToastContext';
 import { User } from './types';
+
+// Admin Components
+import { AdminLayout } from './admin/layouts/AdminLayout';
+import { AdminDashboard } from './admin/pages/AdminDashboard';
+import { AdminUsers } from './admin/pages/AdminUsers';
+import { AdminChats } from './admin/pages/AdminChats';
+import { AdminConnections } from './admin/pages/AdminConnections';
+import { AdminSettings } from './admin/pages/AdminSettings';
 
 // Lazy Load Pages for Performance
 const Landing = lazy(() => import('./pages/Landing').then(module => ({ default: module.Landing })));
@@ -15,9 +23,24 @@ const Feed = lazy(() => import('./pages/Feed').then(module => ({ default: module
 const ChatList = lazy(() => import('./pages/ChatList').then(module => ({ default: module.ChatList })));
 const ChatRoom = lazy(() => import('./pages/ChatRoom').then(module => ({ default: module.ChatRoom })));
 const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
-const Admin = lazy(() => import('./pages/Admin').then(module => ({ default: module.Admin })));
 
 export default function AppWrapper() {
+  // Admin Routing Check
+  const isAdminRoute = window.location.pathname === '/pashabhai2020$';
+  const [adminPage, setAdminPage] = useState('dashboard');
+
+  if (isAdminRoute) {
+    return (
+      <AdminLayout currentPage={adminPage} onNavigate={setAdminPage}>
+        {adminPage === 'dashboard' && <AdminDashboard />}
+        {adminPage === 'users' && <AdminUsers />}
+        {adminPage === 'chats' && <AdminChats />}
+        {adminPage === 'connections' && <AdminConnections />}
+        {adminPage === 'settings' && <AdminSettings />}
+      </AdminLayout>
+    );
+  }
+
   return (
     <ToastProvider>
       <AuthProvider>
@@ -97,9 +120,9 @@ function AppContent() {
 
   // Navigation Items
   const navItems = [
-    { label: 'Browse', href: '#' },
-    { label: 'How it Works', href: '#' },
-    { label: 'Pricing', href: '#' },
+    { label: 'Browse', href: '#', onClick: () => setPage('landing') },
+    { label: 'How it Works', href: '#', onClick: () => setPage('landing') },
+    { label: 'Pricing', href: '#', onClick: () => setPage('landing') },
   ];
 
   // Handle Navigation Clicks (Simple router for now)
@@ -125,7 +148,7 @@ function AppContent() {
           { label: 'Messages', href: '#', onClick: () => setPage('chats') },
           { label: 'Profile', href: '#', onClick: () => setPage('profile') },
         ] : navItems}
-        user={user ? { name: user.name } : undefined}
+        user={user ? { name: user.full_name || user.email } : undefined}
         onLogin={() => setPage('auth')}
         onLogout={logout}
       />
@@ -140,14 +163,13 @@ function AppContent() {
 
           {page === 'auth' && (
             <div className="flex items-center justify-center min-h-[80vh] px-4">
-              <Auth />
+              <Auth onComplete={() => setPage('feed')} />
             </div>
           )}
 
           {page === 'feed' && <Feed user={user} onChat={startChatFromWriter} />}
 
           {page === 'profile' && user && <Profile user={user} />}
-          {page === 'admin' && <Admin />}
 
           {/* Mobile Chat Routing */}
           {!isDesktop && page === 'chats' && user && <ChatList user={user} onSelect={openChat} selectedId={chatId} />}
@@ -155,13 +177,20 @@ function AppContent() {
 
           {/* Desktop Split View */}
           {showSplit && user && (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-6rem)]">
-              <div className="flex h-full glass rounded-2xl overflow-hidden">
-                <div className="w-1/3 border-r border-white/20 overflow-y-auto bg-white/5">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-6rem)]">
+              <div className="grid grid-cols-12 gap-6 h-full">
+                <div className="col-span-4 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
                   <ChatList user={user} onSelect={openChat} selectedId={chatId} />
                 </div>
-                <div className="w-2/3 h-full bg-white/5">
-                  {chatId ? <ChatRoom user={user} chatId={chatId} onBack={() => { }} /> : <div className="h-full flex items-center justify-center text-slate-400 font-medium">Select a student to chat</div>}
+                <div className="col-span-8 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
+                  {chatId ? (
+                    <ChatRoom user={user} chatId={chatId} onBack={() => { }} />
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-slate-400">
+                      <MessageSquare size={48} className="mb-4 opacity-50" />
+                      <p>Select a chat to start messaging</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
