@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { db } from '../services/mockSupabase';
+import { db } from '../services/supabaseService';
 import { Loader2, Camera, MapPin, Briefcase, Link as LinkIcon, Github, Twitter, Linkedin, Mail, Edit2, Plus, X, Trash2, AlertTriangle, Check, Shield, Globe, Lock, Upload, Zap, Share2, Star, Award, Calendar, Grid, Users, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';

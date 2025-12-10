@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../services/mockSupabase';
+import { db } from '../services/supabaseService';
 import { Loader2, Filter, Sparkles, GraduationCap, Award, Users, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WriterCard from '../components/WriterCard';

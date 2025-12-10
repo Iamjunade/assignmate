@@ -1,47 +1,53 @@
 import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  signInWithPopup, 
-  GoogleAuthProvider,
-  signOut,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  deleteUser,
-  signInAnonymously
+import {
+    getAuth,
+    signInWithPopup,
+    GoogleAuthProvider,
+    signOut,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail,
+    deleteUser,
+    signInAnonymously
 } from 'firebase/auth';
-import { 
-    getFirestore, 
-    collection, 
-    addDoc, 
-    onSnapshot, 
-    query, 
-    where, 
-    orderBy, 
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    onSnapshot,
+    query,
+    where,
+    orderBy,
     limit,
-    serverTimestamp 
+    serverTimestamp,
+    doc,
+    setDoc,
+    getDoc
 } from 'firebase/firestore';
-import { 
-    getMessaging, 
-    getToken, 
-    onMessage 
+import {
+    getMessaging,
+    getToken,
+    onMessage
 } from 'firebase/messaging';
+import { getDatabase, ref, onDisconnect, set, onValue, serverTimestamp as rtdbServerTimestamp } from 'firebase/database';
 
-// Environment variables with fallbacks to the provided public credentials
+// Environment variables with fallbacks
 const firebaseConfig = {
-  apiKey: (import.meta as any).env?.VITE_FIREBASE_API_KEY || "AIzaSyCkILlkf-LHXyTOnIuwQgnisczB3fT9GYA",
-  authDomain: (import.meta as any).env?.VITE_FIREBASE_AUTH_DOMAIN || "planning-with-ai-be6ab.firebaseapp.com",
-  projectId: (import.meta as any).env?.VITE_FIREBASE_PROJECT_ID || "planning-with-ai-be6ab",
-  storageBucket: (import.meta as any).env?.VITE_FIREBASE_STORAGE_BUCKET || "planning-with-ai-be6ab.firebasestorage.app",
-  messagingSenderId: (import.meta as any).env?.VITE_FIREBASE_MESSAGING_SENDER_ID || "202841406595",
-  appId: (import.meta as any).env?.VITE_FIREBASE_APP_ID || "1:202841406595:web:ed3abcf976f969a0052fb6"
+    apiKey: (import.meta as any).env?.VITE_FIREBASE_API_KEY || "AIzaSyCkILlkf-LHXyTOnIuwQgnisczB3fT9GYA",
+    authDomain: (import.meta as any).env?.VITE_FIREBASE_AUTH_DOMAIN || "planning-with-ai-be6ab.firebaseapp.com",
+    projectId: (import.meta as any).env?.VITE_FIREBASE_PROJECT_ID || "planning-with-ai-be6ab",
+    storageBucket: (import.meta as any).env?.VITE_FIREBASE_STORAGE_BUCKET || "planning-with-ai-be6ab.firebasestorage.app",
+    messagingSenderId: (import.meta as any).env?.VITE_FIREBASE_MESSAGING_SENDER_ID || "202841406595",
+    appId: (import.meta as any).env?.VITE_FIREBASE_APP_ID || "1:202841406595:web:ed3abcf976f969a0052fb6",
+    databaseURL: (import.meta as any).env?.VITE_FIREBASE_DATABASE_URL || "https://planning-with-ai-be6ab-default-rtdb.firebaseio.com"
 };
 
 let app: any;
 let authInstance: any;
 let dbInstance: any;
 let messagingInstance: any;
+let rtdbInstance: any;
 
 export const isConfigured = true;
 
@@ -49,6 +55,7 @@ try {
     app = initializeApp(firebaseConfig);
     authInstance = getAuth(app);
     dbInstance = getFirestore(app);
+    rtdbInstance = getDatabase(app);
     try {
         messagingInstance = getMessaging(app);
     } catch (e) {
@@ -60,7 +67,7 @@ try {
 
 // --- Notifications System (Firestore Based - Legacy/Internal) ---
 export const notifications = {
-    send: async (receiverId: string, senderName: string, content: string, chatId: string) => {
+    send: async (receiverId: string, senderName: string, content: string, chatId: string, type: 'chat' | 'connection' | 'system' = 'chat') => {
         if (!dbInstance) return;
         try {
             await addDoc(collection(dbInstance, 'notifications'), {
@@ -68,6 +75,7 @@ export const notifications = {
                 senderName,
                 content,
                 chatId,
+                type,
                 read: false,
                 timestamp: serverTimestamp()
             });
@@ -77,13 +85,13 @@ export const notifications = {
     },
 
     listen: (userId: string, onNotify: (data: any) => void) => {
-        if (!dbInstance) return () => {};
-        
+        if (!dbInstance) return () => { };
+
         const q = query(
             collection(dbInstance, 'notifications'),
             where('receiverId', '==', userId),
             orderBy('timestamp', 'desc'),
-            limit(1)
+            limit(10)
         );
 
         return onSnapshot(q, (snapshot) => {
@@ -92,13 +100,23 @@ export const notifications = {
                     const data = change.doc.data();
                     const now = Date.now();
                     const notifTime = data.timestamp?.toMillis ? data.timestamp.toMillis() : (data.timestamp || 0);
-                    
-                    if (now - notifTime < 30000) { 
-                        onNotify(data);
+
+                    // Only notify for recent events (last 30 seconds) to avoid spam on load
+                    if (now - notifTime < 30000) {
+                        onNotify({ id: change.doc.id, ...data });
                     }
                 }
             });
         });
+    },
+
+    markAsRead: async (notificationId: string) => {
+        if (!dbInstance) return;
+        try {
+            await setDoc(doc(dbInstance, 'notifications', notificationId), { read: true }, { merge: true });
+        } catch (e) {
+            console.error("Mark Read Error", e);
+        }
     }
 };
 
@@ -106,17 +124,21 @@ export const notifications = {
 export const fcm = {
     requestPermission: async (userId: string) => {
         if (!messagingInstance) return null;
-        
+
         try {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
-                const currentToken = await getToken(messagingInstance, { 
-                    // Your VAPID Key from the provided screenshot
-                    vapidKey: 'BOOb9zriS5sKaWRI6aqOwPNVgyA_hLRFLTG2GhjeL5dqZvH-axcB0OxmRwuzszJypFtpHJmu5AXGJOJpo89kxac' 
+                const currentToken = await getToken(messagingInstance, {
+                    vapidKey: 'BOOb9zriS5sKaWRI6aqOwPNVgyA_hLRFLTG2GhjeL5dqZvH-axcB0OxmRwuzszJypFtpHJmu5AXGJOJpo89kxac'
                 });
 
                 if (currentToken) {
                     console.log("FCM Token:", currentToken);
+                    // Save token to Firestore for backend use
+                    await setDoc(doc(dbInstance, 'fcm_tokens', userId), {
+                        token: currentToken,
+                        updatedAt: serverTimestamp()
+                    }, { merge: true });
                     return currentToken;
                 }
             }
@@ -132,6 +154,47 @@ export const fcm = {
                 callback(payload);
             });
         }
+    }
+};
+
+// --- Presence System (Realtime Database) ---
+export const presence = {
+    init: (userId: string) => {
+        if (!rtdbInstance) return;
+
+        const userStatusDatabaseRef = ref(rtdbInstance, '/status/' + userId);
+        const isOfflineForDatabase = {
+            state: 'offline',
+            last_changed: rtdbServerTimestamp(),
+        };
+        const isOnlineForDatabase = {
+            state: 'online',
+            last_changed: rtdbServerTimestamp(),
+        };
+
+        const connectedRef = ref(rtdbInstance, '.info/connected');
+        onValue(connectedRef, (snapshot) => {
+            if (snapshot.val() === false) {
+                return;
+            }
+
+            onDisconnect(userStatusDatabaseRef).set(isOfflineForDatabase).then(() => {
+                set(userStatusDatabaseRef, isOnlineForDatabase);
+            });
+        });
+    },
+
+    listenToUserStatus: (userId: string, callback: (isOnline: boolean, lastSeen: number) => void) => {
+        if (!rtdbInstance) return () => { };
+        const userStatusRef = ref(rtdbInstance, '/status/' + userId);
+        return onValue(userStatusRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                callback(data.state === 'online', data.last_changed);
+            } else {
+                callback(false, 0);
+            }
+        });
     }
 };
 
@@ -156,10 +219,7 @@ export const auth = {
     loginWithGoogle: async () => {
         try {
             const provider = new GoogleAuthProvider();
-            // CRITICAL: Forces Google to show the account chooser every time.
-            // This prevents auto-login to the wrong account and solves the duplicate/wrong user issue.
             provider.setCustomParameters({ prompt: 'select_account' });
-            
             const res = await signInWithPopup(authInstance, provider);
             return { data: { user: res.user } };
         } catch (error: any) {
@@ -197,7 +257,7 @@ export const auth = {
         }
     },
     onAuthStateChange: (callback: (user: any) => void) => {
-        if (!authInstance) return () => {};
+        if (!authInstance) return () => { };
         return onAuthStateChanged(authInstance, callback);
     }
 };

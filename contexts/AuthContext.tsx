@@ -1,7 +1,7 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth as firebaseAuth } from '../services/firebase';
-import { userApi } from '../services/mockSupabase';
+import { auth as firebaseAuth, presence } from '../services/firebase';
+import { userApi } from '../services/supabaseService';
+import { notificationService } from '../services/notificationService';
 import { User } from '../types';
 
 interface AuthContextType {
@@ -31,21 +31,21 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
       if (!profile) {
         // New user via Google or direct login where profile creation failed.
-        // DO NOT auto-create profile. Allow UI to prompt user for Handle/School.
         console.log("Profile missing, waiting for user completion...");
         setUser({
           id: fbUser.uid,
           email: fbUser.email,
-          handle: fbUser.displayName || '', // Temporary
-          school: '', // Temporary
+          handle: fbUser.displayName || '',
+          school: '',
           avatar_url: fbUser.photoURL,
-
           xp: 0,
-          is_incomplete: true // Flag to trigger "Complete Profile" flow
+          is_incomplete: true
         } as User);
       } else {
         // Profile exists, log them in fully
         setUser({ ...profile, email: fbUser.email, is_incomplete: false });
+        // Initialize Presence
+        presence.init(fbUser.uid);
       }
     } catch (e) {
       console.error("Sync Error:", e);
@@ -78,6 +78,10 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     if (res.data?.user) {
       // Immediately create profile with specific data including role
       await userApi.createProfile(res.data.user.uid, { handle, school, email, is_writer });
+
+      // Send Welcome Notification
+      await notificationService.sendWelcome(res.data.user.uid, handle);
+
       // Trigger sync manually to update state fast
       await syncUser(res.data.user);
 
@@ -99,14 +103,16 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         is_writer
       });
 
+      // Send Welcome Notification
+      await notificationService.sendWelcome(user.id, handle);
+
       // 2. Force a re-sync to fetch the newly created profile
-      // We verify the profile exists before finishing to prevent UI flicker
       const profile = await userApi.getProfile(user.id);
 
       if (profile) {
         setUser({ ...profile, email: user.email, is_incomplete: false });
+        presence.init(user.id);
       } else {
-        // Fallback if read fails immediately (rare replication lag)
         setUser(prev => prev ? { ...prev, handle, school, is_incomplete: false } : null);
       }
 
