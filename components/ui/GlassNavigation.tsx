@@ -6,6 +6,7 @@ import { GlassButton } from './GlassButton';
 interface NavItem {
     label: string;
     href: string;
+    onClick?: () => void;
 }
 
 interface GlassNavigationProps {
@@ -40,13 +41,16 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-8">
                         {items.map((item) => (
-                            <a
+                            <button
                                 key={item.label}
-                                href={item.href}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    if (item.onClick) item.onClick();
+                                }}
                                 className="text-sm font-medium text-slate-700 hover:text-orange-500 dark:text-slate-200 dark:hover:text-orange-400 transition-colors"
                             >
                                 {item.label}
-                            </a>
+                            </button>
                         ))}
                     </div>
 
@@ -81,14 +85,16 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
                 {isMobileMenuOpen && (
                     <div className="absolute top-full left-4 right-4 mt-2 p-4 glass rounded-2xl md:hidden animate-slide-down flex flex-col space-y-4">
                         {items.map((item) => (
-                            <a
+                            <button
                                 key={item.label}
-                                href={item.href}
-                                className="block px-4 py-2 text-base font-medium text-slate-700 hover:bg-white/10 rounded-lg dark:text-slate-200"
-                                onClick={() => setIsMobileMenuOpen(false)}
+                                onClick={() => {
+                                    if (item.onClick) item.onClick();
+                                    setIsMobileMenuOpen(false);
+                                }}
+                                className="block w-full text-left px-4 py-2 text-base font-medium text-slate-700 hover:bg-white/10 rounded-lg dark:text-slate-200"
                             >
                                 {item.label}
-                            </a>
+                            </button>
                         ))}
                         <div className="pt-4 border-t border-white/10">
                             {user ? (
