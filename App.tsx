@@ -121,10 +121,10 @@ function AppContent() {
           </div>
         }
         items={user ? [
-          { label: 'Feed', href: '#' }, // We'll intercept these in a real router
-          { label: 'Messages', href: '#' },
-          { label: 'Profile', href: '#' },
-        ].map(i => ({ ...i, href: 'javascript:void(0)' })) : navItems} // Temporary hrefs
+          { label: 'Feed', href: '#', onClick: () => setPage('feed') },
+          { label: 'Messages', href: '#', onClick: () => setPage('chats') },
+          { label: 'Profile', href: '#', onClick: () => setPage('profile') },
+        ] : navItems}
         user={user ? { name: user.name } : undefined}
         onLogin={() => setPage('auth')}
         onLogout={logout}
