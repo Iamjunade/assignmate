@@ -69,7 +69,7 @@ export const Auth = () => {
                 }
 
                 error(msg.replace('Firebase:', '').trim());
-            } else if (isReg && !res?.data?.session) {
+            } else if (isReg && res?.data?.session) {
                 success("Account created! Please login to continue.");
                 setIsReg(false);
             }

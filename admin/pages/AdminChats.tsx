@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { adminApi } from '../../services/adminService';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { Search, MessageCircle, Eye, Trash2 } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 
 export const AdminChats = () => {
     const [chats, setChats] = useState<any[]>([]);
@@ -35,10 +36,18 @@ export const AdminChats = () => {
         setMessages(msgs);
     };
 
+    const { success, error } = useToast();
+
     const handleDeleteMessage = async (msgId: string) => {
         if (!confirm('Delete this message?')) return;
-        await adminApi.deleteMessage(msgId);
-        setMessages(messages.filter(m => m.id !== msgId));
+        try {
+            await adminApi.deleteMessage(msgId);
+            setMessages(messages.filter(m => m.id !== msgId));
+            success("Message deleted");
+        } catch (e) {
+            console.error(e);
+            error("Failed to delete message");
+        }
     };
 
     if (loading) return <div className="text-white">Loading Chats...</div>;

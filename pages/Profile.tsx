@@ -125,7 +125,13 @@ export const Profile = ({ user }: { user: any }) => {
     };
 
     const handleFinalDelete = async () => {
-        await deleteAccount();
+        try {
+            await deleteAccount();
+            success("Account deleted successfully");
+        } catch (e: any) {
+            console.error(e);
+            error(e.message || "Failed to delete account");
+        }
     };
 
     return (
