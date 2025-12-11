@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         await userApi.createProfile(res.data.user.uid, { handle, school, email, is_writer });
 
         // Send Welcome Notification
-        await notificationService.sendWelcome(res.data.user.uid, handle);
+        notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
 
         // Trigger sync manually to update state fast
         await syncUser(res.data.user);
@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       });
 
       // Send Welcome Notification
-      await notificationService.sendWelcome(user.id, handle);
+      notificationService.sendWelcome(user.id, handle).catch(console.error);
 
       // 2. Force a re-sync to fetch the newly created profile
       const profile = await userApi.getProfile(user.id);
