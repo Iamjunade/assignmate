@@ -130,7 +130,11 @@ export const Profile = ({ user }: { user: any }) => {
             success("Account deleted successfully");
         } catch (e: any) {
             console.error(e);
-            error(e.message || "Failed to delete account");
+            if (e.code === 'auth/requires-recent-login' || e.message?.includes('requires-recent-login')) {
+                error("Security Check: Please log out and log back in to verify your identity before deleting.");
+            } else {
+                error(e.message || "Failed to delete account");
+            }
         }
     };
 
