@@ -5,8 +5,8 @@ import { notifications } from './firebase';
 // Safely access environment variables
 const env = (import.meta as any).env || {};
 
-const SUPABASE_URL: string = env.VITE_SUPABASE_URL || 'https://blpwnqrqtxmbcmfxpbod.supabase.co';
-const SUPABASE_ANON_KEY: string = env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJscHducXJxdHhtYmNtZnhwYm9kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMDY2MzksImV4cCI6MjA3OTU4MjYzOX0.dFOFS-PVQ9QfYl6MGoPRFj11-h3CZSoMCXsOcEunzI4';
+const SUPABASE_URL: string = env.VITE_SUPABASE_URL || 'https://hgeeqtwzuwvgtalyjoes.supabase.co';
+const SUPABASE_ANON_KEY: string = env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnZWVxdHd6dXd2Z3RhbHlqb2VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0Njg3MjUsImV4cCI6MjA4MTA0NDcyNX0.8A2OMxfUYoHamEoSoULVK0w6UUkuz1ZusFbkR1Frcrg';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
