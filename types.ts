@@ -2,6 +2,7 @@ export interface User {
   id: string;
   handle: string;
   email: string;
+  full_name?: string;
   school: string;
   avatar_url?: string;
   cover_url?: string; // Custom profile cover image
