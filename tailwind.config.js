@@ -11,37 +11,13 @@ export default {
     theme: {
         extend: {
             colors: {
-                // Premium Glass Palette
-                glass: {
-                    100: 'rgba(255, 255, 255, 0.1)',
-                    200: 'rgba(255, 255, 255, 0.2)',
-                    300: 'rgba(255, 255, 255, 0.3)',
-                    400: 'rgba(255, 255, 255, 0.4)',
-                    500: 'rgba(255, 255, 255, 0.5)',
-                    600: 'rgba(255, 255, 255, 0.6)',
-                    700: 'rgba(255, 255, 255, 0.7)',
-                    800: 'rgba(255, 255, 255, 0.8)',
-                    900: 'rgba(255, 255, 255, 0.9)',
-                },
-                // Dark Glass Palette
-                'glass-dark': {
-                    100: 'rgba(0, 0, 0, 0.1)',
-                    200: 'rgba(0, 0, 0, 0.2)',
-                    300: 'rgba(0, 0, 0, 0.3)',
-                    400: 'rgba(0, 0, 0, 0.4)',
-                    500: 'rgba(0, 0, 0, 0.5)',
-                    600: 'rgba(0, 0, 0, 0.6)',
-                    700: 'rgba(0, 0, 0, 0.7)',
-                    800: 'rgba(0, 0, 0, 0.8)',
-                    900: 'rgba(0, 0, 0, 0.9)',
-                },
                 orange: {
                     50: '#fff7ed',
                     100: '#ffedd5',
                     200: '#fed7aa',
                     300: '#fdba74',
                     400: '#fb923c',
-                    500: '#f97316',
+                    500: '#FF7A00', // Primary Brand Color
                     600: '#ea580c',
                     700: '#c2410c',
                     800: '#9a3412',
@@ -49,25 +25,41 @@ export default {
                     950: '#431407',
                 },
                 slate: {
-                    850: '#1e293b', // Custom dark shade
-                    950: '#020617', // Deepest slate
+                    50: '#f8fafc',
+                    100: '#f1f5f9',
+                    200: '#e2e8f0',
+                    300: '#cbd5e1',
+                    400: '#94a3b8',
+                    500: '#64748b',
+                    600: '#475569',
+                    700: '#334155',
+                    800: '#1e293b',
+                    900: '#0f172a',
+                    950: '#020617',
                 }
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
             },
-            backdropBlur: {
-                xs: '2px',
-            },
             boxShadow: {
-                'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',
-                'glass-sm': '0 2px 10px rgba(0, 0, 0, 0.05)',
-                'glass-lg': '0 8px 32px rgba(0, 0, 0, 0.15)',
-                'neon': '0 0 10px rgba(249, 115, 22, 0.5), 0 0 20px rgba(249, 115, 22, 0.3)',
+                'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+                'card': '0 0 0 1px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.04)',
+                'card-hover': '0 0 0 1px rgba(0,0,0,0.03), 0 8px 16px rgba(0,0,0,0.08)',
+                'glow': '0 0 20px rgba(255, 122, 0, 0.3)',
             },
-            backgroundImage: {
-                'gradient-glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
-                'gradient-glass-dark': 'linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05))',
+            animation: {
+                'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+                'scale-in': 'scaleIn 0.2s ease-out forwards',
+            },
+            keyframes: {
+                fadeInUp: {
+                    '0%': { opacity: '0', transform: 'translateY(10px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' },
+                },
+                scaleIn: {
+                    '0%': { opacity: '0', transform: 'scale(0.95)' },
+                    '100%': { opacity: '1', transform: 'scale(1)' },
+                }
             }
         },
     },

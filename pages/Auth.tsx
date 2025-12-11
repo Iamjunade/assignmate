@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { Loader2, Mail, Lock, ArrowRight, GraduationCap, Check, PenTool, Search, Phone, MessageCircle } from 'lucide-react';
+import { Mail, Lock, ArrowRight, GraduationCap, Check, PenTool, Search, Phone, MessageCircle } from 'lucide-react';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
 import { motion } from 'framer-motion';
 import { GlassCard } from '../components/ui/GlassCard';
@@ -128,8 +128,8 @@ export const Auth = () => {
     // View for completing profile (Google Signups)
     if (user?.is_incomplete) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-4">
-                <GlassCard className="max-w-md w-full p-8 md:p-10 relative overflow-visible">
+            <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
+                <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800">
                     <div className="text-center mb-8 flex flex-col items-center">
                         <div className="text-6xl mb-4">📚</div>
                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Setup your Profile</h2>
@@ -156,7 +156,7 @@ export const Auth = () => {
                                 onChange={(val) => setCompletionForm({ ...completionForm, school: val })}
                                 placeholder="Search your college"
                                 className="w-full"
-                                inputClassName="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 pl-10 outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all duration-200 placeholder:text-slate-400 text-slate-900 dark:text-white"
+                                inputClassName="input-clean pl-10"
                                 icon={<GraduationCap className="absolute left-3.5 top-2.5 text-slate-400" size={18} />}
                             />
                         </div>
@@ -166,17 +166,17 @@ export const Auth = () => {
                             <div className="grid grid-cols-2 gap-3">
                                 <div
                                     onClick={() => setIsWriter(false)}
-                                    className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${!isWriter ? 'bg-orange-500/10 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
+                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
                                 >
                                     <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-500' : 'text-slate-500'}`}>Find Help</span>
+                                    <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Find Help</span>
                                 </div>
                                 <div
                                     onClick={() => setIsWriter(true)}
-                                    className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${isWriter ? 'bg-orange-500/10 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
+                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
                                 >
                                     <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-500' : 'text-slate-500'}`}>Earn Money</span>
+                                    <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Earn Money</span>
                                 </div>
                             </div>
                         </div>
@@ -185,37 +185,44 @@ export const Auth = () => {
                             Finish Setup <ArrowRight size={18} className="ml-2" />
                         </GlassButton>
                     </form>
-                </GlassCard>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen flex w-full">
+        <div className="min-h-screen flex w-full bg-white dark:bg-slate-950">
             {/* Left: Form */}
             <div className="w-full lg:w-1/2 p-6 md:p-12 xl:p-24 flex flex-col justify-center relative z-10">
                 <div className="max-w-md w-full mx-auto">
                     <div className="mb-10 text-center lg:text-left">
                         <div className="text-5xl mb-6 lg:hidden">📚</div>
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white mb-3">{isReg ? 'Create Account' : 'Welcome Back'}</h1>
-                        <p className="text-slate-500 dark:text-slate-400 font-medium">{isReg ? 'Join the community of ambitious students.' : 'Please enter your details to sign in.'}</p>
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-3 tracking-tight">{isReg ? 'Create Account' : 'Welcome Back'}</h1>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium text-lg">{isReg ? 'Join the community of ambitious students.' : 'Please enter your details to sign in.'}</p>
                     </div>
 
                     <div className="space-y-4 mb-8">
-                        <GlassButton variant="secondary" onClick={handleGoogle} isLoading={load} className="w-full justify-center">
-                            <img src="https://www.google.com/favicon.ico" className="w-5 h-5 mr-3" alt="Google" />
+                        <button
+                            onClick={handleGoogle}
+                            disabled={load}
+                            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+                        >
+                            <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />
                             Continue with Google
-                        </GlassButton>
+                        </button>
 
-                        <GlassButton variant="secondary" onClick={() => info("Mobile Login coming soon!")} className="w-full justify-center">
-                            <Phone size={20} className="mr-3 text-slate-400" />
+                        <button
+                            onClick={() => info("Mobile Login coming soon!")}
+                            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+                        >
+                            <Phone size={20} className="text-slate-400" />
                             Continue with Mobile Number
-                        </GlassButton>
+                        </button>
 
-                        <div className="relative flex items-center gap-4">
-                            <div className="h-px bg-slate-200 dark:bg-white/10 flex-1"></div>
+                        <div className="relative flex items-center gap-4 py-2">
+                            <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1"></div>
                             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">OR</span>
-                            <div className="h-px bg-slate-200 dark:bg-white/10 flex-1"></div>
+                            <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1"></div>
                         </div>
                     </div>
 
@@ -240,7 +247,7 @@ export const Auth = () => {
                                         onChange={(val) => setForm({ ...form, school: val })}
                                         placeholder="Select your college"
                                         className="w-full"
-                                        inputClassName="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 pl-10 outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all duration-200 placeholder:text-slate-400 text-slate-900 dark:text-white"
+                                        inputClassName="input-clean pl-10"
                                         icon={<GraduationCap className="absolute left-3.5 top-2.5 text-slate-400" size={18} />}
                                     />
                                 </div>
@@ -267,7 +274,7 @@ export const Auth = () => {
                             />
                             {!isReg && (
                                 <div className="flex justify-end mt-2">
-                                    <button type="button" onClick={handleForgotPassword} className="text-xs font-bold text-orange-500 hover:text-orange-600">
+                                    <button type="button" onClick={handleForgotPassword} className="text-xs font-bold text-orange-600 hover:text-orange-700">
                                         Forgot Password?
                                     </button>
                                 </div>
@@ -280,23 +287,23 @@ export const Auth = () => {
                                 <div className="grid grid-cols-2 gap-3">
                                     <div
                                         onClick={() => setIsWriter(false)}
-                                        className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${!isWriter ? 'bg-orange-500/10 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
+                                        className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
                                     >
                                         <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                        <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-500' : 'text-slate-500'}`}>Find Help</span>
+                                        <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Find Help</span>
                                     </div>
                                     <div
                                         onClick={() => setIsWriter(true)}
-                                        className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all ${isWriter ? 'bg-orange-500/10 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
+                                        className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
                                     >
                                         <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                        <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-500' : 'text-slate-500'}`}>Earn Money</span>
+                                        <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Earn Money</span>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        <GlassButton type="submit" isLoading={load} className="w-full mt-4">
+                        <GlassButton type="submit" isLoading={load} className="w-full mt-4 shadow-orange-500/20">
                             {isReg ? 'Create Free Account' : 'Sign In'} <ArrowRight size={18} className="ml-2" />
                         </GlassButton>
                     </form>
@@ -304,7 +311,7 @@ export const Auth = () => {
                     <div className="mt-8 text-center">
                         <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">
                             {isReg ? "Already a member? " : "New to AssignMate? "}
-                            <button onClick={() => setIsReg(!isReg)} className="text-orange-500 font-bold hover:underline">
+                            <button onClick={() => setIsReg(!isReg)} className="text-orange-600 font-bold hover:underline">
                                 {isReg ? "Sign In" : "Create Account"}
                             </button>
                         </p>
@@ -312,7 +319,7 @@ export const Auth = () => {
                 </div>
 
                 <div className="mt-6 text-center">
-                    <a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-xs font-bold text-green-600 hover:text-green-700 bg-green-500/10 px-3 py-1.5 rounded-full border border-green-500/20 transition-colors">
+                    <a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-xs font-bold text-green-600 hover:text-green-700 bg-green-50 px-4 py-2 rounded-full border border-green-200 transition-colors">
                         <MessageCircle size={14} /> Need Help? Chat on WhatsApp
                     </a>
                 </div>
@@ -349,10 +356,10 @@ export const Auth = () => {
                     <div className="mb-8 inline-block bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-4 py-1.5 text-sm font-bold shadow-sm">
                         🚀 Trusted by 10,000+ Students
                     </div>
-                    <h2 className="text-5xl font-extrabold mb-6 leading-tight">
+                    <h2 className="text-6xl font-extrabold mb-6 leading-tight">
                         Your Campus <br /> <span className="text-orange-100">Marketplace.</span>
                     </h2>
-                    <p className="text-lg text-orange-50 leading-relaxed font-medium opacity-90">
+                    <p className="text-xl text-orange-50 leading-relaxed font-medium opacity-90">
                         Connect with peers from IITs, NITs, and top universities to get help with assignments, records, and projects.
                     </p>
                 </div>

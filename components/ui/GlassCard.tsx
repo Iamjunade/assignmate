@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
-    variant?: 'default' | 'dark' | 'neon';
+    variant?: 'default' | 'glass' | 'dark';
     hoverEffect?: boolean;
 }
 
@@ -12,19 +12,18 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     hoverEffect = false,
     ...props
 }) => {
-    const baseStyles = "rounded-2xl backdrop-blur-md transition-all duration-300 border";
 
     const variants = {
-        default: "bg-white/10 border-white/20 shadow-glass",
-        dark: "bg-black/40 border-white/10 shadow-glass text-white",
-        neon: "bg-slate-900/80 border-orange-500/50 shadow-neon"
+        default: "card-clean", // Clean white card
+        glass: "glass rounded-2xl p-6", // Traditional glass
+        dark: "bg-slate-900 border border-slate-800 text-white shadow-lg rounded-2xl"
     };
 
-    const hoverStyles = hoverEffect ? "hover:-translate-y-1 hover:shadow-glass-lg hover:bg-white/15" : "";
+    const hoverStyles = hoverEffect ? "card-hover" : "";
 
     return (
         <div
-            className={`${baseStyles} ${variants[variant]} ${hoverStyles} ${className}`}
+            className={`${variants[variant]} ${hoverStyles} ${className}`}
             {...props}
         >
             {children}

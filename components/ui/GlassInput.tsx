@@ -17,27 +17,23 @@ export const GlassInput: React.FC<GlassInputProps> = ({
     const inputId = id || React.useId();
 
     return (
-        <div className="w-full space-y-1">
+        <div className="w-full space-y-1.5">
             {label && (
-                <label htmlFor={inputId} className="block text-sm font-medium text-slate-700 dark:text-slate-200 ml-1">
+                <label htmlFor={inputId} className="block text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">
                     {label}
                 </label>
             )}
             <div className="relative group">
                 {icon && (
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors">
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors">
                         {icon}
                     </div>
                 )}
                 <input
                     id={inputId}
                     className={`
-            w-full bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl 
-            ${icon ? 'pl-10' : 'pl-4'} pr-4 py-2.5
-            outline-none transition-all duration-200
-            focus:border-orange-500/50 focus:ring-4 focus:ring-orange-500/10
-            placeholder:text-slate-400 text-slate-900 dark:text-white
-            disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-800
+            input-clean
+            ${icon ? 'pl-10' : 'pl-4'} 
             ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' : ''}
             ${className}
           `}
@@ -45,7 +41,7 @@ export const GlassInput: React.FC<GlassInputProps> = ({
                 />
             </div>
             {error && (
-                <p className="text-sm text-red-500 ml-1 animate-slide-down">{error}</p>
+                <p className="text-sm text-red-500 ml-1 font-medium animate-fade-in-up">{error}</p>
             )}
         </div>
     );
