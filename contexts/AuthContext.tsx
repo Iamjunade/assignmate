@@ -76,16 +76,21 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     if (res.error) return res;
 
     if (res.data?.user) {
-      // Immediately create profile with specific data including role
-      await userApi.createProfile(res.data.user.uid, { handle, school, email, is_writer });
+      try {
+        // Immediately create profile with specific data including role
+        await userApi.createProfile(res.data.user.uid, { handle, school, email, is_writer });
 
-      // Send Welcome Notification
-      await notificationService.sendWelcome(res.data.user.uid, handle);
+        // Send Welcome Notification
+        await notificationService.sendWelcome(res.data.user.uid, handle);
 
-      // Trigger sync manually to update state fast
-      await syncUser(res.data.user);
+        // Trigger sync manually to update state fast
+        await syncUser(res.data.user);
 
-      return { data: { ...res.data, session: true } }; // Return success structure
+        return { data: { ...res.data, session: true } }; // Return success structure
+      } catch (error: any) {
+        console.error("Registration Error:", error);
+        return { error: { message: error.message || "Failed to create profile" } };
+      }
     }
     return res;
   };

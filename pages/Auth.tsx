@@ -40,38 +40,43 @@ export const Auth = () => {
             return;
         }
 
-        let res;
-        if (isReg) {
-            if (!form.school) {
-                error("Please select your college/university from the list.");
-                setLoad(false);
-                return;
-            }
-            if (!form.handle) {
-                error("Please choose a handle.");
-                setLoad(false);
-                return;
-            }
-            res = await register(form.email, form.password, form.handle, form.school, isWriter);
-        } else {
-            res = await login(form.email, form.password);
-        }
-
-        if (res?.error) {
-            let msg = res.error.message || "Authentication failed";
-            if (msg.includes('auth/email-already-in-use') || msg.includes('already registered')) {
-                msg = "This email is already associated with an account. Please login.";
-            } else if (msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found') || msg.includes('invalid-credential')) {
-                msg = "Invalid email or password. Please try again.";
-            } else if (msg.includes('auth/weak-password')) {
-                msg = "Password is too weak. Please use a stronger password.";
+        try {
+            let res;
+            if (isReg) {
+                if (!form.school) {
+                    error("Please select your college/university from the list.");
+                    setLoad(false);
+                    return;
+                }
+                if (!form.handle) {
+                    error("Please choose a handle.");
+                    setLoad(false);
+                    return;
+                }
+                res = await register(form.email, form.password, form.handle, form.school, isWriter);
+            } else {
+                res = await login(form.email, form.password);
             }
 
-            error(msg.replace('Firebase:', '').trim());
-            setLoad(false);
-        } else if (isReg && !res?.data?.session) {
-            success("Account created! Please login to continue.");
-            setIsReg(false);
+            if (res?.error) {
+                let msg = res.error.message || "Authentication failed";
+                if (msg.includes('auth/email-already-in-use') || msg.includes('already registered')) {
+                    msg = "This email is already associated with an account. Please login.";
+                } else if (msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found') || msg.includes('invalid-credential')) {
+                    msg = "Invalid email or password. Please try again.";
+                } else if (msg.includes('auth/weak-password')) {
+                    msg = "Password is too weak. Please use a stronger password.";
+                }
+
+                error(msg.replace('Firebase:', '').trim());
+            } else if (isReg && !res?.data?.session) {
+                success("Account created! Please login to continue.");
+                setIsReg(false);
+            }
+        } catch (e: any) {
+            console.error("Auth Error:", e);
+            error(e.message || "An unexpected error occurred.");
+        } finally {
             setLoad(false);
         }
     };
@@ -109,9 +114,15 @@ export const Auth = () => {
             return;
         }
         setLoad(true);
-        await completeGoogleSignup(completionForm.handle, completionForm.school, isWriter);
-        setLoad(false);
-        success("Profile Setup Complete! Welcome.");
+        try {
+            await completeGoogleSignup(completionForm.handle, completionForm.school, isWriter);
+            success("Profile Setup Complete! Welcome.");
+        } catch (e: any) {
+            console.error("Profile Setup Error:", e);
+            error(e.message || "Failed to complete profile setup.");
+        } finally {
+            setLoad(false);
+        }
     };
 
     // View for completing profile (Google Signups)
