@@ -27,9 +27,6 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   // Sync logic: Takes a Firebase User, finds/creates Supabase Profile
   const syncUser = async (fbUser: any) => {
     try {
-      // DEBUG: Alert to confirm sync is starting
-      // alert(`Syncing user: ${fbUser.email}`);
-      
       let profile = await userApi.getProfile(fbUser.uid);
 
       if (!profile) {
@@ -52,18 +49,11 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       }
     } catch (e: any) {
       console.error("Sync Error:", e);
-      // CRITICAL DEBUG: Show alert on sync failure
-      if (typeof window !== 'undefined') {
-          alert(`Login Sync Failed: ${e.message}\n\nCheck your internet or Firestore rules.`);
-      }
     }
   };
 
   useEffect(() => {
     const unsubscribe = firebaseAuth.onAuthStateChange(async (firebaseUser) => {
-      // CRITICAL DEBUG: Check if Auth State Change is even firing
-      if (typeof window !== 'undefined') alert(`Auth State Changed: ${firebaseUser ? 'LOGGED IN (' + firebaseUser.email + ')' : 'LOGGED OUT'}`);
-      
       if (firebaseUser) {
         await syncUser(firebaseUser);
       } else {
@@ -113,10 +103,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     if (!user) return;
 
     try {
-      // DEBUG: Alert start
-      if (typeof window !== 'undefined') alert("Starting Profile Creation...");
-
-      // 1. Create the profile in Supabase
+      // 1. Create the profile in Firestore
       await userApi.createProfile(user.id, {
         handle,
         school,
@@ -126,10 +113,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         is_writer
       });
 
-      // DEBUG: Alert after creation
-      if (typeof window !== 'undefined') alert("Profile Created! Fetching...");
-
-      // Send Welcome Notification
+      // Send Welcome Notification (Non-blocking)
       notificationService.sendWelcome(user.id, handle).catch(console.error);
 
       // 2. Force a re-sync to fetch the newly created profile
@@ -139,6 +123,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         setUser({ ...profile, email: user.email, is_incomplete: false });
         presence.init(user.id);
       } else {
+        // Fallback if fetch fails immediately (shouldn't happen)
         setUser(prev => prev ? { ...prev, handle, school, is_incomplete: false } : null);
       }
 
