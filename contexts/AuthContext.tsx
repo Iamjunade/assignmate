@@ -1,7 +1,7 @@
-```typescript
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth, notifications } from '../services/firebase';
+import { auth as firebaseAuth, presence } from '../services/firebase';
 import { userApi } from '../services/firestoreService';
+import { notificationService } from '../services/notificationService';
 import { User } from '../types';
 import { useToast } from './ToastContext';
 
