@@ -104,19 +104,6 @@ export const Auth = () => {
         }
     };
 
-    const handleCompleteProfile = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!completionForm.school) {
-            error("Please select your college.");
-            return;
-        }
-        if (!completionForm.handle || completionForm.handle.length < 3) {
-            error("Handle must be at least 3 characters.");
-    // View for completing profile (Google Signups)
-    if (user?.is_incomplete) {
-        return (
-            <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
-                <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800">
                     <div className="text-center mb-8 flex flex-col items-center">
                         <div className="text-6xl mb-4">📚</div>
                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Setup your Profile</h2>
