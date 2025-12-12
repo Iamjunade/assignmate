@@ -114,20 +114,6 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
             await resetPassword(form.email);
             info("Password reset email sent. Check your inbox.");
         } catch (e: any) {
-            error(e.message || "Failed to send reset email.");
-        }
-    };
-
-    const handleCompleteProfile = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!completionForm.school) {
-            error("Please select your college.");
-        return (
-            <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
-                <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800">
-                    <div className="text-center mb-8 flex flex-col items-center">
-                        <div className="text-6xl mb-4">📚</div>
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Setup your Profile</h2>
                         <p className="text-slate-500 dark:text-slate-400">Claim your unique handle to join the community.</p>
                     </div>
 
