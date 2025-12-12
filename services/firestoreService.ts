@@ -61,12 +61,18 @@ export const userApi = {
             try {
                 console.log("checkUnique: Checking", h);
                 const q = query(collection(getDb(), 'users'), where('handle', '==', h));
-                const snap = await getDocs(q);
+                
+                // Add 3s timeout to uniqueness check
+                const snap = await Promise.race([
+                    getDocs(q),
+                    new Promise<any>((_, reject) => setTimeout(() => reject(new Error("Timeout")), 3000))
+                ]);
+
                 console.log("checkUnique: Result", !snap.empty);
                 return !snap.empty;
             } catch (e) {
-                console.warn("Handle uniqueness check failed (likely permissions), assuming unique or using fallback.");
-                return false; // Assume unique if we can't check, or let write fail if rules enforce it
+                console.warn("Handle uniqueness check failed or timed out, assuming unique.");
+                return false; // Assume unique to proceed
             }
         };
 
