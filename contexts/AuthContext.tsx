@@ -88,7 +88,11 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
         return { data: { ...res.data, session: true } }; // Return success structure
       } catch (error: any) {
-        console.error("Registration Error:", error);
+        console.error("Registration Error (Profile Creation):", error);
+        // CRITICAL DEBUG: Alert the user on the live site
+        if (typeof window !== 'undefined') {
+             alert(`Registration Failed: ${error.message}\n\nCheck console for details.`);
+        }
         return { error: { message: error.message || "Failed to create profile" } };
       }
     }
