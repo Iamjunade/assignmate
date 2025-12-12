@@ -97,20 +97,6 @@ export const Auth = () => {
         }
         if (!completionForm.handle || completionForm.handle.length < 3) {
             error("Handle must be at least 3 characters.");
-            return;
-        }
-        setLoad(true);
-        try {
-            await completeGoogleSignup(completionForm.handle, completionForm.school, isWriter);
-            success("Profile Setup Complete! Welcome.");
-        } catch (e: any) {
-            console.error("Profile Setup Error:", e);
-            error(e.message || "Failed to complete profile setup.");
-        } finally {
-            setLoad(false);
-        }
-    };
-
     // View for completing profile (Google Signups)
     if (user?.is_incomplete) {
         return (
