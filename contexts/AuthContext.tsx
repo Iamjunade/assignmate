@@ -113,6 +113,9 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     if (!user) return;
 
     try {
+      // DEBUG: Alert start
+      if (typeof window !== 'undefined') alert("Starting Profile Creation...");
+
       // 1. Create the profile in Supabase
       await userApi.createProfile(user.id, {
         handle,
@@ -121,6 +124,9 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         avatar_url: user.avatar_url,
         is_writer
       });
+
+      // DEBUG: Alert after creation
+      if (typeof window !== 'undefined') alert("Profile Created! Fetching...");
 
       // Send Welcome Notification
       notificationService.sendWelcome(user.id, handle).catch(console.error);
