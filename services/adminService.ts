@@ -8,7 +8,7 @@ import {
     orderBy,
     getDoc
 } from 'firebase/firestore';
-import { dbInstance as db } from './firebase';
+import { db as dbInstance } from './firebase';
 import { notifications } from './firebase';
 
 const getDb = () => {
