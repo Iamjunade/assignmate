@@ -33,6 +33,10 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();
         
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:33',message:'submit entry',data:{isReg,email:form.email,hasHandle:!!form.handle,hasSchool:!!form.school,isWriter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        
         // Rate Limiting (Client-side)
         const attempts = parseInt(localStorage.getItem('auth_attempts') || '0');
         const lastAttempt = parseInt(localStorage.getItem('auth_last_attempt') || '0');
@@ -49,6 +53,9 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
         setLoad(true);
 
         if (form.password.length < 6) {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:51',message:'password validation failed',data:{passwordLength:form.password.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+            // #endregion
             error("Password must be at least 6 characters long.");
             setLoad(false);
             return;
@@ -58,21 +65,36 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
             let res;
             if (isReg) {
                 if (!form.school) {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:60',message:'school validation failed',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+                    // #endregion
                     error("Please select your college/university from the list.");
                     setLoad(false);
                     return;
                 }
                 if (!form.handle) {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:65',message:'handle validation failed',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+                    // #endregion
                     error("Please choose a handle.");
                     setLoad(false);
                     return;
                 }
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:70',message:'calling register',data:{email:form.email,handle:form.handle,school:form.school,isWriter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                // #endregion
                 res = await register(form.email, form.password, form.handle, form.school, isWriter);
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:70',message:'register returned',data:{hasError:!!res?.error,hasData:!!res?.data,hasSession:!!res?.data?.session,hasUser:!!res?.data?.user,errorMsg:res?.error?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                // #endregion
             } else {
                 res = await login(form.email, form.password);
             }
 
             if (res?.error) {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:75',message:'registration error',data:{errorCode:res.error.code,errorMessage:res.error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                // #endregion
                 let msg = res.error.message || "Authentication failed";
                 if (msg.includes('auth/email-already-in-use') || msg.includes('already registered')) {
                     msg = "This email is already associated with an account. Please login.";
@@ -83,10 +105,16 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                 }
                 error(msg.replace('Firebase:', '').trim());
             } else if (res?.data?.session || res?.data?.user) {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:85',message:'registration success',data:{hasSession:!!res?.data?.session,hasUser:!!res?.data?.user},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                // #endregion
                 success(isReg ? "Account created! Welcome." : "Welcome back!");
                 if (onComplete) onComplete();
             }
         } catch (e: any) {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:89',message:'submit exception',data:{errorMessage:e.message,errorStack:e.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+            // #endregion
             console.error("Auth Error:", e);
             // DEBUG: Show detailed error to user to help diagnosis
             const sbUrl = (import.meta as any).env.VITE_SUPABASE_URL || 'unknown';
@@ -97,8 +125,14 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     };
 
     const handleGoogle = async () => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:99',message:'handleGoogle entry',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
         setLoad(true);
         const { data, error: gError } = await loginWithGoogle();
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:101',message:'loginWithGoogle returned',data:{hasError:!!gError,hasData:!!data,errorMsg:gError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
         if (gError) {
             error(gError.message || "Google Login Failed");
             setLoad(false);
@@ -120,6 +154,9 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
 
     const handleCompleteProfile = async (e: React.FormEvent) => {
         e.preventDefault();
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:121',message:'handleCompleteProfile entry',data:{handle:completionForm.handle,school:completionForm.school,isWriter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
         if (!completionForm.school) {
             error("Please select your college.");
             return;
@@ -131,14 +168,22 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
         setLoad(true);
         try {
             // Race against a 15s timeout to prevent infinite loading
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:134',message:'calling completeGoogleSignup',data:{handle:completionForm.handle,school:completionForm.school,isWriter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
             await Promise.race([
                 completeGoogleSignup(completionForm.handle, completionForm.school, isWriter),
                 new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out. Please check your connection.")), 15000))
             ]);
-            
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:137',message:'completeGoogleSignup success',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
             success("Profile Setup Complete! Welcome.");
             if (onComplete) onComplete();
         } catch (e: any) {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:141',message:'completeGoogleSignup exception',data:{errorMessage:e.message,errorStack:e.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
             console.error("Profile Setup Error:", e);
             error(e.message || "Failed to complete profile setup.");
         } finally {
@@ -381,30 +426,18 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                         Your Campus <br /> <span className="text-orange-100">Marketplace.</span>
                     </h2>
                     <p className="text-xl text-orange-50 leading-relaxed font-medium opacity-90">
-                                    onClick={() => setIsWriter(false)}
-                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
-                                >
-                                    <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Find Help</span>
-                                </div>
-                                <div
-                                    onClick={() => setIsWriter(true)}
-                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
-                                >
-                                    <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Earn Money</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <GlassButton type="submit" isLoading={load} className="w-full">
-                            Finish Setup <ArrowRight size={18} className="ml-2" />
-                        </GlassButton>
-                    </form>
+                        Connect with peers from IITs, NITs, and top universities to get help with assignments, records, and projects.
+                    </p>
                 </div>
             </div>
-        );
-    }
+            
+            {/* Debug Log for User */}
+            <div className="fixed bottom-0 left-0 w-full bg-black/80 text-green-400 p-2 text-xs font-mono max-h-32 overflow-y-auto z-50 pointer-events-none">
+                <p className="font-bold text-white mb-1">Debug Log (Take Screenshot if Stuck):</p>
+                <div id="debug-log-container"></div>
+            </div>
+        </div >
+    );
 
     return (
         <div className="min-h-screen flex w-full bg-white dark:bg-slate-950">

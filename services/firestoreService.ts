@@ -1,16 +1,16 @@
-import { 
-    collection, 
-    doc, 
-    setDoc, 
-    getDoc, 
-    getDocs, 
-    query, 
-    where, 
-    orderBy, 
-    limit, 
-    updateDoc, 
-    deleteDoc, 
-    addDoc, 
+import {
+    collection,
+    doc,
+    setDoc,
+    getDoc,
+    getDocs,
+    query,
+    where,
+    orderBy,
+    limit,
+    updateDoc,
+    deleteDoc,
+    addDoc,
     serverTimestamp,
     arrayUnion,
     arrayRemove,
@@ -48,13 +48,16 @@ export const userApi = {
     },
 
     createProfile: async (id: string, metadata: any) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firestoreService.ts:50',message:'createProfile entry',data:{id,handle:metadata.handle,school:metadata.school,is_writer:metadata.is_writer},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         console.log("createProfile: Start", id);
         const randomCollege = INDIAN_COLLEGES[Math.floor(Math.random() * INDIAN_COLLEGES.length)].name;
 
         // Simple handle generation - no blocking checks
         let baseHandle = metadata.handle || metadata.full_name || 'Student';
         baseHandle = baseHandle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
-        
+
         // Append 4 random chars to ensure uniqueness without DB roundtrip
         const uniqueHandle = `${baseHandle}_${Math.random().toString(36).substring(2, 6)}`;
 
@@ -77,13 +80,22 @@ export const userApi = {
 
         console.log("createProfile: Writing doc", uniqueHandle);
         try {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firestoreService.ts:79',message:'before setDoc',data:{id,uniqueHandle,hasDb:!!getDb()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
             // Force a timeout on the write operation
             await Promise.race([
                 setDoc(doc(getDb(), 'users', id), newProfile),
                 new Promise((_, reject) => setTimeout(() => reject(new Error("Database Write Timeout (Check Firebase Rules/Network)")), 5000))
             ]);
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firestoreService.ts:85',message:'setDoc success',data:{id,uniqueHandle},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
             console.log("createProfile: Success");
         } catch (e) {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firestoreService.ts:87',message:'setDoc error',data:{errorMessage:e.message,errorCode:e.code,errorStack:e.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
             console.error("createProfile: Failed", e);
             throw e;
         }
@@ -95,16 +107,53 @@ export const userApi = {
     }
 };
 
+import { User } from '../types';
+
+// ... existing imports ...
+
 export const dbService = {
-    getWriters: async () => {
-        const q = query(
-            collection(getDb(), 'users'), 
+    getWriters: async (currentUser: User | null) => {
+        const usersRef = collection(getDb(), 'users');
+
+        // 1. Fetch Global Writers (Visible to everyone)
+        // Note: We filter for is_writer=true AND (visibility='global' OR missing)
+        // Firestore requires composite indexes for complex queries. 
+        // For simplicity/robustness without deploying indexes, we'll fetch writers and filter or use simple queries.
+        // Let's try to be as efficient as possible with available indexes.
+
+        const globalQuery = query(
+            usersRef,
             where('is_writer', '==', true),
-            orderBy('created_at', 'desc'),
-            limit(500)
+            where('visibility', '==', 'global'),
+            limit(100)
         );
-        const snapshot = await getDocs(q);
-        return snapshot.docs.map(d => d.data());
+
+        // 2. Fetch College Writers (If user is logged in)
+        let collegeDocs: any[] = [];
+        if (currentUser && currentUser.school) {
+            const collegeQuery = query(
+                usersRef,
+                where('is_writer', '==', true),
+                where('visibility', '==', 'college'),
+                where('school', '==', currentUser.school),
+                limit(100)
+            );
+            const snap = await getDocs(collegeQuery);
+            collegeDocs = snap.docs.map(d => d.data());
+        }
+
+        // 3. Execute Global Query
+        const globalSnap = await getDocs(globalQuery);
+        const globalDocs = globalSnap.docs.map(d => d.data());
+
+        // 4. Merge and Deduplicate
+        const allWriters = [...globalDocs, ...collegeDocs];
+        const uniqueWriters = Array.from(new Map(allWriters.map(item => [item.id, item])).values());
+
+        // 5. Sort by creation (client-side sort since we merged results)
+        return uniqueWriters.sort((a: any, b: any) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
     },
 
     updateProfile: async (userId: string, updates: any) => {
@@ -118,7 +167,7 @@ export const dbService = {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         const storageRef = ref(storage, `portfolio/${fileName}`);
-        
+
         await uploadBytes(storageRef, file);
         return await getDownloadURL(storageRef);
     },
@@ -196,12 +245,12 @@ export const dbService = {
 
     getIncomingRequests: async (userId: string) => {
         const q = query(
-            collection(getDb(), 'connections'), 
-            where('receiver_id', '==', userId), 
+            collection(getDb(), 'connections'),
+            where('receiver_id', '==', userId),
             where('status', '==', 'pending')
         );
         const snap = await getDocs(q);
-        
+
         // Join with profiles manually
         const requests = await Promise.all(snap.docs.map(async d => {
             const data = d.data();
@@ -218,10 +267,10 @@ export const dbService = {
     getMyConnections: async (userId: string) => {
         const q1 = query(collection(getDb(), 'connections'), where('requester_id', '==', userId), where('status', '==', 'accepted'));
         const q2 = query(collection(getDb(), 'connections'), where('receiver_id', '==', userId), where('status', '==', 'accepted'));
-        
+
         const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
         const ids = new Set<string>();
-        
+
         snap1.forEach(d => ids.add(d.data().receiver_id));
         snap2.forEach(d => ids.add(d.data().requester_id));
 
@@ -247,14 +296,14 @@ export const dbService = {
     getChats: async (userId: string) => {
         const q1 = query(collection(getDb(), 'chats'), where('poster_id', '==', userId));
         const q2 = query(collection(getDb(), 'chats'), where('writer_id', '==', userId));
-        
+
         const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
         // Merge and deduplicate by ID
         const chatMap = new Map();
         [...snap1.docs, ...snap2.docs].forEach(d => chatMap.set(d.id, { id: d.id, ...d.data() }));
-        
+
         const chats = Array.from(chatMap.values());
-        
+
         // Sort manually since we merged results
         chats.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
@@ -264,7 +313,7 @@ export const dbService = {
             const otherId = isPoster ? c.writer_id : c.poster_id;
             const otherSnap = await getDoc(doc(getDb(), 'users', otherId));
             const other = otherSnap.exists() ? otherSnap.data() : null;
-            
+
             return {
                 ...c,
                 gig_title: 'Direct Chat',
@@ -277,7 +326,7 @@ export const dbService = {
     getChatDetails: async (chatId: string, userId: string) => {
         const docSnap = await getDoc(doc(getDb(), 'chats', chatId));
         if (!docSnap.exists()) throw new Error("Not found");
-        
+
         const data = docSnap.data();
         const isPoster = data.poster_id === userId;
         const otherId = isPoster ? data.writer_id : data.poster_id;
@@ -295,8 +344,8 @@ export const dbService = {
     createChat: async (gigId: string | null, posterId: string, writerId: string) => {
         // Check existing
         const q = query(
-            collection(getDb(), 'chats'), 
-            where('poster_id', '==', posterId), 
+            collection(getDb(), 'chats'),
+            where('poster_id', '==', posterId),
             where('writer_id', '==', writerId)
         );
         const snap = await getDocs(q);
@@ -304,8 +353,8 @@ export const dbService = {
 
         // Check reverse
         const q2 = query(
-            collection(getDb(), 'chats'), 
-            where('poster_id', '==', writerId), 
+            collection(getDb(), 'chats'),
+            where('poster_id', '==', writerId),
             where('writer_id', '==', posterId)
         );
         const snap2 = await getDocs(q2);
@@ -318,14 +367,14 @@ export const dbService = {
             updated_at: new Date().toISOString(),
             last_message: null
         };
-        
+
         const res = await addDoc(collection(getDb(), 'chats'), newChat);
         return { id: res.id, ...newChat };
     },
 
     getMessages: async (chatId: string) => {
         const q = query(
-            collection(getDb(), 'chats', chatId, 'messages'), 
+            collection(getDb(), 'chats', chatId, 'messages'),
             orderBy('created_at', 'asc')
         );
         const snap = await getDocs(q);
@@ -357,7 +406,7 @@ export const dbService = {
             const receiverId = chatData.poster_id === senderId ? chatData.writer_id : chatData.poster_id;
             const senderSnap = await getDoc(doc(getDb(), 'users', senderId));
             const senderName = senderSnap.exists() ? senderSnap.data().handle : 'User';
-            
+
             notifications.send(receiverId, senderName, type === 'TEXT' ? content : 'Attachment sent', chatId);
         }
 
@@ -375,11 +424,11 @@ export const dbService = {
         );
         const snap = await getDocs(q);
         const batch = (await import('firebase/firestore')).writeBatch(getDb());
-        
+
         snap.docs.forEach(d => {
             batch.update(d.ref, { read_at: new Date().toISOString() });
         });
-        
+
         if (!snap.empty) await batch.commit();
     },
 
@@ -399,7 +448,7 @@ export const dbService = {
         // OR set up two listeners. For simplicity/cost, we'll poll or just listen to one query if possible.
         // Better approach: Listen to 'chats' where poster_id == userId OR writer_id == userId.
         // Firestore OR queries in snapshot are tricky. Let's use two listeners and merge.
-        
+
         const q1 = query(collection(getDb(), 'chats'), where('poster_id', '==', userId));
         const q2 = query(collection(getDb(), 'chats'), where('writer_id', '==', userId));
 
@@ -412,7 +461,7 @@ export const dbService = {
             const chatMap = new Map();
             allChats.forEach(c => chatMap.set(c.id, c));
             const uniqueChats = Array.from(chatMap.values());
-            
+
             // Sort
             uniqueChats.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
