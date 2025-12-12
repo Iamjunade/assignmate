@@ -38,6 +38,33 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
         const lastAttempt = parseInt(localStorage.getItem('auth_last_attempt') || '0');
         const now = Date.now();
 
+        if (attempts > 5 && (now - lastAttempt) < 60000) {
+            error("Too many attempts. Please try again in a minute.");
+            return;
+        }
+
+        localStorage.setItem('auth_attempts', (attempts + 1).toString());
+        localStorage.setItem('auth_last_attempt', now.toString());
+
+        setLoad(true);
+
+        if (form.password.length < 6) {
+            error("Password must be at least 6 characters long.");
+            setLoad(false);
+            return;
+        }
+
+        try {
+            let res;
+            if (isReg) {
+                if (!form.school) {
+                    error("Please select your college/university from the list.");
+                    setLoad(false);
+                    return;
+                }
+                if (!form.handle) {
+                    error("Please choose a handle.");
+                    setLoad(false);
                     return;
                 }
                 res = await register(form.email, form.password, form.handle, form.school, isWriter);
@@ -63,6 +90,60 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
             console.error("Auth Error:", e);
             // DEBUG: Show detailed error to user to help diagnosis
             const sbUrl = (import.meta as any).env.VITE_SUPABASE_URL || 'unknown';
+            error(`${e.message || "An unexpected error occurred."} (DB: ${sbUrl.substring(0, 15)}...)`);
+        } finally {
+            setLoad(false);
+        }
+    };
+
+    const handleGoogle = async () => {
+        setLoad(true);
+        const { data, error: gError } = await loginWithGoogle();
+        if (gError) {
+            error(gError.message || "Google Login Failed");
+            setLoad(false);
+        }
+    };
+
+    const handleForgotPassword = async () => {
+        if (!form.email) {
+            error("Please enter your email address first.");
+            return;
+        }
+        try {
+            await resetPassword(form.email);
+            info("Password reset email sent. Check your inbox.");
+        } catch (e: any) {
+            error(e.message || "Failed to send reset email.");
+        }
+    };
+
+    const handleCompleteProfile = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!completionForm.school) {
+            error("Please select your college.");
+            return;
+        }
+        if (!completionForm.handle || completionForm.handle.length < 3) {
+            error("Handle must be at least 3 characters.");
+            return;
+        }
+        setLoad(true);
+        try {
+            await completeGoogleSignup(completionForm.handle, completionForm.school, isWriter);
+            success("Profile Setup Complete! Welcome.");
+            if (onComplete) onComplete();
+        } catch (e: any) {
+            console.error("Profile Setup Error:", e);
+            error(e.message || "Failed to complete profile setup.");
+        } finally {
+            setLoad(false);
+        }
+    };
+
+    // View for completing profile (Google Signups)
+    if (user?.is_incomplete) {
+        return (
             <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
                 <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800">
                     <div className="text-center mb-8 flex flex-col items-center">
