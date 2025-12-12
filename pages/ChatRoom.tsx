@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { db, supabase } from '../services/supabaseService';
+import { dbService as db } from '../services/firestoreService';
 import { Send, ArrowLeft, Briefcase, Paperclip, Smile, CheckCheck, MoreVertical, Phone, Video } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { UserPresence } from '../components/UserPresence';

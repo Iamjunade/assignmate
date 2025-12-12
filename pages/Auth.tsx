@@ -24,19 +24,6 @@ export const Auth = () => {
     const [completionForm, setCompletionForm] = useState({ handle: '', school: '' });
 
     // Pre-fill if we have partial data
-    useEffect(() => {
-        if (user?.is_incomplete) {
-            setCompletionForm(prev => ({ ...prev, handle: user.handle || '' }));
-        }
-    }, [user]);
-
-    const submit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoad(true);
-
-        if (form.password.length < 6) {
-            error("Password must be at least 6 characters long.");
-            setLoad(false);
             return;
         }
 

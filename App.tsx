@@ -1,5 +1,5 @@
 import React, { useState, Suspense, lazy, useEffect } from 'react';
-import { db } from './services/supabaseService';
+import { dbService as db } from './services/firestoreService';
 import { notifications, fcm } from './services/firebase';
 import { GlassLayout } from './components/layout/GlassLayout';
 import { GlassNavigation } from './components/ui/GlassNavigation';

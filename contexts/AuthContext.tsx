@@ -1,13 +1,13 @@
+```typescript
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth as firebaseAuth, presence } from '../services/firebase';
-import { userApi } from '../services/supabaseService';
-import { notificationService } from '../services/notificationService';
+import { auth, notifications } from '../services/firebase';
+import { userApi } from '../services/firestoreService';
 import { User } from '../types';
+import { useToast } from './ToastContext';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: typeof firebaseAuth.login;
   loginWithGoogle: typeof firebaseAuth.loginWithGoogle;
   register: (email: string, pass: string, handle: string, school: string, is_writer: boolean) => Promise<any>;
   completeGoogleSignup: (handle: string, school: string, is_writer: boolean) => Promise<void>;

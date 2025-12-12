@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { db, supabase } from '../services/supabaseService';
+import { dbService as db } from '../services/firestoreService';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
 import { MessageSquare, Loader2 } from 'lucide-react';

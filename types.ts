@@ -17,6 +17,7 @@ export interface User {
   is_incomplete?: boolean; // Flag for Google users who haven't set handle/school
   fcm_token?: string; // Firebase Cloud Messaging Token for Push Notifications
   visibility?: 'global' | 'college'; // Visibility setting for the profile
+  role?: 'user' | 'admin' | 'moderator'; // Role-based access control
 }
 
 export interface Chat {

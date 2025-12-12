@@ -30,6 +30,7 @@ import {
     getToken,
     onMessage
 } from 'firebase/messaging';
+import { getStorage } from 'firebase/storage';
 import { getDatabase, ref, onDisconnect, set, onValue, serverTimestamp as rtdbServerTimestamp } from 'firebase/database';
 
 // Environment variables with fallbacks
@@ -48,6 +49,7 @@ let authInstance: any;
 let dbInstance: any;
 let messagingInstance: any;
 let rtdbInstance: any;
+let storageInstance: any;
 
 export const isConfigured = true;
 
@@ -61,9 +63,13 @@ try {
     } catch (e) {
         console.log("Messaging not supported (e.g., non-https or private mode)");
     }
+    // Initialize Storage
+    storageInstance = getStorage(app);
 } catch (e) {
     console.error("Firebase Init Error:", e);
 }
+
+export const storage = storageInstance;
 
 // --- Notifications System (Firestore Based - Legacy/Internal) ---
 export const notifications = {

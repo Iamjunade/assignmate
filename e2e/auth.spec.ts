@@ -1,32 +1,45 @@
 import { test, expect } from '@playwright/test';
 
-test('auth flow', async ({ page }) => {
-    await page.goto('http://localhost:5173');
+test.describe('Authentication Flow', () => {
+  test('should allow a user to register', async ({ page }) => {
+    // 1. Go to Auth Page
+    await page.goto('http://localhost:5173/auth');
 
-    // 1. Check Landing Page
-    await expect(page.getByText("India's #1 Student Marketplace")).toBeVisible();
+    // 2. Switch to Register
+    await page.click('text=Create Account');
 
-    // 2. Navigate to Auth
-    await page.getByRole('button', { name: 'Start Hiring Now' }).click();
-    await expect(page.getByText('Welcome Back')).toBeVisible();
+    // 3. Fill Form
+    const uniqueHandle = `testuser_${Date.now()}`;
+    const uniqueEmail = `${uniqueHandle}@example.com`;
 
-    // 3. Toggle to Register
-    await page.getByText('Create Account').click();
-    await expect(page.getByText('Create Free Account')).toBeVisible();
+    await page.fill('input[placeholder="username"]', uniqueHandle);
+    await page.fill('input[placeholder="Select your college"]', 'IIT Bombay');
+    // Select first option from autocomplete
+    await page.click('.college-option:first-child'); 
+    
+    await page.fill('input[type="email"]', uniqueEmail);
+    await page.fill('input[type="password"]', 'password123');
 
-    // 4. Fill Form (Mock)
-    await page.getByPlaceholder('username').fill('testuser_' + Date.now());
-    await page.getByPlaceholder('name@college.edu.in').fill(`test${Date.now()}@example.com`);
-    await page.getByPlaceholder('••••••••').fill('password123');
-    await page.getByPlaceholder('Select your college').fill('IIT Bombay');
-    await page.getByText('IIT Bombay').click();
+    // 4. Submit
+    await page.click('button[type="submit"]');
 
-    // 5. Submit
-    // Note: We can't fully test Firebase Auth in this simple script without mocking or real credentials.
-    // But we can check if the button is clickable and loading state appears.
-    const submitBtn = page.getByRole('button', { name: 'Create Free Account' });
-    await submitBtn.click();
+    // 5. Verify Success
+    // Expect redirection or success toast
+    await expect(page.locator('text=Account created')).toBeVisible({ timeout: 10000 });
+  });
 
-    // Expect loading state
-    await expect(submitBtn).toBeDisabled();
+  test('should rate limit excessive attempts', async ({ page }) => {
+    await page.goto('http://localhost:5173/auth');
+    
+    // Attempt login 6 times
+    for (let i = 0; i < 6; i++) {
+        await page.fill('input[type="email"]', 'bad@actor.com');
+        await page.fill('input[type="password"]', 'wrongpass');
+        await page.click('button[type="submit"]');
+        await page.waitForTimeout(500); // Wait a bit
+    }
+
+    // Expect rate limit message
+    await expect(page.locator('text=Too many attempts')).toBeVisible();
+  });
 });
