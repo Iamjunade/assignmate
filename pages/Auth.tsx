@@ -381,11 +381,234 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                         Your Campus <br /> <span className="text-orange-100">Marketplace.</span>
                     </h2>
                     <p className="text-xl text-orange-50 leading-relaxed font-medium opacity-90">
+                                    onClick={() => setIsWriter(false)}
+                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
+                                >
+                                    <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                    <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Find Help</span>
+                                </div>
+                                <div
+                                    onClick={() => setIsWriter(true)}
+                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
+                                >
+                                    <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                    <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Earn Money</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <GlassButton type="submit" isLoading={load} className="w-full">
+                            Finish Setup <ArrowRight size={18} className="ml-2" />
+                        </GlassButton>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen flex w-full bg-white dark:bg-slate-950">
+            {/* Left: Form */}
+            <div className="w-full lg:w-1/2 p-6 md:p-12 xl:p-24 flex flex-col justify-center relative z-10">
+                <div className="max-w-md w-full mx-auto">
+                    <div className="mb-10 text-center lg:text-left">
+                        <div className="text-5xl mb-6 lg:hidden">📚</div>
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-3 tracking-tight">{isReg ? 'Create Account' : 'Welcome Back'}</h1>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium text-lg">{isReg ? 'Join the community of ambitious students.' : 'Please enter your details to sign in.'}</p>
+                    </div>
+
+                    <div className="space-y-4 mb-8">
+                        <button
+                            onClick={handleGoogle}
+                            disabled={load}
+                            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+                        >
+                            <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />
+                            Continue with Google
+                        </button>
+
+                        <button
+                            onClick={() => info("Mobile Login coming soon!")}
+                            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+                        >
+                            <Phone size={20} className="text-slate-400" />
+                            Continue with Mobile Number
+                        </button>
+
+                        <div className="relative flex items-center gap-4 py-2">
+                            <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1"></div>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">OR</span>
+                            <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1"></div>
+                        </div>
+                    </div>
+
+                    <form onSubmit={submit} className="space-y-5 relative">
+                        {isReg && (
+                            <>
+                                <GlassInput
+                                    label="Choose a Handle"
+                                    placeholder="username"
+                                    value={form.handle}
+                                    onChange={e => {
+                                        const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                                        setForm({ ...form, handle: val });
+                                    }}
+                                    icon={<span className="font-bold text-sm">@</span>}
+                                />
+
+                                <div className="space-y-2 relative z-50">
+                                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">University</label>
+                                    <CollegeAutocomplete
+                                        value={form.school}
+                                        onChange={(val) => setForm({ ...form, school: val })}
+                                        placeholder="Select your college"
+                                        className="w-full"
+                                        inputClassName="input-clean pl-10"
+                                        icon={<GraduationCap className="absolute left-3.5 top-2.5 text-slate-400" size={18} />}
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        <GlassInput
+                            label="Email Address"
+                            type="email"
+                            placeholder="name@college.edu.in"
+                            value={form.email}
+                            onChange={e => setForm({ ...form, email: e.target.value })}
+                            icon={<Mail size={18} />}
+                        />
+
+                        <div>
+                            <GlassInput
+                                label="Password"
+                                type="password"
+                                placeholder="••••••••"
+                                value={form.password}
+                                onChange={e => setForm({ ...form, password: e.target.value })}
+                                icon={<Lock size={18} />}
+                            />
+                            {!isReg && (
+                                <div className="flex justify-end mt-2">
+                                    <button type="button" onClick={handleForgotPassword} className="text-xs font-bold text-orange-600 hover:text-orange-700">
+                                        Forgot Password?
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {isReg && (
+                            <div className="space-y-2 pt-2">
+                                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">What is your goal?</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div
+                                        onClick={() => setIsWriter(false)}
+                                        className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
+                                    >
+                                        <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                        <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Find Help</span>
+                                    </div>
+                                    <div
+                                        onClick={() => setIsWriter(true)}
+                                        className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
+                                    >
+                                        <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                        <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Earn Money</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <GlassButton type="submit" isLoading={load} className="w-full mt-4 shadow-orange-500/20">
+                            {isReg ? 'Create Free Account' : 'Sign In'} <ArrowRight size={18} className="ml-2" />
+                        </GlassButton>
+                    </form>
+
+                    <div className="mt-8 text-center">
+                        <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">
+                            {isReg ? "Already a member? " : "New to AssignMate? "}
+                            <button onClick={() => setIsReg(!isReg)} className="text-orange-600 font-bold hover:underline">
+                                {isReg ? "Sign In" : "Create Account"}
+                            </button>
+                        </p>
+                    </div>
+                </div>
+
+                <div className="mt-6 text-center">
+                    <a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-xs font-bold text-green-600 hover:text-green-700 bg-green-50 px-4 py-2 rounded-full border border-green-200 transition-colors">
+                        <MessageCircle size={14} /> Need Help? Chat on WhatsApp
+                    </a>
+                </div>
+            </div>
+
+
+            {/* Right: Branding (Hidden on Mobile) */}
+            <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-orange-500 to-amber-600 relative overflow-hidden items-center justify-center p-12">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
+
+                {/* Floating Elements */}
+                <MotionDiv
+                    animate={{ y: [0, -20, 0] }}
+                    transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+                    className="absolute top-20 right-20 bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-xl"
+                >
+                    <Check className="text-white w-8 h-8" />
+                </MotionDiv>
+                <MotionDiv
+                    animate={{ y: [0, 20, 0] }}
+                    transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}
+                    className="absolute bottom-32 left-20 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-xl"
+                >
+                    <div className="flex gap-2 mb-2">
+                        <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                        <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                        <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                    </div>
+                    <div className="w-32 h-2 bg-white/20 rounded mb-2"></div>
+                    <div className="w-20 h-2 bg-white/20 rounded"></div>
+                </MotionDiv>
+
+                <div className="relative z-10 text-white max-w-lg">
+                    <div className="mb-8 inline-block bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-4 py-1.5 text-sm font-bold shadow-sm">
+                        🚀 Trusted by 10,000+ Students
+                    </div>
+                    <h2 className="text-6xl font-extrabold mb-6 leading-tight">
+                        Your Campus <br /> <span className="text-orange-100">Marketplace.</span>
+                    </h2>
+                    <p className="text-xl text-orange-50 leading-relaxed font-medium opacity-90">
                         Connect with peers from IITs, NITs, and top universities to get help with assignments, records, and projects.
                     </p>
                 </div>
             </div>
             
+            {/* Debug Log for User */}
+            <div className="fixed bottom-0 left-0 w-full bg-black/80 text-green-400 p-2 text-xs font-mono max-h-32 overflow-y-auto z-50 pointer-events-none">
+                <p className="font-bold text-white mb-1">Debug Log (Take Screenshot if Stuck):</p>
+                <div id="debug-log-container"></div>
+            </div>
         </div >
     );
+};
+
+// Helper to inject logs into the DOM
+const logToScreen = (msg: string) => {
+    const container = document.getElementById('debug-log-container');
+    if (container) {
+        const line = document.createElement('div');
+        line.innerText = `> ${msg}`;
+        container.appendChild(line);
+    }
+    console.log(msg);
+};
+
+// Monkey patch console.log/error to show on screen
+const originalLog = console.log;
+const originalError = console.error;
+console.log = (...args) => {
+    originalLog(...args);
+    logToScreen(args.map(a => (typeof a === 'object' ? JSON.stringify(a) : a)).join(' '));
+};
+console.error = (...args) => {
+    originalError(...args);
+    logToScreen("ERROR: " + args.map(a => (typeof a === 'object' ? JSON.stringify(a) : a)).join(' '));
 };

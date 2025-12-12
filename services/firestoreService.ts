@@ -77,7 +77,11 @@ export const userApi = {
 
         console.log("createProfile: Writing doc", uniqueHandle);
         try {
-            await setDoc(doc(getDb(), 'users', id), newProfile);
+            // Force a timeout on the write operation
+            await Promise.race([
+                setDoc(doc(getDb(), 'users', id), newProfile),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Database Write Timeout (Check Firebase Rules/Network)")), 5000))
+            ]);
             console.log("createProfile: Success");
         } catch (e) {
             console.error("createProfile: Failed", e);
