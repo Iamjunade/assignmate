@@ -38,33 +38,6 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
         const lastAttempt = parseInt(localStorage.getItem('auth_last_attempt') || '0');
         const now = Date.now();
 
-        if (attempts > 5 && (now - lastAttempt) < 60000) {
-            error("Too many attempts. Please try again in a minute.");
-            return;
-        }
-
-        localStorage.setItem('auth_attempts', (attempts + 1).toString());
-        localStorage.setItem('auth_last_attempt', now.toString());
-
-        setLoad(true);
-
-        if (form.password.length < 6) {
-            error("Password must be at least 6 characters long.");
-            setLoad(false);
-            return;
-        }
-
-        try {
-            let res;
-            if (isReg) {
-                if (!form.school) {
-                    error("Please select your college/university from the list.");
-                    setLoad(false);
-                    return;
-                }
-                if (!form.handle) {
-                    error("Please choose a handle.");
-                    setLoad(false);
                     return;
                 }
                 res = await register(form.email, form.password, form.handle, form.school, isWriter);

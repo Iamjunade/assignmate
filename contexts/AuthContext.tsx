@@ -27,6 +27,9 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   // Sync logic: Takes a Firebase User, finds/creates Supabase Profile
   const syncUser = async (fbUser: any) => {
     try {
+      // DEBUG: Alert to confirm sync is starting
+      // alert(`Syncing user: ${fbUser.email}`);
+      
       let profile = await userApi.getProfile(fbUser.uid);
 
       if (!profile) {
@@ -47,8 +50,12 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         // Initialize Presence
         presence.init(fbUser.uid);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("Sync Error:", e);
+      // CRITICAL DEBUG: Show alert on sync failure
+      if (typeof window !== 'undefined') {
+          alert(`Login Sync Failed: ${e.message}\n\nCheck your internet or Firestore rules.`);
+      }
     }
   };
 
