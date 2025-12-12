@@ -70,6 +70,7 @@ try {
 }
 
 export const storage = storageInstance;
+export const db = dbInstance;
 
 // --- Notifications System (Firestore Based - Legacy/Internal) ---
 export const notifications = {
