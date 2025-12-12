@@ -88,6 +88,142 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
             }
         } catch (e: any) {
             console.error("Auth Error:", e);
+            // DEBUG: Show detailed error to user to help diagnosis
+            const sbUrl = (import.meta as any).env.VITE_SUPABASE_URL || 'unknown';
+            error(`${e.message || "An unexpected error occurred."} (DB: ${sbUrl.substring(0, 15)}...)`);
+        } finally {
+            setLoad(false);
+        }
+    };
+
+    const handleGoogle = async () => {
+        setLoad(true);
+        const { data, error: gError } = await loginWithGoogle();
+        if (gError) {
+            error(gError.message || "Google Login Failed");
+            setLoad(false);
+        }
+    };
+
+    const handleForgotPassword = async () => {
+        if (!form.email) {
+            error("Please enter your email address first.");
+            return;
+        }
+        try {
+            await resetPassword(form.email);
+            info("Password reset email sent. Check your inbox.");
+        } catch (e: any) {
+            error(e.message || "Failed to send reset email.");
+        }
+    };
+
+    const handleCompleteProfile = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!completionForm.school) {
+            error("Please select your college.");
+            return;
+        }
+        if (!completionForm.handle || completionForm.handle.length < 3) {
+            error("Handle must be at least 3 characters.");
+            return;
+        }
+        setLoad(true);
+        try {
+            // Race against a 15s timeout to prevent infinite loading
+            await Promise.race([
+                completeGoogleSignup(completionForm.handle, completionForm.school, isWriter),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out. Please check your connection.")), 15000))
+            ]);
+            
+            success("Profile Setup Complete! Welcome.");
+            if (onComplete) onComplete();
+        } catch (e: any) {
+            console.error("Profile Setup Error:", e);
+            error(e.message || "Failed to complete profile setup.");
+        } finally {
+            setLoad(false);
+        }
+    };
+
+    // View for completing profile (Google Signups)
+    if (user?.is_incomplete) {
+        return (
+            <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
+                <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800">
+                    <div className="text-center mb-8 flex flex-col items-center">
+                        <div className="text-6xl mb-4">📚</div>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Setup your Profile</h2>
+                        <p className="text-slate-500 dark:text-slate-400">Claim your unique handle to join the community.</p>
+                    </div>
+
+                    <form onSubmit={handleCompleteProfile} className="space-y-6">
+                        <GlassInput
+                            label="Choose a Handle"
+                            placeholder="username"
+                            value={completionForm.handle}
+                            onChange={e => {
+                                const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                                setCompletionForm({ ...completionForm, handle: val });
+                            }}
+                            icon={<span className="font-bold text-sm">@</span>}
+                        />
+                        <p className="text-[10px] text-slate-400 ml-1 -mt-4">Only letters, numbers, and underscores.</p>
+
+                        <div className="space-y-2 relative z-50">
+                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">Select your University</label>
+                            <CollegeAutocomplete
+                                value={completionForm.school}
+                                onChange={(val) => setCompletionForm({ ...completionForm, school: val })}
+                                placeholder="Search your college"
+                                className="w-full"
+                                inputClassName="input-clean pl-10"
+                                icon={<GraduationCap className="absolute left-3.5 top-2.5 text-slate-400" size={18} />}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">What is your goal?</label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div
+                                    onClick={() => setIsWriter(false)}
+                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
+                                >
+                                    <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                    <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Find Help</span>
+                                </div>
+                                <div
+                                    onClick={() => setIsWriter(true)}
+                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
+                                >
+                                    <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                    <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Earn Money</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <GlassButton type="submit" isLoading={load} className="w-full">
+                            Finish Setup <ArrowRight size={18} className="ml-2" />
+                        </GlassButton>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen flex w-full bg-white dark:bg-slate-950">
+            {/* Left: Form */}
+            <div className="w-full lg:w-1/2 p-6 md:p-12 xl:p-24 flex flex-col justify-center relative z-10">
+                <div className="max-w-md w-full mx-auto">
+                    <div className="mb-10 text-center lg:text-left">
+                        <div className="text-5xl mb-6 lg:hidden">📚</div>
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-3 tracking-tight">{isReg ? 'Create Account' : 'Welcome Back'}</h1>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium text-lg">{isReg ? 'Join the community of ambitious students.' : 'Please enter your details to sign in.'}</p>
+                    </div>
+
+                    <div className="space-y-4 mb-8">
+                        <button
                             onClick={handleGoogle}
                             disabled={load}
                             className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
