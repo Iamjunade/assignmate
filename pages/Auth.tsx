@@ -107,21 +107,6 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
 
     const handleForgotPassword = async () => {
         if (!form.email) {
-            error("Please enter your email address first.");
-            return;
-        }
-        try {
-            await resetPassword(form.email);
-            info("Password reset email sent. Check your inbox.");
-        } catch (e: any) {
-                        <p className="text-slate-500 dark:text-slate-400">Claim your unique handle to join the community.</p>
-                    </div>
-
-                    <form onSubmit={handleCompleteProfile} className="space-y-6">
-                        <GlassInput
-                            label="Choose a Handle"
-                            placeholder="username"
-                            value={completionForm.handle}
                             onChange={e => {
                                 const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
                                 setCompletionForm({ ...completionForm, handle: val });
