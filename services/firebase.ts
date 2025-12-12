@@ -34,16 +34,17 @@ import { getStorage } from 'firebase/storage';
 import { getDatabase, ref, onDisconnect, set, onValue, serverTimestamp as rtdbServerTimestamp } from 'firebase/database';
 
 // Environment variables with fallbacks (Updated with new assignmate-cfe7e config)
+// Environment variables with fallbacks (Updated with new assignmate-cfe7e config)
+// FORCE HARDCODED VALUES FOR NOW to bypass Vercel env vars from old project
 const firebaseConfig = {
-    apiKey: (import.meta as any).env?.VITE_FIREBASE_API_KEY || "AIzaSyAfGO0SkAJopglyoHpoHASuddExfdlCxtI",
-    authDomain: (import.meta as any).env?.VITE_FIREBASE_AUTH_DOMAIN || "assignmate-cfe7e.firebaseapp.com",
-    projectId: (import.meta as any).env?.VITE_FIREBASE_PROJECT_ID || "assignmate-cfe7e",
-    storageBucket: (import.meta as any).env?.VITE_FIREBASE_STORAGE_BUCKET || "assignmate-cfe7e.firebasestorage.app",
-    messagingSenderId: (import.meta as any).env?.VITE_FIREBASE_MESSAGING_SENDER_ID || "52219651086",
-    appId: (import.meta as any).env?.VITE_FIREBASE_APP_ID || "1:52219651086:web:a6014135e38c3c2799c85f",
+    apiKey: "AIzaSyAfGO0SkAJopglyoHpoHASuddExfdlCxtI",
+    authDomain: "assignmate-cfe7e.firebaseapp.com",
+    projectId: "assignmate-cfe7e",
+    storageBucket: "assignmate-cfe7e.firebasestorage.app",
+    messagingSenderId: "52219651086",
+    appId: "1:52219651086:web:a6014135e38c3c2799c85f",
     measurementId: "G-2P043KNG6V",
-    // Inferred database URL for RTDB (optional)
-    databaseURL: (import.meta as any).env?.VITE_FIREBASE_DATABASE_URL || "https://assignmate-cfe7e-default-rtdb.firebaseio.com"
+    databaseURL: "https://assignmate-cfe7e-default-rtdb.firebaseio.com"
 };
 
 let app: any;
