@@ -173,13 +173,19 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     const handleCompleteProfile = async (e: React.FormEvent) => {
         e.preventDefault();
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:121',message:'handleCompleteProfile entry',data:{handle:completionForm.handle,school:completionForm.school,isWriter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:173',message:'handleCompleteProfile entry',data:{handle:completionForm.handle,school:completionForm.school,isWriter,hasUser:!!user,userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
         // #endregion
         if (!completionForm.school) {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:178',message:'validation failed - no school',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
             error("Please select your college.");
             return;
         }
         if (!completionForm.handle || completionForm.handle.length < 3) {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:182',message:'validation failed - handle too short',data:{handleLength:completionForm.handle?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
             error("Handle must be at least 3 characters.");
             return;
         }
@@ -269,7 +275,16 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                             </div>
                         </div>
 
-                        <GlassButton type="submit" isLoading={load} className="w-full">
+                        <GlassButton 
+                            type="submit" 
+                            isLoading={load} 
+                            className="w-full"
+                            onClick={(e) => {
+                                // #region agent log
+                                fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:272',message:'Finish Setup button clicked',data:{handle:completionForm.handle,school:completionForm.school,isWriter,isLoading:load},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                                // #endregion
+                            }}
+                        >
                             Finish Setup <ArrowRight size={18} className="ml-2" />
                         </GlassButton>
                     </form>

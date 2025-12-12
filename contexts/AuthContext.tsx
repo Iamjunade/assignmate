@@ -161,9 +161,14 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
   const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean) => {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:131',message:'completeGoogleSignup entry',data:{hasUser:!!user,userId:user?.id,handle,school,is_writer},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:162',message:'completeGoogleSignup entry',data:{hasUser:!!user,userId:user?.id,handle,school,is_writer},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
     // #endregion
-    if (!user) return;
+    if (!user) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:166',message:'completeGoogleSignup - no user, throwing error',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      throw new Error("User not found. Please try logging in again.");
+    }
 
     try {
       console.log("Completing Signup...", { handle, school });
