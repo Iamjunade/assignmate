@@ -33,7 +33,7 @@ import {
 import { getStorage } from 'firebase/storage';
 import { getDatabase, ref, onDisconnect, set, onValue, serverTimestamp as rtdbServerTimestamp } from 'firebase/database';
 
-// Environment variables with fallbacks
+// Environment variables with fallbacks (Updated with User provided config)
 const firebaseConfig = {
     apiKey: (import.meta as any).env?.VITE_FIREBASE_API_KEY || "AIzaSyCkILlkf-LHXyTOnIuwQgnisczB3fT9GYA",
     authDomain: (import.meta as any).env?.VITE_FIREBASE_AUTH_DOMAIN || "planning-with-ai-be6ab.firebaseapp.com",
@@ -41,6 +41,7 @@ const firebaseConfig = {
     storageBucket: (import.meta as any).env?.VITE_FIREBASE_STORAGE_BUCKET || "planning-with-ai-be6ab.firebasestorage.app",
     messagingSenderId: (import.meta as any).env?.VITE_FIREBASE_MESSAGING_SENDER_ID || "202841406595",
     appId: (import.meta as any).env?.VITE_FIREBASE_APP_ID || "1:202841406595:web:ed3abcf976f969a0052fb6",
+    // Optional: Only used for Presence/RTDB. If you don't use RTDB, this can be omitted or ignored.
     databaseURL: (import.meta as any).env?.VITE_FIREBASE_DATABASE_URL || "https://planning-with-ai-be6ab-default-rtdb.firebaseio.com"
 };
 
@@ -57,7 +58,14 @@ try {
     app = initializeApp(firebaseConfig);
     authInstance = getAuth(app);
     dbInstance = getFirestore(app);
-    rtdbInstance = getDatabase(app);
+    
+    // Initialize RTDB safely
+    try {
+        rtdbInstance = getDatabase(app);
+    } catch (e) {
+        console.warn("RTDB Init Failed (Non-critical if not using Presence):", e);
+    }
+
     try {
         messagingInstance = getMessaging(app);
     } catch (e) {

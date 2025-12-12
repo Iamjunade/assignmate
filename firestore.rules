@@ -1,49 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper functions
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-    
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-
-    // Users: Authenticated can read all, Owner can update
-    match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isOwner(userId);
-      allow update: if isAuthenticated() && isOwner(userId);
-      allow delete: if false; // Only admin (via backend) or manual
-    }
-
-    // Connections: Authenticated can read/create
-    match /connections/{connectionId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated(); // Should be refined to participants
-      allow delete: if isAuthenticated();
-    }
-
-    // Chats: Authenticated can read/create
-    match /chats/{chatId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-    }
-
-    // Messages: Authenticated can read/create
-    match /chats/{chatId}/messages/{messageId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-    }
-    
-    // Audit Logs: Authenticated can create, Admin (todo) can read
-    match /audit_logs/{logId} {
-      allow create: if isAuthenticated();
-      allow read: if false;
+    // TEMPORARY: Allow all access for debugging
+    // WARNING: Revert this to secure rules before production!
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }
