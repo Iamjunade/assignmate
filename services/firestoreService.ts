@@ -51,40 +51,12 @@ export const userApi = {
         console.log("createProfile: Start", id);
         const randomCollege = INDIAN_COLLEGES[Math.floor(Math.random() * INDIAN_COLLEGES.length)].name;
 
-        // Sanitize handle
-        let handle = metadata.handle || metadata.full_name || 'Student';
-        handle = handle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
-        if (handle.length < 3) handle = `Student_${id.slice(0, 4)}`;
-
-        // Handle Uniqueness
-        const checkUnique = async (h: string) => {
-            try {
-                console.log("checkUnique: Checking", h);
-                const q = query(collection(getDb(), 'users'), where('handle', '==', h));
-                
-                // Add 3s timeout to uniqueness check
-                const snap = await Promise.race([
-                    getDocs(q),
-                    new Promise<any>((_, reject) => setTimeout(() => reject(new Error("Timeout")), 3000))
-                ]);
-
-                console.log("checkUnique: Result", !snap.empty);
-                return !snap.empty;
-            } catch (e) {
-                console.warn("Handle uniqueness check failed or timed out, assuming unique.");
-                return false; // Assume unique to proceed
-            }
-        };
-
-        let uniqueHandle = handle;
-        let counter = 1;
-        // Safety limit for loop
-        let attempts = 0;
-        while (await checkUnique(uniqueHandle) && attempts < 10) {
-            uniqueHandle = `${handle}${counter++}`;
-            attempts++;
-        }
-        if (attempts >= 10) uniqueHandle = `${handle}_${Date.now().toString().slice(-4)}`;
+        // Simple handle generation - no blocking checks
+        let baseHandle = metadata.handle || metadata.full_name || 'Student';
+        baseHandle = baseHandle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+        
+        // Append 4 random chars to ensure uniqueness without DB roundtrip
+        const uniqueHandle = `${baseHandle}_${Math.random().toString(36).substring(2, 6)}`;
 
         const newProfile = {
             id,
@@ -93,7 +65,7 @@ export const userApi = {
             email: metadata.email,
             avatar_url: metadata.avatar_url,
             school: metadata.school || randomCollege,
-            created_at: new Date().toISOString(), // Store as string for consistency with UI
+            created_at: new Date().toISOString(),
             is_verified: 'pending',
             xp: 0,
             tags: ['Student'],
@@ -103,15 +75,14 @@ export const userApi = {
             saved_writers: []
         };
 
-        console.log("createProfile: Writing doc to users collection...", uniqueHandle);
+        console.log("createProfile: Writing doc", uniqueHandle);
         try {
             await setDoc(doc(getDb(), 'users', id), newProfile);
-            console.log("createProfile: setDoc successful");
+            console.log("createProfile: Success");
         } catch (e) {
-            console.error("createProfile: setDoc FAILED", e);
+            console.error("createProfile: Failed", e);
             throw e;
         }
-        console.log("createProfile: Done");
         return newProfile;
     },
 

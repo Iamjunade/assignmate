@@ -24,14 +24,18 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Sync logic: Takes a Firebase User, finds/creates Supabase Profile
+  // Simplified Sync: Just get the profile, don't overthink it
   const syncUser = async (fbUser: any) => {
     try {
-      let profile = await userApi.getProfile(fbUser.uid);
+      console.log("AuthContext: Syncing user...", fbUser.uid);
+      const profile = await userApi.getProfile(fbUser.uid);
 
-      if (!profile) {
-        // New user via Google or direct login where profile creation failed.
-        console.log("Profile missing, waiting for user completion...");
+      if (profile) {
+        console.log("AuthContext: Profile found");
+        setUser({ ...profile, email: fbUser.email, is_incomplete: false });
+        presence.init(fbUser.uid);
+      } else {
+        console.log("AuthContext: Profile missing, marking incomplete");
         setUser({
           id: fbUser.uid,
           email: fbUser.email,
@@ -41,14 +45,11 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           xp: 0,
           is_incomplete: true
         } as User);
-      } else {
-        // Profile exists, log them in fully
-        setUser({ ...profile, email: fbUser.email, is_incomplete: false });
-        // Initialize Presence
-        presence.init(fbUser.uid);
       }
-    } catch (e: any) {
-      console.error("Sync Error:", e);
+    } catch (e) {
+      console.error("AuthContext: Sync Failed", e);
+      // Don't leave user in limbo - log them out if critical failure, or set basic state
+      setUser(null); 
     }
   };
 
@@ -61,7 +62,6 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       }
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -70,46 +70,31 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     setUser(null);
   };
 
-  // Wrapper for Register to ensure Handle/School/Role are passed to Profile Creation
   const register = async (email: string, pass: string, handle: string, school: string, is_writer: boolean) => {
     const res = await firebaseAuth.register(email, pass);
     if (res.error) return res;
 
     if (res.data?.user) {
       try {
-        // Immediately create profile with specific data including role
         await userApi.createProfile(res.data.user.uid, { handle, school, email, is_writer });
-
-        // Send Welcome Notification
         notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
-
-        // Trigger sync manually to update state fast
-        await syncUser(res.data.user);
-
-        return { data: { ...res.data, session: true } }; // Return success structure
+        await syncUser(res.data.user); // Just sync normally
+        return { data: { ...res.data, session: true } };
       } catch (error: any) {
-        console.error("Registration Error (Profile Creation):", error);
-        // CRITICAL DEBUG: Alert the user on the live site
-        if (typeof window !== 'undefined') {
-             alert(`Registration Failed: ${error.message}\n\nCheck console for details.`);
-        }
-        return { error: { message: error.message || "Failed to create profile" } };
+        console.error("Registration Error:", error);
+        return { error: { message: "Account created but profile setup failed. Please login." } };
       }
     }
     return res;
   };
 
   const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean) => {
-    if (!user) {
-        console.error("completeGoogleSignup: No user found in context");
-        return;
-    }
+    if (!user) return;
 
     try {
-      console.log("completeGoogleSignup: Starting...", { handle, school, is_writer, userId: user.id });
+      console.log("Completing Signup...", { handle, school });
       
-      // 1. Create the profile in Firestore
-      console.log("completeGoogleSignup: Calling createProfile...");
+      // 1. Create Profile
       await userApi.createProfile(user.id, {
         handle,
         school,
@@ -118,31 +103,19 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         full_name: user.displayName || 'Student',
         is_writer
       });
-      console.log("completeGoogleSignup: createProfile successful");
 
-      // Send Welcome Notification (Non-blocking)
-      notificationService.sendWelcome(user.id, handle).catch(e => console.error("Welcome notif failed:", e));
+      // 2. Update Local State Immediately (Optimistic UI)
+      setUser(prev => prev ? { ...prev, handle, school, is_incomplete: false, is_writer } : null);
+      
+      // 3. Init Presence
+      presence.init(user.id);
 
-      // 2. Force a re-sync to fetch the newly created profile
-      console.log("completeGoogleSignup: Fetching new profile...");
-      const profile = await userApi.getProfile(user.id);
-      console.log("completeGoogleSignup: Profile fetched:", profile);
-
-      if (profile) {
-        setUser({ ...profile, email: user.email, is_incomplete: false });
-        presence.init(user.id);
-        console.log("completeGoogleSignup: User state updated, done.");
-      } else {
-        console.warn("completeGoogleSignup: Profile created but not found in fetch. Using fallback state.");
-        // Fallback if fetch fails immediately (shouldn't happen)
-        setUser(prev => prev ? { ...prev, handle, school, is_incomplete: false } : null);
-      }
+      // 4. Send Notification (Background)
+      notificationService.sendWelcome(user.id, handle).catch(console.error);
 
     } catch (e: any) {
       console.error("Profile Completion Failed:", e);
-      if (typeof window !== 'undefined') {
-          alert(`Profile Setup Failed: ${e.message}\n\nPlease check your internet connection and try again.`);
-      }
+      alert("Setup Failed: " + e.message);
       throw e;
     }
   };
