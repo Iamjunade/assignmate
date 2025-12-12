@@ -126,16 +126,34 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
 
     const handleGoogle = async () => {
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:99',message:'handleGoogle entry',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:127',message:'handleGoogle entry',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
         // #endregion
         setLoad(true);
-        const { data, error: gError } = await loginWithGoogle();
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:101',message:'loginWithGoogle returned',data:{hasError:!!gError,hasData:!!data,errorMsg:gError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-        // #endregion
-        if (gError) {
-            error(gError.message || "Google Login Failed");
+        try {
+            const { data, error: gError } = await loginWithGoogle();
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:132',message:'loginWithGoogle returned',data:{hasError:!!gError,hasData:!!data,hasUser:!!data?.user,uid:data?.user?.uid,errorMsg:gError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
+            if (gError) {
+                error(gError.message || "Google Login Failed");
+            } else if (data?.user) {
+                // Google login succeeded - onAuthStateChange will handle the rest
+                // If profile is incomplete, the component will show the completion form
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:137',message:'Google login success, waiting for auth state change',data:{uid:data.user.uid},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                // #endregion
+            }
+        } catch (e: any) {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:141',message:'handleGoogle exception',data:{errorMessage:e.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
+            error(e.message || "Google Login Failed");
+        } finally {
+            // Always reset loading state - onAuthStateChange will handle user state
             setLoad(false);
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:147',message:'handleGoogle finally - loading reset',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
         }
     };
 
@@ -192,7 +210,11 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     };
 
     // View for completing profile (Google Signups)
+    // Show this even if loading - the user needs to complete their profile
     if (user?.is_incomplete) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:195',message:'showing incomplete profile form',data:{userId:user.id,email:user.email,hasHandle:!!completionForm.handle,hasSchool:!!completionForm.school},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
         return (
             <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
                 <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800">
