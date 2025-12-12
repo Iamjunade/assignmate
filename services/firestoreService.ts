@@ -48,17 +48,11 @@ export const userApi = {
     },
 
     createProfile: async (id: string, metadata: any) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firestoreService.ts:50',message:'createProfile entry',data:{id,handle:metadata.handle,school:metadata.school,is_writer:metadata.is_writer},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-        // #endregion
-        console.log("createProfile: Start", id);
         const randomCollege = INDIAN_COLLEGES[Math.floor(Math.random() * INDIAN_COLLEGES.length)].name;
 
-        // Simple handle generation - no blocking checks
+        // Clean and generate unique handle
         let baseHandle = metadata.handle || metadata.full_name || 'Student';
         baseHandle = baseHandle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
-
-        // Append 4 random chars to ensure uniqueness without DB roundtrip
         const uniqueHandle = `${baseHandle}_${Math.random().toString(36).substring(2, 6)}`;
 
         const newProfile = {
@@ -78,27 +72,19 @@ export const userApi = {
             saved_writers: []
         };
 
-        console.log("createProfile: Writing doc", uniqueHandle);
         try {
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firestoreService.ts:79',message:'before setDoc',data:{id,uniqueHandle,hasDb:!!getDb()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-            // #endregion
-            // Force a timeout on the write operation
+            // Write to Firestore with timeout protection
             await Promise.race([
                 setDoc(doc(getDb(), 'users', id), newProfile),
-                new Promise((_, reject) => setTimeout(() => reject(new Error("Database Write Timeout (Check Firebase Rules/Network)")), 5000))
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("Database write timeout. Please check your connection.")), 10000)
+                )
             ]);
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firestoreService.ts:85',message:'setDoc success',data:{id,uniqueHandle},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-            // #endregion
-            console.log("createProfile: Success");
         } catch (e) {
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firestoreService.ts:87',message:'setDoc error',data:{errorMessage:e.message,errorCode:e.code,errorStack:e.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-            // #endregion
             console.error("createProfile: Failed", e);
             throw e;
         }
+        
         return newProfile;
     },
 

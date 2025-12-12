@@ -56,21 +56,11 @@ function AppContent() {
   const [page, setPage] = useState('landing'); // Default to landing
   const [chatId, setChatId] = useState<string | null>(null);
 
-  // Redirect to feed if logged in and on landing/auth
+  // Redirect to feed if logged in and complete, or to auth if incomplete
   useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:60',message:'redirect check',data:{hasUser:!!user,isIncomplete:user?.is_incomplete,currentPage:page},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
-    // #endregion
     if (user && !user.is_incomplete && (page === 'landing' || page === 'auth')) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:62',message:'redirecting to feed',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
-      // #endregion
       setPage('feed');
     } else if (user?.is_incomplete && page !== 'auth') {
-      // Ensure incomplete users stay on auth page to see completion form
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:66',message:'user incomplete, ensuring auth page',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
-      // #endregion
       setPage('auth');
     }
   }, [user, page]);
