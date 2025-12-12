@@ -16,7 +16,7 @@ import {
     arrayRemove
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db as dbInstance, storage } from './firebase';
+import { db, storage } from './firebase';
 import { INDIAN_COLLEGES } from '../data/colleges';
 import { notifications } from './firebase';
 
