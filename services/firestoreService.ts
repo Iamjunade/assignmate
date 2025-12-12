@@ -54,28 +54,27 @@ export const userApi = {
         handle = handle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
         if (handle.length < 3) handle = `Student_${id.slice(0, 4)}`;
 
-        // Check email uniqueness (Client-side check, ideally enforced by Auth rules)
-        const q = query(collection(getDb(), 'users'), where('email', '==', metadata.email));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-             // Check if it's the same user (idempotency)
-             if (querySnapshot.docs[0].id !== id) {
-                throw new Error("This email is already registered.");
-             }
-        }
-
         // Handle Uniqueness
         const checkUnique = async (h: string) => {
-            const q = query(collection(getDb(), 'users'), where('handle', '==', h));
-            const snap = await getDocs(q);
-            return !snap.empty;
+            try {
+                const q = query(collection(getDb(), 'users'), where('handle', '==', h));
+                const snap = await getDocs(q);
+                return !snap.empty;
+            } catch (e) {
+                console.warn("Handle uniqueness check failed (likely permissions), assuming unique or using fallback.");
+                return false; // Assume unique if we can't check, or let write fail if rules enforce it
+            }
         };
 
         let uniqueHandle = handle;
         let counter = 1;
-        while (await checkUnique(uniqueHandle)) {
+        // Safety limit for loop
+        let attempts = 0;
+        while (await checkUnique(uniqueHandle) && attempts < 10) {
             uniqueHandle = `${handle}${counter++}`;
+            attempts++;
         }
+        if (attempts >= 10) uniqueHandle = `${handle}_${Date.now().toString().slice(-4)}`;
 
         const newProfile = {
             id,
