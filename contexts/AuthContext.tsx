@@ -23,12 +23,22 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false); // Prevent concurrent syncs
 
   // Simplified Sync: Just get the profile, don't overthink it
   const syncUser = async (fbUser: any, retryCount = 0) => {
+    // Prevent concurrent syncs for the same user
+    if (syncing && user?.id === fbUser.uid) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:29',message:'syncUser skipped - already syncing',data:{uid:fbUser.uid},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+      // #endregion
+      return;
+    }
+    
+    setSyncing(true);
     try {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:28',message:'syncUser entry',data:{uid:fbUser.uid,email:fbUser.email,retryCount},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:35',message:'syncUser entry',data:{uid:fbUser.uid,email:fbUser.email,retryCount},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
       console.log("AuthContext: Syncing user...", fbUser.uid);
       const profile = await userApi.getProfile(fbUser.uid);
@@ -73,6 +83,8 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       console.error("AuthContext: Sync Failed", e);
       // Don't leave user in limbo - log them out if critical failure, or set basic state
       setUser(null); 
+    } finally {
+      setSyncing(false);
     }
   };
 

@@ -213,7 +213,7 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     // Show this even if loading - the user needs to complete their profile
     if (user?.is_incomplete) {
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:195',message:'showing incomplete profile form',data:{userId:user.id,email:user.email,hasHandle:!!completionForm.handle,hasSchool:!!completionForm.school},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/29f02d4f-4ba7-4760-b5a9-e993ea521030',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Auth.tsx:213',message:'RENDERING incomplete profile form',data:{userId:user.id,email:user.email,hasHandle:!!completionForm.handle,hasSchool:!!completionForm.school,isLoading:load},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
         // #endregion
         return (
             <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
