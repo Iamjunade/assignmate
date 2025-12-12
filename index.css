@@ -37,7 +37,7 @@
 
   /* Premium Card Utility */
   .card-clean {
-    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-800 rounded-2xl shadow-card transition-all duration-300 relative overflow-hidden;
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-800 rounded-2xl shadow-card transition-all duration-300 relative;
   }
 
   .card-hover {
