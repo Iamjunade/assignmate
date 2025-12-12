@@ -110,13 +110,12 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   };
 
   const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean) => {
-    if (!user) return;
+    if (!user) throw new Error("No authenticated user found");
 
     try {
-      // DEBUG: Alert start
-      if (typeof window !== 'undefined') alert("Starting Profile Creation...");
+      console.log("Starting Profile Creation for:", user.id);
 
-      // 1. Create the profile in Supabase
+      // 1. Create the profile in Firestore
       await userApi.createProfile(user.id, {
         handle,
         school,
@@ -125,25 +124,29 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         is_writer
       });
 
-      // DEBUG: Alert after creation
-      if (typeof window !== 'undefined') alert("Profile Created! Fetching...");
+      console.log("Profile Created! Fetching...");
 
-      // Send Welcome Notification
+      // 2. Send Welcome Notification (Non-blocking)
       notificationService.sendWelcome(user.id, handle).catch(console.error);
 
-      // 2. Force a re-sync to fetch the newly created profile
+      // 3. Force a re-sync to fetch the newly created profile
+      // We add a small delay to ensure Firestore consistency
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const profile = await userApi.getProfile(user.id);
 
       if (profile) {
         setUser({ ...profile, email: user.email, is_incomplete: false });
         presence.init(user.id);
       } else {
+        // Fallback if fetch fails but create succeeded
+        console.warn("Profile created but fetch failed. Using local data.");
         setUser(prev => prev ? { ...prev, handle, school, is_incomplete: false } : null);
       }
 
-    } catch (e) {
+    } catch (e: any) {
       console.error("Profile Completion Failed", e);
-      throw e;
+      throw new Error(e.message || "Failed to create profile. Please try again.");
     }
   };
 
