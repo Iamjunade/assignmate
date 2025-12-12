@@ -122,6 +122,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         school,
         email: user.email,
         avatar_url: user.avatar_url,
+        full_name: user.displayName || 'Student',
         is_writer
       });
 

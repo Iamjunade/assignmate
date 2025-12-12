@@ -33,18 +33,15 @@ import {
 import { getStorage } from 'firebase/storage';
 import { getDatabase, ref, onDisconnect, set, onValue, serverTimestamp as rtdbServerTimestamp } from 'firebase/database';
 
-// Environment variables with fallbacks (Updated with new assignmate-cfe7e config)
-// Environment variables with fallbacks (Updated with new assignmate-cfe7e config)
-// FORCE HARDCODED VALUES FOR NOW to bypass Vercel env vars from old project
 const firebaseConfig = {
-    apiKey: "AIzaSyAfGO0SkAJopglyoHpoHASuddExfdlCxtI",
-    authDomain: "assignmate-cfe7e.firebaseapp.com",
-    projectId: "assignmate-cfe7e",
-    storageBucket: "assignmate-cfe7e.firebasestorage.app",
-    messagingSenderId: "52219651086",
-    appId: "1:52219651086:web:a6014135e38c3c2799c85f",
-    measurementId: "G-2P043KNG6V",
-    databaseURL: "https://assignmate-cfe7e-default-rtdb.firebaseio.com"
+    apiKey: (import.meta as any).env.VITE_FIREBASE_API_KEY,
+    authDomain: (import.meta as any).env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: (import.meta as any).env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: (import.meta as any).env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: (import.meta as any).env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: (import.meta as any).env.VITE_FIREBASE_APP_ID,
+    measurementId: (import.meta as any).env.VITE_FIREBASE_MEASUREMENT_ID,
+    databaseURL: (import.meta as any).env.VITE_FIREBASE_DATABASE_URL
 };
 
 let app: any;
@@ -148,7 +145,7 @@ export const fcm = {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
                 const currentToken = await getToken(messagingInstance, {
-                    vapidKey: 'BOOb9zriS5sKaWRI6aqOwPNVgyA_hLRFLTG2GhjeL5dqZvH-axcB0OxmRwuzszJypFtpHJmu5AXGJOJpo89kxac'
+                    vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY
                 });
 
                 if (currentToken) {

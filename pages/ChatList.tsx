@@ -22,14 +22,13 @@ export const ChatList = ({ user, onSelect, selectedId }) => {
         // Initial Load
         loadChats();
 
-        // Realtime Subscription: Listen for ANY change to the 'chats' table
-        const channel = supabase.channel('public:chats')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'chats' }, (payload) => {
-                loadChats();
-            })
-            .subscribe();
+        // Realtime Subscription
+        const unsubscribe = db.listenToChats(user.id, (data) => {
+            setChats(data);
+            setLoading(false);
+        });
 
-        return () => { supabase.removeChannel(channel); };
+        return () => { unsubscribe(); };
     }, [user.id]);
 
     const getTimeAgo = (dateStr: string) => {

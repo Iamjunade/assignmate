@@ -13,7 +13,8 @@ import {
     addDoc, 
     serverTimestamp,
     arrayUnion,
-    arrayRemove
+    arrayRemove,
+    onSnapshot
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from './firebase';
@@ -82,7 +83,7 @@ export const userApi = {
         const newProfile = {
             id,
             handle: uniqueHandle,
-            full_name: metadata.full_name,
+            full_name: metadata.full_name || 'Student',
             email: metadata.email,
             avatar_url: metadata.avatar_url,
             school: metadata.school || randomCollege,
@@ -393,6 +394,74 @@ export const dbService = {
         });
         
         if (!snap.empty) await batch.commit();
+    },
+
+    listenToMessages: (chatId: string, callback: (messages: any[]) => void) => {
+        const q = query(
+            collection(getDb(), 'chats', chatId, 'messages'),
+            orderBy('created_at', 'asc')
+        );
+        return onSnapshot(q, (snapshot) => {
+            const messages = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            callback(messages);
+        });
+    },
+
+    listenToChats: (userId: string, callback: (chats: any[]) => void) => {
+        // Listening to complex queries is hard, so we'll listen to the collection and filter client-side 
+        // OR set up two listeners. For simplicity/cost, we'll poll or just listen to one query if possible.
+        // Better approach: Listen to 'chats' where poster_id == userId OR writer_id == userId.
+        // Firestore OR queries in snapshot are tricky. Let's use two listeners and merge.
+        
+        const q1 = query(collection(getDb(), 'chats'), where('poster_id', '==', userId));
+        const q2 = query(collection(getDb(), 'chats'), where('writer_id', '==', userId));
+
+        let chats1: any[] = [];
+        let chats2: any[] = [];
+
+        const mergeAndCallback = async () => {
+            const allChats = [...chats1, ...chats2];
+            // Dedupe
+            const chatMap = new Map();
+            allChats.forEach(c => chatMap.set(c.id, c));
+            const uniqueChats = Array.from(chatMap.values());
+            
+            // Sort
+            uniqueChats.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+
+            // Hydrate (This is expensive in a listener loop, but necessary for UI)
+            // Optimization: Cache user profiles or only fetch if missing.
+            const hydrated = await Promise.all(uniqueChats.map(async (c: any) => {
+                const isPoster = c.poster_id === userId;
+                const otherId = isPoster ? c.writer_id : c.poster_id;
+                // Simple cache check or fetch
+                let other = null;
+                try {
+                    const otherSnap = await getDoc(doc(getDb(), 'users', otherId));
+                    other = otherSnap.exists() ? otherSnap.data() : null;
+                } catch (e) { console.error(e); }
+
+                return {
+                    ...c,
+                    gig_title: 'Direct Chat',
+                    other_handle: other?.handle || 'User',
+                    other_avatar: other?.avatar_url
+                };
+            }));
+            callback(hydrated);
+        };
+
+        const unsub1 = onSnapshot(q1, (snap) => {
+            chats1 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            mergeAndCallback();
+        });
+
+        const unsub2 = onSnapshot(q2, (snap) => {
+            chats2 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            mergeAndCallback();
+        });
+
+        return () => { unsub1(); unsub2(); };
     },
 
     // --- ADMIN METHODS ---

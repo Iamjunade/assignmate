@@ -26,28 +26,16 @@ export const ChatRoom = ({ user, chatId, onBack }) => {
         });
 
         // 3. Realtime Subscription
-        const channel = supabase.channel(`room:${chatId}`)
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` },
-                payload => {
-                    const newMsg = payload.new;
-                    // Prevent duplicates
-                    setMessages(prev => {
-                        if (prev.some(m => m.id === newMsg.id)) return prev;
-                        return [...prev, newMsg];
-                    });
+        const unsubscribe = db.listenToMessages(chatId, (newMessages) => {
+            setMessages(newMessages);
+            // Mark as read if the last message is not from me
+            const lastMsg = newMessages[newMessages.length - 1];
+            if (lastMsg && lastMsg.sender_id !== user.id) {
+                db.markMessagesAsRead(chatId, user.id);
+            }
+        });
 
-                    if (newMsg.sender_id !== user.id) {
-                        db.markMessagesAsRead(chatId, user.id);
-                    }
-                })
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` },
-                payload => {
-                    const updatedMsg = payload.new;
-                    setMessages(prev => prev.map(m => m.id === updatedMsg.id ? updatedMsg : m));
-                })
-            .subscribe();
-
-        return () => { supabase.removeChannel(channel); };
+        return () => { unsubscribe(); };
     }, [chatId, user.id]);
 
     // Scroll to bottom when messages change
