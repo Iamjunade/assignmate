@@ -67,6 +67,21 @@ export const Auth = () => {
                 } else if (msg.includes('auth/weak-password')) {
                     msg = "Password is too weak. Please use a stronger password.";
                 }
+                error(msg.replace('Firebase:', '').trim());
+            } else if (isReg && res?.data?.session) {
+                success("Account created! Please login to continue.");
+                setIsReg(false);
+            }
+        } catch (e: any) {
+            console.error("Auth Error:", e);
+            // DEBUG: Show detailed error to user to help diagnosis
+            const sbUrl = (import.meta as any).env.VITE_SUPABASE_URL || 'unknown';
+            error(`${e.message || "An unexpected error occurred."} (DB: ${sbUrl.substring(0, 15)}...)`);
+        } finally {
+            setLoad(false);
+        }
+    };
+
     const handleGoogle = async () => {
         setLoad(true);
         const { data, error: gError } = await loginWithGoogle();
