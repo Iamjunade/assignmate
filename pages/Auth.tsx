@@ -370,41 +370,6 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
 
                 <div className="relative z-10 text-white max-w-lg">
                     <div className="mb-8 inline-block bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-4 py-1.5 text-sm font-bold shadow-sm">
-                        🚀 Trusted by 10,000+ Students
-                    </div>
-                    <h2 className="text-6xl font-extrabold mb-6 leading-tight">
-                        Your Campus <br /> <span className="text-orange-100">Marketplace.</span>
-                    </h2>
-                    <p className="text-xl text-orange-50 leading-relaxed font-medium opacity-90">
-                                    onClick={() => setIsWriter(false)}
-                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
-                                >
-                                    <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Find Help</span>
-                                </div>
-                                <div
-                                    onClick={() => setIsWriter(true)}
-                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
-                                >
-                                    <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Earn Money</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <GlassButton type="submit" isLoading={load} className="w-full">
-                            Finish Setup <ArrowRight size={18} className="ml-2" />
-                        </GlassButton>
-                    </form>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="min-h-screen flex w-full bg-white dark:bg-slate-950">
-            {/* Left: Form */}
-            <div className="w-full lg:w-1/2 p-6 md:p-12 xl:p-24 flex flex-col justify-center relative z-10">
                 <div className="max-w-md w-full mx-auto">
                     <div className="mb-10 text-center lg:text-left">
                         <div className="text-5xl mb-6 lg:hidden">📚</div>
