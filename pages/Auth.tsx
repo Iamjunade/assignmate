@@ -4,6 +4,93 @@ import { useToast } from '../contexts/ToastContext';
 import { Mail, Lock, ArrowRight, GraduationCap, Check, PenTool, Search, Phone, MessageCircle } from 'lucide-react';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
 import { motion } from 'framer-motion';
+import { GlassCard } from '../components/ui/GlassCard';
+import { GlassInput } from '../components/ui/GlassInput';
+import { GlassButton } from '../components/ui/GlassButton';
+
+const MotionDiv = motion.div as any;
+
+export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
+    const { user, login, register, loginWithGoogle, completeGoogleSignup, resetPassword } = useAuth();
+    const { error, success, info } = useToast();
+    const [isReg, setIsReg] = useState(false);
+    const [load, setLoad] = useState(false);
+    const [form, setForm] = useState({ email: '', password: '', handle: '', school: '' });
+
+    // Role State (false = Student/Hirer, true = Writer/Earner)
+    const [isWriter, setIsWriter] = useState(false);
+
+    // For incomplete google users
+    const [completionForm, setCompletionForm] = useState({ handle: '', school: '' });
+
+    // Pre-fill if we have partial data
+    useEffect(() => {
+        if (user?.is_incomplete) {
+            setCompletionForm(prev => ({ ...prev, handle: user.handle || '' }));
+        }
+    }, [user]);
+
+    const submit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        // Rate Limiting (Client-side)
+        const attempts = parseInt(localStorage.getItem('auth_attempts') || '0');
+        const lastAttempt = parseInt(localStorage.getItem('auth_last_attempt') || '0');
+        const now = Date.now();
+
+        if (attempts > 5 && (now - lastAttempt) < 60000) {
+            error("Too many attempts. Please try again in a minute.");
+            return;
+        }
+
+        localStorage.setItem('auth_attempts', (attempts + 1).toString());
+        localStorage.setItem('auth_last_attempt', now.toString());
+
+        setLoad(true);
+
+        if (form.password.length < 6) {
+            error("Password must be at least 6 characters long.");
+            setLoad(false);
+            return;
+        }
+
+        try {
+            let res;
+            if (isReg) {
+                if (!form.school) {
+                    error("Please select your college/university from the list.");
+                    setLoad(false);
+                    return;
+                }
+                if (!form.handle) {
+                    error("Please choose a handle.");
+                    setLoad(false);
+                    return;
+                }
+                res = await register(form.email, form.password, form.handle, form.school, isWriter);
+            } else {
+                res = await login(form.email, form.password);
+            }
+
+            if (res?.error) {
+                let msg = res.error.message || "Authentication failed";
+                if (msg.includes('auth/email-already-in-use') || msg.includes('already registered')) {
+                    msg = "This email is already associated with an account. Please login.";
+                } else if (msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found') || msg.includes('invalid-credential')) {
+                    msg = "Invalid email or password. Please try again.";
+                } else if (msg.includes('auth/weak-password')) {
+                    msg = "Password is too weak. Please use a stronger password.";
+                }
+                error(msg.replace('Firebase:', '').trim());
+            } else if (res?.data?.session || res?.data?.user) {
+                success(isReg ? "Account created! Welcome." : "Welcome back!");
+                if (onComplete) onComplete();
+            }
+        } catch (e: any) {
+            console.error("Auth Error:", e);
+            // DEBUG: Show detailed error to user to help diagnosis
+            const sbUrl = (import.meta as any).env.VITE_SUPABASE_URL || 'unknown';
+            error(`${e.message || "An unexpected error occurred."} (DB: ${sbUrl.substring(0, 15)}...)`);
         } finally {
             setLoad(false);
         }
@@ -291,6 +378,14 @@ import { motion } from 'framer-motion';
                         Connect with peers from IITs, NITs, and top universities to get help with assignments, records, and projects.
                     </p>
                 </div>
+            </div>
+            
+            {/* DEBUG SECTION - REMOVE BEFORE PRODUCTION */}
+            <div className="fixed bottom-0 left-0 w-full bg-black/80 text-green-400 p-2 text-xs font-mono z-50 max-h-32 overflow-auto">
+                <p><strong>DEBUG CONSOLE:</strong></p>
+                <p>Firebase Configured: {(import.meta as any).env.VITE_FIREBASE_API_KEY ? 'YES (Env)' : 'NO (Using Fallback)'}</p>
+                <p>Project ID: {(import.meta as any).env.VITE_FIREBASE_PROJECT_ID || 'assignmate-cfe7e'}</p>
+                <p>Auth State: {user ? `Logged In (${user.email})` : 'Logged Out'}</p>
             </div>
         </div >
     );
