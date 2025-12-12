@@ -100,10 +100,16 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   };
 
   const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean) => {
-    if (!user) return;
+    if (!user) {
+        console.error("completeGoogleSignup: No user found in context");
+        return;
+    }
 
     try {
+      console.log("completeGoogleSignup: Starting...", { handle, school, is_writer, userId: user.id });
+      
       // 1. Create the profile in Firestore
+      console.log("completeGoogleSignup: Calling createProfile...");
       await userApi.createProfile(user.id, {
         handle,
         school,
@@ -112,23 +118,31 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         full_name: user.displayName || 'Student',
         is_writer
       });
+      console.log("completeGoogleSignup: createProfile successful");
 
       // Send Welcome Notification (Non-blocking)
-      notificationService.sendWelcome(user.id, handle).catch(console.error);
+      notificationService.sendWelcome(user.id, handle).catch(e => console.error("Welcome notif failed:", e));
 
       // 2. Force a re-sync to fetch the newly created profile
+      console.log("completeGoogleSignup: Fetching new profile...");
       const profile = await userApi.getProfile(user.id);
+      console.log("completeGoogleSignup: Profile fetched:", profile);
 
       if (profile) {
         setUser({ ...profile, email: user.email, is_incomplete: false });
         presence.init(user.id);
+        console.log("completeGoogleSignup: User state updated, done.");
       } else {
+        console.warn("completeGoogleSignup: Profile created but not found in fetch. Using fallback state.");
         // Fallback if fetch fails immediately (shouldn't happen)
         setUser(prev => prev ? { ...prev, handle, school, is_incomplete: false } : null);
       }
 
-    } catch (e) {
-      console.error("Profile Completion Failed", e);
+    } catch (e: any) {
+      console.error("Profile Completion Failed:", e);
+      if (typeof window !== 'undefined') {
+          alert(`Profile Setup Failed: ${e.message}\n\nPlease check your internet connection and try again.`);
+      }
       throw e;
     }
   };

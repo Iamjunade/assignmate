@@ -103,8 +103,14 @@ export const userApi = {
             saved_writers: []
         };
 
-        console.log("createProfile: Writing doc", uniqueHandle);
-        await setDoc(doc(getDb(), 'users', id), newProfile);
+        console.log("createProfile: Writing doc to users collection...", uniqueHandle);
+        try {
+            await setDoc(doc(getDb(), 'users', id), newProfile);
+            console.log("createProfile: setDoc successful");
+        } catch (e) {
+            console.error("createProfile: setDoc FAILED", e);
+            throw e;
+        }
         console.log("createProfile: Done");
         return newProfile;
     },
