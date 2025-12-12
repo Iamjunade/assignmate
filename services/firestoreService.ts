@@ -41,64 +41,6 @@ export const userApi = {
     },
 
     getProfile: async (id: string) => {
-        const docRef = doc(getDb(), 'users', id);
-        const docSnap = await getDoc(docRef);
-        return docSnap.exists() ? docSnap.data() : null;
-    },
-
-    createProfile: async (id: string, metadata: any) => {
-        const randomCollege = INDIAN_COLLEGES[Math.floor(Math.random() * INDIAN_COLLEGES.length)].name;
-
-        // Sanitize handle
-        let handle = metadata.handle || metadata.full_name || 'Student';
-        handle = handle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
-        if (handle.length < 3) handle = `Student_${id.slice(0, 4)}`;
-
-        // Handle Uniqueness
-        const checkUnique = async (h: string) => {
-            try {
-                const q = query(collection(getDb(), 'users'), where('handle', '==', h));
-                const snap = await getDocs(q);
-                return !snap.empty;
-            } catch (e) {
-                console.warn("Handle uniqueness check failed (likely permissions), assuming unique or using fallback.");
-                return false; // Assume unique if we can't check, or let write fail if rules enforce it
-            }
-        };
-
-        let uniqueHandle = handle;
-        let counter = 1;
-        // Safety limit for loop
-        let attempts = 0;
-        while (await checkUnique(uniqueHandle) && attempts < 10) {
-            uniqueHandle = `${handle}${counter++}`;
-            attempts++;
-        }
-        if (attempts >= 10) uniqueHandle = `${handle}_${Date.now().toString().slice(-4)}`;
-
-        const newProfile = {
-            id,
-            handle: uniqueHandle,
-            full_name: metadata.full_name,
-            email: metadata.email,
-            avatar_url: metadata.avatar_url,
-            school: metadata.school || randomCollege,
-            created_at: new Date().toISOString(), // Store as string for consistency with UI
-            is_verified: 'pending',
-            xp: 0,
-            tags: ['Student'],
-            is_writer: metadata.is_writer || false,
-            role: 'user',
-            portfolio: [],
-            saved_writers: []
-        };
-
-        await setDoc(doc(getDb(), 'users', id), newProfile);
-        return newProfile;
-    },
-
-    deleteProfile: async (id: string) => {
-        await deleteDoc(doc(getDb(), 'users', id));
     }
 };
 
