@@ -124,6 +124,8 @@ export const notifications = {
                     }
                 }
             });
+        }, (error) => {
+            console.error("Notification Listener Error:", error);
         });
     },
 
