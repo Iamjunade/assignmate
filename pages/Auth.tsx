@@ -95,21 +95,6 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
             setLoad(false);
         }
     };
-
-    const handleGoogle = async () => {
-        setLoad(true);
-        const { data, error: gError } = await loginWithGoogle();
-        if (gError) {
-            error(gError.message || "Google Login Failed");
-        );
-    }
-
-    return (
-        <div className="min-h-screen flex w-full bg-white dark:bg-slate-950">
-            {/* Left: Form */}
-            <div className="w-full lg:w-1/2 p-6 md:p-12 xl:p-24 flex flex-col justify-center relative z-10">
-                <div className="max-w-md w-full mx-auto">
-                    <div className="mb-10 text-center lg:text-left">
                         <div className="text-5xl mb-6 lg:hidden">📚</div>
                         <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-3 tracking-tight">{isReg ? 'Create Account' : 'Welcome Back'}</h1>
                         <p className="text-slate-500 dark:text-slate-400 font-medium text-lg">{isReg ? 'Join the community of ambitious students.' : 'Please enter your details to sign in.'}</p>
