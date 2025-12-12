@@ -24,6 +24,33 @@ export const Auth = () => {
     const [completionForm, setCompletionForm] = useState({ handle: '', school: '' });
 
     // Pre-fill if we have partial data
+    useEffect(() => {
+        if (user?.is_incomplete) {
+            setCompletionForm(prev => ({ ...prev, handle: user.handle || '' }));
+        }
+    }, [user]);
+
+    const submit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        // Rate Limiting (Client-side)
+        const attempts = parseInt(localStorage.getItem('auth_attempts') || '0');
+        const lastAttempt = parseInt(localStorage.getItem('auth_last_attempt') || '0');
+        const now = Date.now();
+
+        if (attempts > 5 && (now - lastAttempt) < 60000) {
+            error("Too many attempts. Please try again in a minute.");
+            return;
+        }
+
+        localStorage.setItem('auth_attempts', (attempts + 1).toString());
+        localStorage.setItem('auth_last_attempt', now.toString());
+
+        setLoad(true);
+
+        if (form.password.length < 6) {
+            error("Password must be at least 6 characters long.");
+            setLoad(false);
             return;
         }
 
