@@ -101,58 +101,6 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
         const { data, error: gError } = await loginWithGoogle();
         if (gError) {
             error(gError.message || "Google Login Failed");
-            setLoad(false);
-        }
-    };
-
-    const handleForgotPassword = async () => {
-        if (!form.email) {
-                            onChange={e => {
-                                const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
-                                setCompletionForm({ ...completionForm, handle: val });
-                            }}
-                            icon={<span className="font-bold text-sm">@</span>}
-                        />
-                        <p className="text-[10px] text-slate-400 ml-1 -mt-4">Only letters, numbers, and underscores.</p>
-
-                        <div className="space-y-2 relative z-50">
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">Select your University</label>
-                            <CollegeAutocomplete
-                                value={completionForm.school}
-                                onChange={(val) => setCompletionForm({ ...completionForm, school: val })}
-                                placeholder="Search your college"
-                                className="w-full"
-                                inputClassName="input-clean pl-10"
-                                icon={<GraduationCap className="absolute left-3.5 top-2.5 text-slate-400" size={18} />}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">What is your goal?</label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div
-                                    onClick={() => setIsWriter(false)}
-                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
-                                >
-                                    <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Find Help</span>
-                                </div>
-                                <div
-                                    onClick={() => setIsWriter(true)}
-                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${isWriter ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
-                                >
-                                    <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>Earn Money</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <GlassButton type="submit" isLoading={load} className="w-full">
-                            Finish Setup <ArrowRight size={18} className="ml-2" />
-                        </GlassButton>
-                    </form>
-                </div>
-            </div>
         );
     }
 
