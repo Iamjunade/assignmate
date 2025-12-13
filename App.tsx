@@ -1,3 +1,19 @@
+import React, { useState, Suspense, lazy, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { dbService as db } from './services/firestoreService';
+import { notifications, fcm } from './services/firebase';
+import { GlassLayout } from './components/layout/GlassLayout';
+import { GlassNavigation } from './components/ui/GlassNavigation';
+import { Loader2, GraduationCap, MessageSquare } from 'lucide-react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ToastProvider, useToast } from './contexts/ToastContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminRoute } from './components/AdminRoute';
+import { User } from './types';
+
+// Admin Components
+import { AdminLayout } from './admin/layouts/AdminLayout';
+import { AdminDashboard } from './admin/pages/AdminDashboard';
 import { AdminUsers } from './admin/pages/AdminUsers';
 import { AdminChats } from './admin/pages/AdminChats';
 import { AdminConnections } from './admin/pages/AdminConnections';
