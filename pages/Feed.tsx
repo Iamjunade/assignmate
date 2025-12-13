@@ -33,41 +33,6 @@ const itemVariants = {
         }
     }
 };
-import React, { useState, useEffect } from 'react';
-import { dbService as db } from '../services/firestoreService';
-import { Loader2, Filter, Sparkles, GraduationCap, Award, Users, CheckCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import WriterCard from '../components/WriterCard';
-import { useAuth } from '../contexts/AuthContext';
-import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
-import { useToast } from '../contexts/ToastContext';
-
-const CATEGORIES = ['All', 'Practical Records', 'Assignments', 'Blue Books', 'Viva Prep', 'Final Year Project', 'Coding', 'Design'];
-
-// Animation variants for stagger effect
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.08,
-            delayChildren: 0.1
-        }
-    }
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: {
-            type: "spring",
-            stiffness: 100,
-            damping: 12
-        }
-    }
-};
 
 export const Feed = ({ user, onChat }) => {
     const { refreshProfile } = useAuth();

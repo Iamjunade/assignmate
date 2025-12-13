@@ -98,6 +98,25 @@ import { User } from '../types';
 // ... existing imports ...
 
 export const dbService = {
+    getUsersBatch: async (userIds: string[]) => {
+        const uniqueIds = Array.from(new Set(userIds)).filter(id => id);
+        if (uniqueIds.length === 0) return new Map();
+
+        const chunks = [];
+        for (let i = 0; i < uniqueIds.length; i += 10) {
+            chunks.push(uniqueIds.slice(i, i + 10));
+        }
+
+        const userMap = new Map();
+        await Promise.all(chunks.map(async (chunk) => {
+            const q = query(collection(getDb(), 'users'), where('id', 'in', chunk));
+            const snap = await getDocs(q);
+            snap.forEach(d => userMap.set(d.id, d.data()));
+        }));
+
+        return userMap;
+    },
+
     getWriters: async (currentUser: User | null, tag: string = 'All') => {
         const usersRef = collection(getDb(), 'users');
 
@@ -250,16 +269,14 @@ export const dbService = {
         const snap = await getDocs(q);
 
         // Join with profiles manually
-        const requests = await Promise.all(snap.docs.map(async d => {
-            const data = d.data();
-            const profileSnap = await getDoc(doc(getDb(), 'users', data.requester_id));
-            return {
-                id: d.id,
-                ...data,
-                requester: profileSnap.exists() ? profileSnap.data() : null
-            };
+        const rawRequests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const requesterIds = rawRequests.map((r: any) => r.requester_id);
+        const userMap = await dbService.getUsersBatch(requesterIds);
+
+        return rawRequests.map((r: any) => ({
+            ...r,
+            requester: userMap.get(r.requester_id) || null
         }));
-        return requests;
     },
 
     getMyConnections: async (userId: string) => {
@@ -274,20 +291,9 @@ export const dbService = {
 
         if (ids.size === 0) return [];
 
-        // Fetch profiles in batches of 10 (Firestore 'in' limit)
-        const idArray = Array.from(ids);
-        const chunks = [];
-        for (let i = 0; i < idArray.length; i += 10) {
-            chunks.push(idArray.slice(i, i + 10));
-        }
-
-        const profiles = [];
-        for (const chunk of chunks) {
-            const q = query(collection(getDb(), 'users'), where('id', 'in', chunk));
-            const snap = await getDocs(q);
-            snap.forEach(d => profiles.push(d.data()));
-        }
-        return profiles;
+        // Fetch profiles in batches using helper
+        const userMap = await dbService.getUsersBatch(Array.from(ids));
+        return Array.from(userMap.values());
     },
 
     // --- CHAT SYSTEM ---
@@ -306,11 +312,13 @@ export const dbService = {
         chats.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
         // Hydrate with user data
-        return await Promise.all(chats.map(async (c: any) => {
+        const otherIds = chats.map((c: any) => c.poster_id === userId ? c.writer_id : c.poster_id);
+        const userMap = await dbService.getUsersBatch(otherIds);
+
+        return chats.map((c: any) => {
             const isPoster = c.poster_id === userId;
             const otherId = isPoster ? c.writer_id : c.poster_id;
-            const otherSnap = await getDoc(doc(getDb(), 'users', otherId));
-            const other = otherSnap.exists() ? otherSnap.data() : null;
+            const other = userMap.get(otherId);
 
             return {
                 ...c,
@@ -318,7 +326,7 @@ export const dbService = {
                 other_handle: other?.handle || 'User',
                 other_avatar: other?.avatar_url
             };
-        }));
+        });
     },
 
     getChatDetails: async (chatId: string, userId: string) => {
@@ -463,17 +471,14 @@ export const dbService = {
             // Sort
             uniqueChats.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
-            // Hydrate (This is expensive in a listener loop, but necessary for UI)
-            // Optimization: Cache user profiles or only fetch if missing.
-            const hydrated = await Promise.all(uniqueChats.map(async (c: any) => {
+            // Hydrate using batch fetch
+            const otherIds = uniqueChats.map((c: any) => c.poster_id === userId ? c.writer_id : c.poster_id);
+            const userMap = await dbService.getUsersBatch(otherIds);
+
+            const hydrated = uniqueChats.map((c: any) => {
                 const isPoster = c.poster_id === userId;
                 const otherId = isPoster ? c.writer_id : c.poster_id;
-                // Simple cache check or fetch
-                let other = null;
-                try {
-                    const otherSnap = await getDoc(doc(getDb(), 'users', otherId));
-                    other = otherSnap.exists() ? otherSnap.data() : null;
-                } catch (e) { console.error(e); }
+                const other = userMap.get(otherId);
 
                 return {
                     ...c,
@@ -481,7 +486,7 @@ export const dbService = {
                     other_handle: other?.handle || 'User',
                     other_avatar: other?.avatar_url
                 };
-            }));
+            });
             callback(hydrated);
         };
 
