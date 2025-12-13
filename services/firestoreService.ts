@@ -50,10 +50,19 @@ export const userApi = {
     createProfile: async (id: string, metadata: any) => {
         const randomCollege = await collegeService.getRandomCollege();
 
-        // Clean and generate unique handle
+        // Clean handle
         let baseHandle = metadata.handle || metadata.full_name || 'Student';
         baseHandle = baseHandle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
-        const uniqueHandle = `${baseHandle}_${Math.random().toString(36).substring(2, 6)}`;
+
+        // Check availability
+        const q = query(collection(getDb(), 'users'), where('handle', '==', baseHandle));
+        const snap = await getDocs(q);
+
+        let uniqueHandle = baseHandle;
+        if (!snap.empty) {
+            // Handle taken, append suffix
+            uniqueHandle = `${baseHandle}_${Math.random().toString(36).substring(2, 6)}`;
+        }
 
         const newProfile = {
             id,
