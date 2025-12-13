@@ -59,8 +59,11 @@ export const userApi = {
         const snap = await getDocs(q);
 
         let uniqueHandle = baseHandle;
-        if (!snap.empty) {
-            // Handle taken, append suffix
+        // Check if any existing user with this handle is NOT the current user
+        const isTaken = snap.docs.some(doc => doc.id !== id);
+
+        if (isTaken) {
+            // Handle taken by someone else, append suffix
             uniqueHandle = `${baseHandle}_${Math.random().toString(36).substring(2, 6)}`;
         }
 
