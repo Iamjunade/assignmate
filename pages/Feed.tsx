@@ -46,7 +46,7 @@ export const Feed = ({ user, onChat }) => {
     const [networkMap, setNetworkMap] = useState<Record<string, string>>({});
 
     const load = async () => {
-        const data = await db.getWriters();
+        const data = await db.getWriters(user);
         const others = user ? (data.filter(w => w.id !== user.id) || []) : data;
         setWriters(others);
 

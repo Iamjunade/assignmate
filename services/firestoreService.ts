@@ -18,7 +18,7 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from './firebase';
-import { INDIAN_COLLEGES } from '../data/colleges';
+import { collegeService } from './collegeService';
 import { notifications } from './firebase';
 
 // Helper to get db instance safely
@@ -48,7 +48,7 @@ export const userApi = {
     },
 
     createProfile: async (id: string, metadata: any) => {
-        const randomCollege = INDIAN_COLLEGES[Math.floor(Math.random() * INDIAN_COLLEGES.length)].name;
+        const randomCollege = await collegeService.getRandomCollege();
 
         // Clean and generate unique handle
         let baseHandle = metadata.handle || metadata.full_name || 'Student';
@@ -76,7 +76,7 @@ export const userApi = {
             // Write to Firestore with timeout protection
             await Promise.race([
                 setDoc(doc(getDb(), 'users', id), newProfile),
-                new Promise((_, reject) => 
+                new Promise((_, reject) =>
                     setTimeout(() => reject(new Error("Database write timeout. Please check your connection.")), 10000)
                 )
             ]);
@@ -84,7 +84,7 @@ export const userApi = {
             console.error("createProfile: Failed", e);
             throw e;
         }
-        
+
         return newProfile;
     },
 
