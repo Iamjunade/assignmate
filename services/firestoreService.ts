@@ -80,6 +80,7 @@ export const userApi = {
             tags: ['Student'],
             is_writer: metadata.is_writer || false,
             role: 'user',
+            visibility: 'global', // Default to global visibility
             portfolio: [],
             saved_writers: []
         };
@@ -138,10 +139,10 @@ export const dbService = {
             limit(100)
         ];
 
-        // 2. Visibility Constraint (Global only for now to keep query simple)
-        // Note: Complex OR queries with array-contains require multiple indexes.
-        // We will prioritize fetching global writers.
-        constraints.push(where('visibility', '==', 'global'));
+        // 2. Visibility Constraint
+        // We removed the strict 'global' check so that legacy users (missing visibility field)
+        // are included. Client-side filtering handles the rest.
+        // constraints.push(where('visibility', '==', 'global'));
 
         // 3. Tag Constraint
         if (tag && tag !== 'All') {
