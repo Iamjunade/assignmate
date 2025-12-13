@@ -19,81 +19,6 @@ export const Profile = ({ user }: { user: any }) => {
 
     const [activeTab, setActiveTab] = useState('portfolio');
 
-    // Upload Loading States
-    const [uploading, setUploading] = useState(false);
-
-    // Edit Mode States
-    const [editingProfile, setEditingProfile] = useState(false);
-    const [bio, setBio] = useState(user.bio || '');
-    const [school, setSchool] = useState(user.school || '');
-    const [newTag, setNewTag] = useState('');
-
-    // Network Data
-    const [requests, setRequests] = useState<Connection[]>([]);
-    const [connections, setConnections] = useState<any[]>([]);
-
-    // Delete Modal State
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
-
-    // Verification State
-    const [idUploading, setIdUploading] = useState(false);
-    const idInputRef = useRef<HTMLInputElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // Load Network Data
-    useEffect(() => {
-        const loadNetwork = async () => {
-            if (!user?.id) return;
-            if (activeTab === 'network' && connections.length === 0) {
-                const reqs = await db.getIncomingRequests(user.id);
-                setRequests(reqs);
-                const conns = await db.getMyConnections(user.id);
-                setConnections(conns);
-            }
-        };
-        loadNetwork();
-    }, [user.id, activeTab]);
-
-    // Derived Stats
-    const level = Math.floor((user.xp || 0) / 100) + 1;
-    const projectsCompleted = Math.floor((user.xp || 0) / 50);
-    const rating = "4.9";
-
-    // --- Handlers ---
-    const handleIdSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            setIdUploading(true);
-            try {
-                const url = await db.uploadFile(file);
-                success("AI is analyzing your ID card...");
-                const analysis = await ai.verifyIdCard(file);
-                let status: 'verified' | 'pending' = 'pending';
-                if (analysis.verified) {
-                    status = 'verified';
-                    success("AI Verified! You are now a Verified Student.");
-                } else {
-                    success("AI couldn't auto-verify. Sent for Admin Review.");
-                }
-                await db.updateProfile(user.id, { id_card_url: url, is_verified: status });
-                await refreshProfile();
-            } catch (err: any) {
-                error("Failed to upload ID or AI verification failed.");
-            } finally {
-                setIdUploading(false);
-                if (idInputRef.current) idInputRef.current.value = '';
-            }
-        }
-    };
-
-    const saveProfile = async () => {
-        await db.updateProfile(user.id, { bio, school, tags: user.tags });
-        setEditingProfile(false);
-        await refreshProfile();
-        success("Profile updated successfully!");
-    };
-
     const addTag = async (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && newTag.trim()) {
             const updatedTags = [...(user.tags || []), newTag.trim()];
@@ -249,6 +174,38 @@ export const Profile = ({ user }: { user: any }) => {
                                     className="mt-1"
                                     inputClassName="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-orange-500 text-slate-900 dark:text-white"
                                 />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase">Visibility</label>
+                                <div className="flex gap-2 mt-1">
+                                    <button
+                                        onClick={() => setVisibility('global')}
+                                        className={`flex-1 py-2 px-3 rounded-xl text-sm font-bold border transition-all ${visibility === 'global'
+                                            ? 'bg-orange-50 border-orange-500 text-orange-700'
+                                            : 'bg-white/5 border-white/10 text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 dark:text-slate-400'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-center gap-2">
+                                            <Globe size={14} /> Global
+                                        </div>
+                                    </button>
+                                    <button
+                                        onClick={() => setVisibility('college')}
+                                        className={`flex-1 py-2 px-3 rounded-xl text-sm font-bold border transition-all ${visibility === 'college'
+                                            ? 'bg-orange-50 border-orange-500 text-orange-700'
+                                            : 'bg-white/5 border-white/10 text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 dark:text-slate-400'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-center gap-2">
+                                            <Lock size={14} /> College Only
+                                        </div>
+                                    </button>
+                                </div>
+                                <p className="text-[10px] text-slate-400 mt-1.5 px-1">
+                                    {visibility === 'global'
+                                        ? "Your profile is visible to everyone on AssignMate."
+                                        : "Only students from your college can see your profile."}
+                                </p>
                             </div>
                             <div className="flex gap-2 justify-end pt-2">
                                 <GlassButton size="sm" variant="ghost" onClick={() => setEditingProfile(false)}>Cancel</GlassButton>
