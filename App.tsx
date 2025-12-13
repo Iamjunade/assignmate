@@ -1,4 +1,5 @@
 import React, { useState, Suspense, lazy, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { dbService as db } from './services/firestoreService';
 import { notifications, fcm } from './services/firebase';
 import { GlassLayout } from './components/layout/GlassLayout';
@@ -6,6 +7,7 @@ import { GlassNavigation } from './components/ui/GlassNavigation';
 import { Loader2, GraduationCap, MessageSquare } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider, useToast } from './contexts/ToastContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { User } from './types';
 
 // Admin Components
@@ -25,9 +27,22 @@ const ChatRoom = lazy(() => import('./pages/ChatRoom').then(module => ({ default
 const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
 
 export default function AppWrapper() {
-  // Admin Routing Check
-  const isAdminRoute = window.location.pathname === '/pashabhai2020$';
-  const [adminPage, setAdminPage] = useState('dashboard');
+  return (
+    <Router>
+      <ToastProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </ToastProvider>
+    </Router>
+  );
+}
+
+function AppRoutes() {
+  // Admin Routing Check (Ideally this should be a protected route too)
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/pashabhai2020');
+  const [adminPage, setAdminPage] = useState('dashboard'); // Legacy admin state
 
   if (isAdminRoute) {
     return (
@@ -42,28 +57,15 @@ export default function AppWrapper() {
   }
 
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ToastProvider>
+    <AppContent />
   );
 }
 
 function AppContent() {
-  const { user, loading, logout } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
-  const [page, setPage] = useState('landing'); // Default to landing
-  const [chatId, setChatId] = useState<string | null>(null);
-
-  // Redirect to feed if logged in and complete, or to auth if incomplete
-  useEffect(() => {
-    if (user && !user.is_incomplete && (page === 'landing' || page === 'auth')) {
-      setPage('feed');
-    } else if (user?.is_incomplete && page !== 'auth') {
-      setPage('auth');
-    }
-  }, [user, page]);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Global Notification & FCM Listener
   useEffect(() => {
@@ -96,47 +98,32 @@ function AppContent() {
     return () => unsubscribe();
   }, [user]);
 
-  if (loading) {
-    return (
-      <div className="h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center text-orange-600 gap-3">
-        <Loader2 className="animate-spin" size={40} />
-        <p className="text-sm font-bold text-slate-500 animate-pulse">Loading AssignMate...</p>
-      </div>
-    );
-  }
-
   const startChatFromWriter = async (writer: User) => {
     if (!user) {
-      setPage('auth');
+      navigate('/auth');
       return;
     }
     const chat = await db.createChat(null, user.id, writer.id);
-    setChatId(chat.id);
-    setPage('room');
+    navigate(`/chats/${chat.id}`);
   };
 
-  const openChat = (id: string) => { setChatId(id); setPage('room'); };
-
-  const isDesktop = window.innerWidth >= 768;
-  const showSplit = isDesktop && (page === 'chats' || page === 'room');
-
-  // Navigation Items
   const navItems = [
-    { label: 'Browse', href: '#', onClick: () => setPage('landing') },
-    { label: 'How it Works', href: '#', onClick: () => setPage('landing') },
-    { label: 'Pricing', href: '#', onClick: () => setPage('landing') },
+    { label: 'Browse', href: '/', onClick: () => navigate('/') },
+    { label: 'How it Works', href: '/', onClick: () => navigate('/') },
+    { label: 'Pricing', href: '/', onClick: () => navigate('/') },
   ];
 
-  // Handle Navigation Clicks (Simple router for now)
-  const handleNavClick = (p: string) => {
-    setPage(p);
-  };
+  const authNavItems = [
+    { label: 'Feed', href: '/feed', onClick: () => navigate('/feed') },
+    { label: 'Messages', href: '/chats', onClick: () => navigate('/chats') },
+    { label: 'Profile', href: '/profile', onClick: () => navigate('/profile') },
+  ];
 
   return (
     <GlassLayout>
       <GlassNavigation
         logo={
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setPage(user ? 'feed' : 'landing')}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(user ? '/feed' : '/')}>
             <div className="bg-orange-500 p-1.5 rounded-lg text-white">
               <GraduationCap size={20} />
             </div>
@@ -145,14 +132,13 @@ function AppContent() {
             </span>
           </div>
         }
-        items={user ? [
-          { label: 'Feed', href: '#', onClick: () => setPage('feed') },
-          { label: 'Messages', href: '#', onClick: () => setPage('chats') },
-          { label: 'Profile', href: '#', onClick: () => setPage('profile') },
-        ] : navItems}
+        items={user ? authNavItems : navItems}
         user={user ? { name: user.full_name || user.email } : undefined}
-        onLogin={() => setPage('auth')}
-        onLogout={logout}
+        onLogin={() => navigate('/auth')}
+        onLogout={async () => {
+          await logout();
+          navigate('/');
+        }}
       />
 
       <div className="pt-20 min-h-screen">
@@ -161,44 +147,87 @@ function AppContent() {
             <Loader2 className="animate-spin" />
           </div>
         }>
-          {page === 'landing' && <Landing onGetStarted={() => setPage('auth')} />}
+          <Routes>
+            <Route path="/" element={<Landing onGetStarted={() => navigate('/auth')} />} />
+            <Route path="/auth" element={<Auth onComplete={() => navigate('/feed')} />} />
 
-          {page === 'auth' && (
-            <div className="flex items-center justify-center min-h-[80vh] px-4">
-              <Auth onComplete={() => setPage('feed')} />
-            </div>
-          )}
+            <Route path="/feed" element={
+              <ProtectedRoute>
+                <Feed user={user} onChat={startChatFromWriter} />
+              </ProtectedRoute>
+            } />
 
-          {page === 'feed' && <Feed user={user} onChat={startChatFromWriter} />}
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                {user && <Profile user={user} />}
+              </ProtectedRoute>
+            } />
 
-          {page === 'profile' && user && <Profile user={user} />}
+            <Route path="/chats" element={
+              <ProtectedRoute>
+                <ChatListWrapper user={user} />
+              </ProtectedRoute>
+            } />
 
-          {/* Mobile Chat Routing */}
-          {!isDesktop && page === 'chats' && user && <ChatList user={user} onSelect={openChat} selectedId={chatId} />}
-          {!isDesktop && page === 'room' && user && <ChatRoom user={user} chatId={chatId} onBack={() => setPage('chats')} />}
+            <Route path="/chats/:chatId" element={
+              <ProtectedRoute>
+                <ChatRoomWrapper user={user} />
+              </ProtectedRoute>
+            } />
 
-          {/* Desktop Split View */}
-          {showSplit && user && (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-6rem)]">
-              <div className="grid grid-cols-12 gap-6 h-full">
-                <div className="col-span-4 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
-                  <ChatList user={user} onSelect={openChat} selectedId={chatId} />
-                </div>
-                <div className="col-span-8 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
-                  {chatId ? (
-                    <ChatRoom user={user} chatId={chatId} onBack={() => { }} />
-                  ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-400">
-                      <MessageSquare size={48} className="mb-4 opacity-50" />
-                      <p>Select a chat to start messaging</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </Suspense>
       </div>
     </GlassLayout>
   );
+}
+
+// Wrapper components to handle split view logic or params
+function ChatListWrapper({ user }: { user: any }) {
+  const navigate = useNavigate();
+  const isDesktop = window.innerWidth >= 768;
+
+  if (isDesktop) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-6rem)]">
+        <div className="grid grid-cols-12 gap-6 h-full">
+          <div className="col-span-4 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
+            <ChatList user={user} onSelect={(id: string) => navigate(`/chats/${id}`)} selectedId={null} />
+          </div>
+          <div className="col-span-8 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
+            <div className="h-full flex flex-col items-center justify-center text-slate-400">
+              <MessageSquare size={48} className="mb-4 opacity-50" />
+              <p>Select a chat to start messaging</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <ChatList user={user} onSelect={(id: string) => navigate(`/chats/${id}`)} selectedId={null} />;
+}
+
+function ChatRoomWrapper({ user }: { user: any }) {
+  const { chatId } = useParams();
+  const navigate = useNavigate();
+  const isDesktop = window.innerWidth >= 768;
+
+  if (isDesktop) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-6rem)]">
+        <div className="grid grid-cols-12 gap-6 h-full">
+          <div className="col-span-4 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
+            <ChatList user={user} onSelect={(id: string) => navigate(`/chats/${id}`)} selectedId={chatId} />
+          </div>
+          <div className="col-span-8 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
+            <ChatRoom user={user} chatId={chatId} onBack={() => navigate('/chats')} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <ChatRoom user={user} chatId={chatId} onBack={() => navigate('/chats')} />;
 }

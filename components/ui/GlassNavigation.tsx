@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { GlassButton } from './GlassButton';
@@ -9,16 +10,7 @@ interface NavItem {
     onClick?: () => void;
 }
 
-interface GlassNavigationProps {
-    logo: React.ReactNode;
-    items: NavItem[];
-    user?: {
-        name: string;
-        avatar?: string;
-    };
-    onLogin?: () => void;
-    onLogout?: () => void;
-}
+// ... props interface
 
 export const GlassNavigation: React.FC<GlassNavigationProps> = ({
     logo,
@@ -41,16 +33,16 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-8">
                         {items.map((item) => (
-                            <button
+                            <Link
                                 key={item.label}
+                                to={item.href}
                                 onClick={(e) => {
-                                    e.preventDefault();
                                     if (item.onClick) item.onClick();
                                 }}
                                 className="text-sm font-medium text-slate-700 hover:text-orange-500 dark:text-slate-200 dark:hover:text-orange-400 transition-colors"
                             >
                                 {item.label}
-                            </button>
+                            </Link>
                         ))}
                     </div>
 
@@ -85,8 +77,9 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
                 {isMobileMenuOpen && (
                     <div className="absolute top-full left-4 right-4 mt-2 p-4 glass rounded-2xl md:hidden animate-slide-down flex flex-col space-y-4">
                         {items.map((item) => (
-                            <button
+                            <Link
                                 key={item.label}
+                                to={item.href}
                                 onClick={() => {
                                     if (item.onClick) item.onClick();
                                     setIsMobileMenuOpen(false);
@@ -94,7 +87,7 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
                                 className="block w-full text-left px-4 py-2 text-base font-medium text-slate-700 hover:bg-white/10 rounded-lg dark:text-slate-200"
                             >
                                 {item.label}
-                            </button>
+                            </Link>
                         ))}
                         <div className="pt-4 border-t border-white/10">
                             {user ? (
