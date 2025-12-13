@@ -1,18 +1,3 @@
-import React, { useState, Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
-import { dbService as db } from './services/firestoreService';
-import { notifications, fcm } from './services/firebase';
-import { GlassLayout } from './components/layout/GlassLayout';
-import { GlassNavigation } from './components/ui/GlassNavigation';
-import { Loader2, GraduationCap, MessageSquare } from 'lucide-react';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ToastProvider, useToast } from './contexts/ToastContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { User } from './types';
-
-// Admin Components
-import { AdminLayout } from './admin/layouts/AdminLayout';
-import { AdminDashboard } from './admin/pages/AdminDashboard';
 import { AdminUsers } from './admin/pages/AdminUsers';
 import { AdminChats } from './admin/pages/AdminChats';
 import { AdminConnections } from './admin/pages/AdminConnections';
@@ -39,23 +24,6 @@ export default function AppWrapper() {
 }
 
 function AppRoutes() {
-  // Admin Routing Check (Ideally this should be a protected route too)
-  const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/pashabhai2020');
-  const [adminPage, setAdminPage] = useState('dashboard'); // Legacy admin state
-
-  if (isAdminRoute) {
-    return (
-      <AdminLayout currentPage={adminPage} onNavigate={setAdminPage}>
-        {adminPage === 'dashboard' && <AdminDashboard />}
-        {adminPage === 'users' && <AdminUsers />}
-        {adminPage === 'chats' && <AdminChats />}
-        {adminPage === 'connections' && <AdminConnections />}
-        {adminPage === 'settings' && <AdminSettings />}
-      </AdminLayout>
-    );
-  }
-
   return (
     <AppContent />
   );
@@ -175,6 +143,13 @@ function AppContent() {
               </ProtectedRoute>
             } />
 
+            {/* Admin Routes */}
+            <Route path="/admin/*" element={
+              <AdminRoute>
+                <AdminRoutesWrapper />
+              </AdminRoute>
+            } />
+
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
@@ -230,4 +205,24 @@ function ChatRoomWrapper({ user }: { user: any }) {
   }
 
   return <ChatRoom user={user} chatId={chatId} onBack={() => navigate('/chats')} />;
+}
+
+function AdminRoutesWrapper() {
+  const [adminPage, setAdminPage] = useState('dashboard');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Sync state with URL if needed, or just use internal state for now as per original design
+  // Ideally, admin routes should be sub-routes like /admin/users, /admin/chats etc.
+  // For now, preserving the "single page app" feel of the admin panel within the /admin route
+
+  return (
+    <AdminLayout currentPage={adminPage} onNavigate={setAdminPage}>
+      {adminPage === 'dashboard' && <AdminDashboard />}
+      {adminPage === 'users' && <AdminUsers />}
+      {adminPage === 'chats' && <AdminChats />}
+      {adminPage === 'connections' && <AdminConnections />}
+      {adminPage === 'settings' && <AdminSettings />}
+    </AdminLayout>
+  );
 }
