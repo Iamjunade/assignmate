@@ -98,45 +98,57 @@ import { User } from '../types';
 // ... existing imports ...
 
 export const dbService = {
-    getWriters: async (currentUser: User | null) => {
+    getWriters: async (currentUser: User | null, tag: string = 'All') => {
         const usersRef = collection(getDb(), 'users');
 
-        // 1. Fetch Global Writers (Visible to everyone)
-        // Note: We filter for is_writer=true AND (visibility='global' OR missing)
-        // Firestore requires composite indexes for complex queries. 
-        // For simplicity/robustness without deploying indexes, we'll fetch writers and filter or use simple queries.
-        // Let's try to be as efficient as possible with available indexes.
-
-        const globalQuery = query(
-            usersRef,
+        // 1. Base Query Constraints
+        const constraints: any[] = [
             where('is_writer', '==', true),
-            where('visibility', '==', 'global'),
             limit(100)
-        );
+        ];
 
-        // 2. Fetch College Writers (If user is logged in)
-        let collegeDocs: any[] = [];
+        // 2. Visibility Constraint (Global only for now to keep query simple)
+        // Note: Complex OR queries with array-contains require multiple indexes.
+        // We will prioritize fetching global writers.
+        constraints.push(where('visibility', '==', 'global'));
+
+        // 3. Tag Constraint
+        if (tag && tag !== 'All') {
+            constraints.push(where('tags', 'array-contains', tag));
+        }
+
+        const globalQuery = query(usersRef, ...constraints);
+
+        // 4. Execute Global Query
+        const globalSnap = await getDocs(globalQuery);
+        let writers = globalSnap.docs.map(d => d.data());
+
+        // 5. Fetch College Writers (If user is logged in) - Separate query to avoid complex OR
+        // Only fetch if we are NOT filtering by tag OR if we can filter by tag + college (requires index)
+        // For now, we'll fetch college writers and filter tags client-side for this subset to avoid index explosion
         if (currentUser && currentUser.school) {
             const collegeQuery = query(
                 usersRef,
                 where('is_writer', '==', true),
                 where('visibility', '==', 'college'),
                 where('school', '==', currentUser.school),
-                limit(100)
+                limit(50)
             );
             const snap = await getDocs(collegeQuery);
-            collegeDocs = snap.docs.map(d => d.data());
+            const collegeWriters = snap.docs.map(d => d.data());
+
+            // Filter college writers by tag client-side (small dataset)
+            const filteredCollegeWriters = (tag && tag !== 'All')
+                ? collegeWriters.filter((w: any) => w.tags?.includes(tag))
+                : collegeWriters;
+
+            writers = [...writers, ...filteredCollegeWriters];
         }
 
-        // 3. Execute Global Query
-        const globalSnap = await getDocs(globalQuery);
-        const globalDocs = globalSnap.docs.map(d => d.data());
+        // 6. Deduplicate
+        const uniqueWriters = Array.from(new Map(writers.map((item: any) => [item.id, item])).values());
 
-        // 4. Merge and Deduplicate
-        const allWriters = [...globalDocs, ...collegeDocs];
-        const uniqueWriters = Array.from(new Map(allWriters.map(item => [item.id, item])).values());
-
-        // 5. Sort by creation (client-side sort since we merged results)
+        // 7. Sort by creation (client-side sort since we merged results)
         return uniqueWriters.sort((a: any, b: any) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );

@@ -33,21 +33,57 @@ const itemVariants = {
         }
     }
 };
+import React, { useState, useEffect } from 'react';
+import { dbService as db } from '../services/firestoreService';
+import { Loader2, Filter, Sparkles, GraduationCap, Award, Users, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import WriterCard from '../components/WriterCard';
+import { useAuth } from '../contexts/AuthContext';
+import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
+import { useToast } from '../contexts/ToastContext';
+
+const CATEGORIES = ['All', 'Practical Records', 'Assignments', 'Blue Books', 'Viva Prep', 'Final Year Project', 'Coding', 'Design'];
+
+// Animation variants for stagger effect
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.08,
+            delayChildren: 0.1
+        }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 100,
+            damping: 12
+        }
+    }
+};
 
 export const Feed = ({ user, onChat }) => {
     const { refreshProfile } = useAuth();
     const { success } = useToast();
     const [writers, setWriters] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
-
+    const [filter, setFilter] = useState('All');
     // Map of userId -> status ('connected', 'pending_sent', etc)
     const [networkMap, setNetworkMap] = useState<Record<string, string>>({});
 
     const load = async () => {
-        const data = await db.getWriters(user);
-        const others = user ? (data.filter(w => w.id !== user.id) || []) : data;
+        setLoading(true);
+        // Pass the current filter (tag) to the server
+        const data = await db.getWriters(user, filter);
+        const others = user ? (data.filter((w: any) => w.id !== user.id) || []) : data;
         setWriters(others);
 
         if (user) {
@@ -58,37 +94,37 @@ export const Feed = ({ user, onChat }) => {
         setLoading(false);
     };
 
-    useEffect(() => { load(); }, [user]);
+    // Reload when user OR filter changes
+    useEffect(() => { load(); }, [user, filter]);
 
-    const handleToggleSave = async (writerId) => {
+    const handleToggleSave = async (writerId: string) => {
         if (!user) return; // Prevent action if visitor
         await db.toggleSaveWriter(user.id, writerId);
         await refreshProfile(); // Refresh my saved list
     };
 
-    const handleConnect = async (writerId) => {
+    const handleConnect = async (writerId: string) => {
         if (!user) return;
         await db.sendConnectionRequest(user.id, writerId);
         setNetworkMap(prev => ({ ...prev, [writerId]: 'pending_sent' }));
         success("Connection request sent!");
     };
 
-    const filteredWriters = writers.filter(w => {
+    const filteredWriters = writers.filter((w: any) => {
         const matchesSearch = w.handle.toLowerCase().includes(searchTerm.toLowerCase()) ||
             w.school.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesCategory = filter === 'All' ||
-            w.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())) ||
-            w.bio?.toLowerCase().includes(filter.toLowerCase());
+        // Category filtering is now done on server.
+        // We only client-side filter for search term now.
 
-        // Visibility Logic
+        // Visibility Logic (Double check client side just in case)
         const isVisible = (!w.visibility || w.visibility === 'global') ||
             (w.visibility === 'college' && (
                 (user && user.school && w.school && user.school.trim().toLowerCase() === w.school.trim().toLowerCase()) ||
                 (searchTerm.length > 2 && w.school.toLowerCase().includes(searchTerm.toLowerCase()))
             ));
 
-        return matchesSearch && matchesCategory && isVisible;
+        return matchesSearch && isVisible;
     });
 
     return (
@@ -249,7 +285,7 @@ export const Feed = ({ user, onChat }) => {
                                 initial="hidden"
                                 animate="visible"
                             >
-                                {filteredWriters.map((writer, i) => (
+                                {filteredWriters.map((writer: any, i: number) => (
                                     <motion.div key={writer.id} variants={itemVariants}>
                                         <WriterCard
                                             writer={writer}
