@@ -1,87 +1,31 @@
 import React from 'react';
-import { GlassButton } from '../components/ui/GlassButton';
-import { SpotlightCard } from '../components/ui/SpotlightCard';
-import Hero from '../components/ui/neural-network-hero';
-import { ArrowRight, Shield, Zap, Users, Star, CheckCircle2, TrendingUp, Award, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Shield, Zap, Clock, CheckCircle2, Star, Users, ArrowRight } from 'lucide-react';
+import { SpotlightCard } from '@/components/ui/SpotlightCard';
+import Hero, { ShaderBackground } from '@/components/ui/neural-network-hero';
 
-interface LandingProps {
-    onGetStarted: () => void;
-}
+export const Landing = () => {
+    const navigate = useNavigate();
 
-export const Landing: React.FC<LandingProps> = ({ onGetStarted }) => {
+    const onGetStarted = () => {
+        navigate('/auth');
+    };
+
     return (
-        <div className="relative z-10 space-y-32 pb-32 overflow-hidden">
-            {/* Illustration Hero Section */}
-            <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-                    <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-                        {/* Left Content */}
-                        <div className="flex-1 text-center lg:text-left space-y-8 z-10">
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 border border-orange-200 text-orange-700 text-xs font-bold uppercase tracking-wider shadow-sm">
-                                <span className="bg-orange-500 text-white px-1.5 py-0.5 rounded text-[10px]">NEW</span>
-                                India's #1 Student Marketplace
-                            </div>
+        <div className="relative min-h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden transition-colors duration-300">
+            <ShaderBackground />
 
-                            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
-                                Get Work Done <br className="hidden lg:block" />
-                                <span className="text-slate-900">Faster & Better.</span>
-                            </h1>
+            <Hero
+                badgeText="India's #1 Student Marketplace"
+                title="Get Work Done Faster & Better."
+                description="Connect with top student freelancers for assignments, projects, and tutoring. Quality work, secure payments, and on-time delivery."
+                ctaButtons={[
+                    { text: "Start Hiring Now", href: "/auth", primary: true },
+                    { text: "Become a Writer", href: "/auth?tab=signup", primary: false }
+                ]}
+                microDetails={["Verified Writers", "Secure Payments", "Fast Delivery"]}
+            />
 
-                            <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
-                                Connect with top-tier students from IITs & NITs. Outsource assignments, projects, and records with guaranteed quality.
-                            </p>
-
-                            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
-                                <button
-                                    onClick={onGetStarted}
-                                    className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-bold text-lg shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-1 transition-all duration-300"
-                                >
-                                    Start Hiring Now
-                                </button>
-                                <button
-                                    onClick={onGetStarted}
-                                    className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border-2 border-slate-200 rounded-2xl font-bold text-lg hover:border-orange-200 hover:bg-orange-50 hover:text-orange-700 transition-all duration-300"
-                                >
-                                    Become a Writer
-                                </button>
-                            </div>
-
-                            <div className="flex items-center justify-center lg:justify-start gap-6 pt-4 text-sm font-bold text-slate-500">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                                    Verified Writers
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                                    Secure Payments
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                                    Fast Delivery
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Right Image */}
-                        <div className="flex-1 relative w-full max-w-lg lg:max-w-none">
-                            <div className="relative z-10">
-                                <img
-                                    src="https://cdni.iconscout.com/illustration/premium/thumb/student-studying-online-2974936-2477363.png"
-                                    alt="Student studying"
-                                    className="w-full h-auto drop-shadow-2xl hover:scale-105 transition-transform duration-500"
-                                />
-                            </div>
-
-                            {/* Decorative Blobs */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-orange-200/30 blur-3xl rounded-full -z-10 animate-pulse-slow"></div>
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-200/40 blur-2xl rounded-full -z-10"></div>
-                            <div className="absolute bottom-0 left-0 w-40 h-40 bg-orange-300/20 blur-2xl rounded-full -z-10"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Bento Grid Features */}
             <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <div className="text-center mb-20 space-y-4">
                     <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">

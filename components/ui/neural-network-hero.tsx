@@ -195,7 +195,7 @@ function ShaderPlane() {
     );
 }
 
-function ShaderBackground() {
+export function ShaderBackground() {
     const canvasRef = useRef<HTMLDivElement | null>(null);
 
     const camera = useMemo(() => ({ position: [0, 0, 1] as [number, number, number], fov: 75, near: 0.1, far: 1000 }), []);
@@ -360,8 +360,8 @@ export default function Hero({
                             key={index}
                             href={button.href}
                             className={`rounded-2xl border px-6 py-3.5 text-sm font-bold tracking-wide transition-all duration-300 shadow-lg hover:-translate-y-0.5 ${button.primary
-                                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white border-transparent shadow-orange-500/25 hover:shadow-orange-500/40"
-                                    : "bg-white text-slate-700 border-slate-200 hover:border-orange-200 hover:bg-orange-50"
+                                ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white border-transparent shadow-orange-500/25 hover:shadow-orange-500/40"
+                                : "bg-white text-slate-700 border-slate-200 hover:border-orange-200 hover:bg-orange-50"
                                 }`}
                         >
                             {button.text}
