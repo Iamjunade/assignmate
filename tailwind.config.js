@@ -12,8 +12,12 @@ export default {
         extend: {
             colors: {
                 "primary": "#f09942",
-                "background-light": "#f8f7f6",
+                "primary-light": "#FFF6ED",
+                "background-light": "#fcfaf8",
                 "background-dark": "#221910",
+                "text-dark": "#1b140d",
+                "text-muted": "#9a734c",
+                "border-color": "#f3ede7",
                 orange: {
                     50: '#fff7ed',
                     100: '#ffedd5',

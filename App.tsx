@@ -105,7 +105,7 @@ function AppContent() {
 
   return (
     <GlassLayout>
-      {location.pathname !== '/' && (
+      {location.pathname !== '/' && location.pathname !== '/feed' && (
         <GlassNavigation
           logo={
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(user ? '/feed' : '/')}>

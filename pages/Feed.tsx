@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { dbService as db } from '../services/firestoreService';
-import { Loader2, Filter, Sparkles, GraduationCap, Award, Users, CheckCircle } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WriterCard from '../components/WriterCard';
 import { useAuth } from '../contexts/AuthContext';
-import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
 import { useToast } from '../contexts/ToastContext';
-
-const CATEGORIES = ['All', 'Practical Records', 'Assignments', 'Blue Books', 'Viva Prep', 'Final Year Project', 'Coding', 'Design'];
+import { Sidebar } from '../components/dashboard/Sidebar';
+import { DashboardHeader } from '../components/dashboard/DashboardHeader';
+import { StatsRow } from '../components/dashboard/StatsRow';
 
 // Animation variants for stagger effect
 const containerVariants = {
@@ -34,7 +34,7 @@ const itemVariants = {
     }
 };
 
-export const Feed = ({ user, onChat }) => {
+export const Feed = ({ user, onChat }: { user: any, onChat: any }) => {
     const { refreshProfile } = useAuth();
     const { success } = useToast();
     const [writers, setWriters] = useState([]);
@@ -43,6 +43,7 @@ export const Feed = ({ user, onChat }) => {
     const [filter, setFilter] = useState('All');
     // Map of userId -> status ('connected', 'pending_sent', etc)
     const [networkMap, setNetworkMap] = useState<Record<string, string>>({});
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const load = async () => {
         setLoading(true);
@@ -93,181 +94,111 @@ export const Feed = ({ user, onChat }) => {
     });
 
     return (
-        <div className="min-h-full bg-slate-50 relative">
-            {/* Floating India's #1 Badge */}
-            <motion.div
-                className="fixed top-20 right-4 z-50 hidden md:block"
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
-                transition={{
-                    opacity: { duration: 0.5 },
-                    x: { duration: 0.5 },
-                    y: { repeat: Infinity, duration: 3, ease: "easeInOut" }
-                }}
-            >
-                <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-full shadow-xl border border-orange-300/50 backdrop-blur-sm flex items-center gap-2">
-                    <Award size={16} className="animate-pulse" />
-                    <span className="text-xs font-bold">India's #1 Marketplace</span>
-                </div>
-            </motion.div>
+        <div className="bg-background-light dark:bg-background-dark text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/30">
+            <Sidebar user={user} />
 
-            {/* Hero Section for Visitors */}
-            {!user && (
-                <motion.div
-                    className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 px-6 py-20 text-center relative overflow-hidden"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.6 }}
-                >
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+            {/* Main Content */}
+            <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+                <DashboardHeader
+                    user={user}
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    onMobileMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                />
 
-                    {/* Animated Floating Elements */}
-                    <motion.div
-                        className="absolute top-20 left-10 w-20 h-20 bg-white/10 backdrop-blur-md rounded-full"
-                        animate={{ y: [0, -20, 0], rotate: [0, 180, 360] }}
-                        transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-                    />
-                    <motion.div
-                        className="absolute bottom-20 right-10 w-16 h-16 bg-white/10 backdrop-blur-md rounded-full"
-                        animate={{ y: [0, 20, 0], rotate: [0, -180, -360] }}
-                        transition={{ repeat: Infinity, duration: 6, ease: "easeInOut", delay: 1 }}
-                    />
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-20">
+                    <div className="max-w-6xl mx-auto flex flex-col gap-8">
+                        {/* Welcome Section */}
+                        <div>
+                            <h1 className="text-3xl md:text-4xl font-extrabold text-text-dark tracking-tight mb-2">
+                                Good Morning, {user?.handle || 'Student'}. <span className="text-text-muted font-medium">No panic today.</span>
+                            </h1>
+                            <p className="text-text-muted">You have 2 active projects and 1 deadline approaching.</p>
+                        </div>
 
-                    <div className="relative z-10">
-                        <motion.span
-                            className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-white text-xs font-bold tracking-wide mb-6 border border-white/30 shadow-sm"
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
-                        >
-                            🚀 #1 Student Marketplace in India
-                        </motion.span>
+                        {/* Stats Row */}
+                        <StatsRow />
 
-                        <motion.h1
-                            className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-sm"
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.3, duration: 0.6 }}
-                        >
-                            Assignments done, <br /> <span className="text-orange-100">Stress gone.</span>
-                        </motion.h1>
+                        {/* Main Grid Layout */}
+                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                            {/* Left Column: Active Projects & Messages (Wider) */}
+                            <div className="xl:col-span-2 flex flex-col gap-8">
+                                {/* Active Projects Section (Repurposed as Recommended Writers for now) */}
+                                <section className="flex flex-col gap-5">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-xl font-bold text-text-dark">Recommended Writers</h2>
+                                        <button className="text-sm font-bold text-primary hover:underline">View All</button>
+                                    </div>
 
-                        <motion.p
-                            className="text-orange-50 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-medium leading-relaxed opacity-90"
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.4, duration: 0.6 }}
-                        >
-                            Connect with top peers from universities across India for help with assignments, records, and projects.
-                        </motion.p>
-
-                        {/* Trust Indicators */}
-                        <motion.div
-                            className="flex flex-wrap justify-center gap-6 md:gap-8 mt-8"
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.5, duration: 0.6 }}
-                        >
-                            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
-                                <Users size={18} className="text-orange-100" />
-                                <span className="text-white font-bold text-sm">10,000+ Students</span>
+                                    {loading ? (
+                                        <div className="flex justify-center py-10">
+                                            <Loader2 className="animate-spin text-primary w-8 h-8" />
+                                        </div>
+                                    ) : (
+                                        <AnimatePresence mode="wait">
+                                            {filteredWriters.length === 0 ? (
+                                                <motion.div
+                                                    className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300 shadow-sm"
+                                                    initial={{ opacity: 0, scale: 0.9 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    exit={{ opacity: 0, scale: 0.9 }}
+                                                    transition={{ duration: 0.3 }}
+                                                >
+                                                    <Sparkles className="mx-auto text-amber-400 mb-4" size={40} />
+                                                    <p className="font-bold text-slate-700 text-lg">No writers found.</p>
+                                                    <p className="text-sm text-text-muted mt-1">Try searching for a different college or skill.</p>
+                                                </motion.div>
+                                            ) : (
+                                                <motion.div
+                                                    className="grid grid-cols-1 md:grid-cols-2 gap-5"
+                                                    variants={containerVariants}
+                                                    initial="hidden"
+                                                    animate="visible"
+                                                >
+                                                    {filteredWriters.map((writer: any, i: number) => (
+                                                        <motion.div key={writer.id} variants={itemVariants}>
+                                                            <WriterCard
+                                                                writer={writer}
+                                                                onChat={onChat}
+                                                                index={i}
+                                                                onToggleSave={user ? handleToggleSave : undefined}
+                                                                isSaved={user?.saved_writers?.includes(writer.id)}
+                                                                connectionStatus={networkMap[writer.id] as any || 'none'}
+                                                                onConnect={handleConnect}
+                                                            />
+                                                        </motion.div>
+                                                    ))}
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    )}
+                                </section>
                             </div>
-                            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
-                                <GraduationCap size={18} className="text-orange-100" />
-                                <span className="text-white font-bold text-sm">500+ Universities</span>
+
+                            {/* Right Column: Suggestions & Utils */}
+                            <div className="flex flex-col gap-8">
+                                {/* Trust Banner */}
+                                <div className="bg-primary/10 rounded-xl p-6 border border-primary/20 flex flex-col gap-4">
+                                    <div className="flex items-center gap-3 text-text-dark">
+                                        <span className="material-symbols-outlined text-3xl">shield_person</span>
+                                        <h3 className="text-lg font-bold leading-tight">Escrow Protected</h3>
+                                    </div>
+                                    <p className="text-sm text-text-muted">Payments are released to writers only after you approve the final submission.</p>
+                                    <button className="w-full py-2.5 rounded-full bg-white text-text-dark text-sm font-bold shadow-sm hover:bg-gray-50 border border-transparent transition-colors">Learn More</button>
+                                </div>
+
+                                {/* Quick Tip */}
+                                <div className="bg-gradient-to-r from-background-light to-white p-5 rounded-xl border border-dashed border-border-color text-center">
+                                    <p className="text-xs text-text-muted mb-3 font-medium">Need help fast?</p>
+                                    <p className="text-sm font-bold text-text-dark mb-3">Premium writers respond in &lt; 15 mins</p>
+                                    <button className="text-primary text-xs font-bold uppercase tracking-wider hover:underline">Browse Premium</button>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
-                                <CheckCircle size={18} className="text-orange-100" />
-                                <span className="text-white font-bold text-sm">50K+ Assignments</span>
-                            </div>
-                        </motion.div>
-                    </div>
-                </motion.div>
-            )}
-
-            {/* Search Header */}
-            <div className="sticky top-0 bg-white/80 backdrop-blur-xl z-20 border-b border-orange-100 shadow-sm">
-                <div className="p-4 md:p-6 max-w-5xl mx-auto">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                            {user ? `Namaste, ${user.handle} 🙏` : 'Explore Talent'}
-                        </h2>
-                        <button className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-colors">
-                            <Filter size={20} />
-                        </button>
-                    </div>
-
-                    <div className="mb-5">
-                        <CollegeAutocomplete
-                            value={searchTerm}
-                            onChange={setSearchTerm}
-                            placeholder="Search by college (e.g., IIT Bombay, Osmania)..."
-                            className="w-full shadow-sm"
-                        />
-                    </div>
-
-                    <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
-                        {CATEGORIES.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => setFilter(cat)}
-                                className={`whitespace-nowrap px-4 py-1.5 text-xs font-bold rounded-full border transition-all ${filter === cat
-                                    ? 'bg-orange-600 border-orange-600 text-white shadow-md shadow-orange-200'
-                                    : 'bg-white border-slate-200 text-slate-600 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-700'
-                                    }`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div className="p-4 md:p-6 max-w-5xl mx-auto pb-24">
-                {loading ? (
-                    <div className="flex justify-center pt-20">
-                        <Loader2 className="animate-spin text-orange-500 w-10 h-10" />
-                    </div>
-                ) : (
-                    <AnimatePresence mode="wait">
-                        {filteredWriters.length === 0 ? (
-                            <motion.div
-                                className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300 shadow-sm"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                transition={{ duration: 0.3 }}
-                            >
-                                <Sparkles className="mx-auto text-amber-400 mb-4" size={40} />
-                                <p className="font-bold text-slate-700 text-lg">No students found.</p>
-                                <p className="text-sm text-slate-500 mt-1">Try searching for a different college or skill.</p>
-                                <button onClick={() => { setFilter('All'); setSearchTerm('') }} className="mt-6 text-orange-600 hover:text-orange-700 text-sm font-bold underline decoration-2 underline-offset-4">View All Students</button>
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
-                                variants={containerVariants}
-                                initial="hidden"
-                                animate="visible"
-                            >
-                                {filteredWriters.map((writer: any, i: number) => (
-                                    <motion.div key={writer.id} variants={itemVariants}>
-                                        <WriterCard
-                                            writer={writer}
-                                            onChat={onChat}
-                                            index={i}
-                                            onToggleSave={user ? handleToggleSave : undefined}
-                                            isSaved={user?.saved_writers?.includes(writer.id)}
-                                            connectionStatus={networkMap[writer.id] as any || 'none'}
-                                            onConnect={handleConnect}
-                                        />
-                                    </motion.div>
-                                ))}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                )}
-            </div>
+            </main>
         </div>
     );
 };
