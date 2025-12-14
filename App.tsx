@@ -105,25 +105,27 @@ function AppContent() {
 
   return (
     <GlassLayout>
-      <GlassNavigation
-        logo={
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(user ? '/feed' : '/')}>
-            <div className="bg-orange-500 p-1.5 rounded-lg text-white">
-              <GraduationCap size={20} />
+      {location.pathname !== '/' && (
+        <GlassNavigation
+          logo={
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(user ? '/feed' : '/')}>
+              <div className="bg-orange-500 p-1.5 rounded-lg text-white">
+                <GraduationCap size={20} />
+              </div>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-400">
+                AssignMate
+              </span>
             </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-400">
-              AssignMate
-            </span>
-          </div>
-        }
-        items={user ? authNavItems : navItems}
-        user={user ? { name: user.full_name || user.email } : undefined}
-        onLogin={() => navigate('/auth')}
-        onLogout={async () => {
-          await logout();
-          navigate('/');
-        }}
-      />
+          }
+          items={user ? authNavItems : navItems}
+          user={user ? { name: user.full_name || user.email } : undefined}
+          onLogin={() => navigate('/auth')}
+          onLogout={async () => {
+            await logout();
+            navigate('/');
+          }}
+        />
+      )}
 
       <div className="pt-20 min-h-screen">
         <Suspense fallback={
