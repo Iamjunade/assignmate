@@ -26,7 +26,7 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
             <div className="max-w-7xl mx-auto">
                 <div className="glass rounded-2xl px-6 py-3 flex items-center justify-between bg-white/70 backdrop-blur-md border-white/40 shadow-sm">
                     {/* Logo */}
-                    <div className="flex-shrink-0">
+                    <div className="flex-1 flex justify-start">
                         {logo}
                     </div>
 
@@ -47,7 +47,10 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
                     </div>
 
                     {/* Actions */}
-                    <div className="hidden md:flex items-center space-x-4">
+                    <div className="hidden md:flex flex-1 items-center justify-end space-x-6">
+                        <Link to="/auth" className="text-sm font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors">
+                            Student
+                        </Link>
                         {user ? (
                             <div className="flex items-center gap-3">
                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
@@ -58,9 +61,14 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
                                 </GlassButton>
                             </div>
                         ) : (
-                            <GlassButton variant="primary" size="sm" onClick={onLogin}>
-                                Sign In
-                            </GlassButton>
+                            <div className="flex items-center gap-4">
+                                <Link to="/auth" className="text-sm font-semibold text-slate-600 hover:text-orange-600 dark:text-slate-300 transition-colors">
+                                    Login
+                                </Link>
+                                <GlassButton variant="primary" size="sm" onClick={onLogin}>
+                                    Sign Up
+                                </GlassButton>
+                            </div>
                         )}
                     </div>
 
