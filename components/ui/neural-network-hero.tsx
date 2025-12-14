@@ -150,7 +150,21 @@ const fragmentShader = `
   
   void main() {
     vec2 uv = vUv * 2.0 - 1.0; uv.y *= -1.0;
-    gl_FragColor = cppn_fn(uv, 0.1 * sin(0.3 * iTime), 0.1 * sin(0.69 * iTime), 0.1 * sin(0.44 * iTime));
+    vec4 nn = cppn_fn(uv, 0.1 * sin(0.3 * iTime), 0.1 * sin(0.69 * iTime), 0.1 * sin(0.44 * iTime));
+    
+    // Map neural network output to Orange theme
+    // Use x channel for intensity
+    float t = nn.x;
+    
+    // Color Palette: Light Orange to Deep Orange
+    vec3 c1 = vec3(1.0, 0.98, 0.95); // Very light orange/white
+    vec3 c2 = vec3(1.0, 0.6, 0.2);   // Vibrant Orange
+    vec3 c3 = vec3(1.0, 0.4, 0.0);   // Deep Orange
+    
+    vec3 color = mix(c1, c2, smoothstep(0.2, 0.6, t));
+    color = mix(color, c3, smoothstep(0.6, 1.0, t));
+    
+    gl_FragColor = vec4(color, 1.0);
   }
 `;
 
@@ -209,7 +223,7 @@ function ShaderBackground() {
     );
 
     return (
-        <div ref={canvasRef} className="bg-black absolute inset-0 -z-10 w-full h-full" aria-hidden>
+        <div ref={canvasRef} className="bg-orange-50 absolute inset-0 -z-10 w-full h-full" aria-hidden>
             <Canvas
                 camera={camera}
                 gl={{ antialias: true, alpha: false }}
@@ -218,7 +232,7 @@ function ShaderBackground() {
             >
                 <ShaderPlane />
             </Canvas>
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-white/20" />
         </div>
     );
 }
@@ -322,21 +336,21 @@ export default function Hero({
     );
 
     return (
-        <section ref={sectionRef} className="relative h-screen w-screen overflow-hidden">
+        <section ref={sectionRef} className="relative h-screen w-screen overflow-hidden bg-orange-50/30">
             <ShaderBackground />
 
             <div className="relative mx-auto flex max-w-7xl flex-col items-start gap-6 px-6 pb-24 pt-36 sm:gap-8 sm:pt-44 md:px-10 lg:px-16">
-                <div ref={badgeRef} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-sm">
-                    <span className="text-[10px] font-light uppercase tracking-[0.08em] text-white/70">{badgeLabel}</span>
-                    <span className="h-1 w-1 rounded-full bg-white/40" />
-                    <span className="text-xs font-light tracking-tight text-white/80">{badgeText}</span>
+                <div ref={badgeRef} className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-100/80 px-3 py-1.5 backdrop-blur-sm shadow-sm">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-orange-600">{badgeLabel}</span>
+                    <span className="h-1 w-1 rounded-full bg-orange-400" />
+                    <span className="text-xs font-medium tracking-tight text-orange-800">{badgeText}</span>
                 </div>
 
-                <h1 ref={headerRef} className="max-w-2xl text-left text-5xl font-extralight leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl">
+                <h1 ref={headerRef} className="max-w-2xl text-left text-5xl font-extrabold leading-[1.05] tracking-tight text-slate-900 sm:text-6xl md:text-7xl">
                     {title}
                 </h1>
 
-                <p ref={paraRef} className="max-w-xl text-left text-base font-light leading-relaxed tracking-tight text-white/75 sm:text-lg">
+                <p ref={paraRef} className="max-w-xl text-left text-base font-medium leading-relaxed tracking-tight text-slate-600 sm:text-lg">
                     {description}
                 </p>
 
@@ -345,9 +359,9 @@ export default function Hero({
                         <a
                             key={index}
                             href={button.href}
-                            className={`rounded-2xl border border-white/10 px-5 py-3 text-sm font-light tracking-tight transition-colors focus:outline-none focus:ring-2 focus:ring-white/30 duration-300 ${button.primary
-                                    ? "bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
-                                    : "text-white/80 hover:bg-white/5"
+                            className={`rounded-2xl border px-6 py-3.5 text-sm font-bold tracking-wide transition-all duration-300 shadow-lg hover:-translate-y-0.5 ${button.primary
+                                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white border-transparent shadow-orange-500/25 hover:shadow-orange-500/40"
+                                    : "bg-white text-slate-700 border-slate-200 hover:border-orange-200 hover:bg-orange-50"
                                 }`}
                         >
                             {button.text}
@@ -355,19 +369,19 @@ export default function Hero({
                     ))}
                 </div>
 
-                <ul ref={microRef} className="mt-8 flex flex-wrap gap-6 text-xs font-extralight tracking-tight text-white/60">
+                <ul ref={microRef} className="mt-8 flex flex-wrap gap-6 text-xs font-bold tracking-tight text-slate-500">
                     {microDetails.map((detail, index) => {
                         const refMap = [microItem1Ref, microItem2Ref, microItem3Ref];
                         return (
                             <li key={index} ref={refMap[index]} className="flex items-center gap-2">
-                                <span className="h-1 w-1 rounded-full bg-white/40" /> {detail}
+                                <span className="h-1.5 w-1.5 rounded-full bg-orange-500" /> {detail}
                             </li>
                         );
                     })}
                 </ul>
             </div>
 
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent" />
         </section>
     );
 }
