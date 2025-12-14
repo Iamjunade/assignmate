@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../services/mockSupabase';
+import { dbService as db } from '../services/firestoreService';
 import { useToast } from '../contexts/ToastContext';
 import { Shield, Check, X, Loader2, Lock } from 'lucide-react';
 

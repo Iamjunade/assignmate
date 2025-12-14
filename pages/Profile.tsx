@@ -18,6 +18,24 @@ export const Profile = ({ user }: { user: any }) => {
     const { success, error } = useToast();
 
     const [activeTab, setActiveTab] = useState('portfolio');
+    const [connections, setConnections] = useState<any[]>([]);
+    const [requests, setRequests] = useState<any[]>([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
+    const [newTag, setNewTag] = useState('');
+    const [uploading, setUploading] = useState(false);
+    const [idUploading, setIdUploading] = useState(false);
+    const [editingProfile, setEditingProfile] = useState(false);
+    const [bio, setBio] = useState(user.bio || '');
+    const [school, setSchool] = useState(user.school || '');
+    const [visibility, setVisibility] = useState(user.visibility || 'global');
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const idInputRef = useRef<HTMLInputElement>(null);
+
+    const level = Math.floor((user.xp || 0) / 100) + 1;
+    const rating = user.rating || 5.0;
+    const projectsCompleted = user.projects_completed || 0;
 
     const addTag = async (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && newTag.trim()) {
@@ -47,6 +65,33 @@ export const Profile = ({ user }: { user: any }) => {
         const conns = await db.getMyConnections(user.id);
         setConnections(conns);
         success(`Connection ${status}`);
+    };
+
+    const saveProfile = async () => {
+        try {
+            await db.updateProfile(user.id, { bio, school, visibility });
+            setEditingProfile(false);
+            await refreshProfile();
+            success("Profile updated!");
+        } catch (e) {
+            error("Failed to update profile");
+        }
+    };
+
+    const handleIdSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setIdUploading(true);
+            try {
+                const url = await db.uploadFile(e.target.files[0]);
+                await db.updateProfile(user.id, { is_verified: 'pending', id_card_url: url });
+                await refreshProfile();
+                success("ID uploaded for verification");
+            } catch (e) {
+                error("Failed to upload ID");
+            } finally {
+                setIdUploading(false);
+            }
+        }
     };
 
     const handleFinalDelete = async () => {

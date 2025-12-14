@@ -79,8 +79,8 @@ export const userApi = {
             xp: 0,
             tags: ['Student'],
             is_writer: metadata.is_writer || false,
-            role: 'user',
-            visibility: 'global', // Default to global visibility
+            role: 'user' as 'user' | 'admin' | 'moderator',
+            visibility: 'global' as 'global' | 'college', // Default to global visibility
             portfolio: [],
             saved_writers: []
         };
@@ -410,7 +410,7 @@ export const dbService = {
         };
 
         // 1. Add to subcollection
-        await addDoc(collection(getDb(), 'chats', chatId, 'messages'), newMessage);
+        const res = await addDoc(collection(getDb(), 'chats', chatId, 'messages'), newMessage);
 
         // 2. Update chat metadata
         await updateDoc(doc(getDb(), 'chats', chatId), {
@@ -429,7 +429,7 @@ export const dbService = {
             notifications.send(receiverId, senderName, type === 'TEXT' ? content : 'Attachment sent', chatId);
         }
 
-        return newMessage;
+        return { id: res.id, ...newMessage };
     },
 
     markMessagesAsRead: async (chatId: string, readerId: string) => {

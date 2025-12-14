@@ -11,6 +11,9 @@ export default {
     theme: {
         extend: {
             colors: {
+                "primary": "#f09942",
+                "background-light": "#f8f7f6",
+                "background-dark": "#221910",
                 orange: {
                     50: '#fff7ed',
                     100: '#ffedd5',
@@ -40,6 +43,11 @@ export default {
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
+                display: ['Manrope', 'sans-serif'],
+            },
+            borderRadius: {
+                "lg": "2rem",
+                "xl": "3rem",
             },
             boxShadow: {
                 'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',

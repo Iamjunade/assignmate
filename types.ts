@@ -8,6 +8,8 @@ export interface User {
   cover_url?: string; // Custom profile cover image
 
   xp: number;
+  rating?: number;
+  projects_completed?: number;
   portfolio?: string[]; // Array of image URLs (Handwriting samples)
   rate_per_page?: number; // Optional: For future expansion
   is_writer?: boolean; // Toggle: Is the user open to work?

@@ -1,14 +1,14 @@
-import { 
-    collection, 
-    getDocs, 
-    deleteDoc, 
-    doc, 
-    updateDoc, 
-    query, 
+import {
+    collection,
+    getDocs,
+    deleteDoc,
+    doc,
+    updateDoc,
+    query,
     orderBy,
     getDoc
 } from 'firebase/firestore';
-import { db as dbInstance } from './firebase';
+import { db } from './firebase';
 import { notifications } from './firebase';
 
 const getDb = () => {
@@ -54,13 +54,13 @@ export const adminApi = {
     getAllChats: async () => {
         const q = query(collection(getDb(), 'chats'), orderBy('updated_at', 'desc'));
         const snap = await getDocs(q);
-        
+
         // Hydrate with user data
         return await Promise.all(snap.docs.map(async d => {
             const data = d.data();
             const posterSnap = await getDoc(doc(getDb(), 'users', data.poster_id));
             const writerSnap = await getDoc(doc(getDb(), 'users', data.writer_id));
-            
+
             return {
                 id: d.id,
                 ...data,
@@ -90,7 +90,7 @@ export const adminApi = {
             const data = d.data();
             const reqSnap = await getDoc(doc(getDb(), 'users', data.requester_id));
             const recSnap = await getDoc(doc(getDb(), 'users', data.receiver_id));
-            
+
             return {
                 id: d.id,
                 ...data,
@@ -108,7 +108,7 @@ export const adminApi = {
     broadcastNotification: async (message: string) => {
         const users = await adminApi.getAllUsers();
         for (const user of users) {
-             // @ts-ignore
+            // @ts-ignore
             await notifications.send(user.id, 'System Announcement', message, 'broadcast', 'system');
         }
     }

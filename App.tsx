@@ -132,7 +132,7 @@ function AppContent() {
           </div>
         }>
           <Routes>
-            <Route path="/" element={<Landing onGetStarted={() => navigate('/auth')} />} />
+            <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth onComplete={() => navigate('/feed')} />} />
 
             <Route path="/feed" element={
