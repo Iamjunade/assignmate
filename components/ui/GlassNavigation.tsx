@@ -24,7 +24,7 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
     return (
         <nav className="fixed top-0 left-0 right-0 z-40 px-4 py-4">
             <div className="max-w-7xl mx-auto">
-                <div className="glass rounded-2xl px-6 py-3 flex items-center justify-between">
+                <div className="glass rounded-2xl px-6 py-3 flex items-center justify-between bg-white/70 backdrop-blur-md border-white/40 shadow-sm">
                     {/* Logo */}
                     <div className="flex-shrink-0">
                         {logo}
@@ -39,7 +39,7 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
                                 onClick={(e) => {
                                     if (item.onClick) item.onClick();
                                 }}
-                                className="text-sm font-medium text-slate-700 hover:text-orange-500 dark:text-slate-200 dark:hover:text-orange-400 transition-colors"
+                                className="text-sm font-semibold text-slate-600 hover:text-orange-600 dark:text-slate-300 dark:hover:text-orange-400 transition-colors tracking-tight"
                             >
                                 {item.label}
                             </Link>
@@ -66,7 +66,7 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
 
                     {/* Mobile Toggle */}
                     <button
-                        className="md:hidden p-2 text-slate-700 dark:text-slate-200"
+                        className="md:hidden p-2 text-slate-600 hover:text-orange-600 dark:text-slate-200 transition-colors"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     >
                         {isMobileMenuOpen ? <X /> : <Menu />}
@@ -75,7 +75,7 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
 
                 {/* Mobile Menu */}
                 {isMobileMenuOpen && (
-                    <div className="absolute top-full left-4 right-4 mt-2 p-4 glass rounded-2xl md:hidden animate-slide-down flex flex-col space-y-4">
+                    <div className="absolute top-full left-4 right-4 mt-2 p-4 glass rounded-2xl md:hidden animate-slide-down flex flex-col space-y-4 bg-orange-50/95 backdrop-blur-xl border border-orange-100 shadow-xl">
                         {items.map((item) => (
                             <Link
                                 key={item.label}
@@ -84,12 +84,12 @@ export const GlassNavigation: React.FC<GlassNavigationProps> = ({
                                     if (item.onClick) item.onClick();
                                     setIsMobileMenuOpen(false);
                                 }}
-                                className="block w-full text-left px-4 py-2 text-base font-medium text-slate-700 hover:bg-white/10 rounded-lg dark:text-slate-200"
+                                className="block w-full text-left px-4 py-3 text-base font-semibold text-slate-700 hover:bg-orange-100/50 hover:text-orange-700 rounded-xl transition-all dark:text-slate-200 dark:hover:bg-slate-800"
                             >
                                 {item.label}
                             </Link>
                         ))}
-                        <div className="pt-4 border-t border-white/10">
+                        <div className="pt-4 border-t border-orange-200/50 dark:border-white/10">
                             {user ? (
                                 <div className="space-y-3">
                                     <div className="px-4 text-sm font-medium text-slate-500">
