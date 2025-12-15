@@ -40,21 +40,22 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
             </header>
 
             <main className="flex flex-col w-full pb-20">
-                {/* Breadcrumbs */}
-                <div className="w-full px-6 pt-6">
-                    <div className="flex flex-wrap gap-2 text-sm">
-                        <a className="text-text-muted hover:text-primary cursor-pointer" onClick={() => onNavigate('feed')}>Home</a>
-                        <span className="text-text-muted">/</span>
-                        <span className="text-text-main font-medium">Find a Writer</span>
-                    </div>
-                </div>
-
                 {/* Hero Section with Map Concept */}
                 <section className="w-full px-0 py-0">
                     <div className="relative w-full rounded-none overflow-hidden bg-[#e8e3de] min-h-[360px] flex items-center justify-center">
                         {/* Abstract Map Background */}
                         <div className="absolute inset-0 z-0 opacity-40 mix-blend-multiply" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCQ2-Lqo5AkwRX0FPz5t8hHaw5zVigPSdbaqkLnzAmWh2vkHSP7J2FKNAG014van5cXsBy7za4dBDtVmMfsZNUa2o3PmcfVm7gqQOIamUs8TTefvqS_1SMDkgHuECaUr60ehZpDbIgcbndTc-SJMuIHw8l8hiwm0U9XUYsdYvmH3M4-JwTNBkgOnAgKz0r2a98b1y2kvMVsmCiZ_W6RDsp_JLytVvb9pnziYu04HmdA1_Qir0R06aRqDOMr4EWNS0HckYDi2Y4NcJeo')", backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
                         <div className="absolute inset-0 bg-gradient-to-t from-[#fcfaf8]/90 via-[#fcfaf8]/40 to-transparent z-0"></div>
+
+                        {/* Breadcrumbs - Moved inside Hero */}
+                        <div className="absolute top-4 left-6 z-20 hidden md:block">
+                            <div className="flex flex-wrap gap-2 text-sm">
+                                <a className="text-text-muted/80 hover:text-primary cursor-pointer" onClick={() => onNavigate('feed')}>Home</a>
+                                <span className="text-text-muted/60">/</span>
+                                <span className="text-text-main/80 font-medium">Find a Writer</span>
+                            </div>
+                        </div>
+
                         <div className="relative z-10 w-full max-w-3xl flex flex-col items-center gap-6 text-center px-4">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 backdrop-blur-sm border border-white/50 shadow-sm">
                                 <span className="material-symbols-outlined text-primary text-sm">location_on</span>
