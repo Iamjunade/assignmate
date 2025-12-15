@@ -12,12 +12,19 @@ export default {
         extend: {
             colors: {
                 "primary": "#f09942",
-                "primary-light": "#FFF6ED",
+                "primary-hover": "#e08830",
+                "secondary": "#9a734c",
                 "background-light": "#fcfaf8",
-                "background-dark": "#221910",
-                "text-dark": "#1b140d",
+                "background-dark": "#1a1612",
+                "card-light": "#ffffff",
+                "card-dark": "#2a221b",
+                "border-light": "#e7dbcf",
+                "border-dark": "#44392f",
+                "text-main": "#1b140d",
                 "text-muted": "#9a734c",
-                "border-color": "#f3ede7",
+                "primary-light": "#FFF6ED", // Keep for backward compatibility if needed
+                "text-dark": "#1b140d", // Keep for backward compatibility
+                "border-color": "#f3ede7", // Keep for backward compatibility
                 orange: {
                     50: '#fff7ed',
                     100: '#ffedd5',

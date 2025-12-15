@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { dbService as db, userApi } from '../services/firestoreService';
-import { Loader2, Camera, MapPin, Briefcase, Link as LinkIcon, Github, Twitter, Linkedin, Mail, Edit2, Plus, X, Trash2, AlertTriangle, Check, Shield, Globe, Lock, Upload, Zap, Share2, Star, Award, Calendar, Grid, Users, UserPlus } from 'lucide-react';
+```javascript
+import React, { useState, useRef } from 'react';
+import { dbService as db } from '../services/firestoreService';
+import { Camera, Edit2, X, Trash2, AlertTriangle, Check, Shield, Globe, Lock, Upload, Star, Grid, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { Connection } from '../types';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
 import { ai } from '../services/ai';
 import { GlassCard } from '../components/ui/GlassCard';
@@ -37,6 +37,17 @@ export const Profile = ({ user }: { user: any }) => {
     const rating = user.rating || 5.0;
     const projectsCompleted = user.projects_completed || 0;
 
+    // Load connections and requests on mount
+    React.useEffect(() => {
+        const loadNetwork = async () => {
+            const reqs = await db.getIncomingRequests(user.id);
+            setRequests(reqs);
+            const conns = await db.getMyConnections(user.id);
+            setConnections(conns);
+        };
+        loadNetwork();
+    }, [user.id]);
+
     const addTag = async (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && newTag.trim()) {
             const updatedTags = [...(user.tags || []), newTag.trim()];
@@ -64,7 +75,7 @@ export const Profile = ({ user }: { user: any }) => {
         setRequests(reqs);
         const conns = await db.getMyConnections(user.id);
         setConnections(conns);
-        success(`Connection ${status}`);
+        success(`Connection ${ status } `);
     };
 
     const saveProfile = async () => {
@@ -94,6 +105,22 @@ export const Profile = ({ user }: { user: any }) => {
         }
     };
 
+    const handlePortfolioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setUploading(true);
+            try {
+                const url = await db.uploadFile(e.target.files[0]);
+                await db.addToPortfolio(user.id, url);
+                await refreshProfile();
+                success("Portfolio item added");
+            } catch (e) {
+                error("Failed to upload portfolio item");
+            } finally {
+                setUploading(false);
+            }
+        }
+    };
+
     const handleFinalDelete = async () => {
         try {
             await deleteAccount();
@@ -109,72 +136,102 @@ export const Profile = ({ user }: { user: any }) => {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 py-8">
-            {/* LEFT COLUMN */}
-            <div className="space-y-6">
-                {/* Profile Card */}
-                <GlassCard className="overflow-hidden p-0">
-                    <div className="h-32 bg-gradient-to-r from-orange-400 to-amber-500 relative">
-                        {user.cover_url && <img src={user.cover_url} className="w-full h-full object-cover" alt="Cover" />}
-                        <button className="absolute top-2 right-2 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors">
-                            <Camera size={16} />
-                        </button>
-                    </div>
-                    <div className="px-5 pb-5">
-                        <div className="relative -mt-12 mb-3 flex justify-between items-end">
-                            <div className="relative">
-                                <img
-                                    src={user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}
-                                    className="w-24 h-24 rounded-full border-4 border-white dark:border-slate-900 bg-white object-cover"
-                                    alt="Avatar"
-                                />
-                                <button className="absolute bottom-0 right-0 p-1.5 bg-slate-900 text-white rounded-full border-2 border-white dark:border-slate-900 hover:bg-orange-600 transition-colors">
-                                    <Camera size={12} />
-                                </button>
+        <div className="max-w-7xl w-full mx-auto px-4 lg:px-10 py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                {/* Left Sidebar: Identity Card (Sticky) */}
+                <aside className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-24 space-y-6">
+                    {/* Profile Card */}
+                    <div className="bg-card-light dark:bg-card-dark rounded-2xl p-6 shadow-soft border border-border-light dark:border-border-dark flex flex-col items-center text-center relative overflow-hidden group">
+                        {/* Verification Banner */}
+                        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
+                        <div className="relative mb-4 mt-2">
+                            <div 
+                                className="size-32 rounded-full bg-cover bg-center border-4 border-background-light dark:border-background-dark shadow-md" 
+                                style={{ backgroundImage: `url(${ user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}` })` }}
+                            ></div>
+                            {/* Blue Tick */}
+                            {user.is_verified === 'verified' && (
+                                <div className="absolute bottom-1 right-1 bg-white dark:bg-card-dark rounded-full p-1 shadow-sm" title="Identity Verified">
+                                    <span className="material-symbols-outlined text-blue-500 fill-current text-[28px] leading-none" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                </div>
+                            )}
+                        </div>
+                        <h1 className="text-2xl font-bold text-text-main dark:text-white">{user.full_name || user.handle}</h1>
+                        <p className="text-secondary dark:text-gray-400 text-sm font-medium mt-1">{user.school || 'University Student'}</p>
+                        <div className="flex items-center gap-1 mt-2 text-xs text-secondary/80 dark:text-gray-500">
+                            <span className="material-symbols-outlined text-sm">location_on</span>
+                            <span>New Delhi, India (Hyper-local)</span>
+                        </div>
+                        {/* XP Level Bar */}
+                        <div className="w-full mt-6 mb-2">
+                            <div className="flex justify-between text-xs font-bold mb-1.5 px-1">
+                                <span className="text-primary uppercase tracking-wider">Level {level} Scribe</span>
+                                <span className="text-secondary">{user.xp || 0} XP</span>
                             </div>
-                            <GlassButton
-                                size="sm"
-                                variant="secondary"
+                            <div className="w-full bg-[#f3ede7] dark:bg-border-dark rounded-full h-2.5 overflow-hidden">
+                                <div className="bg-primary h-2.5 rounded-full" style={{ width: `${ Math.min((user.xp % 100), 100) }% ` }}></div>
+                            </div>
+                            <p className="text-[10px] text-secondary mt-1 text-right">{100 - (user.xp % 100)} XP to Level {level + 1}</p>
+                        </div>
+                        {/* Trust Badges */}
+                        <div className="flex flex-wrap justify-center gap-2 mt-4 w-full">
+                            {user.is_verified === 'verified' && (
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full text-xs font-bold border border-blue-100 dark:border-blue-800">
+                                    <span className="material-symbols-outlined text-sm">badge</span>
+                                    College ID Verified
+                                </div>
+                            )}
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full text-xs font-bold border border-green-100 dark:border-green-800">
+                                <span className="material-symbols-outlined text-sm">shield</span>
+                                Payment Verified
+                            </div>
+                        </div>
+                        {/* Action Buttons */}
+                        <div className="grid grid-cols-2 gap-3 w-full mt-6">
+                            <button 
                                 onClick={() => setEditingProfile(!editingProfile)}
-                                icon={<Edit2 size={14} />}
+                                className="col-span-2 flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-hover text-white font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm shadow-primary/30"
                             >
-                                Edit
-                            </GlassButton>
+                                <span className="material-symbols-outlined text-xl">edit</span>
+                                {editingProfile ? 'Cancel Edit' : 'Edit Profile'}
+                            </button>
+                            <button className="flex items-center justify-center gap-2 w-full bg-[#f3ede7] dark:bg-border-dark hover:bg-border-light dark:hover:bg-gray-700 text-text-main dark:text-white font-bold py-2.5 px-4 rounded-xl transition-colors">
+                                <span className="material-symbols-outlined text-xl">share</span>
+                                Share
+                            </button>
+                            <button className="flex items-center justify-center gap-2 w-full bg-[#f3ede7] dark:bg-border-dark hover:bg-border-light dark:hover:bg-gray-700 text-text-main dark:text-white font-bold py-2.5 px-4 rounded-xl transition-colors">
+                                <span className="material-symbols-outlined text-xl">visibility</span>
+                                Public
+                            </button>
                         </div>
+                    </div>
 
-                        <div>
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                {user.handle}
-                                {user.is_verified === 'verified' && <Shield size={16} className="text-blue-500 fill-blue-500/10" />}
-                            </h2>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{user.school || 'University Student'}</p>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-2 mt-6 pt-6 border-t border-slate-200/50 dark:border-white/10">
-                            <div className="text-center">
-                                <div className="text-lg font-bold text-slate-900 dark:text-white">{level}</div>
-                                <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Level</div>
+                    {/* Quick Info Card */}
+                    <div className="bg-card-light dark:bg-card-dark rounded-2xl p-5 shadow-soft border border-border-light dark:border-border-dark">
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-secondary mb-4">Availability</h3>
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-text-main dark:text-gray-300">Status</span>
+                                <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-bold bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-md">
+                                    <span className="size-2 rounded-full bg-green-500 animate-pulse"></span>
+                                    Online Now
+                                </span>
                             </div>
-                            <div className="text-center border-l border-slate-200/50 dark:border-white/10">
-                                <div className="text-lg font-bold text-slate-900 dark:text-white">{projectsCompleted}</div>
-                                <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Projects</div>
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-text-main dark:text-gray-300">Response Time</span>
+                                <span className="font-bold text-text-main dark:text-white">~ 15 mins</span>
                             </div>
-                            <div className="text-center border-l border-slate-200/50 dark:border-white/10">
-                                <div className="text-lg font-bold text-slate-900 dark:text-white">{rating}</div>
-                                <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Rating</div>
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-text-main dark:text-gray-300">Languages</span>
+                                <span className="font-bold text-text-main dark:text-white">English, Hindi</span>
                             </div>
                         </div>
                     </div>
-                </GlassCard>
 
-                {/* Verification Badge Section */}
-                <GlassCard className="p-5">
-                    <div className="flex items-start gap-3">
-                        <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
-                            <Award size={20} />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-slate-900 dark:text-white text-sm">Get Verified Badge</h3>
+                    {/* Verification Upload (If pending or not verified) */}
+                    {user.is_verified !== 'verified' && (
+                        <div className="bg-card-light dark:bg-card-dark rounded-2xl p-5 shadow-soft border border-border-light dark:border-border-dark">
+                             <h3 className="font-bold text-slate-900 dark:text-white text-sm">Get Verified Badge</h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                                 Upload your College ID Card to get the <span className="text-blue-500 font-bold">Blue Tick</span>. Verified students get 3x more assignments.
                             </p>
@@ -191,364 +248,283 @@ export const Profile = ({ user }: { user: any }) => {
                                     {idUploading ? 'Uploading...' : 'Upload ID Card'}
                                 </button>
                             )}
+                             <input type="file" ref={idInputRef} onChange={handleIdSelect} className="hidden" accept="image/*" />
                         </div>
-                    </div>
-                    <input type="file" ref={idInputRef} onChange={handleIdSelect} className="hidden" accept="image/*" />
-                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
-                </GlassCard>
-
-                {/* About Me */}
-                <GlassCard className="p-5">
-                    <h3 className="font-bold text-slate-800 dark:text-white text-sm mb-3">About Me</h3>
-                    {editingProfile ? (
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-xs font-bold text-slate-500 uppercase">Bio</label>
-                                <textarea
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-orange-500 min-h-[100px] resize-none mt-1 text-slate-900 dark:text-white"
-                                    value={bio}
-                                    onChange={(e) => setBio(e.target.value)}
-                                    placeholder="Tell your peers about your skills..."
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold text-slate-500 uppercase">University</label>
-                                <CollegeAutocomplete
-                                    value={school}
-                                    onChange={setSchool}
-                                    className="mt-1"
-                                    inputClassName="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-orange-500 text-slate-900 dark:text-white"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold text-slate-500 uppercase">Visibility</label>
-                                <div className="flex gap-2 mt-1">
-                                    <button
-                                        onClick={() => setVisibility('global')}
-                                        className={`flex-1 py-2 px-3 rounded-xl text-sm font-bold border transition-all ${visibility === 'global'
-                                            ? 'bg-orange-50 border-orange-500 text-orange-700'
-                                            : 'bg-white/5 border-white/10 text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 dark:text-slate-400'
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-center gap-2">
-                                            <Globe size={14} /> Global
-                                        </div>
-                                    </button>
-                                    <button
-                                        onClick={() => setVisibility('college')}
-                                        className={`flex-1 py-2 px-3 rounded-xl text-sm font-bold border transition-all ${visibility === 'college'
-                                            ? 'bg-orange-50 border-orange-500 text-orange-700'
-                                            : 'bg-white/5 border-white/10 text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 dark:text-slate-400'
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-center gap-2">
-                                            <Lock size={14} /> College Only
-                                        </div>
-                                    </button>
-                                </div>
-                                <p className="text-[10px] text-slate-400 mt-1.5 px-1">
-                                    {visibility === 'global'
-                                        ? "Your profile is visible to everyone on AssignMate."
-                                        : "Only students from your college can see your profile."}
-                                </p>
-                            </div>
-                            <div className="flex gap-2 justify-end pt-2">
-                                <GlassButton size="sm" variant="ghost" onClick={() => setEditingProfile(false)}>Cancel</GlassButton>
-                                <GlassButton size="sm" onClick={saveProfile}>Save Changes</GlassButton>
-                            </div>
-                        </div>
-                    ) : (
-                        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                            {user.bio || "No bio added yet."}
-                        </p>
                     )}
+                </aside>
 
-                    <div className="mt-6">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Skills & Tags</h4>
-                        <div className="flex flex-wrap gap-2">
-                            {(user.tags || []).map((tag: string) => (
-                                <span key={tag} className="bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-white/10 flex items-center gap-2 group">
-                                    {tag}
-                                    <button onClick={() => removeTag(tag)} className="text-slate-400 hover:text-red-500 transition-colors"><X size={12} /></button>
-                                </span>
-                            ))}
-                            {(user.tags?.length || 0) < 8 && (
-                                <input
-                                    className="bg-transparent border border-dashed border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-orange-500 text-slate-500 dark:text-slate-400 focus:text-orange-600 w-24 text-center font-medium placeholder-slate-400"
-                                    placeholder="+ Add Skill"
-                                    value={newTag}
-                                    onChange={e => setNewTag(e.target.value)}
-                                    onKeyDown={addTag}
-                                />
-                            )}
+                {/* Right Column: Activity Feed */}
+                <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+                    {/* Stats Strip */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <div className="text-secondary text-xs font-semibold uppercase mb-1">Total Earned</div>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-bold text-text-main dark:text-white">₹12.5k</span>
+                                <span className="text-green-500 text-xs font-bold flex items-center"><span className="material-symbols-outlined text-[10px]">arrow_upward</span> 12%</span>
+                            </div>
+                        </div>
+                        <div className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <div className="text-secondary text-xs font-semibold uppercase mb-1">Assignments</div>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-bold text-text-main dark:text-white">{projectsCompleted}</span>
+                                <span className="text-secondary text-xs">completed</span>
+                            </div>
+                        </div>
+                        <div className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <div className="text-secondary text-xs font-semibold uppercase mb-1">Rating</div>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-bold text-text-main dark:text-white">{rating}</span>
+                                <span className="material-symbols-outlined text-yellow-400 text-xl filled" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                            </div>
+                        </div>
+                        <div className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                            <div className="text-secondary text-xs font-semibold uppercase mb-1">On-Time</div>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-bold text-text-main dark:text-white">98%</span>
+                                <span className="text-secondary text-xs">rate</span>
+                            </div>
                         </div>
                     </div>
-                </GlassCard>
 
-            </div>
-
-            {/* RIGHT COLUMN: Tabs & Content */}
-            <div className="lg:col-span-2 space-y-6">
-
-                {/* Tabs */}
-                <div className="bg-slate-100/80 dark:bg-white/5 p-1 rounded-xl flex gap-1 mb-6 overflow-x-auto no-scrollbar backdrop-blur-sm">
-                    {
-                        ['portfolio', 'reviews', 'network'].map(tab => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`relative flex-1 py-3 px-4 rounded-lg text-sm font-bold capitalize transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === tab
-                                    ? 'bg-white dark:bg-white/10 text-orange-600 dark:text-orange-400 shadow-sm'
-                                    : 'text-slate-500 hover:bg-white/50 hover:text-slate-700 dark:hover:text-slate-300'
-                                    }`}
-                            >
-                                {tab === 'portfolio' && <Grid size={16} />}
-                                {tab === 'reviews' && <Star size={16} />}
-                                {tab === 'network' && (
-                                    <>
-                                        <Users size={16} />
-                                        {requests.length > 0 && (
-                                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                                        )}
-                                    </>
-                                )}
-                                {tab}
-                            </button>
-                        ))
-                    }
-                </div>
-
-                <AnimatePresence mode='wait'>
-                    {/* PORTFOLIO TAB */}
-                    {activeTab === 'portfolio' && (
-                        <MotionDiv
-                            key="portfolio"
-                            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                        >
-                            <div className="flex items-center justify-between mb-4 px-1">
-                                <h3 className="font-bold text-lg text-slate-800 dark:text-white">My Work Samples</h3>
-                                <GlassButton
-                                    size="sm"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    disabled={uploading}
-                                    icon={<Upload size={14} />}
+                    {/* Tabs */}
+                    <div className="border-b border-border-light dark:border-border-dark">
+                        <nav aria-label="Tabs" className="flex gap-8 overflow-x-auto no-scrollbar">
+                            {['portfolio', 'about', 'reviews', 'network'].map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`border - b - 2 font - medium text - sm py - 3 whitespace - nowrap px - 1 transition - colors capitalize ${
+    activeTab === tab
+        ? 'border-primary text-primary font-bold'
+        : 'border-transparent text-secondary dark:text-gray-400 hover:text-text-main dark:hover:text-white'
+} `}
                                 >
-                                    {uploading ? "Uploading..." : "Add New"}
-                                </GlassButton>
-                            </div>
+                                    {tab} {tab === 'portfolio' && `(${ user.portfolio?.length || 0 })`} {tab === 'network' && requests.length > 0 && `(${ requests.length })`}
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                {(user.portfolio || []).map((url: string, i: number) => (
-                                    <div key={i} className="group relative aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm">
-                                        <img src={url} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Portfolio" />
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleDeleteSample(url); }}
-                                                className="p-2 bg-white/90 text-red-500 rounded-lg hover:bg-red-50 shadow-sm"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
+                    {/* Tab Content */}
+                    <div className="space-y-8 animate-fade-in">
+                        <AnimatePresence mode='wait'>
+                            {/* PORTFOLIO TAB */}
+                            {activeTab === 'portfolio' && (
+                                <MotionDiv
+                                    key="portfolio"
+                                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                                >
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-lg font-bold dark:text-white">Featured Work</h3>
+                                        <input type="file" ref={fileInputRef} onChange={handlePortfolioUpload} className="hidden" accept="image/*" />
                                     </div>
-                                ))}
-                                {(!user.portfolio || user.portfolio.length === 0) && (
-                                    <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-300 dark:border-white/10 rounded-xl bg-slate-50/50 dark:bg-white/5">
-                                        <div className="w-16 h-16 bg-slate-100 dark:bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <Camera className="text-slate-400" size={24} />
-                                        </div>
-                                        <p className="font-bold text-slate-700 dark:text-slate-300">No samples yet</p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Upload photos of your notes or assignments</p>
-                                    </div>
-                                )}
-                            </div>
-                        </MotionDiv>
-                    )}
-
-                    {/* REVIEWS TAB */}
-                    {activeTab === 'reviews' && (
-                        <MotionDiv
-                            key="reviews"
-                            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                        >
-                            <div className="flex items-center justify-between mb-4 px-1">
-                                <h3 className="font-bold text-lg text-slate-800 dark:text-white">Peer Reviews</h3>
-                                <div className="text-sm font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                                    <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                                    4.9 <span className="text-slate-400 font-normal">(12 reviews)</span>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                {[1, 2, 3].map((r) => (
-                                    <GlassCard key={r} className="p-5">
-                                        <div className="flex items-start justify-between mb-2">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold text-xs border border-indigo-200">
-                                                    AK
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-sm text-slate-900 dark:text-white">Arjun K.</h4>
-                                                    <p className="text-[10px] text-slate-500">2 days ago</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                        {(user.portfolio || []).map((url: string, i: number) => (
+                                            <div key={i} className="group cursor-pointer relative">
+                                                <div className="relative overflow-hidden rounded-xl border border-border-light dark:border-border-dark shadow-sm bg-card-light dark:bg-card-dark aspect-[4/3]">
+                                                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${ url })` }}></div>
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-60"></div>
+                                                    <div className="absolute bottom-3 left-4 right-4">
+                                                        <h4 className="text-white font-bold text-sm line-clamp-1">Portfolio Item {i + 1}</h4>
+                                                    </div>
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); handleDeleteSample(url); }}
+                                                        className="absolute top-2 right-2 p-1.5 bg-white/90 text-red-500 rounded-lg hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
                                                 </div>
                                             </div>
-                                            <div className="flex gap-0.5">
-                                                {[1, 2, 3, 4, 5].map(s => <Star key={s} size={12} className="fill-yellow-400 text-yellow-400" />)}
+                                        ))}
+                                        {/* Add New Item */}
+                                        <div 
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border-light dark:border-border-dark bg-[#fcfaf8] dark:bg-background-dark aspect-[4/3] hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
+                                        >
+                                            <div className="size-10 rounded-full bg-white dark:bg-card-dark shadow-sm flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                                {uploading ? <span className="animate-spin material-symbols-outlined text-primary">progress_activity</span> : <span className="material-symbols-outlined text-primary">add</span>}
                                             </div>
+                                            <span className="text-xs font-bold text-secondary dark:text-gray-400">{uploading ? 'Uploading...' : 'Add Project'}</span>
                                         </div>
-                                        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                                            "Super fast delivery and the handwriting was extremely neat. Helped me submit my record on time! Will definitely hire again."
-                                        </p>
-                                        <div className="mt-3 flex gap-2">
-                                            <span className="px-2 py-1 bg-slate-50 dark:bg-white/10 text-slate-500 dark:text-slate-300 text-[10px] font-bold rounded border border-slate-100 dark:border-white/10">Physics Record</span>
-                                        </div>
-                                    </GlassCard>
-                                ))}
-                            </div>
-                        </MotionDiv>
-                    )}
+                                    </div>
+                                </MotionDiv>
+                            )}
 
-                    {/* NETWORK TAB */}
-                    {activeTab === 'network' && (
-                        <MotionDiv
-                            key="network"
-                            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                        >
-                            {/* Connection Requests */}
-                            {requests.length > 0 && (
-                                <div className="mb-8">
-                                    <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 px-1 flex items-center gap-2">
-                                        Requests <span className="bg-red-500/10 text-red-600 text-xs px-2 py-0.5 rounded-full">{requests.length}</span>
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {requests.map(req => (
-                                            <GlassCard key={req.id} className="p-4 flex items-center gap-4">
-                                                <img
-                                                    src={req.requester?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${req.requester_id}`}
-                                                    className="w-12 h-12 rounded-full bg-slate-100"
+                            {/* ABOUT TAB */}
+                            {activeTab === 'about' && (
+                                <MotionDiv
+                                    key="about"
+                                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                                >
+                                    <div className="bg-card-light dark:bg-card-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-sm">
+                                        <h3 className="text-lg font-bold mb-3 dark:text-white">My Expertise</h3>
+                                        {editingProfile ? (
+                                            <div className="space-y-4">
+                                                <textarea
+                                                    className="w-full bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary min-h-[100px] resize-none text-slate-900 dark:text-white"
+                                                    value={bio}
+                                                    onChange={(e) => setBio(e.target.value)}
+                                                    placeholder="Tell your peers about your skills..."
                                                 />
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="font-bold text-slate-900 dark:text-white truncate">{req.requester?.handle}</h4>
-                                                    <p className="text-xs text-slate-500 truncate">{req.requester?.school}</p>
-                                                    <div className="flex gap-2 mt-2">
-                                                        <button
-                                                            onClick={() => handleConnectionResponse(req.id, 'accepted')}
-                                                            className="flex-1 bg-slate-900 text-white text-xs font-bold py-1.5 rounded-lg hover:bg-orange-600 flex items-center justify-center gap-1"
-                                                        >
-                                                            <Check size={12} /> Accept
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleConnectionResponse(req.id, 'rejected')}
-                                                            className="flex-1 bg-slate-100 text-slate-600 text-xs font-bold py-1.5 rounded-lg hover:bg-slate-200"
-                                                        >
-                                                            Ignore
-                                                        </button>
+                                                <CollegeAutocomplete
+                                                    value={school}
+                                                    onChange={setSchool}
+                                                    className="mt-1"
+                                                    inputClassName="w-full bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary text-slate-900 dark:text-white"
+                                                />
+                                                <div className="flex gap-2 justify-end">
+                                                    <button onClick={saveProfile} className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold">Save Changes</button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p className="text-secondary dark:text-gray-300 leading-relaxed text-sm mb-4">
+                                                {user.bio || "No bio added yet. Click 'Edit Profile' to add one."}
+                                            </p>
+                                        )}
+                                        
+                                        <div className="flex flex-wrap gap-2 mt-4">
+                                            {(user.tags || []).map((tag: string) => (
+                                                <span key={tag} className="px-3 py-1 bg-[#f3ede7] dark:bg-border-dark text-text-main dark:text-gray-200 rounded-full text-xs font-medium border border-transparent flex items-center gap-1">
+                                                    {tag}
+                                                    {editingProfile && <button onClick={() => removeTag(tag)}><X size={12} /></button>}
+                                                </span>
+                                            ))}
+                                            {editingProfile && (
+                                                <input
+                                                    className="bg-transparent border border-dashed border-slate-300 rounded-full px-3 py-1 text-xs outline-none focus:border-primary w-24"
+                                                    placeholder="+ Add Skill"
+                                                    value={newTag}
+                                                    onChange={e => setNewTag(e.target.value)}
+                                                    onKeyDown={addTag}
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                </MotionDiv>
+                            )}
+
+                             {/* REVIEWS TAB */}
+                             {activeTab === 'reviews' && (
+                                <MotionDiv
+                                    key="reviews"
+                                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                                >
+                                    <div className="flex justify-between items-center mb-4 mt-8">
+                                        <h3 className="text-lg font-bold dark:text-white">Recent Reviews</h3>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Placeholder Reviews */}
+                                        <div className="bg-card-light dark:bg-card-dark p-5 rounded-xl border border-border-light dark:border-border-dark shadow-sm">
+                                            <div className="flex items-start justify-between mb-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold">AK</div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-text-main dark:text-white">Anjali K.</p>
+                                                        <p className="text-xs text-secondary">Student</p>
                                                     </div>
                                                 </div>
-                                            </GlassCard>
-                                        ))}
+                                                <div className="flex text-yellow-400 text-sm">
+                                                    {[1,2,3,4,5].map(i => <span key={i} className="material-symbols-outlined text-base filled" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>)}
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-text-main dark:text-gray-300 leading-relaxed">"Great work! Saved my semester."</p>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                </MotionDiv>
+                             )}
 
-                            {/* My Connections */}
-                            <div>
-                                <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 px-1">My Connections</h3>
-                                {connections.length === 0 ? (
-                                    <div className="text-center py-12 bg-white/5 rounded-xl border border-dashed border-slate-300 dark:border-white/10">
-                                        <Users className="mx-auto text-slate-300 mb-3" size={32} />
-                                        <p className="text-slate-500 text-sm font-medium">You haven't connected with anyone yet.</p>
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                        {connections.map(conn => (
-                                            <GlassCard key={conn.id} className="p-4 text-center hover:border-orange-500/50">
-                                                <img
-                                                    src={conn.avatar_url}
-                                                    className="w-16 h-16 rounded-full bg-slate-100 mx-auto mb-3 object-cover"
-                                                />
-                                                <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">{conn.handle}</h4>
-                                                <p className="text-xs text-slate-500 truncate mb-3">{conn.school}</p>
-                                                <button className="w-full bg-slate-50 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/20 text-xs font-bold py-2 rounded-lg transition-colors">
-                                                    View Profile
-                                                </button>
-                                            </GlassCard>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </MotionDiv>
-                    )}
-                </AnimatePresence>
-
-            </div>
-
-            {/* Danger Zone */}
-            <div className="mt-12 pt-8 border-t border-slate-200 dark:border-white/10 col-span-full">
-                <h3 className="text-sm font-bold text-red-600 mb-2 uppercase tracking-wider">Danger Zone</h3>
-                <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <div>
-                        <h4 className="font-bold text-slate-800 dark:text-white text-sm">Delete Account</h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            Permanently remove your profile and chat history. This action cannot be undone.
-                        </p>
-                    </div>
-                    <button
-                        onClick={() => { setShowDeleteModal(true); setDeleteConfirmInput(''); }}
-                        className="whitespace-nowrap px-4 py-2 bg-white dark:bg-transparent border border-red-200 dark:border-red-500/30 text-red-600 font-bold rounded-lg text-sm hover:bg-red-600 hover:text-white transition-colors shadow-sm"
-                    >
-                        Delete Account
-                    </button>
-                </div>
-            </div>
-
-            {/* Delete Confirmation Modal */}
-            <AnimatePresence>
-                {showDeleteModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
-                    >
-                        <GlassCard className="max-w-sm w-full p-6 shadow-2xl bg-white dark:bg-slate-900">
-                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4 mx-auto border border-red-200">
-                                <AlertTriangle className="text-red-600" size={24} />
-                            </div>
-
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white text-center mb-2">Delete Account?</h3>
-                            <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-6 leading-relaxed">
-                                This will permanently delete your profile, <b>{user.handle}</b>, and all associated data. You cannot recover your account.
-                            </p>
-
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Type "DELETE" to confirm</label>
-                                    <input
-                                        className="w-full border border-slate-300 dark:border-slate-600 bg-transparent rounded-xl px-4 py-3 text-center font-bold outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all uppercase placeholder-slate-300 dark:text-white"
-                                        placeholder="DELETE"
-                                        value={deleteConfirmInput}
-                                        onChange={(e) => setDeleteConfirmInput(e.target.value.toUpperCase())}
-                                    />
-                                </div>
-
-                                <button
-                                    disabled={deleteConfirmInput !== 'DELETE'}
-                                    onClick={handleFinalDelete}
-                                    className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-red-200"
+                             {/* NETWORK TAB */}
+                             {activeTab === 'network' && (
+                                <MotionDiv
+                                    key="network"
+                                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
                                 >
-                                    Permanently Delete
-                                </button>
-
-                                <button
-                                    onClick={() => setShowDeleteModal(false)}
-                                    className="w-full text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white font-bold py-2 text-sm"
-                                >
-                                    Cancel, keep my account
-                                </button>
-                            </div>
-                        </GlassCard>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                                     {/* Connection Requests */}
+                                     {requests.length > 0 && (
+                                        <div className="mb-8">
+                                            <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 px-1 flex items-center gap-2">
+                                                Requests <span className="bg-red-500/10 text-red-600 text-xs px-2 py-0.5 rounded-full">{requests.length}</span>
+                                            </h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {requests.map(req => (
+                                                    <div key={req.id} className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm flex items-center gap-4">
+                                                        <img
+                                                            src={req.requester?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${req.requester_id}`}
+className = "w-12 h-12 rounded-full bg-slate-100"
+    />
+    <div className="flex-1 min-w-0">
+        <h4 className="font-bold text-slate-900 dark:text-white truncate">{req.requester?.handle}</h4>
+        <div className="flex gap-2 mt-2">
+            <button onClick={() => handleConnectionResponse(req.id, 'accepted')} className="flex-1 bg-slate-900 text-white text-xs font-bold py-1.5 rounded-lg">Accept</button>
+            <button onClick={() => handleConnectionResponse(req.id, 'rejected')} className="flex-1 bg-slate-100 text-slate-600 text-xs font-bold py-1.5 rounded-lg">Ignore</button>
         </div>
+    </div>
+                                                    </div >
+                                                ))}
+                                            </div >
+                                        </div >
+                                    )}
+
+{/* Connections */ }
+<h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 px-1">My Connections</h3>
+{
+    connections.length === 0 ? (
+        <div className="text-center py-12 bg-white/5 rounded-xl border border-dashed border-slate-300 dark:border-white/10">
+            <Users className="mx-auto text-slate-300 mb-3" size={32} />
+            <p className="text-slate-500 text-sm font-medium">No connections yet.</p>
+        </div>
+    ) : (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {connections.map(conn => (
+            <div key={conn.id} className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm text-center">
+                <img src={conn.avatar_url} className="w-16 h-16 rounded-full bg-slate-100 mx-auto mb-3 object-cover" />
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">{conn.handle}</h4>
+                <p className="text-xs text-slate-500 truncate mb-3">{conn.school}</p>
+            </div>
+        ))}
+    </div>
+)
+}
+                                </MotionDiv >
+                             )}
+                        </AnimatePresence >
+                    </div >
+                </div >
+
+    {/* Danger Zone */ }
+    < div className = "mt-12 pt-8 border-t border-slate-200 dark:border-white/10 col-span-full" >
+                    <h3 className="text-sm font-bold text-red-600 mb-2 uppercase tracking-wider">Danger Zone</h3>
+                    <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div>
+                            <h4 className="font-bold text-slate-800 dark:text-white text-sm">Delete Account</h4>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Permanently remove your profile and chat history.</p>
+                        </div>
+                        <button onClick={() => { setShowDeleteModal(true); setDeleteConfirmInput(''); }} className="px-4 py-2 bg-white border border-red-200 text-red-600 font-bold rounded-lg text-sm hover:bg-red-600 hover:text-white transition-colors">Delete Account</button>
+                    </div>
+                </div >
+
+    {/* Delete Modal */ }
+    <AnimatePresence>
+{
+    showDeleteModal && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <div className="max-w-sm w-full p-6 shadow-2xl bg-white dark:bg-slate-900 rounded-2xl">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4 mx-auto border border-red-200">
+                    <AlertTriangle className="text-red-600" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white text-center mb-2">Delete Account?</h3>
+                <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-6">Type "DELETE" to confirm.</p>
+                <input className="w-full border border-slate-300 rounded-xl px-4 py-3 text-center font-bold mb-4" placeholder="DELETE" value={deleteConfirmInput} onChange={(e) => setDeleteConfirmInput(e.target.value.toUpperCase())} />
+                <button disabled={deleteConfirmInput !== 'DELETE'} onClick={handleFinalDelete} className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl mb-2">Permanently Delete</button>
+                <button onClick={() => setShowDeleteModal(false)} className="w-full text-slate-500 font-bold py-2 text-sm">Cancel</button>
+            </div>
+        </motion.div>
+    )
+}
+                </AnimatePresence >
+            </div >
+        </div >
     );
 };
+```
