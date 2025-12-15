@@ -20,15 +20,14 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     const [completionForm, setCompletionForm] = useState({ handle: '', school: '' });
     const [completionIsWriter, setCompletionIsWriter] = useState(false);
 
-    // Pre-fill completion form if user has partial data
+    // Redirect if user is already logged in
     useEffect(() => {
-        if (user?.is_incomplete) {
-            setCompletionForm(prev => ({
-                ...prev,
-                handle: user.handle || ''
-            }));
+        if (user && !user.is_incomplete) {
+            if (onComplete) {
+                onComplete();
+            }
         }
-    }, [user]);
+    }, [user, onComplete]);
 
     // Handle email/password registration and login
     const handleSubmit = async (e: React.FormEvent) => {
