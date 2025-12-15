@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           ...profile,
           email: fbUser.email || profile.email,
           is_incomplete: false
-        });
+        } as User);
         presence.init(userId);
       } else {
         // Profile missing - auto-complete for Google signups

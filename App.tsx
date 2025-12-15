@@ -26,6 +26,7 @@ const Feed = lazy(() => import('./pages/Feed').then(module => ({ default: module
 const ChatList = lazy(() => import('./pages/ChatList').then(module => ({ default: module.ChatList })));
 const ChatRoom = lazy(() => import('./pages/ChatRoom').then(module => ({ default: module.ChatRoom })));
 const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
+const FindWriter = lazy(() => import('./pages/FindWriter').then(module => ({ default: module.FindWriter })));
 
 export default function AppWrapper() {
   return (
@@ -142,6 +143,8 @@ function AppContent() {
                 <Feed user={user} onChat={startChatFromWriter} />
               </ProtectedRoute>
             } />
+
+            <Route path="/writers" element={<FindWriter />} />
 
             <Route path="/profile" element={
               <ProtectedRoute>

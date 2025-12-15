@@ -41,7 +41,7 @@ export const AdminChats = () => {
     const handleDeleteMessage = async (msgId: string) => {
         if (!confirm('Delete this message?')) return;
         try {
-            await adminApi.deleteMessage(msgId);
+            await adminApi.deleteMessage(msgId, 'Admin deletion');
             setMessages(messages.filter(m => m.id !== msgId));
             success("Message deleted");
         } catch (e) {

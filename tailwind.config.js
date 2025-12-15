@@ -11,11 +11,11 @@ export default {
     theme: {
         extend: {
             colors: {
-                "primary": "#f09942",
+                "primary": "#f09942", // Updated to match new design
                 "primary-hover": "#e08830",
                 "secondary": "#9a734c",
                 "background-light": "#fcfaf8",
-                "background-dark": "#1a1612",
+                "background-dark": "#221910", // Updated
                 "card-light": "#ffffff",
                 "card-dark": "#2a221b",
                 "border-light": "#e7dbcf",
@@ -27,7 +27,7 @@ export default {
                 "border-subtle": "#efece8",
                 "accent-orange": "#FFF0E0",
                 "dashboard-muted": "#8c8075",
-                "primary-light": "#FFF6ED", // Keep for backward compatibility if needed
+                "primary-light": "#fbdcb8", // Updated
                 "text-dark": "#1b140d", // Keep for backward compatibility
                 "border-color": "#f3ede7", // Keep for backward compatibility
                 orange: {
@@ -36,7 +36,7 @@ export default {
                     200: '#fed7aa',
                     300: '#fdba74',
                     400: '#fb923c',
-                    500: '#FF7A00', // Primary Brand Color
+                    500: '#f09942', // Updated Primary Brand Color
                     600: '#ea580c',
                     700: '#c2410c',
                     800: '#9a3412',
@@ -59,7 +59,8 @@ export default {
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
-                display: ['Manrope', 'sans-serif'],
+                display: ['Lexend', 'sans-serif'], // Updated to Lexend
+                body: ['Noto Sans', 'sans-serif'], // Added Noto Sans
             },
             borderRadius: {
                 "lg": "2rem",
