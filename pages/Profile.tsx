@@ -1,4 +1,3 @@
-```javascript
 import React, { useState, useRef } from 'react';
 import { dbService as db } from '../services/firestoreService';
 import { Camera, Edit2, X, Trash2, AlertTriangle, Check, Shield, Globe, Lock, Upload, Star, Grid, Users } from 'lucide-react';
@@ -145,9 +144,9 @@ export const Profile = ({ user }: { user: any }) => {
                         {/* Verification Banner */}
                         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
                         <div className="relative mb-4 mt-2">
-                            <div 
-                                className="size-32 rounded-full bg-cover bg-center border-4 border-background-light dark:border-background-dark shadow-md" 
-                                style={{ backgroundImage: `url(${ user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}` })` }}
+                            <div
+                                className="size-32 rounded-full bg-cover bg-center border-4 border-background-light dark:border-background-dark shadow-md"
+                                style={{ backgroundImage: `url('${user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}')` }}
                             ></div>
                             {/* Blue Tick */}
                             {user.is_verified === 'verified' && (
@@ -169,7 +168,7 @@ export const Profile = ({ user }: { user: any }) => {
                                 <span className="text-secondary">{user.xp || 0} XP</span>
                             </div>
                             <div className="w-full bg-[#f3ede7] dark:bg-border-dark rounded-full h-2.5 overflow-hidden">
-                                <div className="bg-primary h-2.5 rounded-full" style={{ width: `${ Math.min((user.xp % 100), 100) }% ` }}></div>
+                                <div className="bg-primary h-2.5 rounded-full" style={{ width: `${Math.min((user.xp % 100), 100)}% ` }}></div>
                             </div>
                             <p className="text-[10px] text-secondary mt-1 text-right">{100 - (user.xp % 100)} XP to Level {level + 1}</p>
                         </div>
@@ -188,7 +187,7 @@ export const Profile = ({ user }: { user: any }) => {
                         </div>
                         {/* Action Buttons */}
                         <div className="grid grid-cols-2 gap-3 w-full mt-6">
-                            <button 
+                            <button
                                 onClick={() => setEditingProfile(!editingProfile)}
                                 className="col-span-2 flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-hover text-white font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm shadow-primary/30"
                             >
@@ -231,7 +230,7 @@ export const Profile = ({ user }: { user: any }) => {
                     {/* Verification Upload (If pending or not verified) */}
                     {user.is_verified !== 'verified' && (
                         <div className="bg-card-light dark:bg-card-dark rounded-2xl p-5 shadow-soft border border-border-light dark:border-border-dark">
-                             <h3 className="font-bold text-slate-900 dark:text-white text-sm">Get Verified Badge</h3>
+                            <h3 className="font-bold text-slate-900 dark:text-white text-sm">Get Verified Badge</h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                                 Upload your College ID Card to get the <span className="text-blue-500 font-bold">Blue Tick</span>. Verified students get 3x more assignments.
                             </p>
@@ -248,7 +247,7 @@ export const Profile = ({ user }: { user: any }) => {
                                     {idUploading ? 'Uploading...' : 'Upload ID Card'}
                                 </button>
                             )}
-                             <input type="file" ref={idInputRef} onChange={handleIdSelect} className="hidden" accept="image/*" />
+                            <input type="file" ref={idInputRef} onChange={handleIdSelect} className="hidden" accept="image/*" />
                         </div>
                     )}
                 </aside>
@@ -294,13 +293,12 @@ export const Profile = ({ user }: { user: any }) => {
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`border - b - 2 font - medium text - sm py - 3 whitespace - nowrap px - 1 transition - colors capitalize ${
-    activeTab === tab
-        ? 'border-primary text-primary font-bold'
-        : 'border-transparent text-secondary dark:text-gray-400 hover:text-text-main dark:hover:text-white'
-} `}
+                                    className={`border - b - 2 font - medium text - sm py - 3 whitespace - nowrap px - 1 transition - colors capitalize ${activeTab === tab
+                                            ? 'border-primary text-primary font-bold'
+                                            : 'border-transparent text-secondary dark:text-gray-400 hover:text-text-main dark:hover:text-white'
+                                        } `}
                                 >
-                                    {tab} {tab === 'portfolio' && `(${ user.portfolio?.length || 0 })`} {tab === 'network' && requests.length > 0 && `(${ requests.length })`}
+                                    {tab} {tab === 'portfolio' && `(${user.portfolio?.length || 0})`} {tab === 'network' && requests.length > 0 && `(${requests.length})`}
                                 </button>
                             ))}
                         </nav>
@@ -323,12 +321,12 @@ export const Profile = ({ user }: { user: any }) => {
                                         {(user.portfolio || []).map((url: string, i: number) => (
                                             <div key={i} className="group cursor-pointer relative">
                                                 <div className="relative overflow-hidden rounded-xl border border-border-light dark:border-border-dark shadow-sm bg-card-light dark:bg-card-dark aspect-[4/3]">
-                                                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${ url })` }}></div>
+                                                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${url})` }}></div>
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-60"></div>
                                                     <div className="absolute bottom-3 left-4 right-4">
                                                         <h4 className="text-white font-bold text-sm line-clamp-1">Portfolio Item {i + 1}</h4>
                                                     </div>
-                                                    <button 
+                                                    <button
                                                         onClick={(e) => { e.stopPropagation(); handleDeleteSample(url); }}
                                                         className="absolute top-2 right-2 p-1.5 bg-white/90 text-red-500 rounded-lg hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
                                                     >
@@ -338,7 +336,7 @@ export const Profile = ({ user }: { user: any }) => {
                                             </div>
                                         ))}
                                         {/* Add New Item */}
-                                        <div 
+                                        <div
                                             onClick={() => fileInputRef.current?.click()}
                                             className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border-light dark:border-border-dark bg-[#fcfaf8] dark:bg-background-dark aspect-[4/3] hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
                                         >
@@ -382,7 +380,7 @@ export const Profile = ({ user }: { user: any }) => {
                                                 {user.bio || "No bio added yet. Click 'Edit Profile' to add one."}
                                             </p>
                                         )}
-                                        
+
                                         <div className="flex flex-wrap gap-2 mt-4">
                                             {(user.tags || []).map((tag: string) => (
                                                 <span key={tag} className="px-3 py-1 bg-[#f3ede7] dark:bg-border-dark text-text-main dark:text-gray-200 rounded-full text-xs font-medium border border-transparent flex items-center gap-1">
@@ -404,8 +402,8 @@ export const Profile = ({ user }: { user: any }) => {
                                 </MotionDiv>
                             )}
 
-                             {/* REVIEWS TAB */}
-                             {activeTab === 'reviews' && (
+                            {/* REVIEWS TAB */}
+                            {activeTab === 'reviews' && (
                                 <MotionDiv
                                     key="reviews"
                                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
@@ -425,23 +423,23 @@ export const Profile = ({ user }: { user: any }) => {
                                                     </div>
                                                 </div>
                                                 <div className="flex text-yellow-400 text-sm">
-                                                    {[1,2,3,4,5].map(i => <span key={i} className="material-symbols-outlined text-base filled" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>)}
+                                                    {[1, 2, 3, 4, 5].map(i => <span key={i} className="material-symbols-outlined text-base filled" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>)}
                                                 </div>
                                             </div>
                                             <p className="text-sm text-text-main dark:text-gray-300 leading-relaxed">"Great work! Saved my semester."</p>
                                         </div>
                                     </div>
                                 </MotionDiv>
-                             )}
+                            )}
 
-                             {/* NETWORK TAB */}
-                             {activeTab === 'network' && (
+                            {/* NETWORK TAB */}
+                            {activeTab === 'network' && (
                                 <MotionDiv
                                     key="network"
                                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
                                 >
-                                     {/* Connection Requests */}
-                                     {requests.length > 0 && (
+                                    {/* Connection Requests */}
+                                    {requests.length > 0 && (
                                         <div className="mb-8">
                                             <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 px-1 flex items-center gap-2">
                                                 Requests <span className="bg-red-500/10 text-red-600 text-xs px-2 py-0.5 rounded-full">{requests.length}</span>
@@ -451,49 +449,47 @@ export const Profile = ({ user }: { user: any }) => {
                                                     <div key={req.id} className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm flex items-center gap-4">
                                                         <img
                                                             src={req.requester?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${req.requester_id}`}
-className = "w-12 h-12 rounded-full bg-slate-100"
-    />
-    <div className="flex-1 min-w-0">
-        <h4 className="font-bold text-slate-900 dark:text-white truncate">{req.requester?.handle}</h4>
-        <div className="flex gap-2 mt-2">
-            <button onClick={() => handleConnectionResponse(req.id, 'accepted')} className="flex-1 bg-slate-900 text-white text-xs font-bold py-1.5 rounded-lg">Accept</button>
-            <button onClick={() => handleConnectionResponse(req.id, 'rejected')} className="flex-1 bg-slate-100 text-slate-600 text-xs font-bold py-1.5 rounded-lg">Ignore</button>
-        </div>
-    </div>
-                                                    </div >
+                                                            className="w-12 h-12 rounded-full bg-slate-100"
+                                                        />
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-bold text-slate-900 dark:text-white truncate">{req.requester?.handle}</h4>
+                                                            <div className="flex gap-2 mt-2">
+                                                                <button onClick={() => handleConnectionResponse(req.id, 'accepted')} className="flex-1 bg-slate-900 text-white text-xs font-bold py-1.5 rounded-lg">Accept</button>
+                                                                <button onClick={() => handleConnectionResponse(req.id, 'rejected')} className="flex-1 bg-slate-100 text-slate-600 text-xs font-bold py-1.5 rounded-lg">Ignore</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 ))}
-                                            </div >
-                                        </div >
+                                            </div>
+                                        </div>
                                     )}
 
-{/* Connections */ }
-<h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 px-1">My Connections</h3>
-{
-    connections.length === 0 ? (
-        <div className="text-center py-12 bg-white/5 rounded-xl border border-dashed border-slate-300 dark:border-white/10">
-            <Users className="mx-auto text-slate-300 mb-3" size={32} />
-            <p className="text-slate-500 text-sm font-medium">No connections yet.</p>
-        </div>
-    ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {connections.map(conn => (
-                <div key={conn.id} className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm text-center">
-                    <img src={conn.avatar_url} className="w-16 h-16 rounded-full bg-slate-100 mx-auto mb-3 object-cover" />
-                    <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">{conn.handle}</h4>
-                    <p className="text-xs text-slate-500 truncate mb-3">{conn.school}</p>
+                                    {/* Connections */}
+                                    <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 px-1">My Connections</h3>
+                                    {connections.length === 0 ? (
+                                        <div className="text-center py-12 bg-white/5 rounded-xl border border-dashed border-slate-300 dark:border-white/10">
+                                            <Users className="mx-auto text-slate-300 mb-3" size={32} />
+                                            <p className="text-slate-500 text-sm font-medium">No connections yet.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                            {connections.map(conn => (
+                                                <div key={conn.id} className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm text-center">
+                                                    <img src={conn.avatar_url} className="w-16 h-16 rounded-full bg-slate-100 mx-auto mb-3 object-cover" />
+                                                    <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">{conn.handle}</h4>
+                                                    <p className="text-xs text-slate-500 truncate mb-3">{conn.school}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </MotionDiv>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
-            ))}
-        </div>
-    )
-}
-                                </MotionDiv >
-                             )}
-                        </AnimatePresence >
-                    </div >
-                </div >
 
-    {/* Danger Zone */ }
-    < div className = "mt-12 pt-8 border-t border-slate-200 dark:border-white/10 col-span-full" >
+                {/* Danger Zone */}
+                <div className="mt-12 pt-8 border-t border-slate-200 dark:border-white/10 col-span-full">
                     <h3 className="text-sm font-bold text-red-600 mb-2 uppercase tracking-wider">Danger Zone</h3>
                     <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                         <div>
@@ -502,29 +498,26 @@ className = "w-12 h-12 rounded-full bg-slate-100"
                         </div>
                         <button onClick={() => { setShowDeleteModal(true); setDeleteConfirmInput(''); }} className="px-4 py-2 bg-white border border-red-200 text-red-600 font-bold rounded-lg text-sm hover:bg-red-600 hover:text-white transition-colors">Delete Account</button>
                     </div>
-                </div >
-
-    {/* Delete Modal */ }
-    <AnimatePresence>
-{
-    showDeleteModal && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <div className="max-w-sm w-full p-6 shadow-2xl bg-white dark:bg-slate-900 rounded-2xl">
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4 mx-auto border border-red-200">
-                    <AlertTriangle className="text-red-600" size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white text-center mb-2">Delete Account?</h3>
-                <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-6">Type "DELETE" to confirm.</p>
-                <input className="w-full border border-slate-300 rounded-xl px-4 py-3 text-center font-bold mb-4" placeholder="DELETE" value={deleteConfirmInput} onChange={(e) => setDeleteConfirmInput(e.target.value.toUpperCase())} />
-                <button disabled={deleteConfirmInput !== 'DELETE'} onClick={handleFinalDelete} className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl mb-2">Permanently Delete</button>
-                <button onClick={() => setShowDeleteModal(false)} className="w-full text-slate-500 font-bold py-2 text-sm">Cancel</button>
+
+                {/* Delete Modal */}
+                <AnimatePresence>
+                    {showDeleteModal && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                            <div className="max-w-sm w-full p-6 shadow-2xl bg-white dark:bg-slate-900 rounded-2xl">
+                                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4 mx-auto border border-red-200">
+                                    <AlertTriangle className="text-red-600" size={24} />
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white text-center mb-2">Delete Account?</h3>
+                                <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-6">Type "DELETE" to confirm.</p>
+                                <input className="w-full border border-slate-300 rounded-xl px-4 py-3 text-center font-bold mb-4" placeholder="DELETE" value={deleteConfirmInput} onChange={(e) => setDeleteConfirmInput(e.target.value.toUpperCase())} />
+                                <button disabled={deleteConfirmInput !== 'DELETE'} onClick={handleFinalDelete} className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl mb-2">Permanently Delete</button>
+                                <button onClick={() => setShowDeleteModal(false)} className="w-full text-slate-500 font-bold py-2 text-sm">Cancel</button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
-        </motion.div>
-    )
-}
-                </AnimatePresence >
-            </div >
-        </div >
+        </div>
     );
 };
-```
