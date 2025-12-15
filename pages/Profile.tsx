@@ -135,7 +135,7 @@ export const Profile = ({ user }: { user: any }) => {
     };
 
     return (
-        <div className="max-w-7xl w-full mx-auto px-4 lg:px-10 py-8">
+        <div className="w-full px-4 lg:px-10 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 {/* Left Sidebar: Identity Card (Sticky) */}
                 <aside className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-24 space-y-6">
@@ -294,8 +294,8 @@ export const Profile = ({ user }: { user: any }) => {
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={`border - b - 2 font - medium text - sm py - 3 whitespace - nowrap px - 1 transition - colors capitalize ${activeTab === tab
-                                            ? 'border-primary text-primary font-bold'
-                                            : 'border-transparent text-secondary dark:text-gray-400 hover:text-text-main dark:hover:text-white'
+                                        ? 'border-primary text-primary font-bold'
+                                        : 'border-transparent text-secondary dark:text-gray-400 hover:text-text-main dark:hover:text-white'
                                         } `}
                                 >
                                     {tab} {tab === 'portfolio' && `(${user.portfolio?.length || 0})`} {tab === 'network' && requests.length > 0 && `(${requests.length})`}
