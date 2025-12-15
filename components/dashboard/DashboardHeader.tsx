@@ -93,7 +93,9 @@ export const DashboardHeader: React.FC = () => {
                                             </div>
                                             <div>
                                                 <div className="text-sm font-bold text-text-dark">{college.name}</div>
-                                                <div className="text-xs text-text-muted">{college.district}, {college.state}</div>
+                                                <div className="text-xs text-text-muted">
+                                                    {college.district ? `${college.district}, ` : ''}{college.state}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
