@@ -117,6 +117,21 @@ function AppContent() {
     );
   }
 
+  // Fix for Feed Layout: Render Feed independently to avoid double sidebar/header
+  if (location.pathname === '/feed') {
+    return (
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen text-slate-400">
+          <Loader2 className="animate-spin" />
+        </div>
+      }>
+        <ProtectedRoute>
+          <Feed user={user} onChat={startChatFromWriter} />
+        </ProtectedRoute>
+      </Suspense>
+    );
+  }
+
   return (
     <GlassLayout>
       {location.pathname !== '/' && location.pathname !== '/feed' && location.pathname !== '/auth' && location.pathname !== '/writers' && (
