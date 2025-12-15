@@ -154,91 +154,7 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
         }
     };
 
-    // Show profile completion form for incomplete Google users
-    if (user?.is_incomplete) {
-        return (
-            <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
-                <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800">
-                    <div className="text-center mb-8 flex flex-col items-center">
-                        <div className="text-6xl mb-4">📚</div>
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Setup your Profile</h2>
-                        <p className="text-slate-500 dark:text-slate-400">Complete your profile to get started.</p>
-                    </div>
-
-                    <form onSubmit={handleCompleteProfile} className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Choose a Handle</label>
-                            <div className="relative group">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">alternate_email</span>
-                                <input
-                                    className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-medium text-[#1b140d] dark:text-white placeholder-gray-400 transition-all outline-none"
-                                    placeholder="username"
-                                    type="text"
-                                    value={completionForm.handle}
-                                    onChange={e => {
-                                        const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
-                                        setCompletionForm({ ...completionForm, handle: val });
-                                    }}
-                                    required
-                                />
-                            </div>
-                            <p className="text-[10px] text-slate-400 ml-1">Only letters, numbers, and underscores.</p>
-                        </div>
-
-                        <div className="space-y-2 relative z-50">
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">
-                                Select your University
-                            </label>
-                            <CollegeAutocomplete
-                                value={completionForm.school}
-                                onChange={(val) => setCompletionForm({ ...completionForm, school: val })}
-                                placeholder="Search your college"
-                                className="w-full"
-                                inputClassName="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-medium text-[#1b140d] dark:text-white placeholder-gray-400 transition-all outline-none"
-                                icon={<span className="material-symbols-outlined absolute left-4 top-3.5 text-gray-400">school</span>}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">
-                                What is your goal?
-                            </label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div
-                                    onClick={() => setCompletionIsWriter(false)}
-                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!completionIsWriter
-                                            ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
-                                            : 'bg-white border-slate-200 hover:bg-slate-50'
-                                        }`}
-                                >
-                                    <Search className={!completionIsWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${!completionIsWriter ? 'text-orange-600' : 'text-slate-500'}`}>
-                                        Find Help
-                                    </span>
-                                </div>
-                                <div
-                                    onClick={() => setCompletionIsWriter(true)}
-                                    className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${completionIsWriter
-                                            ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
-                                            : 'bg-white border-slate-200 hover:bg-slate-50'
-                                        }`}
-                                >
-                                    <PenTool className={completionIsWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                    <span className={`text-xs font-bold mt-2 ${completionIsWriter ? 'text-orange-600' : 'text-slate-500'}`}>
-                                        Earn Money
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <GlassButton type="submit" isLoading={loading} className="w-full">
-                            Finish Setup <ArrowRight size={18} className="ml-2" />
-                        </GlassButton>
-                    </form>
-                </div>
-            </div>
-        );
-    }
+    // Profile completion logic removed as it is now handled automatically in AuthContext
 
     return (
         <div className="min-h-screen flex flex-col lg:flex-row font-display text-[#1b140d] dark:text-white transition-colors duration-200">
@@ -446,8 +362,8 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                                         <div
                                             onClick={() => setIsWriter(false)}
                                             className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!isWriter
-                                                    ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
-                                                    : 'bg-white border-slate-200 hover:bg-slate-50'
+                                                ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
+                                                : 'bg-white border-slate-200 hover:bg-slate-50'
                                                 }`}
                                         >
                                             <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
@@ -458,8 +374,8 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                                         <div
                                             onClick={() => setIsWriter(true)}
                                             className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${isWriter
-                                                    ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
-                                                    : 'bg-white border-slate-200 hover:bg-slate-50'
+                                                ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
+                                                : 'bg-white border-slate-200 hover:bg-slate-50'
                                                 }`}
                                         >
                                             <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />

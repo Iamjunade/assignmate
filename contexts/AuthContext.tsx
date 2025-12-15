@@ -28,36 +28,45 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   // Sync user profile from Firestore
   const syncUser = async (fbUser: any) => {
     const userId = fbUser.uid;
-    
+
     // Prevent concurrent syncs for the same user
     if (syncingRef.current === userId) {
       return;
     }
-    
+
     syncingRef.current = userId;
-    
+
     try {
       const profile = await userApi.getProfile(userId);
 
       if (profile) {
         // Profile exists - set user as complete
-        setUser({ 
-          ...profile, 
-          email: fbUser.email || profile.email, 
-          is_incomplete: false 
+        setUser({
+          ...profile,
+          email: fbUser.email || profile.email,
+          is_incomplete: false
         });
         presence.init(userId);
       } else {
-        // Profile missing - mark as incomplete (for Google signups)
-        setUser({
+        // Profile missing - auto-complete for Google signups
+        const newProfile = {
           id: userId,
           email: fbUser.email || '',
-          handle: fbUser.displayName || '',
-          school: '',
+          handle: fbUser.displayName?.replace(/\s+/g, '_').toLowerCase() || fbUser.email?.split('@')[0] || 'user_' + userId.substring(0, 6),
+          school: 'Not Specified',
           avatar_url: fbUser.photoURL || undefined,
+          full_name: fbUser.displayName || 'Student',
           xp: 0,
-          is_incomplete: true
-        } as User);
+          is_writer: false, // Default to finding help
+          is_incomplete: false // Bypass manual setup
+        };
+
+        // Create the profile immediately
+        await userApi.createProfile(userId, newProfile);
+
+        setUser(newProfile as User);
+        presence.init(userId);
+        notificationService.sendWelcome(userId, newProfile.handle).catch(console.error);
       }
     } catch (e) {
       console.error("AuthContext: Sync Failed", e);
@@ -93,27 +102,27 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     if (res.data?.user) {
       try {
         // Create user profile in Firestore
-        const profile = await userApi.createProfile(res.data.user.uid, { 
-          handle, 
-          school, 
-          email, 
-          is_writer 
+        const profile = await userApi.createProfile(res.data.user.uid, {
+          handle,
+          school,
+          email,
+          is_writer
         });
-        
+
         // Set user state immediately to avoid race conditions
-        setUser({ 
-          ...profile, 
-          email: res.data.user.email || email, 
-          is_incomplete: false 
+        setUser({
+          ...profile,
+          email: res.data.user.email || email,
+          is_incomplete: false
         });
-        
+
         // Initialize presence and send welcome notification
         presence.init(res.data.user.uid);
         notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
-        
+
         // Sync to ensure consistency
         await syncUser(res.data.user);
-        
+
         return { data: { ...res.data, session: true } };
       } catch (error: any) {
         console.error("Registration Error:", error);
@@ -141,16 +150,16 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       });
 
       // Update user state immediately
-      setUser({ 
-        ...profile, 
-        email: user.email, 
-        is_incomplete: false 
+      setUser({
+        ...profile,
+        email: user.email,
+        is_incomplete: false
       });
-      
+
       // Initialize presence and send welcome notification
       presence.init(user.id);
       notificationService.sendWelcome(user.id, handle).catch(console.error);
-      
+
     } catch (e: any) {
       console.error("Profile Completion Failed:", e);
       throw e;
@@ -185,7 +194,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       loginAnonymously: firebaseAuth.loginAnonymously,
       logout,
       deleteAccount,
-      refreshProfile: async () => { 
+      refreshProfile: async () => {
         if (user) {
           await syncUser({ uid: user.id, email: user.email });
         }
