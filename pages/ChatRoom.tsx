@@ -46,7 +46,7 @@ export const ChatRoom = ({ user, chatId, onBack }) => {
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
             const scrollHeight = textareaRef.current.scrollHeight;
-            textareaRef.current.style.height = `${Math.min(scrollHeight, 96)}px`;
+            textareaRef.current.style.height = `${Math.min(scrollHeight, 128)}px`;
         }
     }, [text]);
 
@@ -83,52 +83,66 @@ export const ChatRoom = ({ user, chatId, onBack }) => {
     };
 
     return (
-        <div className="flex flex-col h-full md:h-screen md:max-h-[calc(100vh-2rem)] bg-[#efeae2]">
-
-            {/* 1. Header (WhatsApp Style) */}
-            <div className="px-4 py-2 bg-[#f0f2f5] border-b border-slate-200 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
-                <button onClick={onBack} className="md:hidden p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-200 transition-colors">
-                    <ArrowLeft size={22} />
-                </button>
-
-                {chatDetails ? (
-                    <div className="flex items-center gap-3 flex-1 cursor-pointer">
-                        <img
-                            src={chatDetails.other_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${chatDetails.other_handle}`}
-                            className="w-10 h-10 rounded-full object-cover"
-                            alt="Avatar"
-                        />
-                        <div className="flex-1">
-                            <h3 className="font-semibold text-slate-900 leading-tight text-base">{chatDetails.other_handle}</h3>
-                            <div className="flex items-center gap-1 text-[11px] text-slate-500">
-                                {/* Use UserPresence Component here */}
-                                <UserPresence userId={chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id} showLastSeen={true} />
+        <div className="flex flex-col h-full bg-background-light dark:bg-background-dark relative min-w-0">
+            {/* Chat Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#e6e1db] dark:border-neutral-800 bg-white/80 dark:bg-[#1a120b]/80 backdrop-blur-sm z-10 sticky top-0">
+                <div className="flex items-center gap-4">
+                    <button onClick={onBack} className="md:hidden p-2 -ml-2 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors">
+                        <ArrowLeft size={22} />
+                    </button>
+                    {chatDetails ? (
+                        <div className="flex items-center gap-4">
+                            <div className="relative">
+                                <img
+                                    src={chatDetails.other_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${chatDetails.other_handle}`}
+                                    className="bg-center bg-no-repeat bg-cover rounded-full size-11 shadow-sm object-cover bg-neutral-100"
+                                    alt={chatDetails.other_handle}
+                                />
+                                <div className="absolute bottom-0 right-0 block size-3 rounded-full ring-2 ring-white dark:ring-[#1a120b] bg-white dark:bg-[#1a120b] overflow-hidden">
+                                    <UserPresence userId={chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id} size={12} showLastSeen={false} className="w-full h-full" />
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-lg font-bold text-neutral-900 dark:text-white leading-tight">{chatDetails.other_handle}</h2>
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wide border border-blue-100 dark:border-blue-800">
+                                        <span className="material-symbols-outlined text-[12px]">verified</span> Verified Peer
+                                    </span>
+                                </div>
+                                <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400 flex items-center gap-1">
+                                    Response time: &lt; 5 mins • <UserPresence userId={chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id} showLastSeen={true} />
+                                </p>
                             </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="flex-1 flex gap-3 items-center">
-                        <div className="w-10 h-10 bg-slate-200 rounded-full animate-pulse"></div>
-                        <div className="h-4 w-24 bg-slate-200 rounded animate-pulse"></div>
-                    </div>
-                )}
-
-                <div className="flex items-center gap-4 text-[#54656f]">
-                    <button onClick={handleCreateOffer} className="hidden sm:flex items-center gap-1.5 bg-[#d9fdd3] text-[#008069] border border-[#008069]/20 px-3 py-1.5 rounded-full text-xs font-bold transition-colors hover:bg-[#c9fcc1]">
-                        <Briefcase size={14} /> Hire
+                    ) : (
+                        <div className="flex items-center gap-4">
+                            <div className="size-11 bg-neutral-200 dark:bg-neutral-800 rounded-full animate-pulse"></div>
+                            <div className="space-y-2">
+                                <div className="h-4 w-32 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse"></div>
+                                <div className="h-3 w-24 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+                <div className="flex items-center gap-3">
+                    <button onClick={handleCreateOffer} className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-sm font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition shadow-sm">
+                        <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                        Create Offer
                     </button>
-                    <button className="hidden sm:block hover:bg-slate-200 p-2 rounded-full transition-colors"><Video size={20} /></button>
-                    <button className="hidden sm:block hover:bg-slate-200 p-2 rounded-full transition-colors"><Phone size={20} /></button>
-                    <button className="hover:bg-slate-200 p-2 rounded-full transition-colors"><MoreVertical size={20} /></button>
+                    <button className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 transition">
+                        <span className="material-symbols-outlined">more_vert</span>
+                    </button>
                 </div>
             </div>
 
-            {/* 2. Messages Area (WhatsApp Doodle Background) */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-1 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-repeat bg-[length:400px]">
-                <div className="text-center py-4 mb-2">
-                    <span className="text-[10px] bg-[#fff5c4] text-slate-600 px-3 py-1.5 rounded-lg shadow-sm border border-[#ffeeb0] font-medium inline-block">
-                        Messages are end-to-end encrypted. No one outside of this chat, not even AssignMate, can read or listen to them.
-                    </span>
+            {/* Messages Stream */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col">
+                {/* System Trust Message */}
+                <div className="flex justify-center w-full my-4">
+                    <div className="bg-[#fff8f0] dark:bg-[#2a221a] border border-[#f3ede7] dark:border-neutral-700 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
+                        <span className="material-symbols-outlined text-primary text-[16px]">shield_lock</span>
+                        <p className="text-xs text-neutral-600 dark:text-neutral-400 font-medium">Bank-Grade Trust: Payments held in escrow until you approve the work.</p>
+                    </div>
                 </div>
 
                 {messages.map((m, i) => {
@@ -138,11 +152,11 @@ export const ChatRoom = ({ user, chatId, onBack }) => {
                     if (isSystem) {
                         return (
                             <MotionDiv initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={i} className="flex justify-center my-4">
-                                <div className="bg-[#e7ffdb] border border-[#d9fdd3] p-3 rounded-lg text-center max-w-xs shadow-sm">
-                                    <Briefcase className="mx-auto text-[#008069] mb-1" size={20} />
+                                <div className="bg-[#e7ffdb] border border-[#d9fdd3] p-4 rounded-2xl text-center max-w-xs shadow-sm">
+                                    <Briefcase className="mx-auto text-[#008069] mb-2" size={24} />
                                     <p className="text-sm font-bold text-slate-800">Offer Proposal</p>
-                                    <p className="text-xs text-slate-600">Hire request sent.</p>
-                                    <div className="text-[10px] text-slate-400 mt-1">{formatTime(m.created_at)}</div>
+                                    <p className="text-xs text-slate-600 mt-1">Hire request sent.</p>
+                                    <div className="text-[10px] text-slate-400 mt-2 font-medium">{formatTime(m.created_at)}</div>
                                 </div>
                             </MotionDiv>
                         )
@@ -153,82 +167,87 @@ export const ChatRoom = ({ user, chatId, onBack }) => {
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             key={m.id || i}
-                            className={`flex ${isMe ? 'justify-end' : 'justify-start'} group mb-1`}
+                            className={`flex flex-col gap-1 max-w-[85%] md:max-w-[70%] ${isMe ? 'items-end self-end' : 'items-start'}`}
                         >
-                            <div className={`relative px-3 py-1.5 text-sm shadow-[0_1px_0.5px_rgba(0,0,0,0.13)] max-w-[80%] sm:max-w-[70%] leading-relaxed
-                        ${isMe
-                                    ? 'bg-[#d9fdd3] text-[#111b21] rounded-lg rounded-tr-none'
-                                    : 'bg-white text-[#111b21] rounded-lg rounded-tl-none'
-                                }
-                    `}>
-                                {/* Tail Pseudo-elements */}
-                                {isMe ? (
-                                    <div className="absolute top-0 -right-2 w-2 h-3 bg-[#d9fdd3] [clip-path:polygon(0_0,0%_100%,100%_0)]"></div>
-                                ) : (
-                                    <div className="absolute top-0 -left-2 w-2 h-3 bg-white [clip-path:polygon(0_0,100%_100%,100%_0)]"></div>
+                            <div className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                                {!isMe && (
+                                    <div
+                                        className="bg-center bg-no-repeat bg-cover rounded-full size-8 shrink-0 mb-1 shadow-sm border border-white dark:border-neutral-800"
+                                        style={{ backgroundImage: `url(${chatDetails?.other_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${chatDetails?.other_handle}`})` }}
+                                    ></div>
                                 )}
 
-                                <div className="break-words whitespace-pre-wrap pr-16 min-w-[80px] pt-1">
+                                <div className={`p-4 rounded-2xl shadow-sm text-[15px] leading-relaxed break-words whitespace-pre-wrap ${isMe
+                                        ? 'bg-primary text-white rounded-br-sm shadow-primary/20'
+                                        : 'bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 rounded-bl-sm border border-neutral-100 dark:border-neutral-700'
+                                    }`}>
                                     {m.content}
                                 </div>
-
-                                <div className="absolute bottom-1 right-2 flex items-center gap-1">
-                                    <span className="text-[10px] text-slate-500">
-                                        {formatTime(m.created_at)}
-                                    </span>
-                                    {isMe && (
-                                        <CheckCheck size={14} className={m.read_at ? "text-[#53bdeb]" : "text-slate-400"} />
-                                    )}
-                                </div>
                             </div>
+
+                            <span className={`text-[11px] font-medium flex items-center gap-1 ${isMe ? 'text-neutral-400 mr-1' : 'text-neutral-400 ml-12'}`}>
+                                {formatTime(m.created_at)}
+                                {isMe && (
+                                    <span className="material-symbols-outlined text-[14px] text-neutral-300">
+                                        {m.read_at ? 'done_all' : 'done'}
+                                    </span>
+                                )}
+                            </span>
                         </MotionDiv>
                     );
                 })}
                 <div ref={endRef} />
             </div>
 
-            {/* 3. Input Area */}
-            <form onSubmit={send} className="px-2 py-2 bg-[#f0f2f5] flex items-end gap-2 z-20">
-                <button type="button" className="p-2 text-[#54656f] hover:text-slate-800 transition-colors mb-1.5">
-                    <Smile size={24} />
-                </button>
-                <button type="button" className="p-2 text-[#54656f] hover:text-slate-800 transition-colors mb-1.5">
-                    <Paperclip size={22} />
-                </button>
-
-                <div className="flex-1 bg-white rounded-lg border border-transparent focus-within:border-slate-300 transition-all flex items-end px-3 py-1.5 min-h-[42px] mb-1">
-                    <textarea
-                        ref={textareaRef}
-                        className="w-full bg-transparent outline-none text-[15px] text-[#111b21] placeholder-slate-500 resize-none overflow-y-auto no-scrollbar max-h-24 leading-6"
-                        placeholder="Type a message"
-                        rows={1}
-                        value={text}
-                        onChange={e => setText(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                send(e);
-                            }
-                        }}
-                    />
-                </div>
-
-                {text.trim() ? (
-                    <MotionButton
-                        whileTap={{ scale: 0.9 }}
-                        layout
-                        className="p-3 flex items-center justify-center bg-[#008069] text-white rounded-full shadow-sm mb-1"
-                    >
-                        <Send size={20} className="ml-0.5" />
-                    </MotionButton>
-                ) : (
-                    <button type="button" className="p-3 text-[#54656f] hover:bg-slate-200 rounded-full transition-colors mb-1">
-                        <div className="w-5 h-5 border-2 border-[#54656f] rounded-full flex items-center justify-center">
-                            <div className="w-2 h-3 bg-[#54656f] rounded-sm"></div>
-                        </div>
+            {/* Input Area */}
+            <div className="p-6 pt-2 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark z-20">
+                <form
+                    onSubmit={send}
+                    className="bg-white dark:bg-neutral-800 p-2 pl-4 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 flex items-end gap-2 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] transition-shadow hover:shadow-lg"
+                >
+                    <button type="button" className="p-2 mb-1 rounded-full text-neutral-400 hover:text-primary hover:bg-primary/10 transition-colors">
+                        <span className="material-symbols-outlined rotate-45">attach_file</span>
                     </button>
-                )}
-            </form>
+
+                    <div className="flex-1 py-3">
+                        <textarea
+                            ref={textareaRef}
+                            className="w-full bg-transparent border-none p-0 text-neutral-900 dark:text-white placeholder-neutral-400 focus:ring-0 resize-none max-h-32 text-[15px] leading-relaxed"
+                            placeholder="Type a secure message..."
+                            rows={1}
+                            value={text}
+                            onChange={e => setText(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    send(e);
+                                }
+                            }}
+                        />
+                    </div>
+
+                    <button type="button" className="p-2 mb-1 rounded-full text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">
+                        <span className="material-symbols-outlined">sentiment_satisfied</span>
+                    </button>
+
+                    {text.trim() ? (
+                        <MotionButton
+                            whileTap={{ scale: 0.95 }}
+                            type="submit"
+                            className="size-11 rounded-full bg-primary text-white flex items-center justify-center hover:bg-opacity-90 shadow-md shadow-primary/30 transition-all active:scale-95 mb-0.5"
+                        >
+                            <span className="material-symbols-outlined">send</span>
+                        </MotionButton>
+                    ) : (
+                        <button disabled className="size-11 rounded-full bg-neutral-200 dark:bg-neutral-700 text-neutral-400 flex items-center justify-center mb-0.5 cursor-not-allowed">
+                            <span className="material-symbols-outlined">send</span>
+                        </button>
+                    )}
+                </form>
+                <div className="text-center mt-2">
+                    <p className="text-[10px] text-neutral-400">Press Enter to send. Messages are protected by <span className="text-neutral-500 font-semibold">AssignMate Secure Guarantee™</span></p>
+                </div>
+            </div>
         </div>
     );
 };
