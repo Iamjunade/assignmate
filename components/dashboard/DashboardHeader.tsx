@@ -73,7 +73,7 @@ export const DashboardHeader: React.FC = () => {
 
                     {/* Search Results Dropdown */}
                     {isFocused && searchQuery && (results.colleges.length > 0 || results.students.length > 0) && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-border-subtle overflow-hidden max-h-[400px] overflow-y-auto">
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-border-subtle overflow-hidden max-h-[400px] overflow-y-auto z-[100]">
                             {/* Colleges Section */}
                             {results.colleges.length > 0 && (
                                 <div className="p-2">
@@ -83,6 +83,7 @@ export const DashboardHeader: React.FC = () => {
                                             key={college.id}
                                             className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors"
                                             onClick={() => {
+                                                console.log('Navigating to college:', college.name);
                                                 navigate(`/writers?college=${encodeURIComponent(college.name)}`);
                                                 setIsFocused(false);
                                                 setSearchQuery('');
