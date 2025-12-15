@@ -112,7 +112,12 @@ function AppContent() {
           <Loader2 className="animate-spin" />
         </div>
       }>
-        <FindWriter />
+        <FindWriter onNavigate={(page) => {
+          if (page === 'feed') navigate('/feed');
+          else if (page === 'find-writer') navigate('/writers');
+          else if (page === 'auth') navigate('/auth');
+          else navigate('/' + page);
+        }} />
       </Suspense>
     );
   }
@@ -172,7 +177,12 @@ function AppContent() {
               </ProtectedRoute>
             } />
 
-            <Route path="/writers" element={<FindWriter />} />
+            <Route path="/writers" element={<FindWriter onNavigate={(page) => {
+              if (page === 'feed') navigate('/feed');
+              else if (page === 'find-writer') navigate('/writers');
+              else if (page === 'auth') navigate('/auth');
+              else navigate('/' + page);
+            }} />} />
 
             <Route path="/profile" element={
               <ProtectedRoute>
