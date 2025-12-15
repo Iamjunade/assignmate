@@ -155,12 +155,20 @@ export const Profile = ({ user }: { user: any }) => {
                                 </div>
                             )}
                         </div>
-                        <h1 className="text-2xl font-bold text-text-main dark:text-white">{user.full_name || user.handle}</h1>
+
+                        <h1 className="text-2xl font-bold text-text-main dark:text-white">{user.full_name}</h1>
+                        <p className="text-primary font-bold text-sm">@{user.handle}</p>
                         <p className="text-secondary dark:text-gray-400 text-sm font-medium mt-1">{user.school || 'University Student'}</p>
+
                         <div className="flex items-center gap-1 mt-2 text-xs text-secondary/80 dark:text-gray-500">
+                            <span className="material-symbols-outlined text-sm">mail</span>
+                            <span>{user.email}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1 text-xs text-secondary/80 dark:text-gray-500">
                             <span className="material-symbols-outlined text-sm">location_on</span>
                             <span>New Delhi, India (Hyper-local)</span>
                         </div>
+
                         {/* XP Level Bar */}
                         <div className="w-full mt-6 mb-2">
                             <div className="flex justify-between text-xs font-bold mb-1.5 px-1">
@@ -172,6 +180,7 @@ export const Profile = ({ user }: { user: any }) => {
                             </div>
                             <p className="text-[10px] text-secondary mt-1 text-right">{100 - (user.xp % 100)} XP to Level {level + 1}</p>
                         </div>
+
                         {/* Trust Badges */}
                         <div className="flex flex-wrap justify-center gap-2 mt-4 w-full">
                             {user.is_verified === 'verified' && (
@@ -185,6 +194,7 @@ export const Profile = ({ user }: { user: any }) => {
                                 Payment Verified
                             </div>
                         </div>
+
                         {/* Action Buttons */}
                         <div className="grid grid-cols-2 gap-3 w-full mt-6">
                             <button
@@ -293,10 +303,10 @@ export const Profile = ({ user }: { user: any }) => {
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`border - b - 2 font - medium text - sm py - 3 whitespace - nowrap px - 1 transition - colors capitalize ${activeTab === tab
+                                    className={`border-b-2 font-medium text-sm py-3 whitespace-nowrap px-1 transition-colors capitalize ${activeTab === tab
                                         ? 'border-primary text-primary font-bold'
                                         : 'border-transparent text-secondary dark:text-gray-400 hover:text-text-main dark:hover:text-white'
-                                        } `}
+                                        }`}
                                 >
                                     {tab} {tab === 'portfolio' && `(${user.portfolio?.length || 0})`} {tab === 'network' && requests.length > 0 && `(${requests.length})`}
                                 </button>

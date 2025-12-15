@@ -9,7 +9,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<any>;
   loginWithGoogle: () => Promise<any>;
-  register: (email: string, pass: string, handle: string, school: string, is_writer: boolean) => Promise<any>;
+  register: (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean) => Promise<any>;
   completeGoogleSignup: (handle: string, school: string, is_writer: boolean) => Promise<void>;
   loginAnonymously: () => Promise<any>;
   logout: () => Promise<void>;
@@ -94,17 +94,16 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   };
 
   // Register new user
-  const register = async (email: string, pass: string, handle: string, school: string, is_writer: boolean) => {
+  const register = async (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean) => {
     const res = await firebaseAuth.register(email, pass);
     if (res.error) return res;
 
     if (res.data?.user) {
       try {
         // Create user profile in Firestore immediately
-        // The listener will pick this up momentarily, or create a default if it beats us.
-        // We create it here to ensure the correct data (Handle/School) is used.
         await userApi.createProfile(res.data.user.uid, {
           handle,
+          full_name: fullName,
           school,
           email,
           is_writer

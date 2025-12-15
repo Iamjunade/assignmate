@@ -14,7 +14,7 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     // Form states
     const [isReg, setIsReg] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [form, setForm] = useState({ email: '', password: '', handle: '', school: '' });
+    const [form, setForm] = useState({ email: '', password: '', fullName: '', handle: '', school: '' });
     const [isWriter, setIsWriter] = useState(false);
 
     // Google completion form
@@ -65,7 +65,7 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
 
             let result;
             if (isReg) {
-                result = await register(form.email, form.password, form.handle, form.school, isWriter);
+                result = await register(form.email, form.password, form.fullName, form.handle, form.school, isWriter);
             } else {
                 result = await login(form.email, form.password);
             }
@@ -282,6 +282,21 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                         <form className="space-y-5" onSubmit={handleSubmit}>
                             {isReg && (
                                 <>
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Full Name</label>
+                                        <div className="relative group">
+                                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">person</span>
+                                            <input
+                                                className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-medium text-[#1b140d] dark:text-white placeholder-gray-400 transition-all outline-none"
+                                                placeholder="John Doe"
+                                                type="text"
+                                                value={form.fullName}
+                                                onChange={e => setForm({ ...form, fullName: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
                                     <div className="space-y-2">
                                         <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Choose a Handle</label>
                                         <div className="relative group">
