@@ -5,7 +5,7 @@ export const DashboardHeader: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <header className="h-24 flex items-center justify-between px-8 py-4 bg-[#faf9f7]/90 backdrop-blur-md sticky top-0 z-30">
+        <header className="h-24 flex items-center justify-between px-4 py-4 bg-[#faf9f7]/90 backdrop-blur-md sticky top-0 z-30">
             <button className="lg:hidden p-2 -ml-2 text-text-dark">
                 <span className="material-symbols-outlined">menu</span>
             </button>

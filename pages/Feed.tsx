@@ -20,7 +20,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
             <main className="flex-1 flex flex-col h-full overflow-hidden relative">
                 <DashboardHeader />
 
-                <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-20">
+                <div className="flex-1 overflow-y-auto px-4 pb-20">
                     <div className="w-full flex flex-col gap-8">
                         {/* Welcome Section */}
                         <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
@@ -31,7 +31,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                 </h1>
                                 <p className="text-text-muted mt-2 text-lg">Your academic tasks are under control.</p>
                             </div>
-                            <div className="xl:max-w-md w-full bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow cursor-pointer">
+                            <div className="w-full xl:w-auto bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow cursor-pointer">
                                 <div className="bg-white p-2.5 rounded-full shadow-sm text-emerald-600 z-10">
                                     <span className="material-symbols-outlined">shield_lock</span>
                                 </div>
