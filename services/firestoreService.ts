@@ -82,7 +82,13 @@ export const userApi = {
             role: 'user' as 'user' | 'admin' | 'moderator',
             visibility: 'global' as 'global' | 'college', // Default to global visibility
             portfolio: [],
-            saved_writers: []
+            saved_writers: [],
+            total_earned: 0,
+            on_time_rate: 100,
+            response_time: 60, // 60 minutes default
+            languages: ['English'],
+            is_online: true,
+            id_card_url: null
         };
 
         try {

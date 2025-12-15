@@ -20,6 +20,15 @@ export interface User {
   fcm_token?: string; // Firebase Cloud Messaging Token for Push Notifications
   visibility?: 'global' | 'college'; // Visibility setting for the profile
   role?: 'user' | 'admin' | 'moderator'; // Role-based access control
+
+  // Dynamic Profile Stats
+  total_earned?: number;
+  on_time_rate?: number;
+  response_time?: number; // in minutes
+  languages?: string[];
+  is_online?: boolean;
+  is_verified?: 'pending' | 'verified' | 'rejected' | 'none';
+  id_card_url?: string;
 }
 
 export interface Chat {

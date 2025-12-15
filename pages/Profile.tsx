@@ -25,8 +25,11 @@ export const Profile = ({ user }: { user: any }) => {
     const [uploading, setUploading] = useState(false);
     const [idUploading, setIdUploading] = useState(false);
     const [editingProfile, setEditingProfile] = useState(false);
+
+    // Form State
     const [bio, setBio] = useState(user.bio || '');
     const [school, setSchool] = useState(user.school || '');
+    const [fullName, setFullName] = useState(user.full_name || '');
     const [visibility, setVisibility] = useState(user.visibility || 'global');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -79,7 +82,12 @@ export const Profile = ({ user }: { user: any }) => {
 
     const saveProfile = async () => {
         try {
-            await db.updateProfile(user.id, { bio, school, visibility });
+            await db.updateProfile(user.id, {
+                bio,
+                school,
+                visibility,
+                full_name: fullName
+            });
             setEditingProfile(false);
             await refreshProfile();
             success("Profile updated!");
@@ -166,7 +174,7 @@ export const Profile = ({ user }: { user: any }) => {
                         </div>
                         <div className="flex items-center gap-1 mt-1 text-xs text-secondary/80 dark:text-gray-500">
                             <span className="material-symbols-outlined text-sm">location_on</span>
-                            <span>New Delhi, India (Hyper-local)</span>
+                            <span>{user.school || 'New Delhi, India (Hyper-local)'}</span>
                         </div>
 
                         {/* XP Level Bar */}
@@ -221,18 +229,18 @@ export const Profile = ({ user }: { user: any }) => {
                         <div className="space-y-3">
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-text-main dark:text-gray-300">Status</span>
-                                <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-bold bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-md">
-                                    <span className="size-2 rounded-full bg-green-500 animate-pulse"></span>
-                                    Online Now
+                                <span className={`flex items-center gap-1.5 ${user.is_online ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-slate-500 bg-slate-100'} font-bold px-2 py-0.5 rounded-md`}>
+                                    <span className={`size-2 rounded-full ${user.is_online ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`}></span>
+                                    {user.is_online ? 'Online Now' : 'Offline'}
                                 </span>
                             </div>
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-text-main dark:text-gray-300">Response Time</span>
-                                <span className="font-bold text-text-main dark:text-white">~ 15 mins</span>
+                                <span className="font-bold text-text-main dark:text-white">~ {user.response_time || 60} mins</span>
                             </div>
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-text-main dark:text-gray-300">Languages</span>
-                                <span className="font-bold text-text-main dark:text-white">English, Hindi</span>
+                                <span className="font-bold text-text-main dark:text-white">{(user.languages || ['English']).join(', ')}</span>
                             </div>
                         </div>
                     </div>
@@ -269,7 +277,7 @@ export const Profile = ({ user }: { user: any }) => {
                         <div className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
                             <div className="text-secondary text-xs font-semibold uppercase mb-1">Total Earned</div>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-bold text-text-main dark:text-white">₹12.5k</span>
+                                <span className="text-2xl font-bold text-text-main dark:text-white">₹{(user.total_earned || 0).toLocaleString()}</span>
                                 <span className="text-green-500 text-xs font-bold flex items-center"><span className="material-symbols-outlined text-[10px]">arrow_upward</span> 12%</span>
                             </div>
                         </div>
@@ -290,7 +298,7 @@ export const Profile = ({ user }: { user: any }) => {
                         <div className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
                             <div className="text-secondary text-xs font-semibold uppercase mb-1">On-Time</div>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-bold text-text-main dark:text-white">98%</span>
+                                <span className="text-2xl font-bold text-text-main dark:text-white">{user.on_time_rate || 100}%</span>
                                 <span className="text-secondary text-xs">rate</span>
                             </div>
                         </div>
@@ -369,19 +377,34 @@ export const Profile = ({ user }: { user: any }) => {
                                         <h3 className="text-lg font-bold mb-3 dark:text-white">My Expertise</h3>
                                         {editingProfile ? (
                                             <div className="space-y-4">
-                                                <textarea
-                                                    className="w-full bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary min-h-[100px] resize-none text-slate-900 dark:text-white"
-                                                    value={bio}
-                                                    onChange={(e) => setBio(e.target.value)}
-                                                    placeholder="Tell your peers about your skills..."
-                                                />
-                                                <CollegeAutocomplete
-                                                    value={school}
-                                                    onChange={setSchool}
-                                                    className="mt-1"
-                                                    inputClassName="w-full bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary text-slate-900 dark:text-white"
-                                                />
-                                                <div className="flex gap-2 justify-end">
+                                                <div className="mb-2">
+                                                    <label className="text-xs text-secondary font-bold mb-1 block">Full Name</label>
+                                                    <input
+                                                        className="w-full bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary text-slate-900 dark:text-white"
+                                                        value={fullName}
+                                                        onChange={(e) => setFullName(e.target.value)}
+                                                        placeholder="Your Full Name"
+                                                    />
+                                                </div>
+                                                <div className="mb-2">
+                                                    <label className="text-xs text-secondary font-bold mb-1 block">Bio</label>
+                                                    <textarea
+                                                        className="w-full bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary min-h-[100px] resize-none text-slate-900 dark:text-white"
+                                                        value={bio}
+                                                        onChange={(e) => setBio(e.target.value)}
+                                                        placeholder="Tell your peers about your skills..."
+                                                    />
+                                                </div>
+                                                <div className="mb-2">
+                                                    <label className="text-xs text-secondary font-bold mb-1 block">College / University</label>
+                                                    <CollegeAutocomplete
+                                                        value={school}
+                                                        onChange={setSchool}
+                                                        className="mt-1"
+                                                        inputClassName="w-full bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary text-slate-900 dark:text-white"
+                                                    />
+                                                </div>
+                                                <div className="flex gap-2 justify-end mt-4">
                                                     <button onClick={saveProfile} className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold">Save Changes</button>
                                                 </div>
                                             </div>
