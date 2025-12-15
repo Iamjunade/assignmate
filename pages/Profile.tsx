@@ -75,7 +75,7 @@ export const Profile = ({ user }: { user: any }) => {
         setRequests(reqs);
         const conns = await db.getMyConnections(user.id);
         setConnections(conns);
-        success(`Connection ${ status } `);
+        success('Connection ' + status);
     };
 
     const saveProfile = async () => {
@@ -475,16 +475,16 @@ className = "w-12 h-12 rounded-full bg-slate-100"
             <p className="text-slate-500 text-sm font-medium">No connections yet.</p>
         </div>
     ) : (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {connections.map(conn => (
-            <div key={conn.id} className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm text-center">
-                <img src={conn.avatar_url} className="w-16 h-16 rounded-full bg-slate-100 mx-auto mb-3 object-cover" />
-                <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">{conn.handle}</h4>
-                <p className="text-xs text-slate-500 truncate mb-3">{conn.school}</p>
-            </div>
-        ))}
-    </div>
-)
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {connections.map(conn => (
+                <div key={conn.id} className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm text-center">
+                    <img src={conn.avatar_url} className="w-16 h-16 rounded-full bg-slate-100 mx-auto mb-3 object-cover" />
+                    <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">{conn.handle}</h4>
+                    <p className="text-xs text-slate-500 truncate mb-3">{conn.school}</p>
+                </div>
+            ))}
+        </div>
+    )
 }
                                 </MotionDiv >
                              )}
