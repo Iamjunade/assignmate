@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
 import { GlassButton } from '../components/ui/GlassButton';
-import { GraduationCap, Search, PenTool, ArrowRight } from 'lucide-react'; // Keep Lucide for some specific components if needed, or replace all.
-// The user wants the design from the HTML, which uses Material Symbols. I will use text-based Material Symbols.
+import { GraduationCap, Search, PenTool, ArrowRight } from 'lucide-react';
 
 export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
+    const navigate = useNavigate();
     const { user, login, register, loginWithGoogle, completeGoogleSignup, resetPassword } = useAuth();
     const { error, success, info } = useToast();
 
@@ -25,9 +26,11 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
         if (user && !user.is_incomplete) {
             if (onComplete) {
                 onComplete();
+            } else {
+                navigate('/feed');
             }
         }
-    }, [user, onComplete]);
+    }, [user, onComplete, navigate]);
 
     // Handle email/password registration and login
     const handleSubmit = async (e: React.FormEvent) => {

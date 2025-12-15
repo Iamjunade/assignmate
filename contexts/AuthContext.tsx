@@ -187,7 +187,13 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     <AuthContext.Provider value={{
       user,
       loading,
-      login: firebaseAuth.login,
+      login: async (email: string, password: string) => {
+        const res = await firebaseAuth.login(email, password);
+        if (res.data?.user) {
+          await syncUser(res.data.user);
+        }
+        return res;
+      },
       loginWithGoogle: firebaseAuth.loginWithGoogle,
       register,
       completeGoogleSignup,
