@@ -127,7 +127,7 @@ function AppContent() {
         />
       )}
 
-      <div className="pt-20 min-h-screen">
+      <div className={`${location.pathname !== '/' && location.pathname !== '/auth' ? 'pt-20' : ''} min-h-screen`}>
         <Suspense fallback={
           <div className="flex items-center justify-center h-[50vh] text-slate-400">
             <Loader2 className="animate-spin" />
