@@ -80,18 +80,17 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                 }
 
                 error(userMsg);
+                setLoading(false);
             } else if (result?.data?.session || result?.data?.user) {
                 success(isReg ? "Account created successfully!" : "Welcome back!");
-                if (onComplete) {
-                    setTimeout(() => onComplete(), 500);
-                }
+                // Navigation handled by useEffect when user state updates
             }
         } catch (err: any) {
             console.error("Auth error:", err);
             error(err.message || "An unexpected error occurred.");
-        } finally {
             setLoading(false);
         }
+        // Remove finally block to keep loading true on success until redirect happens
     };
 
     // Handle Google login
