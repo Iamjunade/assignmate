@@ -1,21 +1,193 @@
-import React from 'react';
-// 1. Remove useNavigate import since App.tsx handles navigation now
-// import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { INDIAN_COLLEGES } from '../data/colleges';
 
-// 2. Define the props interface
 interface FindWriterProps {
     onNavigate: (page: string) => void;
 }
 
-// 3. Accept the prop in the component
+// Mock Writers Data
+const MOCK_WRITERS = [
+    {
+        id: 'w1',
+        name: 'Ananya S.',
+        college: 'Mumbai University',
+        role: 'PhD Candidate',
+        verified: true,
+        rating: 4.9,
+        jobs: 84,
+        skills: ['Computer Science', 'Python', 'Java'],
+        price: 450,
+        level: 12,
+        active: true,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD5eyA5mJiAk02OyRZxUOxi92h8QvSqP2p2OuZTsHIBnfu3C1q-DRideE6S9kGNKSVuEeXn9ug9NlQoOmIOkzzAIz8BJdpeBEi_NAcbTYluU388uhF8uf1gB0NWCBC3lztv5hqALo16vUsHiH5RhCA1BwmXQU1Jmw_TZhadzWRYJq5f1IuRpBO6p86iRBNjPgUhJbcyOFOCZM7mzQxJJ0XjI5h_bpB7SpNhZeBR1z51ekmD4eSzxTVpu680sgUxbQrrEbkECrGMpbTE'
+    },
+    {
+        id: 'w2',
+        name: 'Vikram R.',
+        college: 'Delhi University',
+        role: 'Student',
+        verified: true,
+        rating: 4.5,
+        jobs: 12,
+        skills: ['Algorithms', 'C++'],
+        price: 250,
+        level: 5,
+        active: false,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7lnF4Ol7P-HK3Dde6qSTgd944-WawQkJoyY0oKRFrOH7fAUPJv_DrJMaH1xmP15XMkwO97euR2u9j8PIZWQZ4LpV_fVaA4BbXtE_fLmrIH5Lzn-D_aC75-6xrvKFz3kQVJ4VppGgbA6VqRqMZ5Z5ZqevYi41Hd0C-xrD6pnF6Xqva18TmXm6kH5P10BrEOtan1244teGNdcifyiYHxyIx2X4pc36Pc853_mrLuo_pMt2POvzIckOSfSGK5dMVWR9lyQlzpAWcImWN'
+    },
+    {
+        id: 'w3',
+        name: 'Dr. Meera K.',
+        college: 'BITS Pilani',
+        role: 'PhD Scholar',
+        verified: true,
+        rating: 5.0,
+        jobs: 210,
+        skills: ['Data Science', 'Machine Learning'],
+        price: 800,
+        level: 24,
+        active: false,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCJgifg9eezbKJlCwX7jFenkYcWVC1jE7K577tP3G2Kd_VChO6iVvM7lEIVaPzSD7WpC_qdQqlFXFEnCTQ19e9hy9K4oj0pFzUJV674a7YUd43OcFCI5VNA1ECfxGwLDUAgYi0dUj4GtjAYzLVcpVsXZZUGRADmvbxzBoJ1LrnqG6tAWZckvyLPd9GX25o9YynpAagXlhsO8i-HhS31bVRtRkOHxsK8N0wceCVZDoLRx8R4uO5hdbOMgfaexR1SvpYvvC6NXiuJfiLJ'
+    },
+    {
+        id: 'w4',
+        name: 'Kabir Singh',
+        college: 'VIT Vellore',
+        role: 'Student',
+        verified: true,
+        rating: 4.6,
+        jobs: 32,
+        skills: ['Web Dev', 'React'],
+        price: 300,
+        level: 8,
+        active: false,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBURA_vY8UfMZgRA6ksqDUBtIRFrayZgDkXK67RF5Gb4s8funxS1k0_PLindmyDcFtU4cUOaM_9X5rqouBT-gIdHvrRqQc2eObp-c1RZ8eauwnxKBF9G40YRRuCunI8SGASOjjk8u6uq8g7IpOZcfqyrMgQPhoIU9zmW5K9TZm_QA_WSBk1ULoYj-xBpKvja6HG25GWYNiMA_iOjNLUCCnrPr1l4p1bYNDmbu1jeYk9SZJkkbGTRBt-aRp34uPG7c6ySPN8-5fXPn6U'
+    },
+    {
+        id: 'w5',
+        name: 'Sarah J.',
+        college: 'IIT Bombay',
+        role: 'Student',
+        verified: true,
+        rating: 5.0,
+        jobs: 42,
+        skills: ['Physics', 'Math'],
+        price: 400,
+        level: 10,
+        active: true,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAFIhHX4ZGnYjCUykvkK25l_um_GHyQvMPvdqQqyeNBfsIfMc65rjAgZ-k2pPNqW6oF9buU6yVAsgM_WJfrGqn29rSWxACq_aopvS_Qt8oifsFN3ElFWeIw50NHxV3jY2i2Nx1HZtefoEu95pUvYKfXipwdgrsheZmZ65SXtp8JXthck3NXscf3trUFpL-JwZNI34jjm16bk2ewhHi6DOBLWryQhAjd9dw_QBlQorWCv-KGPTdEJWWlTFjdmzlF7efwwuodk_8GeYQ_'
+    },
+    {
+        id: 'w6',
+        name: 'Arjun K.',
+        college: 'IIT Bombay',
+        role: 'Student',
+        verified: true,
+        rating: 4.9,
+        jobs: 128,
+        skills: ['Chemistry', 'Biology'],
+        price: 350,
+        level: 15,
+        active: true,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA5_5HRG81pCpMxVT6SVod3sg9QY9fWxo2OyY-qo_GrNTir3Dsxo70F1zo7pxJFyH8Qkh21rovl4_rjT0uZ0C38S5s8SOcPX4fyzHNKOgwlHKVx0zuOK18Gftk9ylpq1d2wpOn_8MkFG3DMfplGDckCqvA4zrzSvUYpKTmzm9pKLIkDi_-EybgdXPzFbqmMBGbvFElShbRlfr5HVQf7ocTWaacTPkSAd5bbL2vzw-7rUYUO-jSNcJvzpIu_5xWS3roA9Z0msMp8WERT'
+    },
+    {
+        id: 'w7',
+        name: 'Priya M.',
+        college: 'IIT Bombay',
+        role: 'Student',
+        verified: true,
+        rating: 4.8,
+        jobs: 85,
+        skills: ['Economics', 'Stats'],
+        price: 300,
+        level: 11,
+        active: true,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBB9MGalAWJQzPN8cLc_82cLaYNtVf7oGnHWJiRmA4TQMTuziSiYhR1ckDOtW7Qwe9d3s9se0K1qcX7mHg31rZcRoNLkbflTrqc7Ek7ARhTDEdsLmY5IZg5pLilI303xLRBhQNsn3HRABSn1QS8KtmbDeRvBg2rtG2hqp_mzU5xKMw_uWKfBEAoU-9HhOSPX4xTGnqRvqllhx36r2uqpDz5qxt0nDG2So76Myl8pc4tqXWpPNHplHbRUJvU2Ixp5eNxBKtwvOiMvEWQ'
+    },
+    {
+        id: 'w8',
+        name: 'Rohan D.',
+        college: 'IIT Bombay',
+        role: 'Student',
+        verified: true,
+        rating: 4.7,
+        jobs: 15,
+        skills: ['History', 'Pol Sci'],
+        price: 250,
+        level: 4,
+        active: true,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBoS9nxUT4uULrmoKsuVGnZcoQJXC9bICnjgJ0ugdhlB4azQQdC1vXwaYeYS1Xg8AdxI9SuWHmLM921C1AUN5VAz7eC6KtZxcxpJWGvdygLaBGv-CrDrAc8UC2-WUTgbX9E92-KwzT5oHDBObpP7Lo78gIzLH5FAy6Rmgo2xS4hsS16cfw7_PwH96eNe367S1qE6Mzvb8Jlt_Mjj-YHusGWNqfW1vkW0duwOPEbKrWJCHc2xGk9bZb5ocqDYtPllSV1mI62eluv-vsd'
+    }
+];
+
 export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [collegeQuery, setCollegeQuery] = useState(searchParams.get('college') || '');
+    const [isFocused, setIsFocused] = useState(false);
+    const [filteredColleges, setFilteredColleges] = useState<typeof INDIAN_COLLEGES>([]);
+    const [filteredWriters, setFilteredWriters] = useState(MOCK_WRITERS);
+    const searchRef = useRef<HTMLDivElement>(null);
+
+    // Handle click outside to close dropdown
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setIsFocused(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Filter Colleges for Autocomplete
+    useEffect(() => {
+        if (!collegeQuery.trim()) {
+            setFilteredColleges([]);
+            return;
+        }
+        const query = collegeQuery.toLowerCase();
+        const results = INDIAN_COLLEGES.filter(c =>
+            c.name.toLowerCase().includes(query) ||
+            c.state.toLowerCase().includes(query) ||
+            (c.district && c.district.toLowerCase().includes(query))
+        ).slice(0, 20);
+        setFilteredColleges(results);
+    }, [collegeQuery]);
+
+    // Filter Writers based on selected college
+    useEffect(() => {
+        const collegeParam = searchParams.get('college');
+        if (collegeParam) {
+            setCollegeQuery(collegeParam);
+            const filtered = MOCK_WRITERS.filter(w => w.college.toLowerCase().includes(collegeParam.toLowerCase()));
+            setFilteredWriters(filtered.length > 0 ? filtered : MOCK_WRITERS); // Fallback to all if no match found (or show empty state)
+            // Actually, if no match, we should probably show empty or "No writers found in this college"
+            // For now, let's just filter strictly.
+            if (filtered.length === 0 && collegeParam) {
+                // If strict filtering returns nothing, maybe we want to show all but indicate no results? 
+                // Or just show empty. Let's show empty to be correct.
+                setFilteredWriters([]);
+            } else {
+                setFilteredWriters(filtered);
+            }
+        } else {
+            setFilteredWriters(MOCK_WRITERS);
+        }
+    }, [searchParams]);
+
+    const handleCollegeSelect = (collegeName: string) => {
+        setCollegeQuery(collegeName);
+        setSearchParams({ college: collegeName });
+        setIsFocused(false);
+    };
 
     return (
         <div className="bg-background-light dark:bg-background-dark text-text-main font-display antialiased selection:bg-primary/30 min-h-screen flex flex-col">
 
             <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-[#fcfaf8]/90 border-b border-[#f3ede7]">
                 <div className="px-6 py-3 flex items-center justify-between">
-                    {/* 4. Update all navigation clicks to use onNavigate with the correct page key */}
                     <div className="flex items-center gap-4 cursor-pointer" onClick={() => onNavigate('feed')}>
                         <div className="size-8 text-primary">
                             <span className="material-symbols-outlined text-4xl leading-none">school</span>
@@ -69,15 +241,47 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                                 Connect with top-tier students who understand your specific curriculum and grading standards.
                             </p>
                             {/* Search Pill */}
-                            <div className="w-full max-w-2xl p-2 bg-white rounded-full shadow-lg shadow-primary/10 flex flex-col md:flex-row items-center gap-2 border border-[#f3ede7]">
+                            <div className="w-full max-w-2xl p-2 bg-white rounded-full shadow-lg shadow-primary/10 flex flex-col md:flex-row items-center gap-2 border border-[#f3ede7] relative z-50">
                                 <div className="flex-1 flex items-center px-4 h-12 w-full">
                                     <span className="material-symbols-outlined text-text-muted">search</span>
                                     <input className="w-full h-full bg-transparent border-none focus:ring-0 text-text-main placeholder:text-text-muted font-medium text-base ml-2 outline-none" placeholder="Search by subject, writer, or course code..." type="text" />
                                 </div>
                                 <div className="h-8 w-px bg-[#e7dbcf] hidden md:block"></div>
-                                <div className="flex-1 flex items-center px-4 h-12 w-full">
+                                <div className="flex-1 flex items-center px-4 h-12 w-full relative" ref={searchRef}>
                                     <span className="material-symbols-outlined text-text-muted">school</span>
-                                    <input className="w-full h-full bg-transparent border-none focus:ring-0 text-text-main placeholder:text-text-muted font-medium text-base ml-2 outline-none" placeholder="College (e.g. IIT Delhi)" type="text" />
+                                    <input
+                                        className="w-full h-full bg-transparent border-none focus:ring-0 text-text-main placeholder:text-text-muted font-medium text-base ml-2 outline-none"
+                                        placeholder="College (e.g. IIT Delhi)"
+                                        type="text"
+                                        value={collegeQuery}
+                                        onChange={(e) => {
+                                            setCollegeQuery(e.target.value);
+                                            setIsFocused(true);
+                                        }}
+                                        onFocus={() => setIsFocused(true)}
+                                    />
+                                    {/* Dropdown Results */}
+                                    {isFocused && filteredColleges.length > 0 && (
+                                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-border-subtle max-h-80 overflow-y-auto z-[100]">
+                                            {filteredColleges.map((college) => (
+                                                <div
+                                                    key={college.id}
+                                                    className="px-4 py-3 hover:bg-background-light cursor-pointer border-b border-border-subtle last:border-none flex items-center gap-3"
+                                                    onClick={() => handleCollegeSelect(college.name)}
+                                                >
+                                                    <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                                        <span className="material-symbols-outlined text-primary text-sm">school</span>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-sm font-bold text-text-dark">{college.name}</div>
+                                                        <div className="text-xs text-text-muted">
+                                                            {college.district ? `${college.district}, ` : ''}{college.state}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                                 <button className="w-full md:w-auto h-12 px-8 rounded-full bg-primary text-[#1b140d] font-bold text-base shadow-md hover:scale-105 transition-transform flex items-center justify-center gap-2">
                                     <span>Search</span>
@@ -126,13 +330,16 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                                     <span className="material-symbols-outlined text-primary">trending_up</span>
                                     <span className="text-primary font-bold text-sm uppercase tracking-wide">Hot Right Now</span>
                                 </div>
-                                <h2 className="text-2xl md:text-3xl font-bold text-text-main">Trending in Your College</h2>
+                                <h2 className="text-2xl md:text-3xl font-bold text-text-main">
+                                    {searchParams.get('college') ? `Trending in ${searchParams.get('college')}` : 'Trending in Your College'}
+                                </h2>
                             </div>
                             <a className="hidden sm:flex items-center gap-1 text-text-muted font-medium hover:text-primary transition-colors" href="#">
                                 View All <span className="material-symbols-outlined text-lg">arrow_forward</span>
                             </a>
                         </div>
-                        {/* Trending Horizontal Scroll */}
+                        {/* Trending Horizontal Scroll - For now showing static trending or filtered if we want */}
+                        {/* Keeping static trending for visual appeal as "Hot Right Now" might be global or specific */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             {/* Trending Card 1 */}
                             <div className="group relative bg-white rounded-2xl p-4 border border-[#f3ede7] hover:border-primary/30 shadow-soft hover:shadow-hover transition-all duration-300">
@@ -279,8 +486,12 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                     <section>
                         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                             <div>
-                                <h2 className="text-2xl font-bold text-text-main mb-1">Recommended Writers</h2>
-                                <p className="text-text-muted text-sm">Based on your subject search 'Computer Science'</p>
+                                <h2 className="text-2xl font-bold text-text-main mb-1">
+                                    {searchParams.get('college') ? `Writers in ${searchParams.get('college')}` : 'Recommended Writers'}
+                                </h2>
+                                <p className="text-text-muted text-sm">
+                                    {filteredWriters.length} writers found
+                                </p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium text-text-main">Sort by:</span>
@@ -291,217 +502,100 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                                 </select>
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {/* Writer Card Component with full details */}
-                            <div className="group bg-white rounded-2xl border border-[#f3ede7] hover:border-primary/40 shadow-soft hover:shadow-hover transition-all duration-300 flex flex-col h-full overflow-hidden">
-                                <div className="p-5 flex-1 flex flex-col">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="relative">
-                                            <img alt="Writer Avatar" className="w-14 h-14 rounded-full object-cover border-2 border-[#f3ede7]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5eyA5mJiAk02OyRZxUOxi92h8QvSqP2p2OuZTsHIBnfu3C1q-DRideE6S9kGNKSVuEeXn9ug9NlQoOmIOkzzAIz8BJdpeBEi_NAcbTYluU388uhF8uf1gB0NWCBC3lztv5hqALo16vUsHiH5RhCA1BwmXQU1Jmw_TZhadzWRYJq5f1IuRpBO6p86iRBNjPgUhJbcyOFOCZM7mzQxJJ0XjI5h_bpB7SpNhZeBR1z51ekmD4eSzxTVpu680sgUxbQrrEbkECrGMpbTE" />
-                                            <div className="absolute -bottom-1 -right-1 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white">
-                                                Lvl 12
+
+                        {filteredWriters.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {filteredWriters.map((writer) => (
+                                    <div key={writer.id} className="group bg-white rounded-2xl border border-[#f3ede7] hover:border-primary/40 shadow-soft hover:shadow-hover transition-all duration-300 flex flex-col h-full overflow-hidden">
+                                        <div className="p-5 flex-1 flex flex-col">
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className="relative">
+                                                    <img alt="Writer Avatar" className="w-14 h-14 rounded-full object-cover border-2 border-[#f3ede7]" src={writer.image} />
+                                                    <div className={`absolute -bottom-1 -right-1 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white ${writer.level > 10 ? 'bg-orange-600' : 'bg-primary'}`}>
+                                                        Lvl {writer.level}
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-col items-end">
+                                                    {writer.active && (
+                                                        <div className="flex items-center gap-1 bg-green-50 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full mb-1">
+                                                            <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span> Active Now
+                                                        </div>
+                                                    )}
+                                                    <div className="flex items-center gap-1 bg-purple-50 text-purple-700 text-[10px] font-bold px-2 py-1 rounded-full mb-1">
+                                                        <span className="material-symbols-outlined text-[12px]">school</span> {writer.role}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-1 mb-0.5">
+                                                    <h3 className="text-lg font-bold text-text-main">{writer.name}</h3>
+                                                    {writer.verified && (
+                                                        <span className="material-symbols-outlined text-blue-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-text-muted font-medium mb-3 flex items-center gap-1">
+                                                    <span className="material-symbols-outlined text-[14px]">location_on</span> {writer.college}
+                                                </p>
+                                            </div>
+                                            {/* Chips */}
+                                            <div className="flex flex-wrap gap-1.5 mb-4">
+                                                {writer.skills.map((skill, idx) => (
+                                                    <span key={idx} className="bg-[#f3ede7] text-[#5a4633] text-[10px] font-semibold px-2 py-1 rounded-md">{skill}</span>
+                                                ))}
+                                            </div>
+                                            <div className="mt-auto grid grid-cols-2 gap-2 text-center bg-background-light rounded-lg p-2">
+                                                <div>
+                                                    <p className="text-[10px] text-text-muted font-bold uppercase">Rating</p>
+                                                    <div className="flex items-center justify-center gap-1">
+                                                        <span className="text-sm font-bold text-text-main">{writer.rating}</span>
+                                                        <span className="material-symbols-outlined text-yellow-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                                    </div>
+                                                </div>
+                                                <div className="border-l border-[#e7dbcf]">
+                                                    <p className="text-[10px] text-text-muted font-bold uppercase">Jobs</p>
+                                                    <p className="text-sm font-bold text-text-main">{writer.jobs}</p>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col items-end">
-                                            <div className="flex items-center gap-1 bg-green-50 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full mb-1">
-                                                <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span> Active Now
+                                        <div className="px-5 py-4 border-t border-[#f3ede7] bg-[#faf8f6] flex items-center justify-between group-hover:bg-white transition-colors">
+                                            <div>
+                                                <p className="text-xs text-text-muted font-medium">Starting from</p>
+                                                <p className="text-lg font-bold text-text-main">₹{writer.price}<span className="text-xs font-normal text-text-muted">/pg</span></p>
                                             </div>
+                                            <button className="bg-primary text-[#1b140d] text-sm font-bold px-4 py-2 rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
+                                                Hire Now
+                                            </button>
                                         </div>
                                     </div>
-                                    <div>
-                                        <div className="flex items-center gap-1 mb-0.5">
-                                            <h3 className="text-lg font-bold text-text-main">Ananya S.</h3>
-                                            <span className="material-symbols-outlined text-blue-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                        </div>
-                                        <p className="text-xs text-text-muted font-medium mb-3 flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[14px]">location_on</span> Mumbai University
-                                        </p>
-                                    </div>
-                                    {/* Chips */}
-                                    <div className="flex flex-wrap gap-1.5 mb-4">
-                                        <span className="bg-[#f3ede7] text-[#5a4633] text-[10px] font-semibold px-2 py-1 rounded-md">Computer Science</span>
-                                        <span className="bg-[#f3ede7] text-[#5a4633] text-[10px] font-semibold px-2 py-1 rounded-md">Python</span>
-                                        <span className="bg-[#f3ede7] text-[#5a4633] text-[10px] font-semibold px-2 py-1 rounded-md">Java</span>
-                                    </div>
-                                    <div className="mt-auto grid grid-cols-2 gap-2 text-center bg-background-light rounded-lg p-2">
-                                        <div>
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Rating</p>
-                                            <div className="flex items-center justify-center gap-1">
-                                                <span className="text-sm font-bold text-text-main">4.9</span>
-                                                <span className="material-symbols-outlined text-yellow-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                            </div>
-                                        </div>
-                                        <div className="border-l border-[#e7dbcf]">
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Jobs</p>
-                                            <p className="text-sm font-bold text-text-main">84</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="px-5 py-4 border-t border-[#f3ede7] bg-[#faf8f6] flex items-center justify-between group-hover:bg-white transition-colors">
-                                    <div>
-                                        <p className="text-xs text-text-muted font-medium">Starting from</p>
-                                        <p className="text-lg font-bold text-text-main">₹450<span className="text-xs font-normal text-text-muted">/pg</span></p>
-                                    </div>
-                                    <button className="bg-primary text-[#1b140d] text-sm font-bold px-4 py-2 rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
-                                        Hire Now
-                                    </button>
-                                </div>
+                                ))}
                             </div>
-                            {/* Writer Card 2 */}
-                            <div className="group bg-white rounded-2xl border border-[#f3ede7] hover:border-primary/40 shadow-soft hover:shadow-hover transition-all duration-300 flex flex-col h-full overflow-hidden">
-                                <div className="p-5 flex-1 flex flex-col">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="relative">
-                                            <img alt="Writer Avatar" className="w-14 h-14 rounded-full object-cover border-2 border-[#f3ede7]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7lnF4Ol7P-HK3Dde6qSTgd944-WawQkJoyY0oKRFrOH7fAUPJv_DrJMaH1xmP15XMkwO97euR2u9j8PIZWQZ4LpV_fVaA4BbXtE_fLmrIH5Lzn-D_aC75-6xrvKFz3kQVJ4VppGgbA6VqRqMZ5Z5ZqevYi41Hd0C-xrD6pnF6Xqva18TmXm6kH5P10BrEOtan1244teGNdcifyiYHxyIx2X4pc36Pc853_mrLuo_pMt2POvzIckOSfSGK5dMVWR9lyQlzpAWcImWN" />
-                                            <div className="absolute -bottom-1 -right-1 bg-gray-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white">
-                                                Lvl 5
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-1 mb-0.5">
-                                            <h3 className="text-lg font-bold text-text-main">Vikram R.</h3>
-                                            <span className="material-symbols-outlined text-blue-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                        </div>
-                                        <p className="text-xs text-text-muted font-medium mb-3 flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[14px]">location_on</span> Delhi University
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-wrap gap-1.5 mb-4">
-                                        <span className="bg-[#f3ede7] text-[#5a4633] text-[10px] font-semibold px-2 py-1 rounded-md">Algorithms</span>
-                                        <span className="bg-[#f3ede7] text-[#5a4633] text-[10px] font-semibold px-2 py-1 rounded-md">C++</span>
-                                    </div>
-                                    <div className="mt-auto grid grid-cols-2 gap-2 text-center bg-background-light rounded-lg p-2">
-                                        <div>
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Rating</p>
-                                            <div className="flex items-center justify-center gap-1">
-                                                <span className="text-sm font-bold text-text-main">4.5</span>
-                                                <span className="material-symbols-outlined text-yellow-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                            </div>
-                                        </div>
-                                        <div className="border-l border-[#e7dbcf]">
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Jobs</p>
-                                            <p className="text-sm font-bold text-text-main">12</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="px-5 py-4 border-t border-[#f3ede7] bg-[#faf8f6] flex items-center justify-between group-hover:bg-white transition-colors">
-                                    <div>
-                                        <p className="text-xs text-text-muted font-medium">Starting from</p>
-                                        <p className="text-lg font-bold text-text-main">₹250<span className="text-xs font-normal text-text-muted">/pg</span></p>
-                                    </div>
-                                    <button className="bg-primary text-[#1b140d] text-sm font-bold px-4 py-2 rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
-                                        Hire Now
-                                    </button>
-                                </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-20 text-center">
+                                <span className="material-symbols-outlined text-6xl text-text-muted/30 mb-4">school</span>
+                                <h3 className="text-xl font-bold text-text-main mb-2">No writers found in this college</h3>
+                                <p className="text-text-muted max-w-md">
+                                    We couldn't find any writers registered under "{searchParams.get('college')}".
+                                    Try searching for a different college or browse all writers.
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        setSearchParams({});
+                                        setCollegeQuery('');
+                                    }}
+                                    className="mt-6 px-6 py-2 rounded-full bg-primary text-[#1b140d] font-bold hover:brightness-105 transition-all"
+                                >
+                                    View All Writers
+                                </button>
                             </div>
-                            {/* Writer Card 3 */}
-                            <div className="group bg-white rounded-2xl border border-[#f3ede7] hover:border-primary/40 shadow-soft hover:shadow-hover transition-all duration-300 flex flex-col h-full overflow-hidden">
-                                <div className="p-5 flex-1 flex flex-col">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="relative">
-                                            <img alt="Writer Avatar" className="w-14 h-14 rounded-full object-cover border-2 border-[#f3ede7]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJgifg9eezbKJlCwX7jFenkYcWVC1jE7K577tP3G2Kd_VChO6iVvM7lEIVaPzSD7WpC_qdQqlFXFEnCTQ19e9hy9K4oj0pFzUJV674a7YUd43OcFCI5VNA1ECfxGwLDUAgYi0dUj4GtjAYzLVcpVsXZZUGRADmvbxzBoJ1LrnqG6tAWZckvyLPd9GX25o9YynpAagXlhsO8i-HhS31bVRtRkOHxsK8N0wceCVZDoLRx8R4uO5hdbOMgfaexR1SvpYvvC6NXiuJfiLJ" />
-                                            <div className="absolute -bottom-1 -right-1 bg-orange-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white">
-                                                Lvl 24
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col items-end">
-                                            <div className="flex items-center gap-1 bg-purple-50 text-purple-700 text-[10px] font-bold px-2 py-1 rounded-full mb-1">
-                                                <span className="material-symbols-outlined text-[12px]">school</span> PhD Scholar
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-1 mb-0.5">
-                                            <h3 className="text-lg font-bold text-text-main">Dr. Meera K.</h3>
-                                            <span className="material-symbols-outlined text-blue-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                        </div>
-                                        <p className="text-xs text-text-muted font-medium mb-3 flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[14px]">location_on</span> BITS Pilani
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-wrap gap-1.5 mb-4">
-                                        <span className="bg-[#f3ede7] text-[#5a4633] text-[10px] font-semibold px-2 py-1 rounded-md">Data Science</span>
-                                        <span className="bg-[#f3ede7] text-[#5a4633] text-[10px] font-semibold px-2 py-1 rounded-md">Machine Learning</span>
-                                    </div>
-                                    <div className="mt-auto grid grid-cols-2 gap-2 text-center bg-background-light rounded-lg p-2">
-                                        <div>
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Rating</p>
-                                            <div className="flex items-center justify-center gap-1">
-                                                <span className="text-sm font-bold text-text-main">5.0</span>
-                                                <span className="material-symbols-outlined text-yellow-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                            </div>
-                                        </div>
-                                        <div className="border-l border-[#e7dbcf]">
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Jobs</p>
-                                            <p className="text-sm font-bold text-text-main">210</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="px-5 py-4 border-t border-[#f3ede7] bg-[#faf8f6] flex items-center justify-between group-hover:bg-white transition-colors">
-                                    <div>
-                                        <p className="text-xs text-text-muted font-medium">Starting from</p>
-                                        <p className="text-lg font-bold text-text-main">₹800<span className="text-xs font-normal text-text-muted">/pg</span></p>
-                                    </div>
-                                    <button className="bg-primary text-[#1b140d] text-sm font-bold px-4 py-2 rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
-                                        Hire Now
-                                    </button>
-                                </div>
+                        )}
+
+                        {filteredWriters.length > 0 && (
+                            <div className="w-full flex justify-center mt-12">
+                                <button className="px-8 py-3 rounded-full border-2 border-primary text-primary font-bold hover:bg-primary hover:text-[#1b140d] transition-colors">
+                                    Load More Writers
+                                </button>
                             </div>
-                            {/* Writer Card 4 */}
-                            <div className="group bg-white rounded-2xl border border-[#f3ede7] hover:border-primary/40 shadow-soft hover:shadow-hover transition-all duration-300 flex flex-col h-full overflow-hidden">
-                                <div className="p-5 flex-1 flex flex-col">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="relative">
-                                            <img alt="Writer Avatar" className="w-14 h-14 rounded-full object-cover border-2 border-[#f3ede7]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBURA_vY8UfMZgRA6ksqDUBtIRFrayZgDkXK67RF5Gb4s8funxS1k0_PLindmyDcFtU4cUOaM_9X5rqouBT-gIdHvrRqQc2eObp-c1RZ8eauwnxKBF9G40YRRuCunI8SGASOjjk8u6uq8g7IpOZcfqyrMgQPhoIU9zmW5K9TZm_QA_WSBk1ULoYj-xBpKvja6HG25GWYNiMA_iOjNLUCCnrPr1l4p1bYNDmbu1jeYk9SZJkkbGTRBt-aRp34uPG7c6ySPN8-5fXPn6U" />
-                                            <div className="absolute -bottom-1 -right-1 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white">
-                                                Lvl 8
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-1 mb-0.5">
-                                            <h3 className="text-lg font-bold text-text-main">Kabir Singh</h3>
-                                            <span className="material-symbols-outlined text-blue-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                        </div>
-                                        <p className="text-xs text-text-muted font-medium mb-3 flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[14px]">location_on</span> VIT Vellore
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-wrap gap-1.5 mb-4">
-                                        <span className="bg-[#f3ede7] text-[#5a4633] text-[10px] font-semibold px-2 py-1 rounded-md">Web Dev</span>
-                                        <span className="bg-[#f3ede7] text-[#5a4633] text-[10px] font-semibold px-2 py-1 rounded-md">React</span>
-                                    </div>
-                                    <div className="mt-auto grid grid-cols-2 gap-2 text-center bg-background-light rounded-lg p-2">
-                                        <div>
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Rating</p>
-                                            <div className="flex items-center justify-center gap-1">
-                                                <span className="text-sm font-bold text-text-main">4.6</span>
-                                                <span className="material-symbols-outlined text-yellow-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                            </div>
-                                        </div>
-                                        <div className="border-l border-[#e7dbcf]">
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Jobs</p>
-                                            <p className="text-sm font-bold text-text-main">32</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="px-5 py-4 border-t border-[#f3ede7] bg-[#faf8f6] flex items-center justify-between group-hover:bg-white transition-colors">
-                                    <div>
-                                        <p className="text-xs text-text-muted font-medium">Starting from</p>
-                                        <p className="text-lg font-bold text-text-main">₹300<span className="text-xs font-normal text-text-muted">/pg</span></p>
-                                    </div>
-                                    <button className="bg-primary text-[#1b140d] text-sm font-bold px-4 py-2 rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
-                                        Hire Now
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="w-full flex justify-center mt-12">
-                            <button className="px-8 py-3 rounded-full border-2 border-primary text-primary font-bold hover:bg-primary hover:text-[#1b140d] transition-colors">
-                                Load More Writers
-                            </button>
-                        </div>
+                        )}
                     </section>
                 </div>
             </main>
