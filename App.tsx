@@ -52,19 +52,6 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Fix for Full Screen Layout: Render FindWriter independently to bypass GlassLayout constraints
-  if (location.pathname === '/writers') {
-    return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-screen text-slate-400">
-          <Loader2 className="animate-spin" />
-        </div>
-      }>
-        <FindWriter />
-      </Suspense>
-    );
-  }
-
   // Global Notification & FCM Listener
   useEffect(() => {
     if (!user) return;
@@ -116,6 +103,19 @@ function AppContent() {
     { label: 'Messages', href: '/chats', onClick: () => navigate('/chats') },
     { label: 'Profile', href: '/profile', onClick: () => navigate('/profile') },
   ];
+
+  // Fix for Full Screen Layout: Render FindWriter independently to bypass GlassLayout constraints
+  if (location.pathname === '/writers') {
+    return (
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen text-slate-400">
+          <Loader2 className="animate-spin" />
+        </div>
+      }>
+        <FindWriter />
+      </Suspense>
+    );
+  }
 
   return (
     <GlassLayout>
