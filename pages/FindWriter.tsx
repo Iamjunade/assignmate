@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const FindWriter: React.FC = () => {
+    const navigate = useNavigate();
     return (
         <div className="bg-background-light dark:bg-background-dark text-text-main font-display antialiased selection:bg-primary/30 min-h-screen flex flex-col">
             {/* Navbar is handled by App.tsx layout, but we need to ensure it matches the design or hide it if this page has a custom one. 
@@ -12,23 +14,23 @@ export const FindWriter: React.FC = () => {
 
             <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-[#fcfaf8]/90 border-b border-[#f3ede7]">
                 <div className="px-6 md:px-10 lg:px-40 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-4 cursor-pointer">
+                    <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/')}>
                         <div className="size-8 text-primary">
                             <span className="material-symbols-outlined text-4xl leading-none">school</span>
                         </div>
                         <h2 className="text-[#1b140d] text-xl font-bold tracking-tight">AssignMate</h2>
                     </div>
                     <nav className="hidden lg:flex items-center gap-8">
-                        <a className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors" href="#">Home</a>
-                        <a className="text-primary text-sm font-bold" href="#">Find a Writer</a>
-                        <a className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors" href="#">Post a Job</a>
-                        <a className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors" href="#">My Assignments</a>
+                        <button onClick={() => navigate('/')} className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors">Home</button>
+                        <button onClick={() => navigate('/writers')} className="text-primary text-sm font-bold">Find a Writer</button>
+                        <button onClick={() => navigate('/feed')} className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors">Post a Job</button>
+                        <button onClick={() => navigate('/feed')} className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors">My Assignments</button>
                     </nav>
                     <div className="flex items-center gap-3">
-                        <button className="hidden sm:flex h-10 px-5 items-center justify-center rounded-full border border-[#e7dbcf] text-sm font-bold text-[#1b140d] hover:bg-[#f3ede7] transition-all">
+                        <button onClick={() => navigate('/auth')} className="hidden sm:flex h-10 px-5 items-center justify-center rounded-full border border-[#e7dbcf] text-sm font-bold text-[#1b140d] hover:bg-[#f3ede7] transition-all">
                             Log In
                         </button>
-                        <button className="h-10 px-5 flex items-center justify-center rounded-full bg-primary text-[#1b140d] text-sm font-bold hover:brightness-105 transition-all shadow-md shadow-primary/20">
+                        <button onClick={() => navigate('/auth')} className="h-10 px-5 flex items-center justify-center rounded-full bg-primary text-[#1b140d] text-sm font-bold hover:brightness-105 transition-all shadow-md shadow-primary/20">
                             Sign Up
                         </button>
                     </div>
