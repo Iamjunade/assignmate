@@ -7,12 +7,19 @@ export const Landing = () => {
 
     const handleLogin = () => navigate('/auth');
     const handleSignup = () => navigate('/auth?tab=signup');
+    const handleSearch = () => navigate('/feed'); // Mock search navigation
+    const handleScrollTo = (id: string) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
 
     return (
         <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden font-display bg-background-light dark:bg-background-dark text-[#1b140d] dark:text-white transition-colors duration-200">
             {/* Navbar */}
-            <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[#f3ede7] dark:border-[#3a2e24] bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md px-6 py-4 md:px-10 lg:px-20">
-                <div className="flex items-center gap-2 text-[#1b140d] dark:text-white">
+            <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[#f3ede7] dark:border-[#3a2e24] bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md px-6 py-4 md:px-10 lg:px-20 w-full">
+                <div className="flex items-center gap-2 text-[#1b140d] dark:text-white cursor-pointer" onClick={() => navigate('/')}>
                     <div className="size-8 text-primary">
                         <span className="material-symbols-outlined text-4xl">verified</span>
                     </div>
@@ -20,9 +27,9 @@ export const Landing = () => {
                 </div>
                 <div className="hidden lg:flex flex-1 justify-end gap-8 items-center">
                     <nav className="flex items-center gap-8">
-                        <a className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">How it Works</a>
-                        <a className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">Trust & Safety</a>
-                        <a className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">For Writers</a>
+                        <button onClick={() => handleScrollTo('how-it-works')} className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">How it Works</button>
+                        <button onClick={() => handleScrollTo('trust-safety')} className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">Trust & Safety</button>
+                        <button onClick={handleSignup} className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">For Writers</button>
                     </nav>
                     <div className="flex items-center gap-4">
                         <button onClick={handleLogin} className="text-sm font-bold hover:text-primary transition-colors">Login</button>
@@ -37,18 +44,32 @@ export const Landing = () => {
                 </button>
             </header>
 
-            {/* Hero Section */}
-            <section className="relative px-6 py-12 md:px-10 lg:px-20 lg:py-24 overflow-hidden">
+            {/* Mobile Menu Overlay */}
+            {mobileMenuOpen && (
+                <div className="fixed inset-0 z-40 bg-background-light dark:bg-background-dark flex flex-col items-center justify-center gap-8 lg:hidden">
+                    <button className="absolute top-6 right-6" onClick={() => setMobileMenuOpen(false)}>
+                        <span className="material-symbols-outlined text-3xl">close</span>
+                    </button>
+                    <button onClick={() => { handleScrollTo('how-it-works'); setMobileMenuOpen(false); }} className="text-xl font-bold">How it Works</button>
+                    <button onClick={() => { handleScrollTo('trust-safety'); setMobileMenuOpen(false); }} className="text-xl font-bold">Trust & Safety</button>
+                    <button onClick={() => { handleSignup(); setMobileMenuOpen(false); }} className="text-xl font-bold">For Writers</button>
+                    <button onClick={() => { handleLogin(); setMobileMenuOpen(false); }} className="text-xl font-bold text-primary">Login</button>
+                    <button onClick={() => { handleSignup(); setMobileMenuOpen(false); }} className="px-8 py-3 bg-primary text-[#1b140d] font-bold rounded-full">Join Now</button>
+                </div>
+            )}
+
+            {/* Hero Section - Full Screen Height */}
+            <section className="relative w-full min-h-[calc(100vh-80px)] flex items-center justify-center px-6 py-12 md:px-10 lg:px-20 overflow-hidden">
                 {/* Abstract Background Blob */}
                 <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl -z-10"></div>
-                <div className="mx-auto max-w-7xl">
+                <div className="w-full max-w-[1400px] mx-auto">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="flex flex-col gap-8">
                             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 w-fit">
                                 <span className="material-symbols-outlined text-primary text-sm">security</span>
                                 <span className="text-xs font-bold text-primary tracking-wide uppercase">100% Secure & Verified</span>
                             </div>
-                            <h1 className="text-4xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl text-[#1b140d] dark:text-white">
+                            <h1 className="text-5xl font-black leading-tight tracking-tight md:text-6xl lg:text-7xl text-[#1b140d] dark:text-white">
                                 Beat the <span className="text-primary relative inline-block">Last-Minute Panic<svg className="absolute w-full h-3 -bottom-1 left-0 text-primary opacity-40" preserveAspectRatio="none" viewBox="0 0 100 10"><path d="M0 5 Q 50 10 100 5" fill="none" stroke="currentColor" strokeWidth="8"></path></svg></span>. India's #1 Student Marketplace.
                             </h1>
                             <p className="text-lg text-gray-600 dark:text-gray-300 md:text-xl leading-relaxed max-w-lg">
@@ -118,7 +139,7 @@ export const Landing = () => {
             </section>
 
             {/* Trust Logos Strip */}
-            <div className="bg-white dark:bg-[#2c2219] py-8 border-y border-[#f3ede7] dark:border-[#3a2e24]">
+            <div className="bg-white dark:bg-[#2c2219] py-8 border-y border-[#f3ede7] dark:border-[#3a2e24] w-full">
                 <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-20">
                     <p className="text-center text-sm font-semibold text-gray-400 mb-6 uppercase tracking-wider">Secure payments & Verified by</p>
                     <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
@@ -131,7 +152,7 @@ export const Landing = () => {
             </div>
 
             {/* Features / Value Props */}
-            <section className="px-6 py-16 md:px-10 lg:px-20 bg-background-light dark:bg-background-dark">
+            <section id="trust-safety" className="w-full px-6 py-16 md:px-10 lg:px-20 bg-background-light dark:bg-background-dark">
                 <div className="mx-auto max-w-7xl">
                     <div className="text-center max-w-2xl mx-auto mb-16">
                         <h2 className="text-3xl md:text-4xl font-black text-[#1b140d] dark:text-white mb-4">Why AssignMate is Safer & Faster</h2>
@@ -167,7 +188,7 @@ export const Landing = () => {
             </section>
 
             {/* Interactive Search Mockup */}
-            <section className="px-6 py-12 md:px-10 lg:px-20 bg-white dark:bg-[#2c2219]">
+            <section className="w-full px-6 py-12 md:px-10 lg:px-20 bg-white dark:bg-[#2c2219]">
                 <div className="mx-auto max-w-5xl bg-primary/5 dark:bg-white/5 rounded-3xl p-8 md:p-12 text-center">
                     <h2 className="text-2xl md:text-3xl font-bold text-[#1b140d] dark:text-white mb-8">Find a verified senior from your college</h2>
                     <div className="bg-white dark:bg-[#221910] p-2 rounded-full shadow-lg flex flex-col md:flex-row items-center gap-2 max-w-3xl mx-auto border border-gray-100 dark:border-white/10">
@@ -186,21 +207,21 @@ export const Landing = () => {
                                 <option>BITS Pilani</option>
                             </select>
                         </div>
-                        <button className="bg-primary hover:bg-primary/90 text-[#1b140d] font-bold rounded-full px-8 h-12 w-full md:w-auto shadow-md transition-all">
+                        <button onClick={handleSearch} className="bg-primary hover:bg-primary/90 text-[#1b140d] font-bold rounded-full px-8 h-12 w-full md:w-auto shadow-md transition-all">
                             Search
                         </button>
                     </div>
                     <div className="flex flex-wrap justify-center gap-3 mt-6">
                         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Popular:</span>
-                        <span className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">Economics @ DU</span>
-                        <span className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">CS @ IIT</span>
-                        <span className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">Law @ NLU</span>
+                        <button onClick={handleSearch} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">Economics @ DU</button>
+                        <button onClick={handleSearch} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">CS @ IIT</button>
+                        <button onClick={handleSearch} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">Law @ NLU</button>
                     </div>
                 </div>
             </section>
 
             {/* How It Works (Timeline) */}
-            <section className="px-6 py-16 md:px-10 lg:px-20 bg-background-light dark:bg-background-dark">
+            <section id="how-it-works" className="w-full px-6 py-16 md:px-10 lg:px-20 bg-background-light dark:bg-background-dark">
                 <div className="mx-auto max-w-7xl">
                     <div className="flex flex-col md:flex-row gap-12">
                         {/* Left: Text */}
@@ -208,7 +229,7 @@ export const Landing = () => {
                             <div className="sticky top-24">
                                 <h2 className="text-3xl font-black text-[#1b140d] dark:text-white mb-4">How it works</h2>
                                 <p className="text-gray-600 dark:text-gray-300 mb-8">Four simple steps to get your assignment done without the panic.</p>
-                                <button className="hidden md:inline-flex items-center gap-2 font-bold text-primary hover:text-primary/80 transition-colors">
+                                <button onClick={() => handleScrollTo('trust-safety')} className="hidden md:inline-flex items-center gap-2 font-bold text-primary hover:text-primary/80 transition-colors">
                                     Learn more about safety <span className="material-symbols-outlined text-sm">arrow_forward</span>
                                 </button>
                             </div>
@@ -283,7 +304,7 @@ export const Landing = () => {
             </section>
 
             {/* Testimonials */}
-            <section className="px-6 py-16 md:px-10 lg:px-20 bg-white dark:bg-[#2c2219] border-t border-[#f3ede7] dark:border-[#3a2e24]">
+            <section className="w-full px-6 py-16 md:px-10 lg:px-20 bg-white dark:bg-[#2c2219] border-t border-[#f3ede7] dark:border-[#3a2e24]">
                 <div className="mx-auto max-w-7xl">
                     <h2 className="text-3xl font-black text-center text-[#1b140d] dark:text-white mb-12">Success Stories from Students</h2>
                     <div className="grid md:grid-cols-3 gap-6">
@@ -355,7 +376,7 @@ export const Landing = () => {
             </section>
 
             {/* CTA Section */}
-            <section className="px-6 py-20 md:px-10 lg:px-20 bg-background-light dark:bg-background-dark">
+            <section className="w-full px-6 py-20 md:px-10 lg:px-20 bg-background-light dark:bg-background-dark">
                 <div className="mx-auto max-w-6xl bg-[#1b140d] dark:bg-white/5 rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden">
                     {/* Decorative Circle */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px]"></div>
@@ -376,7 +397,7 @@ export const Landing = () => {
             </section>
 
             {/* Footer */}
-            <footer className="bg-background-light dark:bg-[#221910] border-t border-[#f3ede7] dark:border-[#3a2e24] px-6 py-12 md:px-10 lg:px-20">
+            <footer className="w-full bg-background-light dark:bg-[#221910] border-t border-[#f3ede7] dark:border-[#3a2e24] px-6 py-12 md:px-10 lg:px-20">
                 <div className="mx-auto max-w-7xl grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
                     <div className="col-span-2 lg:col-span-2 flex flex-col gap-4 pr-8">
                         <div className="flex items-center gap-2 text-[#1b140d] dark:text-white mb-2">
@@ -391,30 +412,30 @@ export const Landing = () => {
                     </div>
                     <div className="flex flex-col gap-4">
                         <h3 className="font-bold text-[#1b140d] dark:text-white">Platform</h3>
-                        <a className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">How it works</a>
-                        <a className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">Browse Writers</a>
-                        <a className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">Safety & Trust</a>
-                        <a className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">Pricing</a>
+                        <button onClick={() => handleScrollTo('how-it-works')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">How it works</button>
+                        <button onClick={handleSearch} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Browse Writers</button>
+                        <button onClick={() => handleScrollTo('trust-safety')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Safety & Trust</button>
+                        <button onClick={handleSignup} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Pricing</button>
                     </div>
                     <div className="flex flex-col gap-4">
                         <h3 className="font-bold text-[#1b140d] dark:text-white">Support</h3>
-                        <a className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">Help Center</a>
-                        <a className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">Contact Us</a>
-                        <a className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">Dispute Resolution</a>
-                        <a className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">Community Guidelines</a>
+                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Help Center</button>
+                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Contact Us</button>
+                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Dispute Resolution</button>
+                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Community Guidelines</button>
                     </div>
                     <div className="flex flex-col gap-4">
                         <h3 className="font-bold text-[#1b140d] dark:text-white">Legal</h3>
-                        <a className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">Terms of Service</a>
-                        <a className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">Privacy Policy</a>
-                        <a className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer">Academic Integrity</a>
+                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Terms of Service</button>
+                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Privacy Policy</button>
+                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Academic Integrity</button>
                     </div>
                 </div>
                 <div className="mx-auto max-w-7xl pt-8 border-t border-gray-200 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-sm text-gray-400">© 2024 AssignMate. All rights reserved.</p>
                     <div className="flex gap-4">
-                        <a className="text-gray-400 hover:text-primary transition-colors cursor-pointer"><span className="material-symbols-outlined">public</span></a>
-                        <a className="text-gray-400 hover:text-primary transition-colors cursor-pointer"><span className="material-symbols-outlined">chat_bubble</span></a>
+                        <button className="text-gray-400 hover:text-primary transition-colors cursor-pointer"><span className="material-symbols-outlined">public</span></button>
+                        <button className="text-gray-400 hover:text-primary transition-colors cursor-pointer"><span className="material-symbols-outlined">chat_bubble</span></button>
                     </div>
                 </div>
             </footer>
