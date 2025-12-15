@@ -6,7 +6,7 @@ interface FindWriterProps {
     onNavigate: (page: string) => void;
 }
 
-// Mock Writers Data
+// Mock Writers Data - Expanded
 const MOCK_WRITERS = [
     {
         id: 'w1',
@@ -119,6 +119,34 @@ const MOCK_WRITERS = [
         level: 4,
         active: true,
         image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBoS9nxUT4uULrmoKsuVGnZcoQJXC9bICnjgJ0ugdhlB4azQQdC1vXwaYeYS1Xg8AdxI9SuWHmLM921C1AUN5VAz7eC6KtZxcxpJWGvdygLaBGv-CrDrAc8UC2-WUTgbX9E92-KwzT5oHDBObpP7Lo78gIzLH5FAy6Rmgo2xS4hsS16cfw7_PwH96eNe367S1qE6Mzvb8Jlt_Mjj-YHusGWNqfW1vkW0duwOPEbKrWJCHc2xGk9bZb5ocqDYtPllSV1mI62eluv-vsd'
+    },
+    {
+        id: 'w9',
+        name: 'Amit V.',
+        college: 'Delhi Technological University',
+        role: 'Student',
+        verified: true,
+        rating: 4.8,
+        jobs: 56,
+        skills: ['Mechanical', 'AutoCAD'],
+        price: 320,
+        level: 7,
+        active: true,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD5eyA5mJiAk02OyRZxUOxi92h8QvSqP2p2OuZTsHIBnfu3C1q-DRideE6S9kGNKSVuEeXn9ug9NlQoOmIOkzzAIz8BJdpeBEi_NAcbTYluU388uhF8uf1gB0NWCBC3lztv5hqALo16vUsHiH5RhCA1BwmXQU1Jmw_TZhadzWRYJq5f1IuRpBO6p86iRBNjPgUhJbcyOFOCZM7mzQxJJ0XjI5h_bpB7SpNhZeBR1z51ekmD4eSzxTVpu680sgUxbQrrEbkECrGMpbTE'
+    },
+    {
+        id: 'w10',
+        name: 'Sneha P.',
+        college: 'Anna University',
+        role: 'Student',
+        verified: true,
+        rating: 4.6,
+        jobs: 28,
+        skills: ['Civil', 'Structures'],
+        price: 280,
+        level: 6,
+        active: false,
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBB9MGalAWJQzPN8cLc_82cLaYNtVf7oGnHWJiRmA4TQMTuziSiYhR1ckDOtW7Qwe9d3s9se0K1qcX7mHg31rZcRoNLkbflTrqc7Ek7ARhTDEdsLmY5IZg5pLilI303xLRBhQNsn3HRABSn1QS8KtmbDeRvBg2rtG2hqp_mzU5xKMw_uWKfBEAoU-9HhOSPX4xTGnqRvqllhx36r2uqpDz5qxt0nDG2So76Myl8pc4tqXWpPNHplHbRUJvU2Ixp5eNxBKtwvOiMvEWQ'
     }
 ];
 
@@ -128,6 +156,7 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
     const [isFocused, setIsFocused] = useState(false);
     const [filteredColleges, setFilteredColleges] = useState<typeof INDIAN_COLLEGES>([]);
     const [filteredWriters, setFilteredWriters] = useState(MOCK_WRITERS);
+    const [nearbyColleges, setNearbyColleges] = useState<typeof INDIAN_COLLEGES>([]);
     const searchRef = useRef<HTMLDivElement>(null);
 
     // Handle click outside to close dropdown
@@ -156,24 +185,37 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
         setFilteredColleges(results);
     }, [collegeQuery]);
 
-    // Filter Writers based on selected college
+    // Filter Writers based on selected college & Find Nearby
     useEffect(() => {
         const collegeParam = searchParams.get('college');
         if (collegeParam) {
             setCollegeQuery(collegeParam);
             const filtered = MOCK_WRITERS.filter(w => w.college.toLowerCase().includes(collegeParam.toLowerCase()));
-            setFilteredWriters(filtered.length > 0 ? filtered : MOCK_WRITERS); // Fallback to all if no match found (or show empty state)
-            // Actually, if no match, we should probably show empty or "No writers found in this college"
-            // For now, let's just filter strictly.
-            if (filtered.length === 0 && collegeParam) {
-                // If strict filtering returns nothing, maybe we want to show all but indicate no results? 
-                // Or just show empty. Let's show empty to be correct.
+
+            if (filtered.length === 0) {
                 setFilteredWriters([]);
+                // Find nearby colleges logic
+                const currentCollege = INDIAN_COLLEGES.find(c => c.name.toLowerCase() === collegeParam.toLowerCase());
+                if (currentCollege) {
+                    // Filter by same district first, then state
+                    const nearby = INDIAN_COLLEGES.filter(c =>
+                        c.id !== currentCollege.id && // Exclude current
+                        (
+                            (currentCollege.district && c.district === currentCollege.district) ||
+                            c.state === currentCollege.state
+                        )
+                    ).slice(0, 8); // Limit to 8 suggestions
+                    setNearbyColleges(nearby);
+                } else {
+                    setNearbyColleges([]);
+                }
             } else {
                 setFilteredWriters(filtered);
+                setNearbyColleges([]);
             }
         } else {
             setFilteredWriters(MOCK_WRITERS);
+            setNearbyColleges([]);
         }
     }, [searchParams]);
 
@@ -570,19 +612,38 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                                 ))}
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center py-20 text-center">
+                            <div className="flex flex-col items-center justify-center py-12 text-center">
                                 <span className="material-symbols-outlined text-6xl text-text-muted/30 mb-4">school</span>
                                 <h3 className="text-xl font-bold text-text-main mb-2">No writers found in this college</h3>
-                                <p className="text-text-muted max-w-md">
+                                <p className="text-text-muted max-w-md mb-8">
                                     We couldn't find any writers registered under "{searchParams.get('college')}".
-                                    Try searching for a different college or browse all writers.
+                                    {nearbyColleges.length > 0 ? " Try these nearby colleges:" : " Try searching for a different college or browse all writers."}
                                 </p>
+
+                                {nearbyColleges.length > 0 && (
+                                    <div className="w-full max-w-4xl mb-8">
+                                        <div className="flex flex-wrap justify-center gap-3">
+                                            {nearbyColleges.map((college) => (
+                                                <button
+                                                    key={college.id}
+                                                    onClick={() => handleCollegeSelect(college.name)}
+                                                    className="px-4 py-2 rounded-full bg-white border border-[#e7dbcf] hover:border-primary hover:bg-primary/5 transition-all text-sm font-medium text-text-main flex items-center gap-2 group"
+                                                >
+                                                    <span className="material-symbols-outlined text-primary text-[16px]">location_on</span>
+                                                    {college.name}
+                                                    <span className="text-xs text-text-muted group-hover:text-primary/70">({college.district || college.state})</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 <button
                                     onClick={() => {
                                         setSearchParams({});
                                         setCollegeQuery('');
                                     }}
-                                    className="mt-6 px-6 py-2 rounded-full bg-primary text-[#1b140d] font-bold hover:brightness-105 transition-all"
+                                    className="px-6 py-2 rounded-full bg-primary text-[#1b140d] font-bold hover:brightness-105 transition-all"
                                 >
                                     View All Writers
                                 </button>
