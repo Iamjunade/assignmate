@@ -22,6 +22,11 @@ export default {
                 "border-dark": "#44392f",
                 "text-main": "#1b140d",
                 "text-muted": "#9a734c",
+                // Dashboard specific colors
+                "secondary-bg": "#fcfaf8",
+                "border-subtle": "#efece8",
+                "accent-orange": "#FFF0E0",
+                "dashboard-muted": "#8c8075",
                 "primary-light": "#FFF6ED", // Keep for backward compatibility if needed
                 "text-dark": "#1b140d", // Keep for backward compatibility
                 "border-color": "#f3ede7", // Keep for backward compatibility
