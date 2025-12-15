@@ -23,18 +23,10 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const syncingRef = useRef<string | null>(null); // Track which user is being synced
 
   // Sync user profile from Firestore
   const syncUser = async (fbUser: any) => {
     const userId = fbUser.uid;
-
-    // Prevent concurrent syncs for the same user
-    if (syncingRef.current === userId) {
-      return;
-    }
-
-    syncingRef.current = userId;
 
     try {
       const profile = await userApi.getProfile(userId);
@@ -48,7 +40,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         } as User);
         presence.init(userId);
       } else {
-        // Profile missing - auto-complete for Google signups
+        // Profile missing - auto-complete for Google signups or legacy users
         const newProfile = {
           id: userId,
           email: fbUser.email || '',
@@ -57,8 +49,8 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           avatar_url: fbUser.photoURL || undefined,
           full_name: fbUser.displayName || 'Student',
           xp: 0,
-          is_writer: false, // Default to finding help
-          is_incomplete: false // Bypass manual setup
+          is_writer: false,
+          is_incomplete: false
         };
 
         // Create the profile immediately
@@ -70,13 +62,20 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       }
     } catch (e) {
       console.error("AuthContext: Sync Failed", e);
-      setUser(null);
-    } finally {
-      syncingRef.current = null;
+      // Fallback: If Firestore fails, still log the user in so they aren't stuck
+      setUser({
+        id: userId,
+        email: fbUser.email || '',
+        handle: 'User',
+        school: 'Unknown',
+        xp: 0,
+        is_writer: false,
+        is_incomplete: false
+      } as User);
     }
   };
 
-  // Listen to Firebase auth state changes
+  // Listen to Firebase auth state changes - THIS IS THE SINGLE SOURCE OF TRUTH
   useEffect(() => {
     const unsubscribe = firebaseAuth.onAuthStateChange(async (firebaseUser) => {
       if (firebaseUser) {
@@ -94,76 +93,48 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     setUser(null);
   };
 
-  // Register new user with email/password
+  // Register new user
   const register = async (email: string, pass: string, handle: string, school: string, is_writer: boolean) => {
     const res = await firebaseAuth.register(email, pass);
     if (res.error) return res;
 
     if (res.data?.user) {
       try {
-        // Create user profile in Firestore
-        const profile = await userApi.createProfile(res.data.user.uid, {
+        // Create user profile in Firestore immediately
+        // The listener will pick this up momentarily, or create a default if it beats us.
+        // We create it here to ensure the correct data (Handle/School) is used.
+        await userApi.createProfile(res.data.user.uid, {
           handle,
           school,
           email,
           is_writer
         });
 
-        // Set user state immediately to avoid race conditions
-        setUser({
-          ...profile,
-          email: res.data.user.email || email,
-          is_incomplete: false
-        });
-
-        // Initialize presence and send welcome notification
-        presence.init(res.data.user.uid);
-        notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
-
-        // Sync to ensure consistency
-        await syncUser(res.data.user);
-
+        // We do NOT manually set user here to avoid conflicts with the listener
         return { data: { ...res.data, session: true } };
       } catch (error: any) {
         console.error("Registration Error:", error);
-        return { error: { message: "Account created but profile setup failed. Please login." } };
+        return { error: { message: "Account created but profile setup failed." } };
       }
     }
     return res;
   };
 
+  const login = async (email: string, password: string) => {
+    // Simply call firebase login. The useEffect listener above handles the state update.
+    return await firebaseAuth.login(email, password);
+  };
+
   // Complete Google signup by creating profile
   const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean) => {
-    if (!user) {
-      throw new Error("User not found. Please try logging in again.");
-    }
-
+    if (!user) throw new Error("User not found.");
     try {
-      // Create profile in Firestore
       const profile = await userApi.createProfile(user.id, {
-        handle,
-        school,
-        email: user.email,
-        avatar_url: user.avatar_url,
-        full_name: user.full_name || 'Student',
-        is_writer
+        handle, school, email: user.email, avatar_url: user.avatar_url, full_name: user.full_name, is_writer
       });
-
-      // Update user state immediately
-      setUser({
-        ...profile,
-        email: user.email,
-        is_incomplete: false
-      });
-
-      // Initialize presence and send welcome notification
+      setUser({ ...profile, email: user.email, is_incomplete: false });
       presence.init(user.id);
-      notificationService.sendWelcome(user.id, handle).catch(console.error);
-
-    } catch (e: any) {
-      console.error("Profile Completion Failed:", e);
-      throw e;
-    }
+    } catch (e: any) { throw e; }
   };
 
   const deleteAccount = async () => {
@@ -173,9 +144,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       const res = await firebaseAuth.deleteUser();
       if (res.error) throw res.error;
       setUser(null);
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) { throw error; }
   };
 
   const resetPassword = async (email: string) => {
@@ -187,23 +156,15 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     <AuthContext.Provider value={{
       user,
       loading,
-      login: async (email: string, password: string) => {
-        const res = await firebaseAuth.login(email, password);
-        if (res.data?.user) {
-          await syncUser(res.data.user);
-        }
-        return res;
-      },
+      login, // Updated simple login
       loginWithGoogle: firebaseAuth.loginWithGoogle,
-      register,
+      register, // Updated register
       completeGoogleSignup,
       loginAnonymously: firebaseAuth.loginAnonymously,
       logout,
       deleteAccount,
       refreshProfile: async () => {
-        if (user) {
-          await syncUser({ uid: user.id, email: user.email });
-        }
+        if (user) await syncUser({ uid: user.id, email: user.email });
       },
       resetPassword
     }}>
