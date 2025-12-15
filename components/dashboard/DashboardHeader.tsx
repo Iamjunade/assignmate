@@ -1,28 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// Mock Data
-const MOCK_COLLEGES = [
-    { id: 'c1', name: 'IIT Delhi', location: 'New Delhi' },
-    { id: 'c2', name: 'IIT Bombay', location: 'Mumbai' },
-    { id: 'c3', name: 'BITS Pilani', location: 'Pilani' },
-    { id: 'c4', name: 'Delhi University', location: 'New Delhi' },
-    { id: 'c5', name: 'VIT Vellore', location: 'Vellore' },
-];
+import { INDIAN_COLLEGES } from '../../data/colleges';
 
 const MOCK_STUDENTS = [
-    { id: 's1', name: 'Rohan M.', college: 'IIT Delhi', role: 'Physics Tutor' },
-    { id: 's2', name: 'Ananya S.', college: 'Delhi University', role: 'PhD Candidate' },
-    { id: 's3', name: 'Priya K.', college: 'IIT Bombay', role: 'Calculus Expert' },
-    { id: 's4', name: 'Vikram R.', college: 'BITS Pilani', role: 'CS Major' },
-    { id: 's5', name: 'Kabir Singh', college: 'VIT Vellore', role: 'Web Dev' },
+    { id: 's1', name: 'Rohan M.', college: 'Indian Institute of Technology Delhi', role: 'Physics Tutor' },
+    { id: 's2', name: 'Ananya S.', college: 'University of Delhi', role: 'PhD Candidate' },
+    { id: 's3', name: 'Priya K.', college: 'Indian Institute of Technology Bombay', role: 'Calculus Expert' },
+    { id: 's4', name: 'Vikram R.', college: 'Birla Institute of Technology and Science, Pilani', role: 'CS Major' },
+    { id: 's5', name: 'Kabir Singh', college: 'Vellore Institute of Technology', role: 'Web Dev' },
 ];
 
 export const DashboardHeader: React.FC = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [isFocused, setIsFocused] = useState(false);
-    const [results, setResults] = useState<{ colleges: typeof MOCK_COLLEGES, students: typeof MOCK_STUDENTS }>({ colleges: [], students: [] });
+    const [results, setResults] = useState<{ colleges: typeof INDIAN_COLLEGES, students: typeof MOCK_STUDENTS }>({ colleges: [], students: [] });
     const searchRef = useRef<HTMLDivElement>(null);
 
     // Handle click outside to close dropdown
@@ -44,7 +36,14 @@ export const DashboardHeader: React.FC = () => {
         }
 
         const query = searchQuery.toLowerCase();
-        const filteredColleges = MOCK_COLLEGES.filter(c => c.name.toLowerCase().includes(query));
+
+        // Filter colleges (limit to 20 for performance)
+        const filteredColleges = INDIAN_COLLEGES.filter(c =>
+            c.name.toLowerCase().includes(query) ||
+            c.state.toLowerCase().includes(query) ||
+            c.district.toLowerCase().includes(query)
+        ).slice(0, 20);
+
         const filteredStudents = MOCK_STUDENTS.filter(s =>
             s.name.toLowerCase().includes(query) || s.college.toLowerCase().includes(query)
         );
@@ -94,7 +93,7 @@ export const DashboardHeader: React.FC = () => {
                                             </div>
                                             <div>
                                                 <div className="text-sm font-bold text-text-dark">{college.name}</div>
-                                                <div className="text-xs text-text-muted">{college.location}</div>
+                                                <div className="text-xs text-text-muted">{college.district}, {college.state}</div>
                                             </div>
                                         </div>
                                     ))}
