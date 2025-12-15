@@ -135,7 +135,7 @@ export const Profile = ({ user }: { user: any }) => {
     };
 
     return (
-        <div className="w-full px-4 lg:px-10 py-8">
+        <div className="w-full px-4 lg:px-4 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 {/* Left Sidebar: Identity Card (Sticky) */}
                 <aside className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-24 space-y-6">
