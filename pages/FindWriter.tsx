@@ -13,7 +13,7 @@ export const FindWriter: React.FC = () => {
             */}
 
             <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-[#fcfaf8]/90 border-b border-[#f3ede7]">
-                <div className="px-6 md:px-10 lg:px-10 py-3 flex items-center justify-between">
+                <div className="px-4 md:px-6 lg:px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/')}>
                         <div className="size-8 text-primary">
                             <span className="material-symbols-outlined text-4xl leading-none">school</span>
@@ -39,7 +39,7 @@ export const FindWriter: React.FC = () => {
 
             <main className="flex flex-col w-full pb-20">
                 {/* Breadcrumbs */}
-                <div className="w-full px-6 md:px-10 lg:px-10 pt-6">
+                <div className="w-full px-4 md:px-6 lg:px-4 pt-6">
                     <div className="flex flex-wrap gap-2 text-sm">
                         <a className="text-text-muted hover:text-primary" href="#">Home</a>
                         <span className="text-text-muted">/</span>
@@ -48,7 +48,7 @@ export const FindWriter: React.FC = () => {
                 </div>
 
                 {/* Hero Section with Map Concept */}
-                <section className="w-full px-6 md:px-10 lg:px-10 py-8">
+                <section className="w-full px-4 md:px-6 lg:px-4 py-8">
                     <div className="relative w-full rounded-3xl overflow-hidden bg-[#e8e3de] min-h-[360px] flex items-center justify-center">
                         {/* Abstract Map Background */}
                         <div className="absolute inset-0 z-0 opacity-40 mix-blend-multiply" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCQ2-Lqo5AkwRX0FPz5t8hHaw5zVigPSdbaqkLnzAmWh2vkHSP7J2FKNAG014van5cXsBy7za4dBDtVmMfsZNUa2o3PmcfVm7gqQOIamUs8TTefvqS_1SMDkgHuECaUr60ehZpDbIgcbndTc-SJMuIHw8l8hiwm0U9XUYsdYvmH3M4-JwTNBkgOnAgKz0r2a98b1y2kvMVsmCiZ_W6RDsp_JLytVvb9pnziYu04HmdA1_Qir0R06aRqDOMr4EWNS0HckYDi2Y4NcJeo')", backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
@@ -85,7 +85,7 @@ export const FindWriter: React.FC = () => {
                 </section>
 
                 {/* Sticky Filter Bar */}
-                <section className="sticky top-[73px] z-40 w-full bg-[#fcfaf8]/95 backdrop-blur-md border-b border-[#f3ede7] py-3 px-6 md:px-10 lg:px-10">
+                <section className="sticky top-[73px] z-40 w-full bg-[#fcfaf8]/95 backdrop-blur-md border-b border-[#f3ede7] py-3 px-4 md:px-6 lg:px-4">
                     <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar pb-1">
                         <button className="shrink-0 h-9 px-4 rounded-full bg-text-main text-white text-sm font-medium flex items-center gap-2 shadow-md">
                             <span className="material-symbols-outlined text-[18px]">tune</span>
@@ -114,7 +114,7 @@ export const FindWriter: React.FC = () => {
                 </section>
 
                 {/* Main Content Container */}
-                <div className="flex flex-col w-full px-6 md:px-10 lg:px-10 py-8 gap-12">
+                <div className="flex flex-col w-full px-4 md:px-6 lg:px-4 py-8 gap-12">
                     {/* Trending Section */}
                     <section>
                         <div className="flex items-end justify-between mb-6">
@@ -504,7 +504,7 @@ export const FindWriter: React.FC = () => {
             </main>
 
             {/* Footer */}
-            <footer className="w-full bg-[#f3ede7] py-12 px-6 md:px-10 lg:px-10">
+            <footer className="w-full bg-[#f3ede7] py-12 px-4 md:px-6 lg:px-4">
                 <div className="flex flex-col md:flex-row justify-between gap-8 mb-8">
                     <div className="max-w-sm">
                         <div className="flex items-center gap-2 mb-4">
