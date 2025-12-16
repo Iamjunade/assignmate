@@ -117,6 +117,12 @@ import { User } from '../types';
 // ... existing imports ...
 
 export const dbService = {
+    getUser: async (userId: string) => {
+        const docRef = doc(getDb(), 'users', userId);
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+    },
+
     getUsersBatch: async (userIds: string[]) => {
         const uniqueIds = Array.from(new Set(userIds)).filter(id => id);
         if (uniqueIds.length === 0) return new Map();
@@ -296,6 +302,52 @@ export const dbService = {
             ...r,
             requester: userMap.get(r.requester_id) || null
         }));
+    },
+
+    searchStudents: async (queryText: string) => {
+        if (!queryText || queryText.length < 2) return [];
+
+        // Firestore is case-sensitive. This is a basic implementation.
+        // Ideally, we'd store a lowercase version of fields for search.
+
+        const q1 = query(collection(getDb(), 'users'), where('handle', '>=', queryText), where('handle', '<=', queryText + '\uf8ff'), limit(5));
+        const q2 = query(collection(getDb(), 'users'), where('full_name', '>=', queryText), where('full_name', '<=', queryText + '\uf8ff'), limit(5));
+        const q3 = query(collection(getDb(), 'users'), where('school', '>=', queryText), where('school', '<=', queryText + '\uf8ff'), limit(5));
+
+        const [s1, s2, s3] = await Promise.all([getDocs(q1), getDocs(q2), getDocs(q3)]);
+
+        const results = new Map();
+        [...s1.docs, ...s2.docs, ...s3.docs].forEach(d => {
+            results.set(d.id, { id: d.id, ...d.data() });
+        });
+
+        return Array.from(results.values());
+    },
+
+    listenToConnections: (userId: string, callback: (connections: any[]) => void) => {
+        const q1 = query(collection(getDb(), 'connections'), where('requester_id', '==', userId));
+        const q2 = query(collection(getDb(), 'connections'), where('receiver_id', '==', userId));
+
+        let conns1: any[] = [];
+        let conns2: any[] = [];
+
+        const merge = () => {
+            const all = [...conns1, ...conns2];
+            const map = new Map();
+            all.forEach(c => map.set(c.id, c));
+            callback(Array.from(map.values()));
+        };
+
+        const unsub1 = onSnapshot(q1, (snap) => {
+            conns1 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            merge();
+        });
+        const unsub2 = onSnapshot(q2, (snap) => {
+            conns2 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            merge();
+        });
+
+        return () => { unsub1(); unsub2(); };
     },
 
     getMyConnections: async (userId: string) => {

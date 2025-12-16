@@ -2,19 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { INDIAN_COLLEGES } from '../../data/colleges';
 
-const MOCK_STUDENTS = [
-    { id: 's1', name: 'Rohan M.', college: 'Indian Institute of Technology Delhi', role: 'Physics Tutor' },
-    { id: 's2', name: 'Ananya S.', college: 'University of Delhi', role: 'PhD Candidate' },
-    { id: 's3', name: 'Priya K.', college: 'Indian Institute of Technology Bombay', role: 'Calculus Expert' },
-    { id: 's4', name: 'Vikram R.', college: 'Birla Institute of Technology and Science, Pilani', role: 'CS Major' },
-    { id: 's5', name: 'Kabir Singh', college: 'Vellore Institute of Technology', role: 'Web Dev' },
-];
+import { dbService } from '../../services/firestoreService';
 
 export const DashboardHeader: React.FC = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [isFocused, setIsFocused] = useState(false);
-    const [results, setResults] = useState<{ colleges: typeof INDIAN_COLLEGES, students: typeof MOCK_STUDENTS }>({ colleges: [], students: [] });
+    const [results, setResults] = useState<{ colleges: typeof INDIAN_COLLEGES, students: any[] }>({ colleges: [], students: [] });
     const searchRef = useRef<HTMLDivElement>(null);
 
     // Handle click outside to close dropdown
@@ -44,11 +38,16 @@ export const DashboardHeader: React.FC = () => {
             c.district.toLowerCase().includes(query)
         ).slice(0, 20);
 
-        const filteredStudents = MOCK_STUDENTS.filter(s =>
-            s.name.toLowerCase().includes(query) || s.college.toLowerCase().includes(query)
-        );
+        // Search students from DB
+        if (searchQuery.length > 2) {
+            dbService.searchStudents(searchQuery).then(students => {
+                setResults(prev => ({ ...prev, students }));
+            });
+        } else {
+            setResults(prev => ({ ...prev, students: [] }));
+        }
 
-        setResults({ colleges: filteredColleges, students: filteredStudents });
+        setResults(prev => ({ ...prev, colleges: filteredColleges }));
     }, [searchQuery]);
 
     return (
@@ -110,23 +109,25 @@ export const DashboardHeader: React.FC = () => {
                             {/* Students Section */}
                             {results.students.length > 0 && (
                                 <div className="p-2">
-                                    <div className="px-3 py-2 text-xs font-bold text-text-muted uppercase tracking-wider">Students</div>
-                                    {results.students.map(student => (
+                                    <div className="px-3 py-2 text-xs font-bold text-text-muted uppercase tracking-wider">People</div>
+                                    {results.students.map((student: any) => (
                                         <div
                                             key={student.id}
                                             className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors"
                                             onClick={() => {
-                                                navigate('/writers'); // In real app, maybe /profile/:id
+                                                navigate(`/profile/${student.id}`);
                                                 setIsFocused(false);
                                                 setSearchQuery('');
                                             }}
                                         >
-                                            <div className="size-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-text-muted font-bold text-xs border border-white shadow-sm">
-                                                {student.name.charAt(0)}
-                                            </div>
+                                            <img
+                                                src={student.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.handle}`}
+                                                alt={student.handle}
+                                                className="size-8 rounded-full bg-gray-100 object-cover border border-gray-200"
+                                            />
                                             <div>
-                                                <div className="text-sm font-bold text-text-dark">{student.name}</div>
-                                                <div className="text-xs text-text-muted">{student.role} • {student.college}</div>
+                                                <div className="text-sm font-bold text-text-dark">{student.full_name || student.handle}</div>
+                                                <div className="text-xs text-text-muted">@{student.handle} • {student.school}</div>
                                             </div>
                                         </div>
                                     ))}

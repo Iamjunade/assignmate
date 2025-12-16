@@ -26,6 +26,7 @@ const Feed = lazy(() => import('./pages/Feed').then(module => ({ default: module
 const ChatList = lazy(() => import('./pages/ChatList').then(module => ({ default: module.ChatList })));
 const ChatRoom = lazy(() => import('./pages/ChatRoom').then(module => ({ default: module.ChatRoom })));
 const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
+const Connections = lazy(() => import('./pages/Connections').then(module => ({ default: module.Connections })));
 const FindWriter = lazy(() => import('./pages/FindWriter').then(module => ({ default: module.FindWriter })));
 
 export default function AppWrapper() {
@@ -101,6 +102,7 @@ function AppContent() {
   const authNavItems = [
     { label: 'Feed', href: '/feed', onClick: () => navigate('/feed') },
     { label: 'Messages', href: '/chats', onClick: () => navigate('/chats') },
+    { label: 'Connections', href: '/connections', onClick: () => navigate('/connections') },
     { label: 'Profile', href: '/profile', onClick: () => navigate('/profile') },
   ];
 
@@ -138,7 +140,7 @@ function AppContent() {
   }
 
   // Fix for Profile Layout
-  if (location.pathname === '/profile') {
+  if (location.pathname.startsWith('/profile')) {
     return (
       <Suspense fallback={
         <div className="flex items-center justify-center h-screen text-slate-400">
@@ -147,6 +149,21 @@ function AppContent() {
       }>
         <ProtectedRoute>
           {user && <Profile user={user} />}
+        </ProtectedRoute>
+      </Suspense>
+    );
+  }
+
+  // Fix for Connections Layout
+  if (location.pathname === '/connections') {
+    return (
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen text-slate-400">
+          <Loader2 className="animate-spin" />
+        </div>
+      }>
+        <ProtectedRoute>
+          {user && <Connections user={user} />}
         </ProtectedRoute>
       </Suspense>
     );
@@ -172,7 +189,7 @@ function AppContent() {
 
   return (
     <GlassLayout>
-      {location.pathname !== '/' && location.pathname !== '/feed' && location.pathname !== '/auth' && location.pathname !== '/writers' && location.pathname !== '/profile' && !location.pathname.startsWith('/chats') && (
+      {location.pathname !== '/' && location.pathname !== '/feed' && location.pathname !== '/auth' && location.pathname !== '/writers' && !location.pathname.startsWith('/profile') && location.pathname !== '/connections' && !location.pathname.startsWith('/chats') && (
         <GlassNavigation
           logo={
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(user ? '/feed' : '/')}>
@@ -220,6 +237,18 @@ function AppContent() {
             <Route path="/profile" element={
               <ProtectedRoute>
                 {user && <Profile user={user} />}
+              </ProtectedRoute>
+            } />
+
+            <Route path="/profile/:userId" element={
+              <ProtectedRoute>
+                {user && <Profile user={user} />}
+              </ProtectedRoute>
+            } />
+
+            <Route path="/connections" element={
+              <ProtectedRoute>
+                {user && <Connections user={user} />}
               </ProtectedRoute>
             } />
 
