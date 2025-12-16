@@ -1,162 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { INDIAN_COLLEGES } from '../data/colleges';
+import { dbService } from '../services/firestoreService';
+import { useAuth } from '../contexts/AuthContext';
 
 interface FindWriterProps {
     onNavigate: (page: string) => void;
 }
 
-// Mock Writers Data - Expanded
-const MOCK_WRITERS = [
-    {
-        id: 'w1',
-        name: 'Ananya S.',
-        college: 'Mumbai University',
-        role: 'PhD Candidate',
-        verified: true,
-        rating: 4.9,
-        jobs: 84,
-        skills: ['Computer Science', 'Python', 'Java'],
-        price: 450,
-        level: 12,
-        active: true,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD5eyA5mJiAk02OyRZxUOxi92h8QvSqP2p2OuZTsHIBnfu3C1q-DRideE6S9kGNKSVuEeXn9ug9NlQoOmIOkzzAIz8BJdpeBEi_NAcbTYluU388uhF8uf1gB0NWCBC3lztv5hqALo16vUsHiH5RhCA1BwmXQU1Jmw_TZhadzWRYJq5f1IuRpBO6p86iRBNjPgUhJbcyOFOCZM7mzQxJJ0XjI5h_bpB7SpNhZeBR1z51ekmD4eSzxTVpu680sgUxbQrrEbkECrGMpbTE'
-    },
-    {
-        id: 'w2',
-        name: 'Vikram R.',
-        college: 'Delhi University',
-        role: 'Student',
-        verified: true,
-        rating: 4.5,
-        jobs: 12,
-        skills: ['Algorithms', 'C++'],
-        price: 250,
-        level: 5,
-        active: false,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7lnF4Ol7P-HK3Dde6qSTgd944-WawQkJoyY0oKRFrOH7fAUPJv_DrJMaH1xmP15XMkwO97euR2u9j8PIZWQZ4LpV_fVaA4BbXtE_fLmrIH5Lzn-D_aC75-6xrvKFz3kQVJ4VppGgbA6VqRqMZ5Z5ZqevYi41Hd0C-xrD6pnF6Xqva18TmXm6kH5P10BrEOtan1244teGNdcifyiYHxyIx2X4pc36Pc853_mrLuo_pMt2POvzIckOSfSGK5dMVWR9lyQlzpAWcImWN'
-    },
-    {
-        id: 'w3',
-        name: 'Dr. Meera K.',
-        college: 'BITS Pilani',
-        role: 'PhD Scholar',
-        verified: true,
-        rating: 5.0,
-        jobs: 210,
-        skills: ['Data Science', 'Machine Learning'],
-        price: 800,
-        level: 24,
-        active: false,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCJgifg9eezbKJlCwX7jFenkYcWVC1jE7K577tP3G2Kd_VChO6iVvM7lEIVaPzSD7WpC_qdQqlFXFEnCTQ19e9hy9K4oj0pFzUJV674a7YUd43OcFCI5VNA1ECfxGwLDUAgYi0dUj4GtjAYzLVcpVsXZZUGRADmvbxzBoJ1LrnqG6tAWZckvyLPd9GX25o9YynpAagXlhsO8i-HhS31bVRtRkOHxsK8N0wceCVZDoLRx8R4uO5hdbOMgfaexR1SvpYvvC6NXiuJfiLJ'
-    },
-    {
-        id: 'w4',
-        name: 'Kabir Singh',
-        college: 'VIT Vellore',
-        role: 'Student',
-        verified: true,
-        rating: 4.6,
-        jobs: 32,
-        skills: ['Web Dev', 'React'],
-        price: 300,
-        level: 8,
-        active: false,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBURA_vY8UfMZgRA6ksqDUBtIRFrayZgDkXK67RF5Gb4s8funxS1k0_PLindmyDcFtU4cUOaM_9X5rqouBT-gIdHvrRqQc2eObp-c1RZ8eauwnxKBF9G40YRRuCunI8SGASOjjk8u6uq8g7IpOZcfqyrMgQPhoIU9zmW5K9TZm_QA_WSBk1ULoYj-xBpKvja6HG25GWYNiMA_iOjNLUCCnrPr1l4p1bYNDmbu1jeYk9SZJkkbGTRBt-aRp34uPG7c6ySPN8-5fXPn6U'
-    },
-    {
-        id: 'w5',
-        name: 'Sarah J.',
-        college: 'IIT Bombay',
-        role: 'Student',
-        verified: true,
-        rating: 5.0,
-        jobs: 42,
-        skills: ['Physics', 'Math'],
-        price: 400,
-        level: 10,
-        active: true,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAFIhHX4ZGnYjCUykvkK25l_um_GHyQvMPvdqQqyeNBfsIfMc65rjAgZ-k2pPNqW6oF9buU6yVAsgM_WJfrGqn29rSWxACq_aopvS_Qt8oifsFN3ElFWeIw50NHxV3jY2i2Nx1HZtefoEu95pUvYKfXipwdgrsheZmZ65SXtp8JXthck3NXscf3trUFpL-JwZNI34jjm16bk2ewhHi6DOBLWryQhAjd9dw_QBlQorWCv-KGPTdEJWWlTFjdmzlF7efwwuodk_8GeYQ_'
-    },
-    {
-        id: 'w6',
-        name: 'Arjun K.',
-        college: 'IIT Bombay',
-        role: 'Student',
-        verified: true,
-        rating: 4.9,
-        jobs: 128,
-        skills: ['Chemistry', 'Biology'],
-        price: 350,
-        level: 15,
-        active: true,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA5_5HRG81pCpMxVT6SVod3sg9QY9fWxo2OyY-qo_GrNTir3Dsxo70F1zo7pxJFyH8Qkh21rovl4_rjT0uZ0C38S5s8SOcPX4fyzHNKOgwlHKVx0zuOK18Gftk9ylpq1d2wpOn_8MkFG3DMfplGDckCqvA4zrzSvUYpKTmzm9pKLIkDi_-EybgdXPzFbqmMBGbvFElShbRlfr5HVQf7ocTWaacTPkSAd5bbL2vzw-7rUYUO-jSNcJvzpIu_5xWS3roA9Z0msMp8WERT'
-    },
-    {
-        id: 'w7',
-        name: 'Priya M.',
-        college: 'IIT Bombay',
-        role: 'Student',
-        verified: true,
-        rating: 4.8,
-        jobs: 85,
-        skills: ['Economics', 'Stats'],
-        price: 300,
-        level: 11,
-        active: true,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBB9MGalAWJQzPN8cLc_82cLaYNtVf7oGnHWJiRmA4TQMTuziSiYhR1ckDOtW7Qwe9d3s9se0K1qcX7mHg31rZcRoNLkbflTrqc7Ek7ARhTDEdsLmY5IZg5pLilI303xLRBhQNsn3HRABSn1QS8KtmbDeRvBg2rtG2hqp_mzU5xKMw_uWKfBEAoU-9HhOSPX4xTGnqRvqllhx36r2uqpDz5qxt0nDG2So76Myl8pc4tqXWpPNHplHbRUJvU2Ixp5eNxBKtwvOiMvEWQ'
-    },
-    {
-        id: 'w8',
-        name: 'Rohan D.',
-        college: 'IIT Bombay',
-        role: 'Student',
-        verified: true,
-        rating: 4.7,
-        jobs: 15,
-        skills: ['History', 'Pol Sci'],
-        price: 250,
-        level: 4,
-        active: true,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBoS9nxUT4uULrmoKsuVGnZcoQJXC9bICnjgJ0ugdhlB4azQQdC1vXwaYeYS1Xg8AdxI9SuWHmLM921C1AUN5VAz7eC6KtZxcxpJWGvdygLaBGv-CrDrAc8UC2-WUTgbX9E92-KwzT5oHDBObpP7Lo78gIzLH5FAy6Rmgo2xS4hsS16cfw7_PwH96eNe367S1qE6Mzvb8Jlt_Mjj-YHusGWNqfW1vkW0duwOPEbKrWJCHc2xGk9bZb5ocqDYtPllSV1mI62eluv-vsd'
-    },
-    {
-        id: 'w9',
-        name: 'Amit V.',
-        college: 'Delhi Technological University',
-        role: 'Student',
-        verified: true,
-        rating: 4.8,
-        jobs: 56,
-        skills: ['Mechanical', 'AutoCAD'],
-        price: 320,
-        level: 7,
-        active: true,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD5eyA5mJiAk02OyRZxUOxi92h8QvSqP2p2OuZTsHIBnfu3C1q-DRideE6S9kGNKSVuEeXn9ug9NlQoOmIOkzzAIz8BJdpeBEi_NAcbTYluU388uhF8uf1gB0NWCBC3lztv5hqALo16vUsHiH5RhCA1BwmXQU1Jmw_TZhadzWRYJq5f1IuRpBO6p86iRBNjPgUhJbcyOFOCZM7mzQxJJ0XjI5h_bpB7SpNhZeBR1z51ekmD4eSzxTVpu680sgUxbQrrEbkECrGMpbTE'
-    },
-    {
-        id: 'w10',
-        name: 'Sneha P.',
-        college: 'Anna University',
-        role: 'Student',
-        verified: true,
-        rating: 4.6,
-        jobs: 28,
-        skills: ['Civil', 'Structures'],
-        price: 280,
-        level: 6,
-        active: false,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBB9MGalAWJQzPN8cLc_82cLaYNtVf7oGnHWJiRmA4TQMTuziSiYhR1ckDOtW7Qwe9d3s9se0K1qcX7mHg31rZcRoNLkbflTrqc7Ek7ARhTDEdsLmY5IZg5pLilI303xLRBhQNsn3HRABSn1QS8KtmbDeRvBg2rtG2hqp_mzU5xKMw_uWKfBEAoU-9HhOSPX4xTGnqRvqllhx36r2uqpDz5qxt0nDG2So76Myl8pc4tqXWpPNHplHbRUJvU2Ixp5eNxBKtwvOiMvEWQ'
-    }
-];
-
 export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
+    const { user } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const [collegeQuery, setCollegeQuery] = useState(searchParams.get('college') || '');
+    const [searchQuery, setSearchQuery] = useState('');
     const [isFocused, setIsFocused] = useState(false);
+
+    const [writers, setWriters] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [filteredColleges, setFilteredColleges] = useState<typeof INDIAN_COLLEGES>([]);
-    const [filteredWriters, setFilteredWriters] = useState(MOCK_WRITERS);
     const [nearbyColleges, setNearbyColleges] = useState<typeof INDIAN_COLLEGES>([]);
+
     const searchRef = useRef<HTMLDivElement>(null);
 
     // Handle click outside to close dropdown
@@ -185,44 +48,61 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
         setFilteredColleges(results);
     }, [collegeQuery]);
 
-    // Filter Writers based on selected college & Find Nearby
+    // Fetch Writers based on filters
     useEffect(() => {
-        const collegeParam = searchParams.get('college');
-        if (collegeParam) {
-            setCollegeQuery(collegeParam);
-            const filtered = MOCK_WRITERS.filter(w => w.college.toLowerCase().includes(collegeParam.toLowerCase()));
+        const fetchWriters = async () => {
+            setLoading(true);
+            try {
+                const collegeParam = searchParams.get('college');
+                const filters: any = {};
 
-            if (filtered.length === 0) {
-                setFilteredWriters([]);
-                // Find nearby colleges logic
-                const currentCollege = INDIAN_COLLEGES.find(c => c.name.toLowerCase() === collegeParam.toLowerCase());
-                if (currentCollege) {
-                    // Filter by same district first, then state
-                    const nearby = INDIAN_COLLEGES.filter(c =>
-                        c.id !== currentCollege.id && // Exclude current
-                        (
-                            (currentCollege.district && c.district === currentCollege.district) ||
-                            c.state === currentCollege.state
-                        )
-                    ).slice(0, 8); // Limit to 8 suggestions
-                    setNearbyColleges(nearby);
+                if (collegeParam) filters.college = collegeParam;
+                if (searchQuery) filters.searchQuery = searchQuery;
+
+                const data = await dbService.getWriters(user, filters);
+                setWriters(data);
+
+                // Handle Nearby Colleges if no writers found for a specific college
+                if (data.length === 0 && collegeParam) {
+                    const currentCollege = INDIAN_COLLEGES.find(c => c.name.toLowerCase() === collegeParam.toLowerCase());
+                    if (currentCollege) {
+                        const nearby = INDIAN_COLLEGES.filter(c =>
+                            c.id !== currentCollege.id &&
+                            (
+                                (currentCollege.district && c.district === currentCollege.district) ||
+                                c.state === currentCollege.state
+                            )
+                        ).slice(0, 8);
+                        setNearbyColleges(nearby);
+                    } else {
+                        setNearbyColleges([]);
+                    }
                 } else {
                     setNearbyColleges([]);
                 }
-            } else {
-                setFilteredWriters(filtered);
-                setNearbyColleges([]);
+            } catch (error) {
+                console.error("Error fetching writers:", error);
+            } finally {
+                setLoading(false);
             }
-        } else {
-            setFilteredWriters(MOCK_WRITERS);
-            setNearbyColleges([]);
-        }
-    }, [searchParams]);
+        };
+
+        // Debounce search
+        const timeoutId = setTimeout(() => {
+            fetchWriters();
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchParams, searchQuery, user]);
 
     const handleCollegeSelect = (collegeName: string) => {
         setCollegeQuery(collegeName);
         setSearchParams({ college: collegeName });
         setIsFocused(false);
+    };
+
+    const handleSearch = () => {
+        // Triggered by useEffect when searchQuery changes, but button can force refresh or UI feedback
     };
 
     return (
@@ -243,12 +123,20 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                         <button onClick={() => onNavigate('feed')} className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors">My Assignments</button>
                     </nav>
                     <div className="flex items-center gap-3">
-                        <button onClick={() => onNavigate('auth')} className="hidden sm:flex h-10 px-5 items-center justify-center rounded-full border border-[#e7dbcf] text-sm font-bold text-[#1b140d] hover:bg-[#f3ede7] transition-all">
-                            Log In
-                        </button>
-                        <button onClick={() => onNavigate('auth')} className="h-10 px-5 flex items-center justify-center rounded-full bg-primary text-[#1b140d] text-sm font-bold hover:brightness-105 transition-all shadow-md shadow-primary/20">
-                            Sign Up
-                        </button>
+                        {!user ? (
+                            <>
+                                <button onClick={() => onNavigate('auth')} className="hidden sm:flex h-10 px-5 items-center justify-center rounded-full border border-[#e7dbcf] text-sm font-bold text-[#1b140d] hover:bg-[#f3ede7] transition-all">
+                                    Log In
+                                </button>
+                                <button onClick={() => onNavigate('auth')} className="h-10 px-5 flex items-center justify-center rounded-full bg-primary text-[#1b140d] text-sm font-bold hover:brightness-105 transition-all shadow-md shadow-primary/20">
+                                    Sign Up
+                                </button>
+                            </>
+                        ) : (
+                            <button onClick={() => onNavigate('profile')} className="h-10 px-5 flex items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-all">
+                                {user.handle}
+                            </button>
+                        )}
                     </div>
                 </div>
             </header>
@@ -286,7 +174,13 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                             <div className="w-full max-w-2xl p-2 bg-white rounded-full shadow-lg shadow-primary/10 flex flex-col md:flex-row items-center gap-2 border border-[#f3ede7] relative z-50">
                                 <div className="flex-1 flex items-center px-4 h-12 w-full">
                                     <span className="material-symbols-outlined text-text-muted">search</span>
-                                    <input className="w-full h-full bg-transparent border-none focus:ring-0 text-text-main placeholder:text-text-muted font-medium text-base ml-2 outline-none" placeholder="Search by subject, writer, or course code..." type="text" />
+                                    <input
+                                        className="w-full h-full bg-transparent border-none focus:ring-0 text-text-main placeholder:text-text-muted font-medium text-base ml-2 outline-none"
+                                        placeholder="Search by name..."
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
                                 </div>
                                 <div className="h-8 w-px bg-[#e7dbcf] hidden md:block"></div>
                                 <div className="flex-1 flex items-center px-4 h-12 w-full relative" ref={searchRef}>
@@ -364,165 +258,6 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
 
                 {/* Main Content Container */}
                 <div className="flex flex-col w-full px-6 py-8 gap-12">
-                    {/* Trending Section */}
-                    <section>
-                        <div className="flex items-end justify-between mb-6">
-                            <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="material-symbols-outlined text-primary">trending_up</span>
-                                    <span className="text-primary font-bold text-sm uppercase tracking-wide">Hot Right Now</span>
-                                </div>
-                                <h2 className="text-2xl md:text-3xl font-bold text-text-main">
-                                    {searchParams.get('college') ? `Trending in ${searchParams.get('college')}` : 'Trending in Your College'}
-                                </h2>
-                            </div>
-                            <a className="hidden sm:flex items-center gap-1 text-text-muted font-medium hover:text-primary transition-colors" href="#">
-                                View All <span className="material-symbols-outlined text-lg">arrow_forward</span>
-                            </a>
-                        </div>
-                        {/* Trending Horizontal Scroll - For now showing static trending or filtered if we want */}
-                        {/* Keeping static trending for visual appeal as "Hot Right Now" might be global or specific */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {/* Trending Card 1 */}
-                            <div className="group relative bg-white rounded-2xl p-4 border border-[#f3ede7] hover:border-primary/30 shadow-soft hover:shadow-hover transition-all duration-300">
-                                <div className="absolute top-3 right-3 bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm z-10">
-                                    #1 Trending
-                                </div>
-                                <div className="flex flex-col items-center text-center">
-                                    <div className="relative mb-3">
-                                        <div className="w-20 h-20 rounded-full p-[3px] bg-gradient-to-br from-primary to-yellow-400">
-                                            <img alt="Sarah J." className="w-full h-full rounded-full object-cover border-2 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFIhHX4ZGnYjCUykvkK25l_um_GHyQvMPvdqQqyeNBfsIfMc65rjAgZ-k2pPNqW6oF9buU6yVAsgM_WJfrGqn29rSWxACq_aopvS_Qt8oifsFN3ElFWeIw50NHxV3jY2i2Nx1HZtefoEu95pUvYKfXipwdgrsheZmZ65SXtp8JXthck3NXscf3trUFpL-JwZNI34jjm16bk2ewhHi6DOBLWryQhAjd9dw_QBlQorWCv-KGPTdEJWWlTFjdmzlF7efwwuodk_8GeYQ_" />
-                                        </div>
-                                        <div className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-sm">
-                                            <span className="material-symbols-outlined text-blue-500 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                        </div>
-                                    </div>
-                                    <h3 className="text-lg font-bold text-text-main group-hover:text-primary transition-colors">Sarah J.</h3>
-                                    <p className="text-xs font-semibold text-text-muted flex items-center gap-1 mt-1">
-                                        <span className="material-symbols-outlined text-[14px]">school</span>
-                                        IIT Bombay
-                                    </p>
-                                    <div className="flex items-center gap-1 my-3 bg-background-light px-3 py-1 rounded-lg">
-                                        <span className="material-symbols-outlined text-yellow-500 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                        <span className="text-sm font-bold text-text-main">5.0</span>
-                                        <span className="text-xs text-text-muted">(42 jobs)</span>
-                                    </div>
-                                    <div className="w-full pt-3 border-t border-[#f3ede7] flex items-center justify-between">
-                                        <div className="text-left">
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Starting at</p>
-                                            <p className="text-sm font-bold text-text-main">₹400/page</p>
-                                        </div>
-                                        <button className="h-8 w-8 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors">
-                                            <span className="material-symbols-outlined text-lg">add</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Trending Card 2 */}
-                            <div className="group relative bg-white rounded-2xl p-4 border border-[#f3ede7] hover:border-primary/30 shadow-soft hover:shadow-hover transition-all duration-300">
-                                <div className="absolute top-3 right-3 bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-md shadow-sm z-10">
-                                    Fast Reply
-                                </div>
-                                <div className="flex flex-col items-center text-center">
-                                    <div className="relative mb-3">
-                                        <div className="w-20 h-20 rounded-full p-[3px] bg-gradient-to-br from-gray-200 to-gray-300">
-                                            <img alt="Arjun K." className="w-full h-full rounded-full object-cover border-2 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5_5HRG81pCpMxVT6SVod3sg9QY9fWxo2OyY-qo_GrNTir3Dsxo70F1zo7pxJFyH8Qkh21rovl4_rjT0uZ0C38S5s8SOcPX4fyzHNKOgwlHKVx0zuOK18Gftk9ylpq1d2wpOn_8MkFG3DMfplGDckCqvA4zrzSvUYpKTmzm9pKLIkDi_-EybgdXPzFbqmMBGbvFElShbRlfr5HVQf7ocTWaacTPkSAd5bbL2vzw-7rUYUO-jSNcJvzpIu_5xWS3roA9Z0msMp8WERT" />
-                                        </div>
-                                        <div className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-sm">
-                                            <span className="material-symbols-outlined text-blue-500 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                        </div>
-                                    </div>
-                                    <h3 className="text-lg font-bold text-text-main group-hover:text-primary transition-colors">Arjun K.</h3>
-                                    <p className="text-xs font-semibold text-text-muted flex items-center gap-1 mt-1">
-                                        <span className="material-symbols-outlined text-[14px]">school</span>
-                                        IIT Bombay
-                                    </p>
-                                    <div className="flex items-center gap-1 my-3 bg-background-light px-3 py-1 rounded-lg">
-                                        <span className="material-symbols-outlined text-yellow-500 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                        <span className="text-sm font-bold text-text-main">4.9</span>
-                                        <span className="text-xs text-text-muted">(128 jobs)</span>
-                                    </div>
-                                    <div className="w-full pt-3 border-t border-[#f3ede7] flex items-center justify-between">
-                                        <div className="text-left">
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Starting at</p>
-                                            <p className="text-sm font-bold text-text-main">₹350/page</p>
-                                        </div>
-                                        <button className="h-8 w-8 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors">
-                                            <span className="material-symbols-outlined text-lg">add</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Trending Card 3 (Peer Match) */}
-                            <div className="group relative bg-white rounded-2xl p-4 border-2 border-primary/20 hover:border-primary shadow-soft hover:shadow-hover transition-all duration-300">
-                                <div className="absolute top-0 inset-x-0 h-1 bg-primary rounded-t-2xl"></div>
-                                <div className="absolute top-3 left-3 bg-primary text-[#1b140d] text-[10px] font-bold px-2 py-0.5 rounded-full z-10 flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-[12px]">school</span> Peer Match
-                                </div>
-                                <div className="flex flex-col items-center text-center mt-2">
-                                    <div className="relative mb-3">
-                                        <div className="w-20 h-20 rounded-full p-[3px] bg-gradient-to-br from-primary to-pink-500">
-                                            <img alt="Priya M." className="w-full h-full rounded-full object-cover border-2 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBB9MGalAWJQzPN8cLc_82cLaYNtVf7oGnHWJiRmA4TQMTuziSiYhR1ckDOtW7Qwe9d3s9se0K1qcX7mHg31rZcRoNLkbflTrqc7Ek7ARhTDEdsLmY5IZg5pLilI303xLRBhQNsn3HRABSn1QS8KtmbDeRvBg2rtG2hqp_mzU5xKMw_uWKfBEAoU-9HhOSPX4xTGnqRvqllhx36r2uqpDz5qxt0nDG2So76Myl8pc4tqXWpPNHplHbRUJvU2Ixp5eNxBKtwvOiMvEWQ" />
-                                        </div>
-                                        <div className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-sm">
-                                            <span className="material-symbols-outlined text-blue-500 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                        </div>
-                                    </div>
-                                    <h3 className="text-lg font-bold text-text-main group-hover:text-primary transition-colors">Priya M.</h3>
-                                    <p className="text-xs font-semibold text-text-muted flex items-center gap-1 mt-1">
-                                        <span className="material-symbols-outlined text-[14px]">school</span>
-                                        IIT Bombay
-                                    </p>
-                                    <div className="flex items-center gap-1 my-3 bg-background-light px-3 py-1 rounded-lg">
-                                        <span className="material-symbols-outlined text-yellow-500 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                        <span className="text-sm font-bold text-text-main">4.8</span>
-                                        <span className="text-xs text-text-muted">(85 jobs)</span>
-                                    </div>
-                                    <div className="w-full pt-3 border-t border-[#f3ede7] flex items-center justify-between">
-                                        <div className="text-left">
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Starting at</p>
-                                            <p className="text-sm font-bold text-text-main">₹300/page</p>
-                                        </div>
-                                        <button className="h-8 w-8 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors">
-                                            <span className="material-symbols-outlined text-lg">add</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Trending Card 4 */}
-                            <div className="group relative bg-white rounded-2xl p-4 border border-[#f3ede7] hover:border-primary/30 shadow-soft hover:shadow-hover transition-all duration-300">
-                                <div className="flex flex-col items-center text-center">
-                                    <div className="relative mb-3">
-                                        <div className="w-20 h-20 rounded-full p-[3px] bg-gradient-to-br from-gray-200 to-gray-300">
-                                            <img alt="Rohan D." className="w-full h-full rounded-full object-cover border-2 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoS9nxUT4uULrmoKsuVGnZcoQJXC9bICnjgJ0ugdhlB4azQQdC1vXwaYeYS1Xg8AdxI9SuWHmLM921C1AUN5VAz7eC6KtZxcxpJWGvdygLaBGv-CrDrAc8UC2-WUTgbX9E92-KwzT5oHDBObpP7Lo78gIzLH5FAy6Rmgo2xS4hsS16cfw7_PwH96eNe367S1qE6Mzvb8Jlt_Mjj-YHusGWNqfW1vkW0duwOPEbKrWJCHc2xGk9bZb5ocqDYtPllSV1mI62eluv-vsd" />
-                                        </div>
-                                        <div className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-sm">
-                                            <span className="material-symbols-outlined text-blue-500 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                        </div>
-                                    </div>
-                                    <h3 className="text-lg font-bold text-text-main group-hover:text-primary transition-colors">Rohan D.</h3>
-                                    <p className="text-xs font-semibold text-text-muted flex items-center gap-1 mt-1">
-                                        <span className="material-symbols-outlined text-[14px]">school</span>
-                                        IIT Bombay
-                                    </p>
-                                    <div className="flex items-center gap-1 my-3 bg-background-light px-3 py-1 rounded-lg">
-                                        <span className="material-symbols-outlined text-yellow-500 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                        <span className="text-sm font-bold text-text-main">4.7</span>
-                                        <span className="text-xs text-text-muted">(15 jobs)</span>
-                                    </div>
-                                    <div className="w-full pt-3 border-t border-[#f3ede7] flex items-center justify-between">
-                                        <div className="text-left">
-                                            <p className="text-[10px] text-text-muted font-bold uppercase">Starting at</p>
-                                            <p className="text-sm font-bold text-text-main">₹250/page</p>
-                                        </div>
-                                        <button className="h-8 w-8 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors">
-                                            <span className="material-symbols-outlined text-lg">add</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
 
                     {/* All Writers Grid */}
                     <section>
@@ -532,7 +267,7 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                                     {searchParams.get('college') ? `Writers in ${searchParams.get('college')}` : 'Recommended Writers'}
                                 </h2>
                                 <p className="text-text-muted text-sm">
-                                    {filteredWriters.length} writers found
+                                    {loading ? 'Searching...' : `${writers.length} writers found`}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
@@ -545,43 +280,47 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                             </div>
                         </div>
 
-                        {filteredWriters.length > 0 ? (
+                        {loading ? (
+                            <div className="flex justify-center py-20">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                            </div>
+                        ) : writers.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {filteredWriters.map((writer) => (
+                                {writers.map((writer) => (
                                     <div key={writer.id} className="group bg-white rounded-2xl border border-[#f3ede7] hover:border-primary/40 shadow-soft hover:shadow-hover transition-all duration-300 flex flex-col h-full overflow-hidden">
                                         <div className="p-5 flex-1 flex flex-col">
                                             <div className="flex items-start justify-between mb-4">
                                                 <div className="relative">
-                                                    <img alt="Writer Avatar" className="w-14 h-14 rounded-full object-cover border-2 border-[#f3ede7]" src={writer.image} />
-                                                    <div className={`absolute -bottom-1 -right-1 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white ${writer.level > 10 ? 'bg-orange-600' : 'bg-primary'}`}>
-                                                        Lvl {writer.level}
+                                                    <img alt="Writer Avatar" className="w-14 h-14 rounded-full object-cover border-2 border-[#f3ede7]" src={writer.avatar_url || 'https://via.placeholder.com/150'} />
+                                                    <div className={`absolute -bottom-1 -right-1 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white ${writer.xp > 1000 ? 'bg-orange-600' : 'bg-primary'}`}>
+                                                        Lvl {Math.floor(writer.xp / 100) + 1}
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col items-end">
-                                                    {writer.active && (
+                                                    {writer.is_online && (
                                                         <div className="flex items-center gap-1 bg-green-50 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full mb-1">
                                                             <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span> Active Now
                                                         </div>
                                                     )}
                                                     <div className="flex items-center gap-1 bg-purple-50 text-purple-700 text-[10px] font-bold px-2 py-1 rounded-full mb-1">
-                                                        <span className="material-symbols-outlined text-[12px]">school</span> {writer.role}
+                                                        <span className="material-symbols-outlined text-[12px]">school</span> Student
                                                     </div>
                                                 </div>
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-1 mb-0.5">
-                                                    <h3 className="text-lg font-bold text-text-main">{writer.name}</h3>
-                                                    {writer.verified && (
+                                                    <h3 className="text-lg font-bold text-text-main">{writer.full_name || writer.handle}</h3>
+                                                    {writer.is_verified === 'verified' && (
                                                         <span className="material-symbols-outlined text-blue-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                                     )}
                                                 </div>
                                                 <p className="text-xs text-text-muted font-medium mb-3 flex items-center gap-1">
-                                                    <span className="material-symbols-outlined text-[14px]">location_on</span> {writer.college}
+                                                    <span className="material-symbols-outlined text-[14px]">location_on</span> {writer.school}
                                                 </p>
                                             </div>
                                             {/* Chips */}
                                             <div className="flex flex-wrap gap-1.5 mb-4">
-                                                {writer.skills.map((skill, idx) => (
+                                                {writer.tags?.slice(0, 3).map((skill: string, idx: number) => (
                                                     <span key={idx} className="bg-[#f3ede7] text-[#5a4633] text-[10px] font-semibold px-2 py-1 rounded-md">{skill}</span>
                                                 ))}
                                             </div>
@@ -589,23 +328,26 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                                                 <div>
                                                     <p className="text-[10px] text-text-muted font-bold uppercase">Rating</p>
                                                     <div className="flex items-center justify-center gap-1">
-                                                        <span className="text-sm font-bold text-text-main">{writer.rating}</span>
+                                                        <span className="text-sm font-bold text-text-main">{writer.rating || 'New'}</span>
                                                         <span className="material-symbols-outlined text-yellow-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                                                     </div>
                                                 </div>
                                                 <div className="border-l border-[#e7dbcf]">
                                                     <p className="text-[10px] text-text-muted font-bold uppercase">Jobs</p>
-                                                    <p className="text-sm font-bold text-text-main">{writer.jobs}</p>
+                                                    <p className="text-sm font-bold text-text-main">{writer.projects_completed || 0}</p>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="px-5 py-4 border-t border-[#f3ede7] bg-[#faf8f6] flex items-center justify-between group-hover:bg-white transition-colors">
                                             <div>
                                                 <p className="text-xs text-text-muted font-medium">Starting from</p>
-                                                <p className="text-lg font-bold text-text-main">₹{writer.price}<span className="text-xs font-normal text-text-muted">/pg</span></p>
+                                                <p className="text-lg font-bold text-text-main">₹{writer.price_per_page || 300}<span className="text-xs font-normal text-text-muted">/pg</span></p>
                                             </div>
-                                            <button className="bg-primary text-[#1b140d] text-sm font-bold px-4 py-2 rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
-                                                Hire Now
+                                            <button
+                                                onClick={() => onNavigate(`profile/${writer.id}`)}
+                                                className="bg-primary text-[#1b140d] text-sm font-bold px-4 py-2 rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
+                                            >
+                                                View Profile
                                             </button>
                                         </div>
                                     </div>
@@ -614,9 +356,11 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                         ) : (
                             <div className="flex flex-col items-center justify-center py-12 text-center">
                                 <span className="material-symbols-outlined text-6xl text-text-muted/30 mb-4">school</span>
-                                <h3 className="text-xl font-bold text-text-main mb-2">No writers found in this college</h3>
+                                <h3 className="text-xl font-bold text-text-main mb-2">No writers found</h3>
                                 <p className="text-text-muted max-w-md mb-8">
-                                    We couldn't find any writers registered under "{searchParams.get('college')}".
+                                    {searchParams.get('college')
+                                        ? `We couldn't find any writers registered under "${searchParams.get('college')}".`
+                                        : "We couldn't find any writers matching your criteria."}
                                     {nearbyColleges.length > 0 ? " Try these nearby colleges:" : " Try searching for a different college or browse all writers."}
                                 </p>
 
@@ -642,6 +386,7 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                                     onClick={() => {
                                         setSearchParams({});
                                         setCollegeQuery('');
+                                        setSearchQuery('');
                                     }}
                                     className="px-6 py-2 rounded-full bg-primary text-[#1b140d] font-bold hover:brightness-105 transition-all"
                                 >
@@ -650,7 +395,7 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                             </div>
                         )}
 
-                        {filteredWriters.length > 0 && (
+                        {writers.length > 0 && (
                             <div className="w-full flex justify-center mt-12">
                                 <button className="px-8 py-3 rounded-full border-2 border-primary text-primary font-bold hover:bg-primary hover:text-[#1b140d] transition-colors">
                                     Load More Writers

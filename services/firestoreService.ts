@@ -146,57 +146,51 @@ export const dbService = {
         return userMap;
     },
 
-    getWriters: async (currentUser: User | null, tag: string = 'All') => {
+    getWriters: async (currentUser: User | null, filters: { college?: string, searchQuery?: string, tag?: string } = {}) => {
         const usersRef = collection(getDb(), 'users');
+        const { college, searchQuery, tag } = filters;
 
         // 1. Base Query Constraints
         const constraints: any[] = [
             where('is_writer', '==', true),
-            limit(100)
+            limit(50) // Limit to 50 for performance
         ];
 
-        // 2. Visibility Constraint
-        // We removed the strict 'global' check so that legacy users (missing visibility field)
-        // are included. Client-side filtering handles the rest.
-        // constraints.push(where('visibility', '==', 'global'));
+        // 2. Apply Filters
+        // Note: Firestore has limitations on multiple range/inequality filters.
+        // We will prioritize the most specific filter for the query and do the rest client-side if needed.
 
-        // 3. Tag Constraint
-        if (tag && tag !== 'All') {
-            constraints.push(where('tags', 'array-contains', tag));
+        if (college) {
+            constraints.push(where('search_school', '==', college.toLowerCase()));
         }
 
-        const globalQuery = query(usersRef, ...constraints);
+        // If searching by name/handle, we might need a separate query strategy or client-side filtering
+        // because we can't easily combine 'search_school == X' AND 'search_name >= Y' efficiently without specific indexes.
+        // For now, we'll fetch based on college/writer status and filter name client-side if both are present.
 
-        // 4. Execute Global Query
-        const globalSnap = await getDocs(globalQuery);
-        let writers = globalSnap.docs.map(d => d.data());
+        // 3. Execute Query
+        const q = query(usersRef, ...constraints);
+        const snap = await getDocs(q);
+        let writers = snap.docs.map(d => d.data());
 
-        // 5. Fetch College Writers (If user is logged in) - Separate query to avoid complex OR
-        // Only fetch if we are NOT filtering by tag OR if we can filter by tag + college (requires index)
-        // For now, we'll fetch college writers and filter tags client-side for this subset to avoid index explosion
-        if (currentUser && currentUser.school) {
-            const collegeQuery = query(
-                usersRef,
-                where('is_writer', '==', true),
-                where('visibility', '==', 'college'),
-                where('school', '==', currentUser.school),
-                limit(50)
+        // 4. Client-side Filtering (for search query and tags to avoid index explosion)
+        if (searchQuery) {
+            const lowerQuery = searchQuery.toLowerCase();
+            writers = writers.filter((w: any) =>
+                (w.search_name && w.search_name.includes(lowerQuery)) ||
+                (w.search_handle && w.search_handle.includes(lowerQuery)) ||
+                (w.search_school && w.search_school.includes(lowerQuery)) // Also allow searching school via text
             );
-            const snap = await getDocs(collegeQuery);
-            const collegeWriters = snap.docs.map(d => d.data());
-
-            // Filter college writers by tag client-side (small dataset)
-            const filteredCollegeWriters = (tag && tag !== 'All')
-                ? collegeWriters.filter((w: any) => w.tags?.includes(tag))
-                : collegeWriters;
-
-            writers = [...writers, ...filteredCollegeWriters];
         }
 
-        // 6. Deduplicate
+        if (tag && tag !== 'All') {
+            writers = writers.filter((w: any) => w.tags && w.tags.includes(tag));
+        }
+
+        // 5. Deduplicate (just in case)
         const uniqueWriters = Array.from(new Map(writers.map((item: any) => [item.id, item])).values());
 
-        // 7. Sort by creation (client-side sort since we merged results)
+        // 6. Sort by creation (client-side)
         return uniqueWriters.sort((a: any, b: any) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
