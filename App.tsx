@@ -139,7 +139,7 @@ function AppContent() {
 
   return (
     <GlassLayout>
-      {location.pathname !== '/' && location.pathname !== '/feed' && location.pathname !== '/auth' && location.pathname !== '/writers' && (
+      {location.pathname !== '/' && location.pathname !== '/feed' && location.pathname !== '/auth' && location.pathname !== '/writers' && location.pathname !== '/profile' && (
         <GlassNavigation
           logo={
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(user ? '/feed' : '/')}>
@@ -203,11 +203,14 @@ function AppContent() {
             } />
 
             {/* Admin Routes */}
-            <Route path="/admin/*" element={
-              <AdminRoute>
-                <AdminRoutesWrapper />
-              </AdminRoute>
-            } />
+            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="chats" element={<AdminChats />} />
+              <Route path="connections" element={<AdminConnections />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -217,71 +220,12 @@ function AppContent() {
   );
 }
 
-// Wrapper components to handle split view logic or params
+// Wrapper components to handle params
 function ChatListWrapper({ user }: { user: any }) {
-  const navigate = useNavigate();
-  const isDesktop = window.innerWidth >= 768;
-
-  if (isDesktop) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-6rem)]">
-        <div className="grid grid-cols-12 gap-6 h-full">
-          <div className="col-span-4 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
-            <ChatList user={user} onSelect={(id: string) => navigate(`/chats/${id}`)} selectedId={null} />
-          </div>
-          <div className="col-span-8 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
-            <div className="h-full flex flex-col items-center justify-center text-slate-400">
-              <MessageSquare size={48} className="mb-4 opacity-50" />
-              <p>Select a chat to start messaging</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return <ChatList user={user} onSelect={(id: string) => navigate(`/chats/${id}`)} selectedId={null} />;
+  return <ChatList user={user} />;
 }
 
 function ChatRoomWrapper({ user }: { user: any }) {
   const { chatId } = useParams();
-  const navigate = useNavigate();
-  const isDesktop = window.innerWidth >= 768;
-
-  if (isDesktop) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-6rem)]">
-        <div className="grid grid-cols-12 gap-6 h-full">
-          <div className="col-span-4 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
-            <ChatList user={user} onSelect={(id: string) => navigate(`/chats/${id}`)} selectedId={chatId} />
-          </div>
-          <div className="col-span-8 h-full overflow-hidden rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl">
-            <ChatRoom user={user} chatId={chatId} onBack={() => navigate('/chats')} />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return <ChatRoom user={user} chatId={chatId} onBack={() => navigate('/chats')} />;
-}
-
-function AdminRoutesWrapper() {
-  const [adminPage, setAdminPage] = useState('dashboard');
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Sync state with URL if needed, or just use internal state for now as per original design
-  // Ideally, admin routes should be sub-routes like /admin/users, /admin/chats etc.
-  // For now, preserving the "single page app" feel of the admin panel within the /admin route
-
-  return (
-    <AdminLayout currentPage={adminPage} onNavigate={setAdminPage}>
-      {adminPage === 'dashboard' && <AdminDashboard />}
-      {adminPage === 'users' && <AdminUsers />}
-      {adminPage === 'chats' && <AdminChats />}
-      {adminPage === 'connections' && <AdminConnections />}
-      {adminPage === 'settings' && <AdminSettings />}
-    </AdminLayout>
-  );
+  return <ChatRoom chatId={chatId!} user={user} />;
 }
