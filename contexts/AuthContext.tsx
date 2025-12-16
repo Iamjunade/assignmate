@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { auth as firebaseAuth, presence } from '../services/firebase';
 import { userApi } from '../services/firestoreService';
 import { notificationService } from '../services/notificationService';
@@ -9,9 +9,9 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<any>;
   loginWithGoogle: () => Promise<any>;
-  // ✅ FIX 1: Updated signature to include fullName and bio
+  // ✅ FIXED: Updated signature to accept fullName and bio
   register: (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => Promise<any>;
-  // ✅ FIX 2: Updated signature to include bio
+  // ✅ FIXED: Updated signature to accept bio
   completeGoogleSignup: (handle: string, school: string, is_writer: boolean, bio?: string) => Promise<void>;
   loginAnonymously: () => Promise<any>;
   logout: () => Promise<void>;
@@ -25,29 +25,49 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const syncingRef = useRef<string | null>(null);
 
-  // Sync user profile from Firestore
   const syncUser = async (fbUser: any) => {
     const userId = fbUser.uid;
+    if (syncingRef.current === userId) return;
+    syncingRef.current = userId;
+
     try {
       const profile = await userApi.getProfile(userId);
+
       if (profile) {
-        setUser({ ...profile, email: fbUser.email || profile.email, is_incomplete: false } as User);
+        setUser({
+          ...profile,
+          email: fbUser.email || profile.email,
+          is_incomplete: false
+        } as User);
         presence.init(userId);
       } else {
-        // Only set basic info for Google first-timers, marked as incomplete
+        // ✅ FIXED: Set is_incomplete to TRUE for new Google users
+        // This ensures they are redirected to /onboarding
         const newProfile = {
           id: userId,
           email: fbUser.email || '',
-          full_name: fbUser.displayName || 'Student',
+          handle: fbUser.displayName?.replace(/\s+/g, '_').toLowerCase() || 'user_' + userId.substring(0, 6),
+          school: 'Not Specified',
           avatar_url: fbUser.photoURL || undefined,
-          is_incomplete: true // ✅ Critical: Mark as incomplete so they go to Onboarding
+          full_name: fbUser.displayName || 'Student',
+          xp: 0,
+          is_writer: false,
+          is_incomplete: true // <--- Critical Fix
         };
+
+        // We do NOT create the profile in DB yet to avoid partial data.
+        // Or we create it as incomplete.
+        await userApi.createProfile(userId, newProfile);
+
         setUser(newProfile as User);
       }
     } catch (e) {
       console.error("AuthContext: Sync Failed", e);
       setUser(null);
+    } finally {
+      syncingRef.current = null;
     }
   };
 
@@ -68,56 +88,61 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     setUser(null);
   };
 
-  // ✅ FIX 3: Pass fullName and bio to Firestore
+  // ✅ FIXED: Register function now accepts fullName and bio
   const register = async (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => {
     const res = await firebaseAuth.register(email, pass);
     if (res.error) return res;
 
     if (res.data?.user) {
       try {
-        await userApi.createProfile(res.data.user.uid, {
-          email,
-          full_name: fullName, // Save Name
+        const profile = await userApi.createProfile(res.data.user.uid, {
           handle,
           school,
+          email,
+          full_name: fullName, // Saved
+          bio: bio || '',      // Saved
           is_writer,
-          bio: bio || '',      // Save Bio
-          is_incomplete: false
+          is_incomplete: false // Manual setup is complete immediately
         });
+
+        setUser({ ...profile, email: res.data.user.email || email, is_incomplete: false });
+        presence.init(res.data.user.uid);
+        notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
+
         return { data: { ...res.data, session: true } };
       } catch (error: any) {
+        console.error("Registration Error:", error);
         return { error: { message: "Account created but profile setup failed." } };
       }
     }
     return res;
   };
 
-  // ✅ FIX 4: Pass bio to Firestore for Google users
+  // ✅ FIXED: completeGoogleSignup now accepts bio
   const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean, bio?: string) => {
     if (!user) throw new Error("User not found.");
+
     try {
       const profile = await userApi.createProfile(user.id, {
-        email: user.email,
-        full_name: user.full_name,
-        avatar_url: user.avatar_url,
         handle,
         school,
+        email: user.email,
+        avatar_url: user.avatar_url,
+        full_name: user.full_name || 'Student',
+        bio: bio || '', // Saved
         is_writer,
-        bio: bio || '', // Save Bio
-        is_incomplete: false
+        is_incomplete: false // Mark as complete!
       });
-      setUser({ ...profile, email: user.email, is_incomplete: false } as User);
+
+      setUser({ ...profile, email: user.email, is_incomplete: false });
       presence.init(user.id);
-    } catch (e: any) { throw e; }
-  };
+      notificationService.sendWelcome(user.id, handle).catch(console.error);
 
-  const login = async (email: string, password: string) => {
-    return await firebaseAuth.login(email, password);
+    } catch (e: any) {
+      console.error("Profile Completion Failed:", e);
+      throw e;
+    }
   };
-
-  // (Include other existing functions: loginWithGoogle, deleteAccount, etc.)
-  const loginWithGoogle = firebaseAuth.loginWithGoogle;
-  const loginAnonymously = firebaseAuth.loginAnonymously;
 
   const deleteAccount = async () => {
     if (!user) return;
@@ -129,16 +154,23 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     } catch (error) { throw error; }
   };
 
-  const resetPassword = async (email: string) => {
-    const res = await firebaseAuth.resetPassword(email);
-    if (res.error) throw res.error;
+  const login = async (email: string, password: string) => {
+    return await firebaseAuth.login(email, password);
   };
 
   return (
     <AuthContext.Provider value={{
-      user, loading, login, loginWithGoogle, register, completeGoogleSignup,
-      loginAnonymously, logout, deleteAccount, resetPassword,
-      refreshProfile: async () => { if (user) await syncUser({ uid: user.id, email: user.email }); }
+      user,
+      loading,
+      login,
+      loginWithGoogle: firebaseAuth.loginWithGoogle,
+      register,
+      completeGoogleSignup,
+      loginAnonymously: firebaseAuth.loginAnonymously,
+      logout,
+      deleteAccount,
+      refreshProfile: async () => { if (user) await syncUser({ uid: user.id, email: user.email }); },
+      resetPassword: async (email) => { const res = await firebaseAuth.resetPassword(email); if (res.error) throw res.error; }
     }}>
       {children}
     </AuthContext.Provider>
