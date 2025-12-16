@@ -136,65 +136,84 @@ function AppContent() {
       </Suspense>
     );
   }
-  await logout();
-  navigate('/');
-}}
+
+  return (
+    <GlassLayout>
+      {location.pathname !== '/' && location.pathname !== '/feed' && location.pathname !== '/auth' && location.pathname !== '/writers' && (
+        <GlassNavigation
+          logo={
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(user ? '/feed' : '/')}>
+              <div className="size-10 rounded-xl overflow-hidden">
+                <img src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
+              </div>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-400">
+                AssignMate
+              </span>
+            </div>
+          }
+          items={user ? authNavItems : navItems}
+          user={user ? { name: user.full_name || user.email } : undefined}
+          onLogin={() => navigate('/auth')}
+          onLogout={async () => {
+            await logout();
+            navigate('/');
+          }}
         />
       )}
 
-<div className={`${location.pathname !== '/' && location.pathname !== '/auth' ? 'pt-20' : ''} min-h-screen`}>
-  <Suspense fallback={
-    <div className="flex items-center justify-center h-[50vh] text-slate-400">
-      <Loader2 className="animate-spin" />
-    </div>
-  }>
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/auth" element={<Auth onComplete={() => navigate('/feed')} />} />
+      <div className={`${location.pathname !== '/' && location.pathname !== '/auth' ? 'pt-20' : ''} min-h-screen`}>
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-[50vh] text-slate-400">
+            <Loader2 className="animate-spin" />
+          </div>
+        }>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/auth" element={<Auth onComplete={() => navigate('/feed')} />} />
 
-      <Route path="/feed" element={
-        <ProtectedRoute>
-          <Feed user={user} onChat={startChatFromWriter} />
-        </ProtectedRoute>
-      } />
+            <Route path="/feed" element={
+              <ProtectedRoute>
+                <Feed user={user} onChat={startChatFromWriter} />
+              </ProtectedRoute>
+            } />
 
-      <Route path="/writers" element={<FindWriter onNavigate={(page) => {
-        if (page === 'feed') navigate('/feed');
-        else if (page === 'find-writer') navigate('/writers');
-        else if (page === 'auth') navigate('/auth');
-        else navigate('/' + page);
-      }} />} />
+            <Route path="/writers" element={<FindWriter onNavigate={(page) => {
+              if (page === 'feed') navigate('/feed');
+              else if (page === 'find-writer') navigate('/writers');
+              else if (page === 'auth') navigate('/auth');
+              else navigate('/' + page);
+            }} />} />
 
-      <Route path="/profile" element={
-        <ProtectedRoute>
-          {user && <Profile user={user} />}
-        </ProtectedRoute>
-      } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                {user && <Profile user={user} />}
+              </ProtectedRoute>
+            } />
 
-      <Route path="/chats" element={
-        <ProtectedRoute>
-          <ChatListWrapper user={user} />
-        </ProtectedRoute>
-      } />
+            <Route path="/chats" element={
+              <ProtectedRoute>
+                <ChatListWrapper user={user} />
+              </ProtectedRoute>
+            } />
 
-      <Route path="/chats/:chatId" element={
-        <ProtectedRoute>
-          <ChatRoomWrapper user={user} />
-        </ProtectedRoute>
-      } />
+            <Route path="/chats/:chatId" element={
+              <ProtectedRoute>
+                <ChatRoomWrapper user={user} />
+              </ProtectedRoute>
+            } />
 
-      {/* Admin Routes */}
-      <Route path="/admin/*" element={
-        <AdminRoute>
-          <AdminRoutesWrapper />
-        </AdminRoute>
-      } />
+            {/* Admin Routes */}
+            <Route path="/admin/*" element={
+              <AdminRoute>
+                <AdminRoutesWrapper />
+              </AdminRoute>
+            } />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  </Suspense>
-</div>
-    </GlassLayout >
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </div>
+    </GlassLayout>
   );
 }
 
