@@ -87,17 +87,19 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     setUser(null);
   };
 
+  // ✅ FIXED: Added 'fullName' and 'bio' to the parameters so they are saved
   const register = async (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => {
     const res = await firebaseAuth.register(email, pass);
     if (res.error) return res;
 
     if (res.data?.user) {
       try {
+        // ✅ Now we save the 'fullName' to the database
         const profile = await userApi.createProfile(res.data.user.uid, {
           handle,
           school,
           email,
-          full_name: fullName,
+          full_name: fullName, // <--- This was missing before!
           bio: bio || '',
           is_writer,
           is_incomplete: false
