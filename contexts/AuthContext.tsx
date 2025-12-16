@@ -9,9 +9,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<any>;
   loginWithGoogle: () => Promise<any>;
-  // ✅ CHECK 1: Ensure this line accepts 'fullName' and 'bio'
   register: (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => Promise<any>;
-  // ✅ CHECK 2: Ensure this line accepts 'bio'
   completeGoogleSignup: (handle: string, school: string, is_writer: boolean, bio?: string) => Promise<void>;
   loginAnonymously: () => Promise<any>;
   logout: () => Promise<void>;
@@ -45,19 +43,23 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         } as User);
         presence.init(userId);
       } else {
-        // ✅ CHECK 3: Ensure is_incomplete is TRUE for new Google users
+        // ✅ FIXED: Use 'null' instead of 'undefined' for avatar_url
+        // Firestore crashes if you send 'undefined'
         const newProfile = {
           id: userId,
           email: fbUser.email || '',
           handle: fbUser.displayName?.replace(/\s+/g, '_').toLowerCase() || 'user_' + userId.substring(0, 6),
           school: 'Not Specified',
-          avatar_url: fbUser.photoURL || undefined,
+          avatar_url: fbUser.photoURL || null, // <--- THIS WAS THE CAUSE OF YOUR ERROR
           full_name: fbUser.displayName || 'Student',
           xp: 0,
           is_writer: false,
-          is_incomplete: true // <--- This forces the redirect to /onboarding
+          is_incomplete: true
         };
-        // Don't create profile in DB yet, just set local state to trigger onboarding
+
+        // Create the incomplete profile in DB so we don't sync 404s forever
+        await userApi.createProfile(userId, newProfile);
+
         setUser(newProfile as User);
       }
     } catch (e) {
@@ -85,7 +87,6 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     setUser(null);
   };
 
-  // ✅ CHECK 4: Ensure register function accepts and SAVES all 7 arguments
   const register = async (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => {
     const res = await firebaseAuth.register(email, pass);
     if (res.error) return res;
@@ -96,10 +97,10 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           handle,
           school,
           email,
-          full_name: fullName, // Save Name
-          bio: bio || '',      // Save Bio
+          full_name: fullName,
+          bio: bio || '',
           is_writer,
-          is_incomplete: false // Manual setup is complete immediately
+          is_incomplete: false
         });
 
         setUser({ ...profile, email: res.data.user.email || email, is_incomplete: false });
@@ -115,20 +116,20 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     return res;
   };
 
-  // ✅ CHECK 5: Ensure completeGoogleSignup accepts and SAVES bio
   const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean, bio?: string) => {
     if (!user) throw new Error("User not found.");
 
     try {
+      // ✅ FIXED: Ensure avatar_url is explicitly null if undefined
       const profile = await userApi.createProfile(user.id, {
         handle,
         school,
         email: user.email,
-        avatar_url: user.avatar_url,
+        avatar_url: user.avatar_url || null, // <--- ALSO FIXED HERE
         full_name: user.full_name || 'Student',
-        bio: bio || '', // Save Bio
+        bio: bio || '',
         is_writer,
-        is_incomplete: false // Mark as complete
+        is_incomplete: false
       });
 
       setUser({ ...profile, email: user.email, is_incomplete: false });
@@ -141,7 +142,6 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     }
   };
 
-  // ... (login, loginAnonymously, deleteAccount, resetPassword remain the same) ...
   const login = async (email: string, password: string) => {
     return await firebaseAuth.login(email, password);
   };
