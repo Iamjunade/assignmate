@@ -21,13 +21,17 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     const [completionForm, setCompletionForm] = useState({ handle: '', school: '' });
     const [completionIsWriter, setCompletionIsWriter] = useState(false);
 
-    // Redirect if user is already logged in
+    // ✅ FIX: Redirect to Onboarding if incomplete, otherwise Feed
     useEffect(() => {
-        if (user && !user.is_incomplete) {
-            if (onComplete) {
-                onComplete();
+        if (user) {
+            if (user.is_incomplete) {
+                navigate('/onboarding');
             } else {
-                navigate('/feed');
+                if (onComplete) {
+                    onComplete();
+                } else {
+                    navigate('/feed');
+                }
             }
         }
     }, [user, onComplete, navigate]);
