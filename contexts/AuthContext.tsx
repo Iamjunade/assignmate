@@ -9,9 +9,9 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<any>;
   loginWithGoogle: () => Promise<any>;
-  // ✅ FIXED: Updated signature to accept fullName and bio
+  // ✅ CHECK 1: Ensure this line accepts 'fullName' and 'bio'
   register: (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => Promise<any>;
-  // ✅ FIXED: Updated signature to accept bio
+  // ✅ CHECK 2: Ensure this line accepts 'bio'
   completeGoogleSignup: (handle: string, school: string, is_writer: boolean, bio?: string) => Promise<void>;
   loginAnonymously: () => Promise<any>;
   logout: () => Promise<void>;
@@ -27,8 +27,10 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const syncingRef = useRef<string | null>(null);
 
+  // Sync user profile from Firestore
   const syncUser = async (fbUser: any) => {
     const userId = fbUser.uid;
+    // Prevent double syncing
     if (syncingRef.current === userId) return;
     syncingRef.current = userId;
 
@@ -43,8 +45,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         } as User);
         presence.init(userId);
       } else {
-        // ✅ FIXED: Set is_incomplete to TRUE for new Google users
-        // This ensures they are redirected to /onboarding
+        // ✅ CHECK 3: Ensure is_incomplete is TRUE for new Google users
         const newProfile = {
           id: userId,
           email: fbUser.email || '',
@@ -54,13 +55,9 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           full_name: fbUser.displayName || 'Student',
           xp: 0,
           is_writer: false,
-          is_incomplete: true // <--- Critical Fix
+          is_incomplete: true // <--- This forces the redirect to /onboarding
         };
-
-        // We do NOT create the profile in DB yet to avoid partial data.
-        // Or we create it as incomplete.
-        await userApi.createProfile(userId, newProfile);
-
+        // Don't create profile in DB yet, just set local state to trigger onboarding
         setUser(newProfile as User);
       }
     } catch (e) {
@@ -88,7 +85,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     setUser(null);
   };
 
-  // ✅ FIXED: Register function now accepts fullName and bio
+  // ✅ CHECK 4: Ensure register function accepts and SAVES all 7 arguments
   const register = async (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => {
     const res = await firebaseAuth.register(email, pass);
     if (res.error) return res;
@@ -99,8 +96,8 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           handle,
           school,
           email,
-          full_name: fullName, // Saved
-          bio: bio || '',      // Saved
+          full_name: fullName, // Save Name
+          bio: bio || '',      // Save Bio
           is_writer,
           is_incomplete: false // Manual setup is complete immediately
         });
@@ -118,7 +115,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     return res;
   };
 
-  // ✅ FIXED: completeGoogleSignup now accepts bio
+  // ✅ CHECK 5: Ensure completeGoogleSignup accepts and SAVES bio
   const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean, bio?: string) => {
     if (!user) throw new Error("User not found.");
 
@@ -129,9 +126,9 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         email: user.email,
         avatar_url: user.avatar_url,
         full_name: user.full_name || 'Student',
-        bio: bio || '', // Saved
+        bio: bio || '', // Save Bio
         is_writer,
-        is_incomplete: false // Mark as complete!
+        is_incomplete: false // Mark as complete
       });
 
       setUser({ ...profile, email: user.email, is_incomplete: false });
@@ -144,33 +141,20 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     }
   };
 
-  const deleteAccount = async () => {
-    if (!user) return;
-    try {
-      await userApi.deleteProfile(user.id);
-      const res = await firebaseAuth.deleteUser();
-      if (res.error) throw res.error;
-      setUser(null);
-    } catch (error) { throw error; }
-  };
-
+  // ... (login, loginAnonymously, deleteAccount, resetPassword remain the same) ...
   const login = async (email: string, password: string) => {
     return await firebaseAuth.login(email, password);
   };
+  const loginWithGoogle = firebaseAuth.loginWithGoogle;
+  const loginAnonymously = firebaseAuth.loginAnonymously;
+  const deleteAccount = async () => { if (!user) return; try { await userApi.deleteProfile(user.id); const res = await firebaseAuth.deleteUser(); if (res.error) throw res.error; setUser(null); } catch (error) { throw error; } };
+  const resetPassword = async (email: string) => { const res = await firebaseAuth.resetPassword(email); if (res.error) throw res.error; };
 
   return (
     <AuthContext.Provider value={{
-      user,
-      loading,
-      login,
-      loginWithGoogle: firebaseAuth.loginWithGoogle,
-      register,
-      completeGoogleSignup,
-      loginAnonymously: firebaseAuth.loginAnonymously,
-      logout,
-      deleteAccount,
-      refreshProfile: async () => { if (user) await syncUser({ uid: user.id, email: user.email }); },
-      resetPassword: async (email) => { const res = await firebaseAuth.resetPassword(email); if (res.error) throw res.error; }
+      user, loading, login, loginWithGoogle, register, completeGoogleSignup,
+      loginAnonymously, logout, deleteAccount, resetPassword,
+      refreshProfile: async () => { if (user) await syncUser({ uid: user.id, email: user.email }); }
     }}>
       {children}
     </AuthContext.Provider>
