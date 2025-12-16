@@ -28,7 +28,6 @@ const ChatRoom = lazy(() => import('./pages/ChatRoom').then(module => ({ default
 const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
 const Connections = lazy(() => import('./pages/Connections').then(module => ({ default: module.Connections })));
 const Onboarding = lazy(() => import('./pages/Onboarding').then(module => ({ default: module.Onboarding })));
-const Onboarding = lazy(() => import('./pages/Onboarding').then(module => ({ default: module.Onboarding })));
 const FindWriter = lazy(() => import('./pages/FindWriter').then(module => ({ default: module.FindWriter })));
 
 export default function AppWrapper() {
@@ -222,7 +221,6 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth onComplete={() => navigate('/feed')} />} />
-            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/onboarding" element={<Onboarding />} />
 
             <Route path="/feed" element={
