@@ -11,32 +11,38 @@ export default {
     theme: {
         extend: {
             colors: {
-                "primary": "#f09942", // Updated to match new design
-                "primary-hover": "#e08830",
-                "secondary": "#9a734c",
-                "background-light": "#fcfaf8",
-                "background-dark": "#221910", // Updated
-                "card-light": "#ffffff",
-                "card-dark": "#2a221b",
-                "border-light": "#e7dbcf",
-                "border-dark": "#44392f",
-                "text-main": "#1b140d",
-                "text-muted": "#9a734c",
-                // Dashboard specific colors
+                "primary": "#f97316", // Vibrant Orange
+                "primary-hover": "#ea580c",
+                "primary-soft": "#fff7ed", // Very light orange for backgrounds
+                "secondary": "#64748b", // Slate 500
+                "background": "#f8fafc", // Slate 50 - Light, airy background
+                "background-light": "#fcfaf8", // Keep for compatibility
+                "background-dark": "#221910", // Keep for compatibility
+                "card": "#ffffff",
+                "card-light": "#ffffff", // Keep for compatibility
+                "card-dark": "#2a221b", // Keep for compatibility
+                "border": "#e2e8f0", // Slate 200
+                "border-light": "#e7dbcf", // Keep for compatibility
+                "border-dark": "#44392f", // Keep for compatibility
+                "text-main": "#0f172a", // Slate 900 - High contrast text
+                "text-muted": "#64748b", // Slate 500
+                "success-bg": "#ecfdf5",
+                "success-text": "#059669",
+                // Dashboard specific colors (Keep for backward compatibility)
                 "secondary-bg": "#fcfaf8",
                 "border-subtle": "#efece8",
                 "accent-orange": "#FFF0E0",
                 "dashboard-muted": "#8c8075",
-                "primary-light": "#fbdcb8", // Updated
-                "text-dark": "#1b140d", // Keep for backward compatibility
-                "border-color": "#f3ede7", // Keep for backward compatibility
+                "primary-light": "#fbdcb8",
+                "text-dark": "#1b140d",
+                "border-color": "#f3ede7",
                 orange: {
                     50: '#fff7ed',
                     100: '#ffedd5',
                     200: '#fed7aa',
                     300: '#fdba74',
                     400: '#fb923c',
-                    500: '#f09942', // Updated Primary Brand Color
+                    500: '#f97316', // Updated Primary Brand Color
                     600: '#ea580c',
                     700: '#c2410c',
                     800: '#9a3412',
@@ -59,18 +65,22 @@ export default {
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
-                display: ['Lexend', 'sans-serif'], // Updated to Lexend
-                body: ['Noto Sans', 'sans-serif'], // Added Noto Sans
+                display: ['Manrope', 'sans-serif'], // Updated to Manrope
+                body: ['Noto Sans', 'sans-serif'],
             },
             borderRadius: {
-                "lg": "2rem",
-                "xl": "3rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "2xl": "1rem",
+                "3xl": "1.5rem",
+                "4xl": "2.5rem",
+                "full": "9999px"
             },
             boxShadow: {
-                'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
-                'card': '0 0 0 1px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.04)',
+                'soft': '0 10px 40px -10px rgba(0,0,0,0.05)',
+                'card': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
                 'card-hover': '0 0 0 1px rgba(0,0,0,0.03), 0 8px 16px rgba(0,0,0,0.08)',
-                'glow': '0 0 20px rgba(255, 122, 0, 0.3)',
+                'glow': '0 0 20px -5px rgba(249, 115, 22, 0.3)',
                 'neon': '0 0 20px rgba(255, 122, 0, 0.4), 0 0 40px rgba(255, 122, 0, 0.2)',
             },
             animation: {

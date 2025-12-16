@@ -1,16 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { dbService as db } from '../services/firestoreService';
-import { Camera, Edit2, X, Trash2, AlertTriangle, Check, Shield, Globe, Lock, Upload, Star, Grid, Users } from 'lucide-react';
+import {
+    Camera, Edit2, X, Trash2, AlertTriangle, Check, Shield, Globe, Lock, Upload, Star,
+    Grid, Users, MapPin, Mail, Calendar, Award, Briefcase, Clock, Zap, MessageSquare,
+    Link as LinkIcon, Plus, ChevronRight, MoreHorizontal, Settings
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
-import { ai } from '../services/ai';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { GlassInput } from '../components/ui/GlassInput';
-
-const MotionDiv = motion.div as any;
 
 export const Profile = ({ user }: { user: any }) => {
     const { refreshProfile, deleteAccount } = useAuth();
@@ -34,18 +35,21 @@ export const Profile = ({ user }: { user: any }) => {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const idInputRef = useRef<HTMLInputElement>(null);
+    const portfolioInputRef = useRef<HTMLInputElement>(null);
 
     const level = Math.floor((user.xp || 0) / 100) + 1;
     const rating = user.rating || 5.0;
     const projectsCompleted = user.projects_completed || 0;
 
     // Load connections and requests on mount
-    React.useEffect(() => {
+    useEffect(() => {
         const loadNetwork = async () => {
-            const reqs = await db.getIncomingRequests(user.id);
-            setRequests(reqs);
-            const conns = await db.getMyConnections(user.id);
-            setConnections(conns);
+            if (user?.id) {
+                const reqs = await db.getIncomingRequests(user.id);
+                setRequests(reqs);
+                const conns = await db.getMyConnections(user.id);
+                setConnections(conns);
+            }
         };
         loadNetwork();
     }, [user.id]);
@@ -128,6 +132,19 @@ export const Profile = ({ user }: { user: any }) => {
         }
     };
 
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            try {
+                const url = await db.uploadFile(e.target.files[0]);
+                await db.updateProfile(user.id, { avatar_url: url });
+                await refreshProfile();
+                success("Avatar updated");
+            } catch (e) {
+                error("Failed to upload avatar");
+            }
+        }
+    };
+
     const handleFinalDelete = async () => {
         try {
             await deleteAccount();
@@ -143,414 +160,489 @@ export const Profile = ({ user }: { user: any }) => {
     };
 
     return (
-        <div className="w-full px-4 lg:px-4 py-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                {/* Left Sidebar: Identity Card (Sticky) */}
-                <aside className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-24 space-y-6">
-                    {/* Profile Card */}
-                    <div className="bg-card-light dark:bg-card-dark rounded-2xl p-6 shadow-soft border border-border-light dark:border-border-dark flex flex-col items-center text-center relative overflow-hidden group">
-                        {/* Verification Banner */}
-                        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
-                        <div className="relative mb-4 mt-2">
-                            <div
-                                className="size-32 rounded-full bg-cover bg-center border-4 border-background-light dark:border-background-dark shadow-md"
-                                style={{ backgroundImage: `url('${user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}')` }}
-                            ></div>
-                            {/* Blue Tick */}
-                            {user.is_verified === 'verified' && (
-                                <div className="absolute bottom-1 right-1 bg-white dark:bg-card-dark rounded-full p-1 shadow-sm" title="Identity Verified">
-                                    <span className="material-symbols-outlined text-blue-500 fill-current text-[28px] leading-none" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                </div>
-                            )}
-                        </div>
-
-                        <h1 className="text-2xl font-bold text-text-main dark:text-white">{user.full_name}</h1>
-                        <p className="text-primary font-bold text-sm">@{user.handle}</p>
-                        <p className="text-secondary dark:text-gray-400 text-sm font-medium mt-1">{user.school || 'University Student'}</p>
-
-                        <div className="flex items-center gap-1 mt-2 text-xs text-secondary/80 dark:text-gray-500">
-                            <span className="material-symbols-outlined text-sm">mail</span>
-                            <span>{user.email}</span>
-                        </div>
-                        <div className="flex items-center gap-1 mt-1 text-xs text-secondary/80 dark:text-gray-500">
-                            <span className="material-symbols-outlined text-sm">location_on</span>
-                            <span>{user.school || 'New Delhi, India (Hyper-local)'}</span>
-                        </div>
-
-                        {/* XP Level Bar */}
-                        <div className="w-full mt-6 mb-2">
-                            <div className="flex justify-between text-xs font-bold mb-1.5 px-1">
-                                <span className="text-primary uppercase tracking-wider">Level {level} Scribe</span>
-                                <span className="text-secondary">{user.xp || 0} XP</span>
-                            </div>
-                            <div className="w-full bg-[#f3ede7] dark:bg-border-dark rounded-full h-2.5 overflow-hidden">
-                                <div className="bg-primary h-2.5 rounded-full" style={{ width: `${Math.min((user.xp % 100), 100)}% ` }}></div>
-                            </div>
-                            <p className="text-[10px] text-secondary mt-1 text-right">{100 - (user.xp % 100)} XP to Level {level + 1}</p>
-                        </div>
-
-                        {/* Trust Badges */}
-                        <div className="flex flex-wrap justify-center gap-2 mt-4 w-full">
-                            {user.is_verified === 'verified' && (
-                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full text-xs font-bold border border-blue-100 dark:border-blue-800">
-                                    <span className="material-symbols-outlined text-sm">badge</span>
-                                    College ID Verified
-                                </div>
-                            )}
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full text-xs font-bold border border-green-100 dark:border-green-800">
-                                <span className="material-symbols-outlined text-sm">shield</span>
-                                Payment Verified
-                            </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="grid grid-cols-2 gap-3 w-full mt-6">
-                            <button
-                                onClick={() => setEditingProfile(!editingProfile)}
-                                className="col-span-2 flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-hover text-white font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm shadow-primary/30"
-                            >
-                                <span className="material-symbols-outlined text-xl">edit</span>
-                                {editingProfile ? 'Cancel Edit' : 'Edit Profile'}
-                            </button>
-                            <button className="flex items-center justify-center gap-2 w-full bg-[#f3ede7] dark:bg-border-dark hover:bg-border-light dark:hover:bg-gray-700 text-text-main dark:text-white font-bold py-2.5 px-4 rounded-xl transition-colors">
-                                <span className="material-symbols-outlined text-xl">share</span>
-                                Share
-                            </button>
-                            <button className="flex items-center justify-center gap-2 w-full bg-[#f3ede7] dark:bg-border-dark hover:bg-border-light dark:hover:bg-gray-700 text-text-main dark:text-white font-bold py-2.5 px-4 rounded-xl transition-colors">
-                                <span className="material-symbols-outlined text-xl">visibility</span>
-                                Public
-                            </button>
-                        </div>
+        <div className="w-full min-h-screen bg-background dark:bg-background-dark font-sans text-text-main dark:text-white pb-20">
+            {/* Header - Glassmorphism */}
+            <header className="sticky top-0 z-50 px-4 py-4 w-full flex justify-center pointer-events-none">
+                <div className="glass-panel pointer-events-auto rounded-full px-6 py-3 flex items-center justify-between w-full max-w-5xl shadow-soft bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/40 dark:border-slate-700/40">
+                    <div className="flex items-center gap-8">
+                        <img src="/logo.png" alt="Logo" className="h-8 w-auto" />
+                        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-secondary dark:text-gray-400">
+                            <a href="/dashboard" className="hover:text-primary transition-colors">Feed</a>
+                            <a href="/messages" className="hover:text-primary transition-colors">Messages</a>
+                            <a href="/profile" className="text-primary font-bold">Profile</a>
+                        </nav>
                     </div>
-
-                    {/* Quick Info Card */}
-                    <div className="bg-card-light dark:bg-card-dark rounded-2xl p-5 shadow-soft border border-border-light dark:border-border-dark">
-                        <h3 className="text-sm font-bold uppercase tracking-wider text-secondary mb-4">Availability</h3>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-text-main dark:text-gray-300">Status</span>
-                                <span className={`flex items-center gap-1.5 ${user.is_online ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20' : 'text-slate-500 bg-slate-100'} font-bold px-2 py-0.5 rounded-md`}>
-                                    <span className={`size-2 rounded-full ${user.is_online ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`}></span>
-                                    {user.is_online ? 'Online Now' : 'Offline'}
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-text-main dark:text-gray-300">Response Time</span>
-                                <span className="font-bold text-text-main dark:text-white">~ {user.response_time || 60} mins</span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-text-main dark:text-gray-300">Languages</span>
-                                <span className="font-bold text-text-main dark:text-white">{(user.languages || ['English']).join(', ')}</span>
-                            </div>
-                        </div>
+                    <div className="flex items-center gap-3">
+                        <button className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-secondary">
+                            <Settings size={20} />
+                        </button>
+                        <button
+                            onClick={() => useAuth().logout()}
+                            className="bg-black text-white dark:bg-white dark:text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-opacity"
+                        >
+                            Logout
+                        </button>
                     </div>
+                </div>
+            </header>
 
-                    {/* Verification Upload (If pending or not verified) */}
-                    {user.is_verified !== 'verified' && (
-                        <div className="bg-card-light dark:bg-card-dark rounded-2xl p-5 shadow-soft border border-border-light dark:border-border-dark">
-                            <h3 className="font-bold text-slate-900 dark:text-white text-sm">Get Verified Badge</h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                                Upload your College ID Card to get the <span className="text-blue-500 font-bold">Blue Tick</span>. Verified students get 3x more assignments.
-                            </p>
-                            {user.is_verified === 'pending' ? (
-                                <div className="mt-3 bg-yellow-500/10 text-yellow-600 text-xs font-bold px-3 py-2 rounded-lg border border-yellow-500/20 text-center">
-                                    Verification Pending...
-                                </div>
-                            ) : (
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                    {/* Left Sidebar: Identity & Status */}
+                    <aside className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-28 space-y-6">
+
+                        {/* Profile Card */}
+                        <div className="bg-white dark:bg-card-dark rounded-3xl p-6 shadow-soft border border-border-light dark:border-border-dark flex flex-col items-center text-center relative overflow-hidden group">
+                            {/* Verification Banner */}
+                            {user.is_verified === 'verified' && (
+                                <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-400 to-blue-600"></div>
+                            )}
+
+                            <div className="relative mb-4 mt-2 group-hover:scale-105 transition-transform duration-300">
+                                <div
+                                    className="size-32 rounded-full bg-cover bg-center border-4 border-white dark:border-slate-800 shadow-lg"
+                                    style={{ backgroundImage: `url('${user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}')` }}
+                                ></div>
                                 <button
-                                    onClick={() => idInputRef.current?.click()}
-                                    disabled={idUploading}
-                                    className="mt-3 w-full py-2 bg-slate-900 dark:bg-white dark:text-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-colors"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="absolute bottom-1 right-1 bg-white dark:bg-slate-800 p-2 rounded-full shadow-md border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                                 >
-                                    {idUploading ? 'Uploading...' : 'Upload ID Card'}
+                                    <Camera size={16} className="text-secondary" />
                                 </button>
-                            )}
-                            <input type="file" ref={idInputRef} onChange={handleIdSelect} className="hidden" accept="image/*" />
-                        </div>
-                    )}
-                </aside>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleAvatarUpload}
+                                />
+                                {user.is_verified === 'verified' && (
+                                    <div className="absolute top-1 right-1 bg-white dark:bg-slate-800 rounded-full p-1 shadow-sm" title="Verified Student">
+                                        <span className="material-symbols-outlined text-blue-500 text-[24px] leading-none" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                    </div>
+                                )}
+                            </div>
 
-                {/* Right Column: Activity Feed */}
-                <div className="lg:col-span-8 xl:col-span-9 space-y-6">
-                    {/* Stats Strip */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <div className="text-secondary text-xs font-semibold uppercase mb-1">Total Earned</div>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-bold text-text-main dark:text-white">₹{(user.total_earned || 0).toLocaleString()}</span>
-                                <span className="text-green-500 text-xs font-bold flex items-center"><span className="material-symbols-outlined text-[10px]">arrow_upward</span> 12%</span>
-                            </div>
-                        </div>
-                        <div className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <div className="text-secondary text-xs font-semibold uppercase mb-1">Assignments</div>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-bold text-text-main dark:text-white">{projectsCompleted}</span>
-                                <span className="text-secondary text-xs">completed</span>
-                            </div>
-                        </div>
-                        <div className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <div className="text-secondary text-xs font-semibold uppercase mb-1">Rating</div>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-bold text-text-main dark:text-white">{rating}</span>
-                                <span className="material-symbols-outlined text-yellow-400 text-xl filled" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            </div>
-                        </div>
-                        <div className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
-                            <div className="text-secondary text-xs font-semibold uppercase mb-1">On-Time</div>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-bold text-text-main dark:text-white">{user.on_time_rate || 100}%</span>
-                                <span className="text-secondary text-xs">rate</span>
-                            </div>
-                        </div>
-                    </div>
+                            <h1 className="text-2xl font-bold text-text-main dark:text-white font-display">{user.full_name}</h1>
+                            <p className="text-primary font-bold text-sm mb-1">@{user.handle}</p>
+                            <p className="text-secondary dark:text-gray-400 text-sm font-medium flex items-center justify-center gap-1.5">
+                                <span className="material-symbols-outlined text-base">school</span>
+                                {user.school || 'University Student'}
+                            </p>
 
-                    {/* Tabs */}
-                    <div className="border-b border-border-light dark:border-border-dark">
-                        <nav aria-label="Tabs" className="flex gap-8 overflow-x-auto no-scrollbar">
-                            {['portfolio', 'about', 'reviews', 'network'].map(tab => (
+                            {/* XP Level Bar */}
+                            <div className="w-full mt-6 mb-4 px-2">
+                                <div className="flex justify-between text-xs font-bold mb-2">
+                                    <span className="text-primary uppercase tracking-wider flex items-center gap-1">
+                                        <Zap size={12} className="fill-current" />
+                                        Level {level}
+                                    </span>
+                                    <span className="text-secondary">{user.xp || 0} XP</span>
+                                </div>
+                                <div className="w-full bg-orange-50 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                                    <div className="bg-gradient-to-r from-orange-400 to-primary h-full rounded-full transition-all duration-500" style={{ width: `${Math.min((user.xp % 100), 100)}%` }}></div>
+                                </div>
+                                <p className="text-[10px] text-secondary/70 mt-1.5 text-right">{100 - (user.xp % 100)} XP to next level</p>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="grid grid-cols-2 gap-3 w-full mt-2">
+                                <button
+                                    onClick={() => setEditingProfile(!editingProfile)}
+                                    className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-primary font-bold text-sm hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
+                                >
+                                    <Edit2 size={16} />
+                                    Edit
+                                </button>
+                                <button className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 dark:bg-slate-800 text-secondary font-bold text-sm hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                                    <LinkIcon size={16} />
+                                    Share
+                                </button>
+                            </div>
+
+                            {/* Availability Status */}
+                            <div className="mt-6 pt-6 border-t border-border-light dark:border-border-dark w-full flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className={`size-2.5 rounded-full ${user.is_online ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
+                                    <span className="text-sm font-medium text-secondary">
+                                        {user.is_online ? 'Available Now' : 'Offline'}
+                                    </span>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked={user.is_online} className="sr-only peer" readOnly />
+                                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Trust & Verification */}
+                        <div className="bg-white dark:bg-card-dark rounded-3xl p-6 shadow-soft border border-border-light dark:border-border-dark">
+                            <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
+                                <Shield size={20} className="text-primary" />
+                                Trust Score
+                            </h3>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-green-100 dark:bg-green-900/30 p-1.5 rounded-full">
+                                            <Mail size={16} className="text-green-600 dark:text-green-400" />
+                                        </div>
+                                        <span className="text-sm font-medium text-green-900 dark:text-green-100">Email Verified</span>
+                                    </div>
+                                    <Check size={16} className="text-green-600 dark:text-green-400" />
+                                </div>
+
+                                <div className={`flex items-center justify-between p-3 rounded-xl border ${user.is_verified === 'verified' ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30' : 'bg-gray-50 dark:bg-slate-800/50 border-gray-100 dark:border-slate-700'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-1.5 rounded-full ${user.is_verified === 'verified' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-200 dark:bg-slate-700'}`}>
+                                            <Shield size={16} className={`${user.is_verified === 'verified' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500'}`} />
+                                        </div>
+                                        <span className={`text-sm font-medium ${user.is_verified === 'verified' ? 'text-blue-900 dark:text-blue-100' : 'text-gray-500'}`}>
+                                            {user.is_verified === 'verified' ? 'ID Verified' : 'ID Not Verified'}
+                                        </span>
+                                    </div>
+                                    {user.is_verified === 'verified' ? (
+                                        <Check size={16} className="text-blue-600 dark:text-blue-400" />
+                                    ) : (
+                                        <button
+                                            onClick={() => idInputRef.current?.click()}
+                                            className="text-xs font-bold text-primary hover:underline"
+                                            disabled={idUploading}
+                                        >
+                                            {idUploading ? '...' : 'Verify'}
+                                        </button>
+                                    )}
+                                    <input
+                                        type="file"
+                                        ref={idInputRef}
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleIdSelect}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Danger Zone (Collapsed) */}
+                        <div className="text-center">
+                            <button
+                                onClick={() => setShowDeleteModal(true)}
+                                className="text-xs font-medium text-red-500 hover:text-red-600 hover:underline transition-colors"
+                            >
+                                Delete Account
+                            </button>
+                        </div>
+                    </aside>
+
+                    {/* Right Column: Stats & Content */}
+                    <div className="lg:col-span-8 xl:col-span-9 space-y-8">
+
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {[
+                                { label: 'Total Earned', value: `₹${user.total_earned || 0}`, icon: 'payments', color: 'text-green-600', bg: 'bg-green-50' },
+                                { label: 'Assignments', value: projectsCompleted, icon: 'assignment', color: 'text-blue-600', bg: 'bg-blue-50' },
+                                { label: 'Rating', value: rating.toFixed(1), icon: 'star', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+                                { label: 'On-Time Rate', value: `${user.on_time_rate || 100}%`, icon: 'schedule', color: 'text-purple-600', bg: 'bg-purple-50' },
+                            ].map((stat, i) => (
+                                <div key={i} className="bg-white dark:bg-card-dark p-5 rounded-2xl shadow-sm border border-border-light dark:border-border-dark flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                                    <div className={`p-3 rounded-full ${stat.bg} dark:bg-opacity-10 mb-3`}>
+                                        <span className={`material-symbols-outlined ${stat.color} text-2xl`}>{stat.icon}</span>
+                                    </div>
+                                    <span className="text-2xl font-bold text-text-main dark:text-white font-display">{stat.value}</span>
+                                    <span className="text-xs font-medium text-secondary uppercase tracking-wide mt-1">{stat.label}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Tabs Navigation */}
+                        <div className="bg-white dark:bg-card-dark rounded-2xl p-1.5 shadow-sm border border-border-light dark:border-border-dark inline-flex w-full md:w-auto overflow-x-auto">
+                            {['portfolio', 'about', 'reviews', 'network'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`border-b-2 font-medium text-sm py-3 whitespace-nowrap px-1 transition-colors capitalize ${activeTab === tab
-                                        ? 'border-primary text-primary font-bold'
-                                        : 'border-transparent text-secondary dark:text-gray-400 hover:text-text-main dark:hover:text-white'
+                                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex-1 md:flex-none ${activeTab === tab
+                                            ? 'bg-primary text-white shadow-md'
+                                            : 'text-secondary hover:bg-gray-50 dark:hover:bg-slate-800'
                                         }`}
                                 >
-                                    {tab} {tab === 'portfolio' && `(${user.portfolio?.length || 0})`} {tab === 'network' && requests.length > 0 && `(${requests.length})`}
+                                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
                                 </button>
                             ))}
-                        </nav>
-                    </div>
+                        </div>
 
-                    {/* Tab Content */}
-                    <div className="space-y-8 animate-fade-in">
-                        <AnimatePresence mode='wait'>
-                            {/* PORTFOLIO TAB */}
-                            {activeTab === 'portfolio' && (
-                                <MotionDiv
-                                    key="portfolio"
-                                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                                >
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-lg font-bold dark:text-white">Featured Work</h3>
-                                        <input type="file" ref={fileInputRef} onChange={handlePortfolioUpload} className="hidden" accept="image/*" />
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                                        {(user.portfolio || []).map((url: string, i: number) => (
-                                            <div key={i} className="group cursor-pointer relative">
-                                                <div className="relative overflow-hidden rounded-xl border border-border-light dark:border-border-dark shadow-sm bg-card-light dark:bg-card-dark aspect-[4/3]">
-                                                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${url})` }}></div>
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-60"></div>
-                                                    <div className="absolute bottom-3 left-4 right-4">
-                                                        <h4 className="text-white font-bold text-sm line-clamp-1">Portfolio Item {i + 1}</h4>
-                                                    </div>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); handleDeleteSample(url); }}
-                                                        className="absolute top-2 right-2 p-1.5 bg-white/90 text-red-500 rounded-lg hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
+                        {/* Tab Content */}
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {activeTab === 'portfolio' && (
+                                    <div className="space-y-6">
+                                        <div className="flex items-center justify-between">
+                                            <h2 className="text-xl font-bold font-display">Featured Projects</h2>
+                                            <button
+                                                onClick={() => portfolioInputRef.current?.click()}
+                                                className="text-sm font-bold text-primary hover:underline flex items-center gap-1"
+                                            >
+                                                <Plus size={16} /> Add New
+                                            </button>
+                                            <input
+                                                type="file"
+                                                ref={portfolioInputRef}
+                                                className="hidden"
+                                                accept="image/*"
+                                                onChange={handlePortfolioUpload}
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {/* Add New Card */}
+                                            <button
+                                                onClick={() => portfolioInputRef.current?.click()}
+                                                className="group aspect-[4/3] rounded-2xl border-2 border-dashed border-border-light dark:border-border-dark hover:border-primary/50 hover:bg-orange-50/50 dark:hover:bg-slate-800/50 transition-all flex flex-col items-center justify-center gap-3"
+                                            >
+                                                <div className="p-4 rounded-full bg-orange-100 dark:bg-slate-800 group-hover:scale-110 transition-transform">
+                                                    <Upload size={24} className="text-primary" />
                                                 </div>
-                                            </div>
-                                        ))}
-                                        {/* Add New Item */}
-                                        <div
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border-light dark:border-border-dark bg-[#fcfaf8] dark:bg-background-dark aspect-[4/3] hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
-                                        >
-                                            <div className="size-10 rounded-full bg-white dark:bg-card-dark shadow-sm flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                                {uploading ? <span className="animate-spin material-symbols-outlined text-primary">progress_activity</span> : <span className="material-symbols-outlined text-primary">add</span>}
-                                            </div>
-                                            <span className="text-xs font-bold text-secondary dark:text-gray-400">{uploading ? 'Uploading...' : 'Add Project'}</span>
+                                                <span className="font-bold text-secondary group-hover:text-primary transition-colors">Upload Project</span>
+                                            </button>
+
+                                            {/* Portfolio Items */}
+                                            {user.portfolio?.map((item: any, i: number) => (
+                                                <div key={i} className="group relative aspect-[4/3] rounded-2xl overflow-hidden shadow-card hover:shadow-lg transition-all">
+                                                    <img src={item} alt="Portfolio" className="w-full h-full object-cover" />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                                                        <button
+                                                            onClick={() => handleDeleteSample(item)}
+                                                            className="absolute top-3 right-3 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-red-500 transition-colors"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                        <p className="text-white font-bold">Project Sample #{i + 1}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
-                                </MotionDiv>
-                            )}
+                                )}
 
-                            {/* ABOUT TAB */}
-                            {activeTab === 'about' && (
-                                <MotionDiv
-                                    key="about"
-                                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                                >
-                                    <div className="bg-card-light dark:bg-card-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-sm">
-                                        <h3 className="text-lg font-bold mb-3 dark:text-white">My Expertise</h3>
+                                {activeTab === 'about' && (
+                                    <div className="bg-white dark:bg-card-dark rounded-3xl p-8 shadow-soft border border-border-light dark:border-border-dark space-y-8">
                                         {editingProfile ? (
                                             <div className="space-y-4">
-                                                <div className="mb-2">
-                                                    <label className="text-xs text-secondary font-bold mb-1 block">Full Name</label>
-                                                    <input
-                                                        className="w-full bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary text-slate-900 dark:text-white"
-                                                        value={fullName}
-                                                        onChange={(e) => setFullName(e.target.value)}
-                                                        placeholder="Your Full Name"
-                                                    />
+                                                <div>
+                                                    <label className="block text-sm font-bold text-secondary mb-1">Full Name</label>
+                                                    <GlassInput value={fullName} onChange={(e) => setFullName(e.target.value)} />
                                                 </div>
-                                                <div className="mb-2">
-                                                    <label className="text-xs text-secondary font-bold mb-1 block">Bio</label>
+                                                <div>
+                                                    <label className="block text-sm font-bold text-secondary mb-1">Bio</label>
                                                     <textarea
-                                                        className="w-full bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary min-h-[100px] resize-none text-slate-900 dark:text-white"
+                                                        className="w-full p-3 rounded-xl bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none h-32"
                                                         value={bio}
                                                         onChange={(e) => setBio(e.target.value)}
-                                                        placeholder="Tell your peers about your skills..."
                                                     />
                                                 </div>
-                                                <div className="mb-2">
-                                                    <label className="text-xs text-secondary font-bold mb-1 block">College / University</label>
-                                                    <CollegeAutocomplete
-                                                        value={school}
-                                                        onChange={setSchool}
-                                                        className="mt-1"
-                                                        inputClassName="w-full bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-primary text-slate-900 dark:text-white"
-                                                    />
+                                                <div>
+                                                    <label className="block text-sm font-bold text-secondary mb-1">School / University</label>
+                                                    <CollegeAutocomplete value={school} onChange={setSchool} />
                                                 </div>
-                                                <div className="flex gap-2 justify-end mt-4">
-                                                    <button onClick={saveProfile} className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold">Save Changes</button>
+                                                <div className="flex gap-3 pt-4">
+                                                    <GlassButton onClick={saveProfile} variant="primary">Save Changes</GlassButton>
+                                                    <GlassButton onClick={() => setEditingProfile(false)} variant="secondary">Cancel</GlassButton>
                                                 </div>
                                             </div>
                                         ) : (
-                                            <p className="text-secondary dark:text-gray-300 leading-relaxed text-sm mb-4">
-                                                {user.bio || "No bio added yet. Click 'Edit Profile' to add one."}
+                                            <>
+                                                <div>
+                                                    <h3 className="text-lg font-bold font-display mb-3 flex items-center gap-2">
+                                                        <span className="material-symbols-outlined text-primary">person</span>
+                                                        About Me
+                                                    </h3>
+                                                    <p className="text-secondary leading-relaxed">
+                                                        {user.bio || "No bio added yet. Click 'Edit' to tell others about yourself!"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <h3 className="text-lg font-bold font-display mb-3 flex items-center gap-2">
+                                                        <span className="material-symbols-outlined text-primary">school</span>
+                                                        Education
+                                                    </h3>
+                                                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-background-light dark:bg-slate-800/50">
+                                                        <div className="p-3 bg-white dark:bg-slate-700 rounded-xl shadow-sm">
+                                                            <span className="material-symbols-outlined text-primary">school</span>
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold text-text-main dark:text-white">{user.school || 'University Name'}</h4>
+                                                            <p className="text-sm text-secondary">Student • Computer Science</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <h3 className="text-lg font-bold font-display mb-3 flex items-center gap-2">
+                                                        <span className="material-symbols-outlined text-primary">label</span>
+                                                        Skills & Tags
+                                                    </h3>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {user.tags?.map((tag: string) => (
+                                                            <span key={tag} className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-primary text-sm font-medium border border-orange-100 dark:border-orange-900/30 flex items-center gap-1 group">
+                                                                {tag}
+                                                                <button onClick={() => removeTag(tag)} className="hover:text-red-500 hidden group-hover:block">
+                                                                    <X size={12} />
+                                                                </button>
+                                                            </span>
+                                                        ))}
+                                                        <div className="relative flex items-center">
+                                                            <Plus size={16} className="absolute left-2 text-secondary" />
+                                                            <input
+                                                                type="text"
+                                                                value={newTag}
+                                                                onChange={(e) => setNewTag(e.target.value)}
+                                                                onKeyDown={addTag}
+                                                                placeholder="Add skill..."
+                                                                className="pl-8 pr-3 py-1.5 rounded-lg bg-gray-50 dark:bg-slate-800 border-none text-sm focus:ring-2 focus:ring-primary/20 w-32 transition-all"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+
+                                {activeTab === 'reviews' && (
+                                    <div className="space-y-4">
+                                        <div className="bg-white dark:bg-card-dark rounded-3xl p-8 shadow-soft border border-border-light dark:border-border-dark text-center py-12">
+                                            <div className="w-16 h-16 bg-orange-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <Star size={32} className="text-primary" />
+                                            </div>
+                                            <h3 className="text-xl font-bold font-display mb-2">No Reviews Yet</h3>
+                                            <p className="text-secondary max-w-md mx-auto">
+                                                Complete assignments and get rated by other students to build your reputation!
                                             </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'network' && (
+                                    <div className="space-y-6">
+                                        {/* Connection Requests */}
+                                        {requests.length > 0 && (
+                                            <div className="bg-white dark:bg-card-dark rounded-3xl p-6 shadow-soft border border-border-light dark:border-border-dark">
+                                                <h3 className="font-bold font-display mb-4 flex items-center gap-2">
+                                                    <span className="w-2 h-2 rounded-full bg-primary"></span>
+                                                    Pending Requests
+                                                </h3>
+                                                <div className="space-y-3">
+                                                    {requests.map((req) => (
+                                                        <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-background-light dark:bg-slate-800/50">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="size-10 rounded-full bg-gray-200 bg-cover bg-center" style={{ backgroundImage: `url('${req.fromUser?.avatar_url}')` }}></div>
+                                                                <div>
+                                                                    <p className="font-bold text-sm">{req.fromUser?.full_name}</p>
+                                                                    <p className="text-xs text-secondary">@{req.fromUser?.handle}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <button onClick={() => handleConnectionResponse(req.id, 'accepted')} className="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100"><Check size={16} /></button>
+                                                                <button onClick={() => handleConnectionResponse(req.id, 'rejected')} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"><X size={16} /></button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         )}
 
-                                        <div className="flex flex-wrap gap-2 mt-4">
-                                            {(user.tags || []).map((tag: string) => (
-                                                <span key={tag} className="px-3 py-1 bg-[#f3ede7] dark:bg-border-dark text-text-main dark:text-gray-200 rounded-full text-xs font-medium border border-transparent flex items-center gap-1">
-                                                    {tag}
-                                                    {editingProfile && <button onClick={() => removeTag(tag)}><X size={12} /></button>}
-                                                </span>
-                                            ))}
-                                            {editingProfile && (
-                                                <input
-                                                    className="bg-transparent border border-dashed border-slate-300 rounded-full px-3 py-1 text-xs outline-none focus:border-primary w-24"
-                                                    placeholder="+ Add Skill"
-                                                    value={newTag}
-                                                    onChange={e => setNewTag(e.target.value)}
-                                                    onKeyDown={addTag}
-                                                />
+                                        {/* Connections List */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {connections.length > 0 ? connections.map((conn) => {
+                                                const otherUser = conn.participants.find((p: any) => p.id !== user.id);
+                                                return (
+                                                    <div key={conn.id} className="bg-white dark:bg-card-dark p-4 rounded-2xl shadow-sm border border-border-light dark:border-border-dark flex items-center gap-4">
+                                                        <div className="size-12 rounded-full bg-gray-200 bg-cover bg-center" style={{ backgroundImage: `url('${otherUser?.avatar_url}')` }}></div>
+                                                        <div>
+                                                            <p className="font-bold text-text-main dark:text-white">{otherUser?.full_name}</p>
+                                                            <p className="text-xs text-secondary">@{otherUser?.handle}</p>
+                                                        </div>
+                                                        <button className="ml-auto p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-secondary">
+                                                            <MessageSquare size={18} />
+                                                        </button>
+                                                    </div>
+                                                );
+                                            }) : (
+                                                <div className="col-span-full text-center py-12 text-secondary">
+                                                    <Users size={48} className="mx-auto mb-3 opacity-20" />
+                                                    <p>No connections yet. Start networking!</p>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
-                                </MotionDiv>
-                            )}
-
-                            {/* REVIEWS TAB */}
-                            {activeTab === 'reviews' && (
-                                <MotionDiv
-                                    key="reviews"
-                                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                                >
-                                    <div className="flex justify-between items-center mb-4 mt-8">
-                                        <h3 className="text-lg font-bold dark:text-white">Recent Reviews</h3>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* Placeholder Reviews */}
-                                        <div className="bg-card-light dark:bg-card-dark p-5 rounded-xl border border-border-light dark:border-border-dark shadow-sm">
-                                            <div className="flex items-start justify-between mb-3">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold">AK</div>
-                                                    <div>
-                                                        <p className="text-sm font-bold text-text-main dark:text-white">Anjali K.</p>
-                                                        <p className="text-xs text-secondary">Student</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex text-yellow-400 text-sm">
-                                                    {[1, 2, 3, 4, 5].map(i => <span key={i} className="material-symbols-outlined text-base filled" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>)}
-                                                </div>
-                                            </div>
-                                            <p className="text-sm text-text-main dark:text-gray-300 leading-relaxed">"Great work! Saved my semester."</p>
-                                        </div>
-                                    </div>
-                                </MotionDiv>
-                            )}
-
-                            {/* NETWORK TAB */}
-                            {activeTab === 'network' && (
-                                <MotionDiv
-                                    key="network"
-                                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                                >
-                                    {/* Connection Requests */}
-                                    {requests.length > 0 && (
-                                        <div className="mb-8">
-                                            <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 px-1 flex items-center gap-2">
-                                                Requests <span className="bg-red-500/10 text-red-600 text-xs px-2 py-0.5 rounded-full">{requests.length}</span>
-                                            </h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {requests.map(req => (
-                                                    <div key={req.id} className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm flex items-center gap-4">
-                                                        <img
-                                                            src={req.requester?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${req.requester_id}`}
-                                                            className="w-12 h-12 rounded-full bg-slate-100"
-                                                        />
-                                                        <div className="flex-1 min-w-0">
-                                                            <h4 className="font-bold text-slate-900 dark:text-white truncate">{req.requester?.handle}</h4>
-                                                            <div className="flex gap-2 mt-2">
-                                                                <button onClick={() => handleConnectionResponse(req.id, 'accepted')} className="flex-1 bg-slate-900 text-white text-xs font-bold py-1.5 rounded-lg">Accept</button>
-                                                                <button onClick={() => handleConnectionResponse(req.id, 'rejected')} className="flex-1 bg-slate-100 text-slate-600 text-xs font-bold py-1.5 rounded-lg">Ignore</button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Connections */}
-                                    <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 px-1">My Connections</h3>
-                                    {connections.length === 0 ? (
-                                        <div className="text-center py-12 bg-white/5 rounded-xl border border-dashed border-slate-300 dark:border-white/10">
-                                            <Users className="mx-auto text-slate-300 mb-3" size={32} />
-                                            <p className="text-slate-500 text-sm font-medium">No connections yet.</p>
-                                        </div>
-                                    ) : (
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                            {connections.map(conn => (
-                                                <div key={conn.id} className="bg-card-light dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm text-center">
-                                                    <img src={conn.avatar_url} className="w-16 h-16 rounded-full bg-slate-100 mx-auto mb-3 object-cover" />
-                                                    <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">{conn.handle}</h4>
-                                                    <p className="text-xs text-slate-500 truncate mb-3">{conn.school}</p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </MotionDiv>
-                            )}
+                                )}
+                            </motion.div>
                         </AnimatePresence>
                     </div>
                 </div>
+            </main>
 
-                {/* Danger Zone */}
-                <div className="mt-12 pt-8 border-t border-slate-200 dark:border-white/10 col-span-full">
-                    <h3 className="text-sm font-bold text-red-600 mb-2 uppercase tracking-wider">Danger Zone</h3>
-                    <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                        <div>
-                            <h4 className="font-bold text-slate-800 dark:text-white text-sm">Delete Account</h4>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Permanently remove your profile and chat history.</p>
-                        </div>
-                        <button onClick={() => { setShowDeleteModal(true); setDeleteConfirmInput(''); }} className="px-4 py-2 bg-white border border-red-200 text-red-600 font-bold rounded-lg text-sm hover:bg-red-600 hover:text-white transition-colors">Delete Account</button>
-                    </div>
-                </div>
+            {/* Delete Account Modal */}
+            <AnimatePresence>
+                {showDeleteModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+                            className="bg-white dark:bg-card-dark rounded-3xl p-8 max-w-md w-full shadow-2xl border border-red-100 dark:border-red-900/30"
+                        >
+                            <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <AlertTriangle size={32} className="text-red-500" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-center mb-2">Delete Account?</h2>
+                            <p className="text-secondary text-center mb-6">
+                                This action is irreversible. All your data, including XP and portfolio items, will be permanently lost.
+                            </p>
 
-                {/* Delete Modal */}
-                <AnimatePresence>
-                    {showDeleteModal && (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                            <div className="max-w-sm w-full p-6 shadow-2xl bg-white dark:bg-slate-900 rounded-2xl">
-                                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4 mx-auto border border-red-200">
-                                    <AlertTriangle className="text-red-600" size={24} />
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-2">
+                                        Type "DELETE" to confirm
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={deleteConfirmInput}
+                                        onChange={(e) => setDeleteConfirmInput(e.target.value)}
+                                        className="w-full p-3 rounded-xl bg-background border border-border focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none font-bold text-center"
+                                        placeholder="DELETE"
+                                    />
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white text-center mb-2">Delete Account?</h3>
-                                <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-6">Type "DELETE" to confirm.</p>
-                                <input className="w-full border border-slate-300 rounded-xl px-4 py-3 text-center font-bold mb-4" placeholder="DELETE" value={deleteConfirmInput} onChange={(e) => setDeleteConfirmInput(e.target.value.toUpperCase())} />
-                                <button disabled={deleteConfirmInput !== 'DELETE'} onClick={handleFinalDelete} className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl mb-2">Permanently Delete</button>
-                                <button onClick={() => setShowDeleteModal(false)} className="w-full text-slate-500 font-bold py-2 text-sm">Cancel</button>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="py-3 rounded-xl font-bold text-secondary hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleFinalDelete}
+                                        disabled={deleteConfirmInput !== 'DELETE'}
+                                        className="py-3 rounded-xl font-bold bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-red-500/30"
+                                    >
+                                        Delete Forever
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
