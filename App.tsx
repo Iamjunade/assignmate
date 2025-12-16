@@ -152,9 +152,27 @@ function AppContent() {
     );
   }
 
+  // Fix for Chats Layout
+  if (location.pathname.startsWith('/chats')) {
+    return (
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen text-slate-400">
+          <Loader2 className="animate-spin" />
+        </div>
+      }>
+        <ProtectedRoute>
+          <Routes>
+            <Route path="/" element={<ChatListWrapper user={user} />} />
+            <Route path="/:chatId" element={<ChatRoomWrapper user={user} />} />
+          </Routes>
+        </ProtectedRoute>
+      </Suspense>
+    );
+  }
+
   return (
     <GlassLayout>
-      {location.pathname !== '/' && location.pathname !== '/feed' && location.pathname !== '/auth' && location.pathname !== '/writers' && location.pathname !== '/profile' && (
+      {location.pathname !== '/' && location.pathname !== '/feed' && location.pathname !== '/auth' && location.pathname !== '/writers' && location.pathname !== '/profile' && !location.pathname.startsWith('/chats') && (
         <GlassNavigation
           logo={
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(user ? '/feed' : '/')}>
