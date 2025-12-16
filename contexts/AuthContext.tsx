@@ -32,25 +32,30 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       const profile = await userApi.getProfile(userId);
 
       if (profile) {
-        // Profile exists - set user as complete
+        // Check if profile is actually complete (has handle and school)
+        const isIncomplete = !profile.school || profile.school === 'Not Specified' || !profile.handle;
+
         setUser({
           ...profile,
           email: fbUser.email || profile.email,
-          is_incomplete: false
+          is_incomplete: isIncomplete
         } as User);
         presence.init(userId);
       } else {
-        // Profile missing - auto-complete for Google signups or legacy users
+        // Profile missing - Create initial profile for Google signups but mark as INCOMPLETE
+        // We set a temporary handle to satisfy database constraints if any, but user must update it.
+        const tempHandle = 'user_' + userId.substring(0, 6);
+
         const newProfile = {
           id: userId,
           email: fbUser.email || '',
-          handle: fbUser.displayName?.replace(/\s+/g, '_').toLowerCase() || fbUser.email?.split('@')[0] || 'user_' + userId.substring(0, 6),
-          school: 'Not Specified',
+          handle: tempHandle, // Temporary
+          school: '', // Empty to trigger onboarding
           avatar_url: fbUser.photoURL || undefined,
           full_name: fbUser.displayName || 'Student',
           xp: 0,
           is_writer: false,
-          is_incomplete: false
+          is_incomplete: true // FORCE ONBOARDING
         };
 
         // Create the profile immediately
@@ -58,11 +63,11 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
         setUser(newProfile as User);
         presence.init(userId);
-        notificationService.sendWelcome(userId, newProfile.handle).catch(console.error);
+        // Don't send welcome email yet, wait for onboarding completion
       }
     } catch (e) {
       console.error("AuthContext: Sync Failed", e);
-      // Fallback: If Firestore fails, still log the user in so they aren't stuck
+      // Fallback
       setUser({
         id: userId,
         email: fbUser.email || '',
@@ -70,7 +75,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         school: 'Unknown',
         xp: 0,
         is_writer: false,
-        is_incomplete: false
+        is_incomplete: true
       } as User);
     }
   };

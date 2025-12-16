@@ -20,7 +20,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (user.is_incomplete) {
-        return <Navigate to="/auth" replace />;
+        return <Navigate to="/onboarding" replace />;
     }
 
     return <>{children}</>;
