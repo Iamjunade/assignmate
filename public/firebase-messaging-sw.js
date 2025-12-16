@@ -12,12 +12,12 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage(function(payload) {
+messaging.onBackgroundMessage(function (payload) {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/icon.png'
+    icon: 'https://i.postimg.cc/y3n68LDW/Gemini-Generated-Image-lpmz4olpmz4olpmz-removebg-preview.png'
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);

@@ -29,8 +29,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage,
                 <div className="h-full flex flex-col">
                     {/* Header */}
                     <div className="p-6 border-b border-slate-800 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white">
-                            <Shield size={18} />
+                        <div className="w-8 h-8 rounded-lg overflow-hidden">
+                            <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
                         </div>
                         <div>
                             <h1 className="font-bold text-lg text-white">Admin Panel</h1>
@@ -45,8 +45,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage,
                                 key={item.id}
                                 onClick={() => onNavigate(item.id)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${currentPage === item.id
-                                        ? 'bg-red-600/10 text-red-500 border border-red-600/20'
-                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                    ? 'bg-red-600/10 text-red-500 border border-red-600/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                                     }`}
                             >
                                 {item.icon}

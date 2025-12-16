@@ -18,7 +18,7 @@ export const Layout = ({ children, user, page, setPage, onLogout }: LayoutProps)
                 <div className="flex items-center gap-3">
                     {/* Logo Image */}
                     <img
-                        src="https://i.ibb.co/0pVsZCnx/assignmate.png"
+                        src="/logo.png"
                         alt="AssignMate"
                         className="h-12 w-auto object-contain drop-shadow-sm transition-transform hover:scale-105"
                         onError={(e) => {
@@ -68,7 +68,7 @@ export const Layout = ({ children, user, page, setPage, onLogout }: LayoutProps)
         <header className="md:hidden h-16 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sticky top-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl z-20">
             <div className="flex items-center" onClick={() => setPage('feed')}>
                 <img
-                    src="https://i.ibb.co/0pVsZCnx/assignmate.png"
+                    src="/logo.png"
                     alt="Logo"
                     className="h-9 w-auto object-contain"
                     onError={(e) => {

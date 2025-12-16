@@ -231,8 +231,8 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
             <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-[#fcfaf8]/90 border-b border-[#f3ede7]">
                 <div className="px-6 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-4 cursor-pointer" onClick={() => onNavigate('feed')}>
-                        <div className="size-8 text-primary">
-                            <span className="material-symbols-outlined text-4xl leading-none">school</span>
+                        <div className="size-8 rounded-lg overflow-hidden">
+                            <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
                         </div>
                         <h2 className="text-[#1b140d] text-xl font-bold tracking-tight">AssignMate</h2>
                     </div>
