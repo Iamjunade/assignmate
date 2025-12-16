@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from '../../types';
 
+import { useAuth } from '../../contexts/AuthContext';
+
 interface SidebarProps {
     user: User | null;
 }
@@ -9,8 +11,18 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { logout } = useAuth();
 
     const isActive = (path: string) => location.pathname === path;
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate('/auth');
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
+    };
 
     return (
         <aside className="w-72 h-full hidden lg:flex flex-col border-r border-border-subtle bg-white z-20 shrink-0 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.02)]">
@@ -68,6 +80,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">person</span>
                     <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Profile</span>
                 </a>
+                <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all group cursor-pointer hover:bg-red-50 text-text-muted hover:text-red-500 mt-auto"
+                >
+                    <span className="material-symbols-outlined transition-colors">logout</span>
+                    <span className="text-sm font-medium transition-colors">Logout</span>
+                </button>
             </nav>
             <div className="p-6">
                 <div className="flex items-center gap-3 p-3 rounded-2xl bg-secondary-bg border border-border-subtle cursor-pointer hover:border-primary/30 transition-colors" onClick={() => navigate('/profile')}>
