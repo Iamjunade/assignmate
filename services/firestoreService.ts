@@ -532,5 +532,66 @@ export const dbService = {
     verifyUser: async (userId: string, status: 'verified' | 'rejected') => {
         const docRef = doc(getDb(), 'users', userId);
         await updateDoc(docRef, { is_verified: status });
+    },
+
+    // --- DASHBOARD METHODS ---
+    getDashboardStats: async (userId: string) => {
+        // 1. Get Active Orders (where student_id == userId AND status == 'in_progress')
+        const q = query(
+            collection(getDb(), 'orders'),
+            where('student_id', '==', userId),
+            where('status', '==', 'in_progress'),
+            orderBy('deadline', 'asc')
+        );
+
+        const snap = await getDocs(q);
+        const activeOrders = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+
+        // 2. Calculate Stats
+        const activeCount = activeOrders.length;
+        const escrowBalance = activeOrders.reduce((sum, order) => sum + (order.amount || 0), 0);
+
+        // 3. Next Deadline
+        let nextDeadline = null;
+        let nextDeadlineProject = null;
+
+        if (activeOrders.length > 0) {
+            // Since we ordered by deadline asc, the first one is the next deadline
+            const firstOrder = activeOrders[0];
+            if (firstOrder.deadline) {
+                const daysLeft = Math.ceil((new Date(firstOrder.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                nextDeadline = daysLeft > 0 ? daysLeft : 0; // 0 means due today or overdue
+                nextDeadlineProject = firstOrder.title;
+            }
+        }
+
+        // 4. Hydrate Orders with Writer Data
+        const hydratedOrders = await Promise.all(activeOrders.map(async (order) => {
+            if (!order.writer_id) return order;
+            try {
+                const writerSnap = await getDoc(doc(getDb(), 'users', order.writer_id));
+                if (writerSnap.exists()) {
+                    const w = writerSnap.data();
+                    return {
+                        ...order,
+                        writer_handle: w.handle,
+                        writer_avatar: w.avatar_url,
+                        writer_school: w.school,
+                        writer_verified: w.is_verified === 'verified'
+                    };
+                }
+            } catch (e) {
+                console.error("Error hydrating order writer:", e);
+            }
+            return order;
+        }));
+
+        return {
+            activeCount,
+            escrowBalance,
+            nextDeadline,
+            nextDeadlineProject,
+            activeOrders: hydratedOrders
+        };
     }
 };

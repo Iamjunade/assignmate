@@ -40,6 +40,8 @@ export interface Chat {
   other_handle?: string;
   last_message?: string;
   updated_at: string;
+  unread_count?: number;
+  has_active_order?: boolean;
 }
 
 export interface Message {
@@ -83,4 +85,24 @@ export interface Connection {
   created_at: string;
   requester?: User; // Joined data for UI
   receiver?: User; // Joined data for UI
+}
+
+export type OrderStatus = 'in_progress' | 'completed' | 'cancelled' | 'disputed';
+
+export interface Order {
+  id: string;
+  student_id: string;
+  writer_id: string;
+  title: string;
+  status: OrderStatus;
+  amount: number; // Escrow amount
+  deadline: string; // ISO Date
+  created_at: string;
+  completion_percentage: number; // 0-100
+
+  // UI Helpers (Hydrated)
+  writer_handle?: string;
+  writer_avatar?: string;
+  writer_school?: string;
+  writer_verified?: boolean;
 }
