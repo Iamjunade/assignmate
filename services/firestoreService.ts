@@ -74,6 +74,10 @@ export const userApi = {
             email: metadata.email,
             avatar_url: metadata.avatar_url,
             school: metadata.school || randomCollege,
+            // Search fields (lowercase)
+            search_handle: uniqueHandle.toLowerCase(),
+            search_name: (metadata.full_name || 'Student').toLowerCase(),
+            search_school: (metadata.school || randomCollege).toLowerCase(),
             created_at: new Date().toISOString(),
             is_verified: 'pending',
             xp: 0,
@@ -200,6 +204,12 @@ export const dbService = {
 
     updateProfile: async (userId: string, updates: any) => {
         const docRef = doc(getDb(), 'users', userId);
+
+        // Maintain search fields
+        if (updates.full_name) updates.search_name = updates.full_name.toLowerCase();
+        if (updates.school) updates.search_school = updates.school.toLowerCase();
+        if (updates.handle) updates.search_handle = updates.handle.toLowerCase();
+
         await updateDoc(docRef, updates);
         return { error: null };
     },
@@ -307,12 +317,11 @@ export const dbService = {
     searchStudents: async (queryText: string) => {
         if (!queryText || queryText.length < 2) return [];
 
-        // Firestore is case-sensitive. This is a basic implementation.
-        // Ideally, we'd store a lowercase version of fields for search.
+        const lowerQuery = queryText.toLowerCase();
 
-        const q1 = query(collection(getDb(), 'users'), where('handle', '>=', queryText), where('handle', '<=', queryText + '\uf8ff'), limit(5));
-        const q2 = query(collection(getDb(), 'users'), where('full_name', '>=', queryText), where('full_name', '<=', queryText + '\uf8ff'), limit(5));
-        const q3 = query(collection(getDb(), 'users'), where('school', '>=', queryText), where('school', '<=', queryText + '\uf8ff'), limit(5));
+        const q1 = query(collection(getDb(), 'users'), where('search_handle', '>=', lowerQuery), where('search_handle', '<=', lowerQuery + '\uf8ff'), limit(5));
+        const q2 = query(collection(getDb(), 'users'), where('search_name', '>=', lowerQuery), where('search_name', '<=', lowerQuery + '\uf8ff'), limit(5));
+        const q3 = query(collection(getDb(), 'users'), where('search_school', '>=', lowerQuery), where('search_school', '<=', lowerQuery + '\uf8ff'), limit(5));
 
         const [s1, s2, s3] = await Promise.all([getDocs(q1), getDocs(q2), getDocs(q3)]);
 
