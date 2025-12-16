@@ -9,8 +9,8 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<any>;
   loginWithGoogle: () => Promise<any>;
-  register: (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean) => Promise<any>;
-  completeGoogleSignup: (handle: string, school: string, is_writer: boolean) => Promise<void>;
+  register: (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio: string) => Promise<any>;
+  completeGoogleSignup: (handle: string, school: string, is_writer: boolean, bio: string) => Promise<void>;
   loginAnonymously: () => Promise<any>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   };
 
   // Register new user
-  const register = async (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean) => {
+  const register = async (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio: string) => {
     const res = await firebaseAuth.register(email, pass);
     if (res.error) return res;
 
@@ -111,7 +111,8 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           full_name: fullName,
           school,
           email,
-          is_writer
+          is_writer,
+          bio
         });
 
         // We do NOT manually set user here to avoid conflicts with the listener
@@ -130,11 +131,11 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   };
 
   // Complete Google signup by creating profile
-  const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean) => {
+  const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean, bio: string) => {
     if (!user) throw new Error("User not found.");
     try {
       const profile = await userApi.createProfile(user.id, {
-        handle, school, email: user.email, avatar_url: user.avatar_url, full_name: user.full_name, is_writer
+        handle, school, email: user.email, avatar_url: user.avatar_url, full_name: user.full_name, is_writer, bio
       });
       setUser({ ...profile, email: user.email, is_incomplete: false });
       presence.init(user.id);

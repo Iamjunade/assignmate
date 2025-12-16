@@ -14,7 +14,7 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     // Form states
     const [isReg, setIsReg] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [form, setForm] = useState({ email: '', password: '', fullName: '', handle: '', school: '' });
+    const [form, setForm] = useState({ email: '', password: '', fullName: '', handle: '', school: '', bio: '' });
     const [isWriter, setIsWriter] = useState(false);
 
     // Google completion form
@@ -65,7 +65,7 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
 
             let result;
             if (isReg) {
-                result = await register(form.email, form.password, form.fullName, form.handle, form.school, isWriter);
+                result = await register(form.email, form.password, form.fullName, form.handle, form.school, isWriter, form.bio);
             } else {
                 result = await login(form.email, form.password);
             }
@@ -325,6 +325,19 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                                             inputClassName="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-medium text-[#1b140d] dark:text-white placeholder-gray-400 transition-all outline-none"
                                             icon={<span className="material-symbols-outlined absolute left-4 top-3.5 text-gray-400">school</span>}
                                         />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Bio (Optional)</label>
+                                        <div className="relative group">
+                                            <span className="material-symbols-outlined absolute left-4 top-4 text-gray-400 group-focus-within:text-primary transition-colors">edit_note</span>
+                                            <textarea
+                                                className="w-full h-24 pl-12 pr-4 py-3 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-medium text-[#1b140d] dark:text-white placeholder-gray-400 transition-all outline-none resize-none"
+                                                placeholder="Tell us a bit about yourself..."
+                                                value={form.bio}
+                                                onChange={e => setForm({ ...form, bio: e.target.value })}
+                                            />
+                                        </div>
                                     </div>
                                 </>
                             )}

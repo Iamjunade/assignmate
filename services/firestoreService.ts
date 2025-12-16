@@ -74,10 +74,12 @@ export const userApi = {
             email: metadata.email,
             avatar_url: metadata.avatar_url,
             school: metadata.school || randomCollege,
+            bio: metadata.bio || '',
             // Search fields (lowercase)
             search_handle: uniqueHandle.toLowerCase(),
             search_name: (metadata.full_name || 'Student').toLowerCase(),
             search_school: (metadata.school || randomCollege).toLowerCase(),
+            search_bio: (metadata.bio || '').toLowerCase(),
             created_at: new Date().toISOString(),
             is_verified: 'pending',
             xp: 0,
@@ -179,7 +181,8 @@ export const dbService = {
             writers = writers.filter((w: any) =>
                 (w.search_name && w.search_name.includes(lowerQuery)) ||
                 (w.search_handle && w.search_handle.includes(lowerQuery)) ||
-                (w.search_school && w.search_school.includes(lowerQuery)) // Also allow searching school via text
+                (w.search_school && w.search_school.includes(lowerQuery)) ||
+                (w.search_bio && w.search_bio.includes(lowerQuery)) // Added bio search
             );
         }
 
@@ -203,6 +206,7 @@ export const dbService = {
         if (updates.full_name) updates.search_name = updates.full_name.toLowerCase();
         if (updates.school) updates.search_school = updates.school.toLowerCase();
         if (updates.handle) updates.search_handle = updates.handle.toLowerCase();
+        if (updates.bio) updates.search_bio = updates.bio.toLowerCase();
 
         await updateDoc(docRef, updates);
         return { error: null };
