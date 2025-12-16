@@ -15,9 +15,9 @@ export default {
                 "primary-hover": "#ea580c",
                 "primary-soft": "#fff7ed", // Very light orange for backgrounds
                 "secondary": "#64748b", // Slate 500
-                "background": "#f8fafc", // Slate 50 - Light, airy background
-                "background-light": "#fcfaf8", // Keep for compatibility
-                "background-dark": "#221910", // Keep for compatibility
+                "background": "#ffffff", // Pure White
+                "background-light": "#ffffff", // Pure White
+                "background-dark": "#ffffff", // Force White for now as per request
                 "card": "#ffffff",
                 "card-light": "#ffffff", // Keep for compatibility
                 "card-dark": "#2a221b", // Keep for compatibility

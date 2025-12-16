@@ -160,31 +160,8 @@ export const Profile = ({ user }: { user: any }) => {
     };
 
     return (
-        <div className="w-full min-h-screen bg-background dark:bg-background-dark font-sans text-text-main dark:text-white pb-20">
-            {/* Header - Glassmorphism */}
-            <header className="sticky top-0 z-50 px-4 py-4 w-full flex justify-center pointer-events-none">
-                <div className="glass-panel pointer-events-auto rounded-full px-6 py-3 flex items-center justify-between w-full max-w-5xl shadow-soft bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/40 dark:border-slate-700/40">
-                    <div className="flex items-center gap-8">
-                        <img src="/logo.png" alt="Logo" className="h-8 w-auto" />
-                        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-secondary dark:text-gray-400">
-                            <a href="/dashboard" className="hover:text-primary transition-colors">Feed</a>
-                            <a href="/messages" className="hover:text-primary transition-colors">Messages</a>
-                            <a href="/profile" className="text-primary font-bold">Profile</a>
-                        </nav>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <button className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-secondary">
-                            <Settings size={20} />
-                        </button>
-                        <button
-                            onClick={() => useAuth().logout()}
-                            className="bg-black text-white dark:bg-white dark:text-black px-5 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-opacity"
-                        >
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </header>
+        <div className="w-full min-h-screen bg-background font-sans text-text-main pb-20">
+            {/* Header Removed as per request (Duplicate) */}
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -193,7 +170,7 @@ export const Profile = ({ user }: { user: any }) => {
                     <aside className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-28 space-y-6">
 
                         {/* Profile Card */}
-                        <div className="bg-white dark:bg-card-dark rounded-3xl p-6 shadow-soft border border-border-light dark:border-border-dark flex flex-col items-center text-center relative overflow-hidden group">
+                        <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light flex flex-col items-center text-center relative overflow-hidden group">
                             {/* Verification Banner */}
                             {user.is_verified === 'verified' && (
                                 <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-400 to-blue-600"></div>
@@ -201,12 +178,12 @@ export const Profile = ({ user }: { user: any }) => {
 
                             <div className="relative mb-4 mt-2 group-hover:scale-105 transition-transform duration-300">
                                 <div
-                                    className="size-32 rounded-full bg-cover bg-center border-4 border-white dark:border-slate-800 shadow-lg"
+                                    className="size-32 rounded-full bg-cover bg-center border-4 border-white shadow-lg"
                                     style={{ backgroundImage: `url('${user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}')` }}
                                 ></div>
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="absolute bottom-1 right-1 bg-white dark:bg-slate-800 p-2 rounded-full shadow-md border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                                    className="absolute bottom-1 right-1 bg-white p-2 rounded-full shadow-md border border-gray-100 hover:bg-gray-50 transition-colors"
                                 >
                                     <Camera size={16} className="text-secondary" />
                                 </button>
@@ -218,15 +195,15 @@ export const Profile = ({ user }: { user: any }) => {
                                     onChange={handleAvatarUpload}
                                 />
                                 {user.is_verified === 'verified' && (
-                                    <div className="absolute top-1 right-1 bg-white dark:bg-slate-800 rounded-full p-1 shadow-sm" title="Verified Student">
+                                    <div className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-sm" title="Verified Student">
                                         <span className="material-symbols-outlined text-blue-500 text-[24px] leading-none" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                     </div>
                                 )}
                             </div>
 
-                            <h1 className="text-2xl font-bold text-text-main dark:text-white font-display">{user.full_name}</h1>
+                            <h1 className="text-2xl font-bold text-text-main font-display">{user.full_name}</h1>
                             <p className="text-primary font-bold text-sm mb-1">@{user.handle}</p>
-                            <p className="text-secondary dark:text-gray-400 text-sm font-medium flex items-center justify-center gap-1.5">
+                            <p className="text-secondary text-sm font-medium flex items-center justify-center gap-1.5">
                                 <span className="material-symbols-outlined text-base">school</span>
                                 {user.school || 'University Student'}
                             </p>
@@ -240,7 +217,7 @@ export const Profile = ({ user }: { user: any }) => {
                                     </span>
                                     <span className="text-secondary">{user.xp || 0} XP</span>
                                 </div>
-                                <div className="w-full bg-orange-50 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                                <div className="w-full bg-orange-50 rounded-full h-2 overflow-hidden">
                                     <div className="bg-gradient-to-r from-orange-400 to-primary h-full rounded-full transition-all duration-500" style={{ width: `${Math.min((user.xp % 100), 100)}%` }}></div>
                                 </div>
                                 <p className="text-[10px] text-secondary/70 mt-1.5 text-right">{100 - (user.xp % 100)} XP to next level</p>
@@ -250,19 +227,19 @@ export const Profile = ({ user }: { user: any }) => {
                             <div className="grid grid-cols-2 gap-3 w-full mt-2">
                                 <button
                                     onClick={() => setEditingProfile(!editingProfile)}
-                                    className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-primary font-bold text-sm hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
+                                    className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-orange-50 text-primary font-bold text-sm hover:bg-orange-100 transition-colors"
                                 >
                                     <Edit2 size={16} />
                                     Edit
                                 </button>
-                                <button className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 dark:bg-slate-800 text-secondary font-bold text-sm hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                                <button className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors">
                                     <LinkIcon size={16} />
                                     Share
                                 </button>
                             </div>
 
                             {/* Availability Status */}
-                            <div className="mt-6 pt-6 border-t border-border-light dark:border-border-dark w-full flex items-center justify-between">
+                            <div className="mt-6 pt-6 border-t border-border-light w-full flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className={`size-2.5 rounded-full ${user.is_online ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
                                     <span className="text-sm font-medium text-secondary">
@@ -271,39 +248,39 @@ export const Profile = ({ user }: { user: any }) => {
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" checked={user.is_online} className="sr-only peer" readOnly />
-                                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
                                 </label>
                             </div>
                         </div>
 
                         {/* Trust & Verification */}
-                        <div className="bg-white dark:bg-card-dark rounded-3xl p-6 shadow-soft border border-border-light dark:border-border-dark">
+                        <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light">
                             <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
                                 <Shield size={20} className="text-primary" />
                                 Trust Score
                             </h3>
                             <div className="space-y-3">
-                                <div className="flex items-center justify-between p-3 rounded-xl bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30">
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-green-50 border border-green-100">
                                     <div className="flex items-center gap-3">
-                                        <div className="bg-green-100 dark:bg-green-900/30 p-1.5 rounded-full">
-                                            <Mail size={16} className="text-green-600 dark:text-green-400" />
+                                        <div className="bg-green-100 p-1.5 rounded-full">
+                                            <Mail size={16} className="text-green-600" />
                                         </div>
-                                        <span className="text-sm font-medium text-green-900 dark:text-green-100">Email Verified</span>
+                                        <span className="text-sm font-medium text-green-900">Email Verified</span>
                                     </div>
-                                    <Check size={16} className="text-green-600 dark:text-green-400" />
+                                    <Check size={16} className="text-green-600" />
                                 </div>
 
-                                <div className={`flex items-center justify-between p-3 rounded-xl border ${user.is_verified === 'verified' ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30' : 'bg-gray-50 dark:bg-slate-800/50 border-gray-100 dark:border-slate-700'}`}>
+                                <div className={`flex items-center justify-between p-3 rounded-xl border ${user.is_verified === 'verified' ? 'bg-blue-50 border-blue-100' : 'bg-gray-50 border-gray-100'}`}>
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-1.5 rounded-full ${user.is_verified === 'verified' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-200 dark:bg-slate-700'}`}>
-                                            <Shield size={16} className={`${user.is_verified === 'verified' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500'}`} />
+                                        <div className={`p-1.5 rounded-full ${user.is_verified === 'verified' ? 'bg-blue-100' : 'bg-gray-200'}`}>
+                                            <Shield size={16} className={`${user.is_verified === 'verified' ? 'text-blue-600' : 'text-gray-500'}`} />
                                         </div>
-                                        <span className={`text-sm font-medium ${user.is_verified === 'verified' ? 'text-blue-900 dark:text-blue-100' : 'text-gray-500'}`}>
+                                        <span className={`text-sm font-medium ${user.is_verified === 'verified' ? 'text-blue-900' : 'text-gray-500'}`}>
                                             {user.is_verified === 'verified' ? 'ID Verified' : 'ID Not Verified'}
                                         </span>
                                     </div>
                                     {user.is_verified === 'verified' ? (
-                                        <Check size={16} className="text-blue-600 dark:text-blue-400" />
+                                        <Check size={16} className="text-blue-600" />
                                     ) : (
                                         <button
                                             onClick={() => idInputRef.current?.click()}
@@ -346,25 +323,25 @@ export const Profile = ({ user }: { user: any }) => {
                                 { label: 'Rating', value: rating.toFixed(1), icon: 'star', color: 'text-yellow-600', bg: 'bg-yellow-50' },
                                 { label: 'On-Time Rate', value: `${user.on_time_rate || 100}%`, icon: 'schedule', color: 'text-purple-600', bg: 'bg-purple-50' },
                             ].map((stat, i) => (
-                                <div key={i} className="bg-white dark:bg-card-dark p-5 rounded-2xl shadow-sm border border-border-light dark:border-border-dark flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
-                                    <div className={`p-3 rounded-full ${stat.bg} dark:bg-opacity-10 mb-3`}>
+                                <div key={i} className="bg-white p-5 rounded-2xl shadow-sm border border-border-light flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                                    <div className={`p-3 rounded-full ${stat.bg} mb-3`}>
                                         <span className={`material-symbols-outlined ${stat.color} text-2xl`}>{stat.icon}</span>
                                     </div>
-                                    <span className="text-2xl font-bold text-text-main dark:text-white font-display">{stat.value}</span>
+                                    <span className="text-2xl font-bold text-text-main font-display">{stat.value}</span>
                                     <span className="text-xs font-medium text-secondary uppercase tracking-wide mt-1">{stat.label}</span>
                                 </div>
                             ))}
                         </div>
 
                         {/* Tabs Navigation */}
-                        <div className="bg-white dark:bg-card-dark rounded-2xl p-1.5 shadow-sm border border-border-light dark:border-border-dark inline-flex w-full md:w-auto overflow-x-auto">
+                        <div className="bg-white rounded-2xl p-1.5 shadow-sm border border-border-light inline-flex w-full md:w-auto overflow-x-auto">
                             {['portfolio', 'about', 'reviews', 'network'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex-1 md:flex-none ${activeTab === tab
                                             ? 'bg-primary text-white shadow-md'
-                                            : 'text-secondary hover:bg-gray-50 dark:hover:bg-slate-800'
+                                            : 'text-secondary hover:bg-gray-50'
                                         }`}
                                 >
                                     {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -404,9 +381,9 @@ export const Profile = ({ user }: { user: any }) => {
                                             {/* Add New Card */}
                                             <button
                                                 onClick={() => portfolioInputRef.current?.click()}
-                                                className="group aspect-[4/3] rounded-2xl border-2 border-dashed border-border-light dark:border-border-dark hover:border-primary/50 hover:bg-orange-50/50 dark:hover:bg-slate-800/50 transition-all flex flex-col items-center justify-center gap-3"
+                                                className="group aspect-[4/3] rounded-2xl border-2 border-dashed border-border-light hover:border-primary/50 hover:bg-orange-50/50 transition-all flex flex-col items-center justify-center gap-3"
                                             >
-                                                <div className="p-4 rounded-full bg-orange-100 dark:bg-slate-800 group-hover:scale-110 transition-transform">
+                                                <div className="p-4 rounded-full bg-orange-100 group-hover:scale-110 transition-transform">
                                                     <Upload size={24} className="text-primary" />
                                                 </div>
                                                 <span className="font-bold text-secondary group-hover:text-primary transition-colors">Upload Project</span>
@@ -432,7 +409,7 @@ export const Profile = ({ user }: { user: any }) => {
                                 )}
 
                                 {activeTab === 'about' && (
-                                    <div className="bg-white dark:bg-card-dark rounded-3xl p-8 shadow-soft border border-border-light dark:border-border-dark space-y-8">
+                                    <div className="bg-white rounded-3xl p-8 shadow-soft border border-border-light space-y-8">
                                         {editingProfile ? (
                                             <div className="space-y-4">
                                                 <div>
@@ -473,12 +450,12 @@ export const Profile = ({ user }: { user: any }) => {
                                                         <span className="material-symbols-outlined text-primary">school</span>
                                                         Education
                                                     </h3>
-                                                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-background-light dark:bg-slate-800/50">
-                                                        <div className="p-3 bg-white dark:bg-slate-700 rounded-xl shadow-sm">
+                                                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-background-light">
+                                                        <div className="p-3 bg-white rounded-xl shadow-sm">
                                                             <span className="material-symbols-outlined text-primary">school</span>
                                                         </div>
                                                         <div>
-                                                            <h4 className="font-bold text-text-main dark:text-white">{user.school || 'University Name'}</h4>
+                                                            <h4 className="font-bold text-text-main">{user.school || 'University Name'}</h4>
                                                             <p className="text-sm text-secondary">Student • Computer Science</p>
                                                         </div>
                                                     </div>
@@ -491,7 +468,7 @@ export const Profile = ({ user }: { user: any }) => {
                                                     </h3>
                                                     <div className="flex flex-wrap gap-2">
                                                         {user.tags?.map((tag: string) => (
-                                                            <span key={tag} className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-primary text-sm font-medium border border-orange-100 dark:border-orange-900/30 flex items-center gap-1 group">
+                                                            <span key={tag} className="px-3 py-1.5 rounded-lg bg-orange-50 text-primary text-sm font-medium border border-orange-100 flex items-center gap-1 group">
                                                                 {tag}
                                                                 <button onClick={() => removeTag(tag)} className="hover:text-red-500 hidden group-hover:block">
                                                                     <X size={12} />
@@ -506,7 +483,7 @@ export const Profile = ({ user }: { user: any }) => {
                                                                 onChange={(e) => setNewTag(e.target.value)}
                                                                 onKeyDown={addTag}
                                                                 placeholder="Add skill..."
-                                                                className="pl-8 pr-3 py-1.5 rounded-lg bg-gray-50 dark:bg-slate-800 border-none text-sm focus:ring-2 focus:ring-primary/20 w-32 transition-all"
+                                                                className="pl-8 pr-3 py-1.5 rounded-lg bg-gray-50 border-none text-sm focus:ring-2 focus:ring-primary/20 w-32 transition-all"
                                                             />
                                                         </div>
                                                     </div>
@@ -518,8 +495,8 @@ export const Profile = ({ user }: { user: any }) => {
 
                                 {activeTab === 'reviews' && (
                                     <div className="space-y-4">
-                                        <div className="bg-white dark:bg-card-dark rounded-3xl p-8 shadow-soft border border-border-light dark:border-border-dark text-center py-12">
-                                            <div className="w-16 h-16 bg-orange-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <div className="bg-white rounded-3xl p-8 shadow-soft border border-border-light text-center py-12">
+                                            <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                                 <Star size={32} className="text-primary" />
                                             </div>
                                             <h3 className="text-xl font-bold font-display mb-2">No Reviews Yet</h3>
@@ -534,14 +511,14 @@ export const Profile = ({ user }: { user: any }) => {
                                     <div className="space-y-6">
                                         {/* Connection Requests */}
                                         {requests.length > 0 && (
-                                            <div className="bg-white dark:bg-card-dark rounded-3xl p-6 shadow-soft border border-border-light dark:border-border-dark">
+                                            <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light">
                                                 <h3 className="font-bold font-display mb-4 flex items-center gap-2">
                                                     <span className="w-2 h-2 rounded-full bg-primary"></span>
                                                     Pending Requests
                                                 </h3>
                                                 <div className="space-y-3">
                                                     {requests.map((req) => (
-                                                        <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-background-light dark:bg-slate-800/50">
+                                                        <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-background-light">
                                                             <div className="flex items-center gap-3">
                                                                 <div className="size-10 rounded-full bg-gray-200 bg-cover bg-center" style={{ backgroundImage: `url('${req.fromUser?.avatar_url}')` }}></div>
                                                                 <div>
@@ -564,13 +541,13 @@ export const Profile = ({ user }: { user: any }) => {
                                             {connections.length > 0 ? connections.map((conn) => {
                                                 const otherUser = conn.participants.find((p: any) => p.id !== user.id);
                                                 return (
-                                                    <div key={conn.id} className="bg-white dark:bg-card-dark p-4 rounded-2xl shadow-sm border border-border-light dark:border-border-dark flex items-center gap-4">
+                                                    <div key={conn.id} className="bg-white p-4 rounded-2xl shadow-sm border border-border-light flex items-center gap-4">
                                                         <div className="size-12 rounded-full bg-gray-200 bg-cover bg-center" style={{ backgroundImage: `url('${otherUser?.avatar_url}')` }}></div>
                                                         <div>
-                                                            <p className="font-bold text-text-main dark:text-white">{otherUser?.full_name}</p>
+                                                            <p className="font-bold text-text-main">{otherUser?.full_name}</p>
                                                             <p className="text-xs text-secondary">@{otherUser?.handle}</p>
                                                         </div>
-                                                        <button className="ml-auto p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-secondary">
+                                                        <button className="ml-auto p-2 rounded-full hover:bg-gray-100 text-secondary">
                                                             <MessageSquare size={18} />
                                                         </button>
                                                     </div>
@@ -599,9 +576,9 @@ export const Profile = ({ user }: { user: any }) => {
                     >
                         <motion.div
                             initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-                            className="bg-white dark:bg-card-dark rounded-3xl p-8 max-w-md w-full shadow-2xl border border-red-100 dark:border-red-900/30"
+                            className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-red-100"
                         >
-                            <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <AlertTriangle size={32} className="text-red-500" />
                             </div>
                             <h2 className="text-2xl font-bold text-center mb-2">Delete Account?</h2>
@@ -626,7 +603,7 @@ export const Profile = ({ user }: { user: any }) => {
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
                                         onClick={() => setShowDeleteModal(false)}
-                                        className="py-3 rounded-xl font-bold text-secondary hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                                        className="py-3 rounded-xl font-bold text-secondary hover:bg-gray-100 transition-colors"
                                     >
                                         Cancel
                                     </button>
