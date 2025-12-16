@@ -173,8 +173,8 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                 <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/20 rounded-full blur-[100px] z-0"></div>
 
                 <div className="relative z-10 flex items-center gap-2">
-                    <div className="size-8 text-primary">
-                        <span className="material-symbols-outlined text-4xl">verified</span>
+                    <div className="size-10 rounded-xl overflow-hidden">
+                        <img src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
                     </div>
                     <h2 className="text-xl font-bold text-white tracking-tight">AssignMate</h2>
                 </div>
@@ -225,8 +225,8 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                 {/* Mobile Header */}
                 <div className="lg:hidden flex items-center justify-between p-6">
                     <div className="flex items-center gap-2">
-                        <div className="size-6 text-primary">
-                            <span className="material-symbols-outlined text-2xl">verified</span>
+                        <div className="size-8 rounded-lg overflow-hidden">
+                            <img src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
                         </div>
                         <h2 className="text-lg font-bold text-[#1b140d] dark:text-white">AssignMate</h2>
                     </div>

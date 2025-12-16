@@ -20,8 +20,8 @@ export const Landing = () => {
             {/* Navbar */}
             <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[#f3ede7] dark:border-[#3a2e24] bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md px-4 py-4 w-full">
                 <div className="flex items-center gap-2 text-[#1b140d] dark:text-white cursor-pointer" onClick={() => navigate('/')}>
-                    <div className="size-8 text-primary">
-                        <span className="material-symbols-outlined text-4xl">verified</span>
+                    <div className="size-10 rounded-xl overflow-hidden">
+                        <img src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
                     </div>
                     <h2 className="text-xl font-bold leading-tight tracking-tight">AssignMate</h2>
                 </div>
@@ -401,8 +401,8 @@ export const Landing = () => {
                 <div className="mx-auto max-w-7xl grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
                     <div className="col-span-2 lg:col-span-2 flex flex-col gap-4 pr-8">
                         <div className="flex items-center gap-2 text-[#1b140d] dark:text-white mb-2">
-                            <div className="size-6 text-primary">
-                                <span className="material-symbols-outlined text-2xl">verified</span>
+                            <div className="size-8 rounded-lg overflow-hidden">
+                                <img src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
                             </div>
                             <h2 className="text-lg font-bold">AssignMate</h2>
                         </div>
