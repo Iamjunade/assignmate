@@ -178,54 +178,81 @@ export const dbService = {
     },
 
     getWriters: async (currentUser: User | null, filters: { college?: string, searchQuery?: string, tag?: string } = {}) => {
-        const usersRef = collection(getDb(), 'users');
         const { college, searchQuery, tag } = filters;
+        const usersRef = collection(getDb(), 'users');
+        let writers: any[] = [];
 
-        // 1. Base Query Constraints
-        const constraints: any[] = [
-            where('is_writer', '==', true),
-            limit(50) // Limit to 50 for performance
-        ];
+        if (searchQuery && searchQuery.length >= 2) {
+            // Perform Server-Side Search
+            const lowerQuery = searchQuery.toLowerCase();
+            const endQuery = lowerQuery + '\uf8ff';
 
-        // 2. Apply Filters
-        // Note: Firestore has limitations on multiple range/inequality filters.
-        // We will prioritize the most specific filter for the query and do the rest client-side if needed.
+            // We need to search across multiple fields. Firestore requires separate queries.
+            // All must filter by is_writer == true.
 
-        if (college) {
-            constraints.push(where('search_school', '==', college.toLowerCase()));
+            const queries = [];
+
+            // 1. Search by Name
+            queries.push(query(usersRef,
+                where('is_writer', '==', true),
+                where('search_name', '>=', lowerQuery),
+                where('search_name', '<=', endQuery),
+                limit(20)
+            ));
+
+            // 2. Search by Handle
+            queries.push(query(usersRef,
+                where('is_writer', '==', true),
+                where('search_handle', '>=', lowerQuery),
+                where('search_handle', '<=', endQuery),
+                limit(20)
+            ));
+
+            // 3. Search by School (only if college filter is NOT set, otherwise we filter by college separately)
+            if (!college) {
+                queries.push(query(usersRef,
+                    where('is_writer', '==', true),
+                    where('search_school', '>=', lowerQuery),
+                    where('search_school', '<=', endQuery),
+                    limit(20)
+                ));
+            }
+
+            const snapshots = await Promise.all(queries.map(q => getDocs(q)));
+            const resultMap = new Map();
+            snapshots.forEach(snap => {
+                snap.docs.forEach(doc => resultMap.set(doc.id, doc.data()));
+            });
+
+            writers = Array.from(resultMap.values());
+
+        } else {
+            // Default: Fetch recent writers (existing logic)
+            const constraints: any[] = [
+                where('is_writer', '==', true),
+                orderBy('created_at', 'desc'), // Explicit sort
+                limit(50)
+            ];
+
+            if (college) {
+                constraints.push(where('search_school', '==', college.toLowerCase()));
+            }
+
+            const q = query(usersRef, ...constraints);
+            const snap = await getDocs(q);
+            writers = snap.docs.map(d => d.data());
         }
 
-        // If searching by name/handle, we might need a separate query strategy or client-side filtering
-        // because we can't easily combine 'search_school == X' AND 'search_name >= Y' efficiently without specific indexes.
-        // For now, we'll fetch based on college/writer status and filter name client-side if both are present.
-
-        // 3. Execute Query
-        const q = query(usersRef, ...constraints);
-        const snap = await getDocs(q);
-        let writers = snap.docs.map(d => d.data());
-
-        // 4. Client-side Filtering (for search query and tags to avoid index explosion)
-        if (searchQuery) {
-            const lowerQuery = searchQuery.toLowerCase();
-            writers = writers.filter((w: any) =>
-                (w.search_name && w.search_name.includes(lowerQuery)) ||
-                (w.search_handle && w.search_handle.includes(lowerQuery)) ||
-                (w.search_school && w.search_school.includes(lowerQuery)) ||
-                (w.search_bio && w.search_bio.includes(lowerQuery)) // Added bio search
-            );
+        // Client-side filtering for remaining fields (Tags, College if search was used)
+        if (college && searchQuery) {
+            writers = writers.filter((w: any) => w.search_school === college.toLowerCase());
         }
 
         if (tag && tag !== 'All') {
             writers = writers.filter((w: any) => w.tags && w.tags.includes(tag));
         }
 
-        // 5. Deduplicate (just in case)
-        const uniqueWriters = Array.from(new Map(writers.map((item: any) => [item.id, item])).values());
-
-        // 6. Sort by creation (client-side)
-        return uniqueWriters.sort((a: any, b: any) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+        return writers;
     },
 
     updateProfile: async (userId: string, updates: any) => {
