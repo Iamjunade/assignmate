@@ -41,7 +41,7 @@ const firebaseConfig = {
     messagingSenderId: (import.meta as any).env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     appId: (import.meta as any).env.VITE_FIREBASE_APP_ID,
     measurementId: (import.meta as any).env.VITE_FIREBASE_MEASUREMENT_ID,
-    databaseURL: (import.meta as any).env.VITE_FIREBASE_DATABASE_URL
+    databaseURL: "https://assignmate-cfe7e-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
 let app: any;
@@ -57,7 +57,7 @@ try {
     app = initializeApp(firebaseConfig);
     authInstance = getAuth(app);
     dbInstance = getFirestore(app);
-    
+
     // Initialize RTDB safely
     try {
         rtdbInstance = getDatabase(app);
@@ -145,7 +145,7 @@ export const fcm = {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
                 const currentToken = await getToken(messagingInstance, {
-                    vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY
+                    vapidKey: "BBlG6uz8HQjkYoEfJxxcBhcUC8HFb3uWH2z4zEclEk7KUBG_zTQaFHyAFwzAmzmUKPRK7xxUveJNVCI3pV9yZNo"
                 });
 
                 if (currentToken) {
