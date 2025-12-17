@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 const MotionDiv = motion.div as any;
 
-export const ChatList = ({ user, onSelect, selectedId }) => {
+export const ChatList = ({ user, onSelect, selectedId }: { user: any, onSelect?: any, selectedId?: any }) => {
     const navigate = useNavigate();
     const [chats, setChats] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);

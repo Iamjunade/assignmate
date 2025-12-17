@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { INDIAN_COLLEGES } from '../data/colleges';
 import { dbService } from '../services/firestoreService';
 import { useAuth } from '../contexts/AuthContext';
 
-interface FindWriterProps {
-    onNavigate: (page: string) => void;
-}
-
-export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
+export const FindWriter = () => {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const [collegeQuery, setCollegeQuery] = useState(searchParams.get('college') || '');
@@ -110,30 +107,30 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
 
             <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-[#fcfaf8]/90 border-b border-[#f3ede7]">
                 <div className="px-6 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-4 cursor-pointer" onClick={() => onNavigate('feed')}>
+                    <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/feed')}>
                         <div className="size-8 rounded-lg overflow-hidden">
                             <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
                         </div>
                         <h2 className="text-[#1b140d] text-xl font-bold tracking-tight">AssignMate</h2>
                     </div>
                     <nav className="hidden lg:flex items-center gap-8">
-                        <button onClick={() => onNavigate('feed')} className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors">Home</button>
-                        <button onClick={() => onNavigate('find-writer')} className="text-primary text-sm font-bold">Find a Writer</button>
-                        <button onClick={() => onNavigate('feed')} className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors">Post a Job</button>
-                        <button onClick={() => onNavigate('feed')} className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors">My Assignments</button>
+                        <button onClick={() => navigate('/feed')} className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors">Home</button>
+                        <button onClick={() => navigate('/writers')} className="text-primary text-sm font-bold">Find a Writer</button>
+                        <button onClick={() => navigate('/feed')} className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors">Post a Job</button>
+                        <button onClick={() => navigate('/feed')} className="text-[#1b140d] text-sm font-medium hover:text-primary transition-colors">My Assignments</button>
                     </nav>
                     <div className="flex items-center gap-3">
                         {!user ? (
                             <>
-                                <button onClick={() => onNavigate('auth')} className="hidden sm:flex h-10 px-5 items-center justify-center rounded-full border border-[#e7dbcf] text-sm font-bold text-[#1b140d] hover:bg-[#f3ede7] transition-all">
+                                <button onClick={() => navigate('/auth')} className="hidden sm:flex h-10 px-5 items-center justify-center rounded-full border border-[#e7dbcf] text-sm font-bold text-[#1b140d] hover:bg-[#f3ede7] transition-all">
                                     Log In
                                 </button>
-                                <button onClick={() => onNavigate('auth')} className="h-10 px-5 flex items-center justify-center rounded-full bg-primary text-[#1b140d] text-sm font-bold hover:brightness-105 transition-all shadow-md shadow-primary/20">
+                                <button onClick={() => navigate('/auth')} className="h-10 px-5 flex items-center justify-center rounded-full bg-primary text-[#1b140d] text-sm font-bold hover:brightness-105 transition-all shadow-md shadow-primary/20">
                                     Sign Up
                                 </button>
                             </>
                         ) : (
-                            <button onClick={() => onNavigate('profile')} className="h-10 px-5 flex items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-all">
+                            <button onClick={() => navigate('/profile')} className="h-10 px-5 flex items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20 transition-all">
                                 {user.handle}
                             </button>
                         )}
@@ -152,7 +149,7 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                         {/* Breadcrumbs - Moved inside Hero */}
                         <div className="absolute top-4 left-6 z-20 hidden md:block">
                             <div className="flex flex-wrap gap-2 text-sm">
-                                <a className="text-text-muted/80 hover:text-primary cursor-pointer" onClick={() => onNavigate('feed')}>Home</a>
+                                <a className="text-text-muted/80 hover:text-primary cursor-pointer" onClick={() => navigate('/feed')}>Home</a>
                                 <span className="text-text-muted/60">/</span>
                                 <span className="text-text-main/80 font-medium">Find a Writer</span>
                             </div>
@@ -344,7 +341,7 @@ export const FindWriter: React.FC<FindWriterProps> = ({ onNavigate }) => {
                                                 <p className="text-lg font-bold text-text-main">₹{writer.price_per_page || 300}<span className="text-xs font-normal text-text-muted">/pg</span></p>
                                             </div>
                                             <button
-                                                onClick={() => onNavigate(`profile/${writer.id}`)}
+                                                onClick={() => navigate(`/profile/${writer.id}`)}
                                                 className="bg-primary text-[#1b140d] text-sm font-bold px-4 py-2 rounded-lg shadow-md hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
                                             >
                                                 View Profile

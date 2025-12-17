@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 const MotionDiv = motion.div as any;
 const MotionButton = motion.button as any;
 
-export const ChatRoom = ({ user, chatId, onBack }) => {
+export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, onBack?: () => void }) => {
     const navigate = useNavigate();
     const [messages, setMessages] = useState<any[]>([]);
     const [text, setText] = useState('');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
@@ -12,7 +12,8 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     const { error, success, info } = useToast();
 
     // Form states
-    const [isReg, setIsReg] = useState(false);
+    const [searchParams] = useSearchParams();
+    const [isReg, setIsReg] = useState(searchParams.get('tab') === 'signup');
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({ email: '', password: '', fullName: '', handle: '', school: '', bio: '' });
     const [isWriter, setIsWriter] = useState(false);

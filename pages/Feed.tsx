@@ -157,7 +157,38 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     </div>
 
                                     {loading ? (
-                                        <div className="text-center py-10 text-text-muted">Loading projects...</div>
+                                        <div className="space-y-6">
+                                            {[1, 2].map((i) => (
+                                                <div key={i} className="bg-white p-6 rounded-[1.5rem] border border-border-subtle shadow-card animate-pulse">
+                                                    <div className="flex justify-between items-center mb-5">
+                                                        <div className="flex gap-4">
+                                                            <div className="size-12 rounded-2xl bg-gray-200 shrink-0"></div>
+                                                            <div className="space-y-2">
+                                                                <div className="h-4 w-48 bg-gray-200 rounded"></div>
+                                                                <div className="h-3 w-32 bg-gray-200 rounded"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="size-8 rounded-full bg-gray-200"></div>
+                                                    </div>
+                                                    <div className="bg-secondary-bg rounded-xl p-4 flex items-center justify-between gap-4 border border-border-subtle">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="size-10 rounded-full bg-gray-200"></div>
+                                                            <div className="space-y-2">
+                                                                <div className="h-3 w-24 bg-gray-200 rounded"></div>
+                                                                <div className="h-2 w-16 bg-gray-200 rounded"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="w-32 space-y-2">
+                                                            <div className="flex justify-between">
+                                                                <div className="h-2 w-12 bg-gray-200 rounded"></div>
+                                                                <div className="h-2 w-8 bg-gray-200 rounded"></div>
+                                                            </div>
+                                                            <div className="h-2 w-full bg-gray-200 rounded-full"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     ) : stats.activeOrders.length === 0 ? (
                                         <div className="bg-white p-8 rounded-[1.5rem] border border-border-subtle text-center">
                                             <div className="size-16 bg-orange-50 text-primary rounded-full flex items-center justify-center mx-auto mb-4">

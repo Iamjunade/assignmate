@@ -29,6 +29,7 @@ const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: 
 const Connections = lazy(() => import('./pages/Connections').then(module => ({ default: module.Connections })));
 const Onboarding = lazy(() => import('./pages/Onboarding').then(module => ({ default: module.Onboarding })));
 const FindWriter = lazy(() => import('./pages/FindWriter').then(module => ({ default: module.FindWriter })));
+const AdminVerifications = lazy(() => import('./admin/pages/AdminVerifications').then(module => ({ default: module.AdminVerifications })));
 
 export default function AppWrapper() {
   return (
@@ -115,12 +116,7 @@ function AppContent() {
           <Loader2 className="animate-spin" />
         </div>
       }>
-        <FindWriter onNavigate={(page) => {
-          if (page === 'feed') navigate('/feed');
-          else if (page === 'find-writer') navigate('/writers');
-          else if (page === 'auth') navigate('/auth');
-          else navigate('/' + page);
-        }} />
+        <FindWriter />
       </Suspense>
     );
   }
@@ -229,12 +225,7 @@ function AppContent() {
               </ProtectedRoute>
             } />
 
-            <Route path="/writers" element={<FindWriter onNavigate={(page) => {
-              if (page === 'feed') navigate('/feed');
-              else if (page === 'find-writer') navigate('/writers');
-              else if (page === 'auth') navigate('/auth');
-              else navigate('/' + page);
-            }} />} />
+            <Route path="/writers" element={<FindWriter />} />
 
             <Route path="/profile" element={
               <ProtectedRoute>
@@ -271,6 +262,7 @@ function AppContent() {
               <Route index element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="verifications" element={<AdminVerifications />} />
               <Route path="chats" element={<AdminChats />} />
               <Route path="connections" element={<AdminConnections />} />
               <Route path="settings" element={<AdminSettings />} />

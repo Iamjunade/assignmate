@@ -3,7 +3,7 @@ import { dbService as db } from '../services/firestoreService';
 import {
     Camera, Edit2, X, Trash2, AlertTriangle, Check, Shield, Globe, Lock, Upload, Star,
     Grid, Users, MapPin, Mail, Calendar, Award, Briefcase, Clock, Zap, MessageSquare,
-    Link as LinkIcon, Plus, ChevronRight, MoreHorizontal, Settings, UserPlus, UserCheck
+    Link as LinkIcon, Plus, ChevronRight, MoreHorizontal, Settings, UserPlus, UserCheck, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,8 +22,11 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     const { refreshProfile, deleteAccount } = useAuth();
     const { success, error } = useToast();
 
-    const [profileUser, setProfileUser] = useState(currentUser);
-    const isOwnProfile = !userId || userId === currentUser.id;
+    const isOwnProfile = !userId || (currentUser && userId === currentUser.id);
+
+    // State to hold the profile data we are viewing
+    const [profileUser, setProfileUser] = useState(isOwnProfile ? currentUser : null);
+    const [loadingProfile, setLoadingProfile] = useState(!isOwnProfile);
 
     const [activeTab, setActiveTab] = useState('portfolio');
     const [connections, setConnections] = useState<any[]>([]);
@@ -59,44 +62,44 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
 
     // Load Profile Data
     useEffect(() => {
-        const loadProfile = async () => {
-            if (userId && userId !== currentUser.id) {
+        const fetchProfile = async () => {
+            if (isOwnProfile) {
+                setProfileUser(currentUser);
+                setLoadingProfile(false);
+            } else if (userId) {
+                setLoadingProfile(true);
                 try {
-                    // Fetch other user profile
-                    // We need to fetch the user document. 
-                    // Since dbService doesn't have a direct getUser(id) that returns data, we'll use a workaround or assume it exists.
-                    // Based on previous context, we might need to use getDocs with query or similar if getUser isn't available.
-                    // However, let's try to use db.getUser if it was added, or fallback to searching.
-                    // Actually, let's use the search functionality or just fetch it if we can.
-                    // For now, I will assume I can fetch it. If not, I'll need to add getUser to firestoreService.
-                    // I'll add a quick getUser helper in firestoreService if needed, but for now let's try to fetch.
-
-                    // Wait, I can't easily add to firestoreService without editing it.
-                    // I'll assume db.getUser exists or I'll use a known method.
-                    // Actually, I'll just use the `db` object. 
-                    // If `db.getUser` is not defined, I'll need to fix it.
-                    // Let's check if I can use `db.getUser`.
-                    // In the previous turn I saw `db.getUser` being used in my thought process, but did I verify it?
-                    // I'll assume it exists for now.
-
-                    const userDoc = await db.getUser(userId);
-                    if (userDoc) {
-                        setProfileUser(userDoc);
+                    // Fetch public profile of the other user
+                    const data = await db.getUser(userId);
+                    if (data) {
+                        setProfileUser(data);
 
                         // Check connection status
-                        const map = await db.getNetworkMap(currentUser.id);
-                        setConnectionStatus(map[userId] as any || 'none');
+                        if (currentUser) {
+                            const map = await db.getNetworkMap(currentUser.id);
+                            setConnectionStatus(map[userId] as any || 'none');
+                        }
+                    } else {
+                        error("User not found");
+                        navigate('/feed');
                     }
                 } catch (e) {
                     console.error(e);
                     error("User not found");
+                    navigate('/feed');
+                } finally {
+                    setLoadingProfile(false);
                 }
-            } else {
-                setProfileUser(currentUser);
             }
         };
-        loadProfile();
-    }, [userId, currentUser]);
+
+        fetchProfile();
+    }, [userId, currentUser, isOwnProfile, navigate, error]);
+
+    // Show loading spinner if fetching another user
+    if (loadingProfile || !profileUser) {
+        return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
+    }
 
     const level = Math.floor((profileUser.xp || 0) / 100) + 1;
     const rating = profileUser.rating || 5.0;

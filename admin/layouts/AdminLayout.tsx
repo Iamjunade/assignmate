@@ -1,23 +1,30 @@
 import React, { useState } from 'react';
-import { Users, MessageSquare, Activity, Settings, Link as LinkIcon, LogOut, Menu, X, Shield } from 'lucide-react';
-import { GlassCard } from '../../components/ui/GlassCard';
+import { Users, MessageSquare, Activity, Settings, Link as LinkIcon, LogOut, Menu, X, Shield, CheckCircle } from 'lucide-react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
-interface AdminLayoutProps {
-    children: React.ReactNode;
-    currentPage: string;
-    onNavigate: (page: string) => void;
-}
-
-export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onNavigate }) => {
+export const AdminLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // Determine current page from path
+    const currentPage = location.pathname.split('/').pop() || 'dashboard';
 
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: <Activity size={20} /> },
         { id: 'users', label: 'Users', icon: <Users size={20} /> },
+        { id: 'verifications', label: 'Verifications', icon: <Shield size={20} /> },
         { id: 'chats', label: 'Chats', icon: <MessageSquare size={20} /> },
         { id: 'connections', label: 'Connections', icon: <LinkIcon size={20} /> },
         { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
     ];
+
+    const handleNavigate = (page: string) => {
+        navigate(`/admin/${page}`);
+        if (window.innerWidth < 1024) {
+            setIsSidebarOpen(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-950 text-slate-200 flex font-sans">
@@ -43,7 +50,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage,
                         {navItems.map((item) => (
                             <button
                                 key={item.id}
-                                onClick={() => onNavigate(item.id)}
+                                onClick={() => handleNavigate(item.id)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${currentPage === item.id
                                     ? 'bg-red-600/10 text-red-500 border border-red-600/20'
                                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -92,7 +99,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage,
 
                 {/* Page Content */}
                 <div className="flex-1 overflow-y-auto p-6">
-                    {children}
+                    <Outlet />
                 </div>
             </main>
 
