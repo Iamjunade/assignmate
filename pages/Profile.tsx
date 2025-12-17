@@ -334,13 +334,41 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                 <Edit2 size={16} /> Edit
                                             </button>
                                         ) : (
-                                            // ✅ Case 2: Others' Profile -> Show Connect
-                                            <button
-                                                onClick={handleConnect}
-                                                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-[#1b140d] font-bold text-sm hover:opacity-90 transition-colors shadow-sm"
-                                            >
-                                                <UserPlus size={16} /> Connect
-                                            </button>
+                                            // ✅ Case 2: Others' Profile -> Handle Connection Status
+                                            <>
+                                                {connectionStatus === 'none' && (
+                                                    <button
+                                                        onClick={handleConnect}
+                                                        className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-[#1b140d] font-bold text-sm hover:opacity-90 transition-colors shadow-sm"
+                                                    >
+                                                        <UserPlus size={16} /> Connect
+                                                    </button>
+                                                )}
+                                                {connectionStatus === 'pending_sent' && (
+                                                    <button
+                                                        disabled
+                                                        className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-100 text-secondary font-bold text-sm cursor-not-allowed"
+                                                    >
+                                                        <Clock size={16} /> Pending
+                                                    </button>
+                                                )}
+                                                {connectionStatus === 'pending_received' && (
+                                                    <button
+                                                        onClick={() => setActiveTab('network')}
+                                                        className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-50 text-blue-600 font-bold text-sm hover:bg-blue-100 transition-colors"
+                                                    >
+                                                        <UserCheck size={16} /> Respond
+                                                    </button>
+                                                )}
+                                                {connectionStatus === 'connected' && (
+                                                    <button
+                                                        onClick={handleMessage}
+                                                        className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-green-50 text-green-600 font-bold text-sm hover:bg-green-100 transition-colors"
+                                                    >
+                                                        <MessageSquare size={16} /> Message
+                                                    </button>
+                                                )}
+                                            </>
                                         )}
 
                                         <button className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors">

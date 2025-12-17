@@ -94,7 +94,8 @@ export const userApi = {
             response_time: 60, // 60 minutes default
             languages: ['English'],
             is_online: true,
-            id_card_url: null
+            id_card_url: null,
+            is_incomplete: metadata.is_incomplete ?? false // ✅ Added is_incomplete
         };
 
         try {
@@ -126,7 +127,12 @@ import { User } from '../types';
 export const dbService = {
     getAllUsers: async () => {
         try {
-            const q = query(collection(getDb(), 'users'), limit(50));
+            // ✅ Filter out incomplete profiles at query level
+            const q = query(
+                collection(getDb(), 'users'),
+                where('is_incomplete', '==', false),
+                limit(50)
+            );
             const snapshot = await getDocs(q);
             return snapshot.docs.map(doc => doc.data());
         } catch (error) {
