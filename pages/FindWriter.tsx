@@ -291,7 +291,13 @@ export const FindWriter = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="col-span-full text-center text-gray-500">No writers found.</p>
+                                    <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
+                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                            <span className="material-symbols-outlined text-gray-400 text-3xl">group_off</span>
+                                        </div>
+                                        <h3 className="text-lg font-bold text-gray-700">No students found</h3>
+                                        <p className="text-gray-500 text-sm">Try adjusting your search or check back later.</p>
+                                    </div>
                                 )}
                             </div>
                         </section>
