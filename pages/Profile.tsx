@@ -56,8 +56,18 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     // 3. Effect: Fetch data if we are viewing someone else
     useEffect(() => {
         if (isOwnProfile) {
+            // Optimistically show current user, but fetch fresh data to avoid staleness
             setProfileUser(currentUser);
-            setLoadingProfile(false);
+            if (currentUser?.id) {
+                db.getUserProfile(currentUser.id)
+                    .then(data => {
+                        if (data) setProfileUser(data);
+                    })
+                    .catch(err => console.error("Failed to refresh profile", err))
+                    .finally(() => setLoadingProfile(false));
+            } else {
+                setLoadingProfile(false);
+            }
         } else {
             setLoadingProfile(true);
             // Fetch public profile of the other user

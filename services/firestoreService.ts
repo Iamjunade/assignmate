@@ -309,6 +309,8 @@ export const dbService = {
             await setDoc(doc(getDb(), 'connections', connId), {
                 id: connId,
                 participants: [reqData.fromId, reqData.toId],
+                requester_id: reqData.fromId,
+                receiver_id: reqData.toId,
                 created_at: new Date().toISOString()
             });
         }
