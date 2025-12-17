@@ -136,21 +136,6 @@ function AppContent() {
     );
   }
 
-  // Fix for Profile Layout
-  if (location.pathname.startsWith('/profile')) {
-    return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-screen text-slate-400">
-          <Loader2 className="animate-spin" />
-        </div>
-      }>
-        <ProtectedRoute>
-          {user && <Profile user={user} />}
-        </ProtectedRoute>
-      </Suspense>
-    );
-  }
-
   // Fix for Connections Layout
   if (location.pathname === '/connections') {
     return (

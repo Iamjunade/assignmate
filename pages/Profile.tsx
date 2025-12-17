@@ -22,12 +22,14 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     const { refreshProfile, deleteAccount } = useAuth();
     const { success, error } = useToast();
 
+    // 1. Determine if we are viewing our own profile
     const isOwnProfile = !userId || (currentUser && userId === currentUser.id);
 
-    // State to hold the profile data we are viewing
+    // 2. State for the profile we are VIEWING
     const [profileUser, setProfileUser] = useState(isOwnProfile ? currentUser : null);
     const [loadingProfile, setLoadingProfile] = useState(!isOwnProfile);
 
+    // Existing state variables
     const [activeTab, setActiveTab] = useState('portfolio');
     const [connections, setConnections] = useState<any[]>([]);
     const [requests, setRequests] = useState<any[]>([]);
@@ -50,6 +52,34 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     const idInputRef = useRef<HTMLInputElement>(null);
     const portfolioInputRef = useRef<HTMLInputElement>(null);
 
+    // 3. Effect: Fetch data if we are viewing someone else
+    useEffect(() => {
+        if (isOwnProfile) {
+            setProfileUser(currentUser);
+            setLoadingProfile(false);
+        } else {
+            setLoadingProfile(true);
+            // Fetch public profile of the other user
+            db.getUserProfile(userId).then(data => {
+                if (data) {
+                    setProfileUser(data);
+                    // Check connection status
+                    if (currentUser) {
+                        db.getNetworkMap(currentUser.id).then(map => {
+                            setConnectionStatus(map[userId] as any || 'none');
+                        });
+                    }
+                } else {
+                    error("User not found");
+                    navigate('/writers');
+                }
+                setLoadingProfile(false);
+            }).catch(() => {
+                setLoadingProfile(false);
+            });
+        }
+    }, [userId, currentUser, isOwnProfile, navigate, error]);
+
     // Update state when profileUser changes
     useEffect(() => {
         if (profileUser) {
@@ -59,51 +89,6 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
             setVisibility(profileUser.visibility || 'global');
         }
     }, [profileUser]);
-
-    // Load Profile Data
-    useEffect(() => {
-        const fetchProfile = async () => {
-            if (isOwnProfile) {
-                setProfileUser(currentUser);
-                setLoadingProfile(false);
-            } else if (userId) {
-                setLoadingProfile(true);
-                try {
-                    // Fetch public profile of the other user
-                    const data = await db.getUser(userId);
-                    if (data) {
-                        setProfileUser(data);
-
-                        // Check connection status
-                        if (currentUser) {
-                            const map = await db.getNetworkMap(currentUser.id);
-                            setConnectionStatus(map[userId] as any || 'none');
-                        }
-                    } else {
-                        error("User not found");
-                        navigate('/feed');
-                    }
-                } catch (e) {
-                    console.error(e);
-                    error("User not found");
-                    navigate('/feed');
-                } finally {
-                    setLoadingProfile(false);
-                }
-            }
-        };
-
-        fetchProfile();
-    }, [userId, currentUser, isOwnProfile, navigate, error]);
-
-    // Show loading spinner if fetching another user
-    if (loadingProfile || !profileUser) {
-        return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
-    }
-
-    const level = Math.floor((profileUser.xp || 0) / 100) + 1;
-    const rating = profileUser.rating || 5.0;
-    const projectsCompleted = profileUser.projects_completed || 0;
 
     // Load connections and requests
     useEffect(() => {
@@ -252,6 +237,19 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         }
     };
 
+    // 4. Loading State
+    if (loadingProfile || !profileUser) {
+        return (
+            <div className="flex h-screen items-center justify-center bg-background">
+                <Loader2 className="animate-spin text-primary" size={40} />
+            </div>
+        );
+    }
+
+    const level = Math.floor((profileUser.xp || 0) / 100) + 1;
+    const rating = profileUser.rating || 5.0;
+    const projectsCompleted = profileUser.projects_completed || 0;
+
     return (
         <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={currentUser} />
@@ -335,15 +333,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         ) : (
                                             // ✅ Case 2: Others' Profile -> Show Connect
                                             <button
-                                                onClick={async () => {
-                                                    // Call backend to send request
-                                                    try {
-                                                        await db.sendConnectionRequest(currentUser.id, profileUser.id);
-                                                        success("Connection request sent!");
-                                                    } catch (e) {
-                                                        error("Failed to send request");
-                                                    }
-                                                }}
+                                                onClick={handleConnect}
                                                 className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-[#1b140d] font-bold text-sm hover:opacity-90 transition-colors shadow-sm"
                                             >
                                                 <UserPlus size={16} /> Connect

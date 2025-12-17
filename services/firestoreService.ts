@@ -141,6 +141,17 @@ export const dbService = {
         return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
     },
 
+    getUserProfile: async (userId: string) => {
+        try {
+            const docRef = doc(getDb(), 'users', userId);
+            const docSnap = await getDoc(docRef);
+            return docSnap.exists() ? docSnap.data() : null;
+        } catch (error) {
+            console.error("Error fetching user profile:", error);
+            return null;
+        }
+    },
+
     getUsersBatch: async (userIds: string[]) => {
         const uniqueIds = Array.from(new Set(userIds)).filter(id => id);
         if (uniqueIds.length === 0) return new Map();
