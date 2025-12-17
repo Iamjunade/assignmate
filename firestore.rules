@@ -66,6 +66,24 @@ service cloud.firestore {
       allow create: if isAuthenticated() && (request.auth.uid in request.resource.data.participants);
     }
 
+    // --- Notifications ---
+    match /notifications/{notificationId} {
+      // Read: Only the receiver can read their notifications
+      allow read: if isAuthenticated() && resource.data.receiverId == request.auth.uid;
+      
+      // Create: Any authenticated user can send a notification (e.g. for chat/connection)
+      allow create: if isAuthenticated();
+      
+      // Update: Receiver can mark as read
+      allow update: if isAuthenticated() && resource.data.receiverId == request.auth.uid;
+    }
+
+    // --- FCM Tokens ---
+    match /fcm_tokens/{userId} {
+      // Users can only read/write their own token
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
     // --- Audit Logs ---
     match /audit_logs/{logId} {
       allow create: if isAuthenticated();
