@@ -10,6 +10,7 @@ import { ToastProvider, useToast } from './contexts/ToastContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminRoute } from './components/AdminRoute';
 import { User } from './types';
+import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 
 // Admin Components
 import { AdminLayout } from './admin/layouts/AdminLayout';
@@ -33,13 +34,15 @@ const AdminVerifications = lazy(() => import('./admin/pages/AdminVerifications')
 
 export default function AppWrapper() {
   return (
-    <Router>
-      <ToastProvider>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </ToastProvider>
-    </Router>
+    <GlobalErrorBoundary>
+      <Router>
+        <ToastProvider>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </ToastProvider>
+      </Router>
+    </GlobalErrorBoundary>
   );
 }
 
