@@ -231,7 +231,11 @@ export const dbService = {
         if (updates.handle) updates.search_handle = updates.handle.toLowerCase();
         if (updates.bio) updates.search_bio = updates.bio.toLowerCase();
 
-        await updateDoc(docRef, updates);
+        // Use setDoc with merge to safely update specific fields like fcm_token
+        await setDoc(docRef, {
+            ...updates,
+            last_seen: new Date().toISOString()
+        }, { merge: true });
         return { error: null };
     },
 
