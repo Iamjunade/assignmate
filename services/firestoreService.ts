@@ -315,6 +315,7 @@ export const dbService = {
     },
 
     getNetworkMap: async (currentUserId: string) => {
+        if (!currentUserId) return {};
         // This fetches who I am connected to
         const connectionsRef = collection(getDb(), 'connections');
         const q = query(connectionsRef, where('participants', 'array-contains', currentUserId));
@@ -346,6 +347,7 @@ export const dbService = {
     },
 
     getIncomingRequests: async (userId: string) => {
+        if (!userId) return [];
         const q = query(
             collection(getDb(), 'requests'),
             where('toId', '==', userId),
@@ -365,6 +367,7 @@ export const dbService = {
     },
 
     getMyConnections: async (userId: string) => {
+        if (!userId) return [];
         const q = query(collection(getDb(), 'connections'), where('participants', 'array-contains', userId));
         const snap = await getDocs(q);
 
@@ -410,6 +413,7 @@ export const dbService = {
 
     // --- CHAT SYSTEM ---
     getChats: async (userId: string) => {
+        if (!userId) return [];
         const q1 = query(collection(getDb(), 'chats'), where('poster_id', '==', userId));
         const q2 = query(collection(getDb(), 'chats'), where('writer_id', '==', userId));
 
@@ -562,6 +566,7 @@ export const dbService = {
     },
 
     listenToChats: (userId: string, callback: (chats: any[]) => void) => {
+        if (!userId) return () => { };
         // Listening to complex queries is hard, so we'll listen to the collection and filter client-side 
         // OR set up two listeners. For simplicity/cost, we'll poll or just listen to one query if possible.
         // Better approach: Listen to 'chats' where poster_id == userId OR writer_id == userId.
@@ -629,6 +634,7 @@ export const dbService = {
 
     // --- DASHBOARD METHODS ---
     getDashboardStats: async (userId: string) => {
+        if (!userId) return { activeCount: 0, escrowBalance: 0, nextDeadline: null, nextDeadlineProject: null, activeOrders: [] };
         // 1. Get Active Orders (where student_id == userId AND status == 'in_progress')
         const q = query(
             collection(getDb(), 'orders'),
