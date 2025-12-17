@@ -221,6 +221,7 @@ function AppContent() {
               </ProtectedRoute>
             } />
 
+            {/* ✅ Route for viewing other profiles */}
             <Route path="/profile/:userId" element={
               <ProtectedRoute>
                 {user && <Profile user={user} />}

@@ -56,7 +56,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                                     <input
                                         type="text"
-                                        placeholder="Search for writers, assignments, or peers..."
+                                        placeholder="Search for students, writers, or assignments..."
                                         className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
