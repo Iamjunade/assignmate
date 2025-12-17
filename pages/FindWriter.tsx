@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { INDIAN_COLLEGES } from '../data/colleges';
-import { dbService } from '../services/firestoreService';
+import { dbService, userApi } from '../services/firestoreService';
 import { useAuth } from '../contexts/AuthContext';
 
 export const FindWriter = () => {
@@ -50,18 +50,36 @@ export const FindWriter = () => {
         const fetchWriters = async () => {
             setLoading(true);
             try {
-                const collegeParam = searchParams.get('college');
-                const filters: any = {};
+                // Fetch all users
+                const allUsers = await userApi.getAllUsers();
 
-                if (collegeParam) filters.college = collegeParam;
-                if (searchQuery) filters.searchQuery = searchQuery;
+                // Filter out yourself and incomplete profiles
+                let validUsers = allUsers.filter((u: any) =>
+                    u.id !== user?.id && !u.is_incomplete
+                );
 
-                const data = await dbService.getWriters(user, filters);
-                setWriters(data);
+                // Apply client-side filters
+                if (searchQuery) {
+                    const lowerQuery = searchQuery.toLowerCase();
+                    validUsers = validUsers.filter((u: any) =>
+                        (u.full_name && u.full_name.toLowerCase().includes(lowerQuery)) ||
+                        (u.handle && u.handle.toLowerCase().includes(lowerQuery)) ||
+                        (u.school && u.school.toLowerCase().includes(lowerQuery))
+                    );
+                }
+
+                if (collegeQuery) {
+                    const lowerCollege = collegeQuery.toLowerCase();
+                    validUsers = validUsers.filter((u: any) =>
+                        u.school && u.school.toLowerCase().includes(lowerCollege)
+                    );
+                }
+
+                setWriters(validUsers);
 
                 // Handle Nearby Colleges if no writers found for a specific college
-                if (data.length === 0 && collegeParam) {
-                    const currentCollege = INDIAN_COLLEGES.find(c => c.name.toLowerCase() === collegeParam.toLowerCase());
+                if (validUsers.length === 0 && collegeQuery) {
+                    const currentCollege = INDIAN_COLLEGES.find(c => c.name.toLowerCase() === collegeQuery.toLowerCase());
                     if (currentCollege) {
                         const nearby = INDIAN_COLLEGES.filter(c =>
                             c.id !== currentCollege.id &&
@@ -90,7 +108,7 @@ export const FindWriter = () => {
         }, 500);
 
         return () => clearTimeout(timeoutId);
-    }, [searchParams, searchQuery, user]);
+    }, [searchParams, searchQuery, collegeQuery, user]);
 
     const handleCollegeSelect = (collegeName: string) => {
         setCollegeQuery(collegeName);

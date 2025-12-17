@@ -115,6 +115,21 @@ export const userApi = {
 
     deleteProfile: async (id: string) => {
         await deleteDoc(doc(getDb(), 'users', id));
+    },
+
+    getAllUsers: async (roleFilter?: 'writer' | 'student') => {
+        try {
+            let q = query(collection(getDb(), 'users'));
+            // Optional: Filter by role if you differentiate writers vs students
+            if (roleFilter === 'writer') {
+                q = query(collection(getDb(), 'users'), where('is_writer', '==', true));
+            }
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(doc => doc.data());
+        } catch (error) {
+            console.error("Error fetching users:", error);
+            return [];
+        }
     }
 };
 
