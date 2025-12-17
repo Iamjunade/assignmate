@@ -9,7 +9,9 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<any>;
   loginWithGoogle: () => Promise<any>;
+  // ✅ FIX 1: Updated signature to accept fullName and bio
   register: (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => Promise<any>;
+  // ✅ FIX 2: Updated signature to accept bio
   completeGoogleSignup: (handle: string, school: string, is_writer: boolean, bio?: string) => Promise<void>;
   loginAnonymously: () => Promise<any>;
   logout: () => Promise<void>;
@@ -28,7 +30,6 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   // Sync user profile from Firestore
   const syncUser = async (fbUser: any) => {
     const userId = fbUser.uid;
-    // Prevent double syncing
     if (syncingRef.current === userId) return;
     syncingRef.current = userId;
 
@@ -43,23 +44,21 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         } as User);
         presence.init(userId);
       } else {
-        // ✅ FIXED: Use 'null' instead of 'undefined' for avatar_url
-        // Firestore crashes if you send 'undefined'
+        // ✅ FIX 3: Handle undefined photoURL for Google Users
         const newProfile = {
           id: userId,
           email: fbUser.email || '',
           handle: fbUser.displayName?.replace(/\s+/g, '_').toLowerCase() || 'user_' + userId.substring(0, 6),
           school: 'Not Specified',
-          avatar_url: fbUser.photoURL || null, // <--- THIS WAS THE CAUSE OF YOUR ERROR
+          avatar_url: fbUser.photoURL || null, // FIX: Use null, not undefined
           full_name: fbUser.displayName || 'Student',
           xp: 0,
           is_writer: false,
-          is_incomplete: true
+          is_incomplete: true // Forces redirect to /onboarding
         };
 
-        // Create the incomplete profile in DB so we don't sync 404s forever
+        // Create incomplete profile in DB
         await userApi.createProfile(userId, newProfile);
-
         setUser(newProfile as User);
       }
     } catch (e) {
@@ -87,22 +86,21 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     setUser(null);
   };
 
-  // ✅ FIXED: Added 'fullName' and 'bio' to the parameters so they are saved
+  // ✅ FIX 4: Register function now captures fullName and bio
   const register = async (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => {
     const res = await firebaseAuth.register(email, pass);
     if (res.error) return res;
 
     if (res.data?.user) {
       try {
-        // ✅ Now we save the 'fullName' to the database
         const profile = await userApi.createProfile(res.data.user.uid, {
           handle,
           school,
           email,
-          full_name: fullName, // <--- This was missing before!
-          bio: bio || '',
+          full_name: fullName, // ✅ Correctly saving Name
+          bio: bio || '',      // ✅ Correctly saving Bio
           is_writer,
-          is_incomplete: false
+          is_incomplete: false // Manual setup is complete immediately
         });
 
         setUser({ ...profile, email: res.data.user.email || email, is_incomplete: false });
@@ -118,20 +116,20 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     return res;
   };
 
+  // ✅ FIX 5: Complete Google Signup captures bio
   const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean, bio?: string) => {
     if (!user) throw new Error("User not found.");
 
     try {
-      // ✅ FIXED: Ensure avatar_url is explicitly null if undefined
       const profile = await userApi.createProfile(user.id, {
         handle,
         school,
         email: user.email,
-        avatar_url: user.avatar_url || null, // <--- ALSO FIXED HERE
+        avatar_url: user.avatar_url || null,
         full_name: user.full_name || 'Student',
-        bio: bio || '',
+        bio: bio || '', // ✅ Correctly saving Bio
         is_writer,
-        is_incomplete: false
+        is_incomplete: false // Mark as complete
       });
 
       setUser({ ...profile, email: user.email, is_incomplete: false });
