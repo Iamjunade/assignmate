@@ -117,13 +117,9 @@ export const userApi = {
         await deleteDoc(doc(getDb(), 'users', id));
     },
 
-    getAllUsers: async (roleFilter?: 'writer' | 'student') => {
+    getAllUsers: async () => {
         try {
-            let q = query(collection(getDb(), 'users'));
-            // Optional: Filter by role if you differentiate writers vs students
-            if (roleFilter === 'writer') {
-                q = query(collection(getDb(), 'users'), where('is_writer', '==', true));
-            }
+            const q = query(collection(getDb(), 'users'), limit(50));
             const snapshot = await getDocs(q);
             return snapshot.docs.map(doc => doc.data());
         } catch (error) {
@@ -265,65 +261,107 @@ export const dbService = {
     },
 
     // --- CONNECTION SYSTEM ---
-    sendConnectionRequest: async (requesterId: string, receiverId: string) => {
-        const newConn = {
-            requester_id: requesterId,
-            receiver_id: receiverId,
+    // --- CONNECTION SYSTEM ---
+    sendConnectionRequest: async (fromUserId: string, toUserId: string) => {
+        const id = `${fromUserId}_${toUserId}`;
+        await setDoc(doc(getDb(), 'requests', id), {
+            id,
+            fromId: fromUserId,
+            toId: toUserId,
             status: 'pending',
             created_at: new Date().toISOString()
-        };
-        const res = await addDoc(collection(getDb(), 'connections'), newConn);
-        return { ...newConn, id: res.id };
+        });
     },
 
-    respondToConnectionRequest: async (connectionId: string, status: 'accepted' | 'rejected') => {
-        const docRef = doc(getDb(), 'connections', connectionId);
-        if (status === 'rejected') {
-            await deleteDoc(docRef);
-        } else {
-            await updateDoc(docRef, { status: 'accepted' });
+    respondToConnectionRequest: async (requestId: string, status: 'accepted' | 'rejected') => {
+        const reqRef = doc(getDb(), 'requests', requestId);
+        await updateDoc(reqRef, { status });
+
+        if (status === 'accepted') {
+            // Create the connection entry
+            const reqSnap = await getDoc(reqRef);
+            const reqData = reqSnap.data();
+            if (!reqData) return;
+
+            const connId = `${reqData.fromId}_${reqData.toId}`;
+            await setDoc(doc(getDb(), 'connections', connId), {
+                id: connId,
+                participants: [reqData.fromId, reqData.toId],
+                created_at: new Date().toISOString()
+            });
         }
     },
 
-    getNetworkMap: async (userId: string) => {
-        // Firestore doesn't support OR queries across fields easily efficiently without multiple queries
-        // Query 1: I am requester
-        const q1 = query(collection(getDb(), 'connections'), where('requester_id', '==', userId));
-        // Query 2: I am receiver
-        const q2 = query(collection(getDb(), 'connections'), where('receiver_id', '==', userId));
+    getNetworkMap: async (currentUserId: string) => {
+        // This fetches who I am connected to
+        const connectionsRef = collection(getDb(), 'connections');
+        const q = query(connectionsRef, where('participants', 'array-contains', currentUserId));
+        const snapshot = await getDocs(q);
 
-        const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-        const allDocs = [...snap1.docs, ...snap2.docs].map(d => d.data());
-
-        const map: Record<string, string> = {};
-        allDocs.forEach((c: any) => {
-            if (c.status === 'accepted') {
-                const other = c.requester_id === userId ? c.receiver_id : c.requester_id;
-                map[other] = 'connected';
-            } else if (c.status === 'pending') {
-                if (c.requester_id === userId) map[c.receiver_id] = 'pending_sent';
-                else map[c.requester_id] = 'pending_received';
-            }
+        const map: any = {};
+        snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const otherId = data.participants.find((id: string) => id !== currentUserId);
+            if (otherId) map[otherId] = 'connected';
         });
+
+        // Also check pending sent requests
+        const requestsRef = collection(getDb(), 'requests');
+        const sentQ = query(requestsRef, where('fromId', '==', currentUserId), where('status', '==', 'pending'));
+        const sentSnap = await getDocs(sentQ);
+        sentSnap.docs.forEach(doc => {
+            map[doc.data().toId] = 'pending_sent';
+        });
+
+        // Check pending received requests
+        const receivedQ = query(requestsRef, where('toId', '==', currentUserId), where('status', '==', 'pending'));
+        const receivedSnap = await getDocs(receivedQ);
+        receivedSnap.docs.forEach(doc => {
+            map[doc.data().fromId] = 'pending_received';
+        });
+
         return map;
     },
 
     getIncomingRequests: async (userId: string) => {
         const q = query(
-            collection(getDb(), 'connections'),
-            where('receiver_id', '==', userId),
+            collection(getDb(), 'requests'),
+            where('toId', '==', userId),
             where('status', '==', 'pending')
         );
         const snap = await getDocs(q);
 
         // Join with profiles manually
         const rawRequests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const requesterIds = rawRequests.map((r: any) => r.requester_id);
+        const requesterIds = rawRequests.map((r: any) => r.fromId);
         const userMap = await dbService.getUsersBatch(requesterIds);
 
         return rawRequests.map((r: any) => ({
             ...r,
-            requester: userMap.get(r.requester_id) || null
+            fromUser: userMap.get(r.fromId) || null
+        }));
+    },
+
+    getMyConnections: async (userId: string) => {
+        const q = query(collection(getDb(), 'connections'), where('participants', 'array-contains', userId));
+        const snap = await getDocs(q);
+
+        const connections = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+        const otherIds = new Set<string>();
+
+        connections.forEach(c => {
+            const other = c.participants.find((id: string) => id !== userId);
+            if (other) otherIds.add(other);
+        });
+
+        if (otherIds.size === 0) return [];
+
+        const userMap = await dbService.getUsersBatch(Array.from(otherIds));
+
+        // Return connections with hydrated participants for Profile.tsx
+        return connections.map(c => ({
+            ...c,
+            participants: c.participants.map((id: string) => userMap.get(id) || { id })
         }));
     },
 
@@ -346,48 +384,7 @@ export const dbService = {
         return Array.from(results.values());
     },
 
-    listenToConnections: (userId: string, callback: (connections: any[]) => void) => {
-        const q1 = query(collection(getDb(), 'connections'), where('requester_id', '==', userId));
-        const q2 = query(collection(getDb(), 'connections'), where('receiver_id', '==', userId));
 
-        let conns1: any[] = [];
-        let conns2: any[] = [];
-
-        const merge = () => {
-            const all = [...conns1, ...conns2];
-            const map = new Map();
-            all.forEach(c => map.set(c.id, c));
-            callback(Array.from(map.values()));
-        };
-
-        const unsub1 = onSnapshot(q1, (snap) => {
-            conns1 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            merge();
-        });
-        const unsub2 = onSnapshot(q2, (snap) => {
-            conns2 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            merge();
-        });
-
-        return () => { unsub1(); unsub2(); };
-    },
-
-    getMyConnections: async (userId: string) => {
-        const q1 = query(collection(getDb(), 'connections'), where('requester_id', '==', userId), where('status', '==', 'accepted'));
-        const q2 = query(collection(getDb(), 'connections'), where('receiver_id', '==', userId), where('status', '==', 'accepted'));
-
-        const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-        const ids = new Set<string>();
-
-        snap1.forEach(d => ids.add(d.data().receiver_id));
-        snap2.forEach(d => ids.add(d.data().requester_id));
-
-        if (ids.size === 0) return [];
-
-        // Fetch profiles in batches using helper
-        const userMap = await dbService.getUsersBatch(Array.from(ids));
-        return Array.from(userMap.values());
-    },
 
     // --- CHAT SYSTEM ---
     getChats: async (userId: string) => {

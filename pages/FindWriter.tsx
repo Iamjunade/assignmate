@@ -9,8 +9,16 @@ export const FindWriter = () => {
     const { user } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const [collegeQuery, setCollegeQuery] = useState(searchParams.get('college') || '');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
     const [isFocused, setIsFocused] = useState(false);
+
+    // Sync URL search param to state
+    useEffect(() => {
+        const queryFromUrl = searchParams.get('search');
+        if (queryFromUrl) {
+            setSearchQuery(queryFromUrl);
+        }
+    }, [searchParams]);
 
     const [writers, setWriters] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
