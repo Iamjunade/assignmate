@@ -117,6 +117,13 @@ export const userApi = {
         await deleteDoc(doc(getDb(), 'users', id));
     },
 
+};
+
+import { User } from '../types';
+
+// ... existing imports ...
+
+export const dbService = {
     getAllUsers: async () => {
         try {
             const q = query(collection(getDb(), 'users'), limit(50));
@@ -126,14 +133,8 @@ export const userApi = {
             console.error("Error fetching users:", error);
             return [];
         }
-    }
-};
+    },
 
-import { User } from '../types';
-
-// ... existing imports ...
-
-export const dbService = {
     getUser: async (userId: string) => {
         const docRef = doc(getDb(), 'users', userId);
         const docSnap = await getDoc(docRef);

@@ -40,275 +40,278 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
     };
 
     return (
-        <div className="bg-[#faf9f7] text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
+        <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />
 
             <main className="flex-1 flex flex-col h-full overflow-hidden relative">
                 <DashboardHeader />
 
-                <div className="flex-1 overflow-y-auto px-2 pb-20">
-                    <div className="w-full flex flex-col gap-8">
-                        {/* Search Bar */}
-                        <div className="bg-white p-4 rounded-2xl shadow-sm">
-                            <div className="relative">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">search</span>
-                                <input
-                                    type="text"
-                                    placeholder="Search for writers or peers..."
-                                    className="w-full bg-gray-100 p-3 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            navigate(`/writers?search=${e.currentTarget.value}`);
-                                        }
-                                    }}
-                                />
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="w-full flex flex-col gap-8">
+                            {/* Search Bar */}
+                            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-8">
+                                <div className="relative">
+                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                                    <input
+                                        type="text"
+                                        placeholder="Search for writers, assignments, or peers..."
+                                        className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                // ✅ Navigate to FindWriter with search query
+                                                navigate(`/writers?search=${e.currentTarget.value}`);
+                                            }
+                                        }}
+                                    />
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Welcome Section */}
-                        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
-                            <div>
-                                <div className="text-sm font-bold text-primary mb-1 tracking-wide uppercase">
-                                    {format(new Date(), 'MMM d')} • Student Dashboard
+                            {/* Welcome Section */}
+                            <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
+                                <div>
+                                    <div className="text-sm font-bold text-primary mb-1 tracking-wide uppercase">
+                                        {format(new Date(), 'MMM d')} • Student Dashboard
+                                    </div>
+                                    <h1 className="text-3xl md:text-4xl font-extrabold text-text-dark tracking-tight leading-tight">
+                                        Good Morning, {user?.full_name?.split(' ')[0] || 'Student'}.
+                                    </h1>
+                                    <p className="text-text-muted mt-2 text-lg">Your academic tasks are under control.</p>
                                 </div>
-                                <h1 className="text-3xl md:text-4xl font-extrabold text-text-dark tracking-tight leading-tight">
-                                    Good Morning, {user?.full_name?.split(' ')[0] || 'Student'}.
-                                </h1>
-                                <p className="text-text-muted mt-2 text-lg">Your academic tasks are under control.</p>
+                                <div className="w-full xl:w-auto bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow cursor-pointer">
+                                    <div className="bg-white p-2.5 rounded-full shadow-sm text-emerald-600 z-10">
+                                        <span className="material-symbols-outlined">shield_lock</span>
+                                    </div>
+                                    <div className="flex-1 z-10">
+                                        <h3 className="text-sm font-bold text-text-dark">Escrow Protected Payments</h3>
+                                        <p className="text-xs text-text-muted mt-0.5">Funds released only when you're 100% satisfied.</p>
+                                    </div>
+                                    <span className="material-symbols-outlined text-emerald-200 absolute -right-4 -bottom-4 text-[100px] opacity-20">verified_user</span>
+                                </div>
                             </div>
-                            <div className="w-full xl:w-auto bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow cursor-pointer">
-                                <div className="bg-white p-2.5 rounded-full shadow-sm text-emerald-600 z-10">
-                                    <span className="material-symbols-outlined">shield_lock</span>
-                                </div>
-                                <div className="flex-1 z-10">
-                                    <h3 className="text-sm font-bold text-text-dark">Escrow Protected Payments</h3>
-                                    <p className="text-xs text-text-muted mt-0.5">Funds released only when you're 100% satisfied.</p>
-                                </div>
-                                <span className="material-symbols-outlined text-emerald-200 absolute -right-4 -bottom-4 text-[100px] opacity-20">verified_user</span>
-                            </div>
-                        </div>
 
-                        {/* Stats Row */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {/* Active Projects */}
-                            <div className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
-                                <div className="flex justify-between items-start mb-4 relative z-10">
-                                    <h3 className="text-text-muted font-bold text-sm">Active Projects</h3>
-                                    <div className="size-10 rounded-full bg-orange-50 text-primary flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                        <span className="material-symbols-outlined">assignment</span>
+                            {/* Stats Row */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {/* Active Projects */}
+                                <div className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
+                                    <div className="flex justify-between items-start mb-4 relative z-10">
+                                        <h3 className="text-text-muted font-bold text-sm">Active Projects</h3>
+                                        <div className="size-10 rounded-full bg-orange-50 text-primary flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                            <span className="material-symbols-outlined">assignment</span>
+                                        </div>
+                                    </div>
+                                    <div className="relative z-10">
+                                        <span className="text-4xl font-extrabold text-text-dark tracking-tight">{stats.activeCount}</span>
+                                        {stats.activeCount > 0 && (
+                                            <div className="flex items-center gap-2 mt-3">
+                                                <div className="flex -space-x-2">
+                                                    {stats.activeOrders.slice(0, 3).map((order: any, i: number) => (
+                                                        <img
+                                                            key={i}
+                                                            src={order.writer_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${order.writer_handle}`}
+                                                            alt="Writer"
+                                                            className="size-6 rounded-full border-2 border-white"
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <span className="text-xs font-bold text-text-muted">In Progress</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                                <div className="relative z-10">
-                                    <span className="text-4xl font-extrabold text-text-dark tracking-tight">{stats.activeCount}</span>
-                                    {stats.activeCount > 0 && (
-                                        <div className="flex items-center gap-2 mt-3">
-                                            <div className="flex -space-x-2">
-                                                {stats.activeOrders.slice(0, 3).map((order: any, i: number) => (
-                                                    <img
-                                                        key={i}
-                                                        src={order.writer_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${order.writer_handle}`}
-                                                        alt="Writer"
-                                                        className="size-6 rounded-full border-2 border-white"
-                                                    />
+
+                                {/* Escrow Balance */}
+                                <div className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
+                                    <div className="flex justify-between items-start mb-4 relative z-10">
+                                        <h3 className="text-text-muted font-bold text-sm">Escrow Balance</h3>
+                                        <div className="size-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                            <span className="material-symbols-outlined">account_balance</span>
+                                        </div>
+                                    </div>
+                                    <div className="relative z-10">
+                                        <span className="text-4xl font-extrabold text-text-dark tracking-tight">{formatCurrency(stats.escrowBalance)}</span>
+                                        <div className="flex items-center gap-1.5 mt-3 text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded-lg">
+                                            <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                                            <span className="text-xs font-bold">Funds Secured</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Next Deadline */}
+                                <div className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
+                                    <div className="flex justify-between items-start mb-4 relative z-10">
+                                        <h3 className="text-text-muted font-bold text-sm">Next Deadline</h3>
+                                        <div className="size-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                            <span className="material-symbols-outlined">timer</span>
+                                        </div>
+                                    </div>
+                                    <div className="relative z-10">
+                                        {stats.nextDeadline !== null ? (
+                                            <>
+                                                <span className="text-4xl font-extrabold text-text-dark tracking-tight">{stats.nextDeadline} <span className="text-lg font-bold text-text-muted">Days</span></span>
+                                                <div className="mt-3">
+                                                    <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                                        <div className="h-full bg-red-500 rounded-full" style={{ width: '70%' }}></div>
+                                                    </div>
+                                                    <p className="text-xs font-bold text-red-500 mt-1.5 truncate">{stats.nextDeadlineProject}</p>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <span className="text-2xl font-bold text-text-muted">No deadlines</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                                {/* Main Content Column */}
+                                <div className="xl:col-span-2 flex flex-col gap-8">
+                                    <section className="flex flex-col gap-5">
+                                        <div className="flex items-center justify-between">
+                                            <h2 className="text-xl font-bold text-text-dark flex items-center gap-2">
+                                                Active Projects
+                                                <span className="bg-gray-100 text-text-muted text-xs font-bold px-2 py-1 rounded-full">{stats.activeCount}</span>
+                                            </h2>
+                                            <a href="#" className="text-sm font-bold text-primary hover:text-primary-hover transition-colors">View All Projects</a>
+                                        </div>
+
+                                        {loading ? (
+                                            <div className="space-y-6">
+                                                {[1, 2].map((i) => (
+                                                    <div key={i} className="bg-white p-6 rounded-[1.5rem] border border-border-subtle shadow-card animate-pulse">
+                                                        <div className="flex justify-between items-center mb-5">
+                                                            <div className="flex gap-4">
+                                                                <div className="size-12 rounded-2xl bg-gray-200 shrink-0"></div>
+                                                                <div className="space-y-2">
+                                                                    <div className="h-4 w-48 bg-gray-200 rounded"></div>
+                                                                    <div className="h-3 w-32 bg-gray-200 rounded"></div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="size-8 rounded-full bg-gray-200"></div>
+                                                        </div>
+                                                        <div className="bg-secondary-bg rounded-xl p-4 flex items-center justify-between gap-4 border border-border-subtle">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="size-10 rounded-full bg-gray-200"></div>
+                                                                <div className="space-y-2">
+                                                                    <div className="h-3 w-24 bg-gray-200 rounded"></div>
+                                                                    <div className="h-2 w-16 bg-gray-200 rounded"></div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="w-32 space-y-2">
+                                                                <div className="flex justify-between">
+                                                                    <div className="h-2 w-12 bg-gray-200 rounded"></div>
+                                                                    <div className="h-2 w-8 bg-gray-200 rounded"></div>
+                                                                </div>
+                                                                <div className="h-2 w-full bg-gray-200 rounded-full"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 ))}
                                             </div>
-                                            <span className="text-xs font-bold text-text-muted">In Progress</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Escrow Balance */}
-                            <div className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
-                                <div className="flex justify-between items-start mb-4 relative z-10">
-                                    <h3 className="text-text-muted font-bold text-sm">Escrow Balance</h3>
-                                    <div className="size-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                        <span className="material-symbols-outlined">account_balance</span>
-                                    </div>
-                                </div>
-                                <div className="relative z-10">
-                                    <span className="text-4xl font-extrabold text-text-dark tracking-tight">{formatCurrency(stats.escrowBalance)}</span>
-                                    <div className="flex items-center gap-1.5 mt-3 text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded-lg">
-                                        <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                                        <span className="text-xs font-bold">Funds Secured</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Next Deadline */}
-                            <div className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
-                                <div className="flex justify-between items-start mb-4 relative z-10">
-                                    <h3 className="text-text-muted font-bold text-sm">Next Deadline</h3>
-                                    <div className="size-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                        <span className="material-symbols-outlined">timer</span>
-                                    </div>
-                                </div>
-                                <div className="relative z-10">
-                                    {stats.nextDeadline !== null ? (
-                                        <>
-                                            <span className="text-4xl font-extrabold text-text-dark tracking-tight">{stats.nextDeadline} <span className="text-lg font-bold text-text-muted">Days</span></span>
-                                            <div className="mt-3">
-                                                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-red-500 rounded-full" style={{ width: '70%' }}></div>
+                                        ) : stats.activeOrders.length === 0 ? (
+                                            <div className="bg-white p-8 rounded-[1.5rem] border border-border-subtle text-center">
+                                                <div className="size-16 bg-orange-50 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                                                    <span className="material-symbols-outlined text-3xl">post_add</span>
                                                 </div>
-                                                <p className="text-xs font-bold text-red-500 mt-1.5 truncate">{stats.nextDeadlineProject}</p>
+                                                <h3 className="text-lg font-bold text-text-dark mb-2">No active projects</h3>
+                                                <p className="text-text-muted mb-6">Post a new assignment to get started.</p>
+                                                <button onClick={() => navigate('/writers')} className="bg-primary text-white px-6 py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all">
+                                                    Post a Project
+                                                </button>
                                             </div>
-                                        </>
-                                    ) : (
-                                        <span className="text-2xl font-bold text-text-muted">No deadlines</span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                            {/* Main Content Column */}
-                            <div className="xl:col-span-2 flex flex-col gap-8">
-                                <section className="flex flex-col gap-5">
-                                    <div className="flex items-center justify-between">
-                                        <h2 className="text-xl font-bold text-text-dark flex items-center gap-2">
-                                            Active Projects
-                                            <span className="bg-gray-100 text-text-muted text-xs font-bold px-2 py-1 rounded-full">{stats.activeCount}</span>
-                                        </h2>
-                                        <a href="#" className="text-sm font-bold text-primary hover:text-primary-hover transition-colors">View All Projects</a>
-                                    </div>
-
-                                    {loading ? (
-                                        <div className="space-y-6">
-                                            {[1, 2].map((i) => (
-                                                <div key={i} className="bg-white p-6 rounded-[1.5rem] border border-border-subtle shadow-card animate-pulse">
-                                                    <div className="flex justify-between items-center mb-5">
+                                        ) : (
+                                            stats.activeOrders.map((order: any) => (
+                                                <div key={order.id} className="bg-white p-6 rounded-[1.5rem] border border-border-subtle shadow-card hover:shadow-soft transition-all duration-300">
+                                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
                                                         <div className="flex gap-4">
-                                                            <div className="size-12 rounded-2xl bg-gray-200 shrink-0"></div>
-                                                            <div className="space-y-2">
-                                                                <div className="h-4 w-48 bg-gray-200 rounded"></div>
-                                                                <div className="h-3 w-32 bg-gray-200 rounded"></div>
+                                                            <div className="size-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                                                                <span className="material-symbols-outlined">article</span>
                                                             </div>
-                                                        </div>
-                                                        <div className="size-8 rounded-full bg-gray-200"></div>
-                                                    </div>
-                                                    <div className="bg-secondary-bg rounded-xl p-4 flex items-center justify-between gap-4 border border-border-subtle">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="size-10 rounded-full bg-gray-200"></div>
-                                                            <div className="space-y-2">
-                                                                <div className="h-3 w-24 bg-gray-200 rounded"></div>
-                                                                <div className="h-2 w-16 bg-gray-200 rounded"></div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="w-32 space-y-2">
-                                                            <div className="flex justify-between">
-                                                                <div className="h-2 w-12 bg-gray-200 rounded"></div>
-                                                                <div className="h-2 w-8 bg-gray-200 rounded"></div>
-                                                            </div>
-                                                            <div className="h-2 w-full bg-gray-200 rounded-full"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : stats.activeOrders.length === 0 ? (
-                                        <div className="bg-white p-8 rounded-[1.5rem] border border-border-subtle text-center">
-                                            <div className="size-16 bg-orange-50 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <span className="material-symbols-outlined text-3xl">post_add</span>
-                                            </div>
-                                            <h3 className="text-lg font-bold text-text-dark mb-2">No active projects</h3>
-                                            <p className="text-text-muted mb-6">Post a new assignment to get started.</p>
-                                            <button onClick={() => navigate('/writers')} className="bg-primary text-white px-6 py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all">
-                                                Post a Project
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        stats.activeOrders.map((order: any) => (
-                                            <div key={order.id} className="bg-white p-6 rounded-[1.5rem] border border-border-subtle shadow-card hover:shadow-soft transition-all duration-300">
-                                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
-                                                    <div className="flex gap-4">
-                                                        <div className="size-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                                                            <span className="material-symbols-outlined">article</span>
-                                                        </div>
-                                                        <div>
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <h3 className="text-lg font-bold text-text-dark">{order.title}</h3>
-                                                                <span className="px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-700 text-[10px] font-bold uppercase tracking-wider border border-orange-100">Work In Progress</span>
-                                                            </div>
-                                                            <p className="text-sm text-text-muted">ID: #{order.id.substring(0, 6).toUpperCase()} • Due: {format(new Date(order.deadline), 'MMM d')}</p>
-                                                        </div>
-                                                    </div>
-                                                    <button className="size-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-text-muted transition-colors">
-                                                        <span className="material-symbols-outlined">more_horiz</span>
-                                                    </button>
-                                                </div>
-
-                                                <div className="bg-secondary-bg rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-border-subtle mb-5">
-                                                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                                                        <div className="relative">
-                                                            <div className="size-10 rounded-full bg-cover bg-center border border-white shadow-sm" style={{ backgroundImage: `url('${order.writer_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${order.writer_handle}`}')` }}></div>
-                                                            {order.writer_verified && (
-                                                                <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5" title="Verified Writer">
-                                                                    <span className="material-symbols-outlined text-blue-500 text-[14px] leading-none" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                                            <div>
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <h3 className="text-lg font-bold text-text-dark">{order.title}</h3>
+                                                                    <span className="px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-700 text-[10px] font-bold uppercase tracking-wider border border-orange-100">Work In Progress</span>
                                                                 </div>
-                                                            )}
+                                                                <p className="text-sm text-text-muted">ID: #{order.id.substring(0, 6).toUpperCase()} • Due: {format(new Date(order.deadline), 'MMM d')}</p>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <p className="text-sm font-bold text-text-dark">{order.writer_handle || 'Unknown Writer'}</p>
-                                                            <p className="text-xs text-text-muted">{order.writer_school || 'University'}</p>
-                                                        </div>
+                                                        <button className="size-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-text-muted transition-colors">
+                                                            <span className="material-symbols-outlined">more_horiz</span>
+                                                        </button>
                                                     </div>
-                                                    <div className="w-full sm:w-48">
-                                                        <div className="flex justify-between text-[10px] font-bold text-text-muted mb-1.5 uppercase tracking-wide">
-                                                            <span>Completion</span>
-                                                            <span>{order.completion_percentage || 0}%</span>
-                                                        </div>
-                                                        <div className="w-full bg-white border border-gray-200 rounded-full h-2 overflow-hidden">
-                                                            <div className="bg-primary h-2 rounded-full" style={{ width: `${order.completion_percentage || 0}%` }}></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </section>
-                            </div>
 
-                            {/* Right Sidebar Column */}
-                            <div className="flex flex-col gap-8">
-                                {/* Verified Writers Section */}
-                                <section>
-                                    <div className="flex items-center justify-between mb-5">
-                                        <h2 className="text-lg font-bold text-text-dark">Verified at {user?.school || 'Your University'}</h2>
-                                        <div className="flex gap-2">
-                                            <button className="size-8 rounded-full bg-white border border-border-subtle flex items-center justify-center text-text-muted hover:bg-gray-50 transition-colors">
-                                                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-                                            </button>
-                                            <button className="size-8 rounded-full bg-white border border-border-subtle flex items-center justify-center text-text-muted hover:bg-gray-50 transition-colors">
-                                                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    {/* Placeholder for Verified Writers - Can be dynamic later */}
-                                    <div className="bg-white p-5 rounded-[1.5rem] border border-border-subtle shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <div className="flex gap-3">
-                                                <div className="size-12 rounded-xl bg-cover bg-center shadow-sm" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80')" }}></div>
-                                                <div>
-                                                    <div className="flex items-center gap-1">
-                                                        <h3 className="font-bold text-text-dark">Rohan M.</h3>
-                                                        <span className="material-symbols-outlined text-blue-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                                    </div>
-                                                    <p className="text-xs text-text-muted">M.Sc Physics • Delhi University</p>
-                                                    <div className="flex items-center gap-1 mt-1 text-xs font-bold text-text-dark">
-                                                        <span className="material-symbols-outlined text-amber-400 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                                        4.9 <span className="text-text-muted font-medium">(120)</span>
+                                                    <div className="bg-secondary-bg rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-border-subtle mb-5">
+                                                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                                                            <div className="relative">
+                                                                <div className="size-10 rounded-full bg-cover bg-center border border-white shadow-sm" style={{ backgroundImage: `url('${order.writer_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${order.writer_handle}`}')` }}></div>
+                                                                {order.writer_verified && (
+                                                                    <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5" title="Verified Writer">
+                                                                        <span className="material-symbols-outlined text-blue-500 text-[14px] leading-none" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-bold text-text-dark">{order.writer_handle || 'Unknown Writer'}</p>
+                                                                <p className="text-xs text-text-muted">{order.writer_school || 'University'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="w-full sm:w-48">
+                                                            <div className="flex justify-between text-[10px] font-bold text-text-muted mb-1.5 uppercase tracking-wide">
+                                                                <span>Completion</span>
+                                                                <span>{order.completion_percentage || 0}%</span>
+                                                            </div>
+                                                            <div className="w-full bg-white border border-gray-200 rounded-full h-2 overflow-hidden">
+                                                                <div className="bg-primary h-2 rounded-full" style={{ width: `${order.completion_percentage || 0}%` }}></div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                            ))
+                                        )}
+                                    </section>
+                                </div>
+
+                                {/* Right Sidebar Column */}
+                                <div className="flex flex-col gap-8">
+                                    {/* Verified Writers Section */}
+                                    <section>
+                                        <div className="flex items-center justify-between mb-5">
+                                            <h2 className="text-lg font-bold text-text-dark">Verified at {user?.school || 'Your University'}</h2>
+                                            <div className="flex gap-2">
+                                                <button className="size-8 rounded-full bg-white border border-border-subtle flex items-center justify-center text-text-muted hover:bg-gray-50 transition-colors">
+                                                    <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                                                </button>
+                                                <button className="size-8 rounded-full bg-white border border-border-subtle flex items-center justify-center text-text-muted hover:bg-gray-50 transition-colors">
+                                                    <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                                                </button>
                                             </div>
-                                            <span className="bg-orange-50 text-orange-700 text-[10px] font-bold px-2 py-1 rounded-lg border border-orange-100">Top Rated</span>
                                         </div>
-                                        <div className="flex gap-2 mt-4">
-                                            <span className="bg-gray-50 text-text-muted text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-gray-100">Physics</span>
-                                            <span className="bg-gray-50 text-text-muted text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-gray-100">Calculus</span>
+                                        {/* Placeholder for Verified Writers - Can be dynamic later */}
+                                        <div className="bg-white p-5 rounded-[1.5rem] border border-border-subtle shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div className="flex gap-3">
+                                                    <div className="size-12 rounded-xl bg-cover bg-center shadow-sm" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80')" }}></div>
+                                                    <div>
+                                                        <div className="flex items-center gap-1">
+                                                            <h3 className="font-bold text-text-dark">Rohan M.</h3>
+                                                            <span className="material-symbols-outlined text-blue-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                                        </div>
+                                                        <p className="text-xs text-text-muted">M.Sc Physics • Delhi University</p>
+                                                        <div className="flex items-center gap-1 mt-1 text-xs font-bold text-text-dark">
+                                                            <span className="material-symbols-outlined text-amber-400 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                                            4.9 <span className="text-text-muted font-medium">(120)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span className="bg-orange-50 text-orange-700 text-[10px] font-bold px-2 py-1 rounded-lg border border-orange-100">Top Rated</span>
+                                            </div>
+                                            <div className="flex gap-2 mt-4">
+                                                <span className="bg-gray-50 text-text-muted text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-gray-100">Physics</span>
+                                                <span className="bg-gray-50 text-text-muted text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-gray-100">Calculus</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                </section>
+                                    </section>
+                                </div>
                             </div>
                         </div>
                     </div>

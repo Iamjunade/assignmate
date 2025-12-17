@@ -325,56 +325,34 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                     {/* Action Buttons */}
                                     <div className="grid grid-cols-2 gap-3 w-full mt-2">
                                         {isOwnProfile ? (
-                                            <>
-                                                <button
-                                                    onClick={() => setEditingProfile(!editingProfile)}
-                                                    className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-orange-50 text-primary font-bold text-sm hover:bg-orange-100 transition-colors"
-                                                >
-                                                    <Edit2 size={16} />
-                                                    Edit
-                                                </button>
-                                                <button className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors">
-                                                    <LinkIcon size={16} />
-                                                    Share
-                                                </button>
-                                            </>
+                                            // ✅ Case 1: My Profile -> Show Edit
+                                            <button
+                                                onClick={() => setEditingProfile(!editingProfile)}
+                                                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-orange-50 text-primary font-bold text-sm hover:bg-orange-100 transition-colors"
+                                            >
+                                                <Edit2 size={16} /> Edit
+                                            </button>
                                         ) : (
-                                            <>
-                                                {connectionStatus === 'connected' ? (
-                                                    <button
-                                                        onClick={handleMessage}
-                                                        className="col-span-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-colors shadow-lg shadow-primary/30"
-                                                    >
-                                                        <MessageSquare size={16} />
-                                                        Message
-                                                    </button>
-                                                ) : connectionStatus === 'pending_sent' ? (
-                                                    <button
-                                                        disabled
-                                                        className="col-span-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-100 text-secondary font-bold text-sm cursor-not-allowed"
-                                                    >
-                                                        <UserCheck size={16} />
-                                                        Request Sent
-                                                    </button>
-                                                ) : connectionStatus === 'pending_received' ? (
-                                                    <button
-                                                        onClick={() => navigate('/connections')}
-                                                        className="col-span-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-colors"
-                                                    >
-                                                        <UserCheck size={16} />
-                                                        Respond
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        onClick={handleConnect}
-                                                        className="col-span-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-colors shadow-lg shadow-primary/30"
-                                                    >
-                                                        <UserPlus size={16} />
-                                                        Connect
-                                                    </button>
-                                                )}
-                                            </>
+                                            // ✅ Case 2: Others' Profile -> Show Connect
+                                            <button
+                                                onClick={async () => {
+                                                    // Call backend to send request
+                                                    try {
+                                                        await db.sendConnectionRequest(currentUser.id, profileUser.id);
+                                                        success("Connection request sent!");
+                                                    } catch (e) {
+                                                        error("Failed to send request");
+                                                    }
+                                                }}
+                                                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-[#1b140d] font-bold text-sm hover:opacity-90 transition-colors shadow-sm"
+                                            >
+                                                <UserPlus size={16} /> Connect
+                                            </button>
                                         )}
+
+                                        <button className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors">
+                                            <LinkIcon size={16} /> Share
+                                        </button>
                                     </div>
 
                                     {/* Availability Status */}
