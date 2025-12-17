@@ -46,6 +46,16 @@ service cloud.firestore {
       }
     }
 
+    // --- Requests Collection (Connection Requests) ---
+    match /requests/{requestId} {
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.toId);
+      allow read: if isAuthenticated() && (
+        resource.data.fromId == request.auth.uid || 
+        resource.data.toId == request.auth.uid
+      );
+    }
+
     // --- Connections Collection ---
     match /connections/{connectionId} {
       // Read: Requester or Receiver
