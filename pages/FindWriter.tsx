@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { INDIAN_COLLEGES } from '../data/colleges';
 import { dbService, userApi } from '../services/firestoreService';
 import { useAuth } from '../contexts/AuthContext';
+import { Avatar } from '../components/ui/Avatar';
 
 export const FindWriter = () => {
     const navigate = useNavigate();
@@ -129,7 +130,7 @@ export const FindWriter = () => {
                                     Dashboard
                                 </button>
                                 <div className="size-10 rounded-full overflow-hidden border border-[#e7dbcf] cursor-pointer" onClick={() => navigate('/profile')}>
-                                    <img src={user.avatar_url || `https://ui-avatars.com/api/?name=${user.full_name}&background=random`} alt="Profile" className="w-full h-full object-cover" />
+                                    <Avatar src={user.avatar_url} alt={user.full_name} className="w-full h-full" />
                                 </div>
                             </div>
                         )}
@@ -276,7 +277,7 @@ export const FindWriter = () => {
                                     writers.map((writer) => (
                                         <div key={writer.id} className="bg-white p-5 rounded-2xl border border-[#f3ede7] shadow-sm hover:shadow-md transition-all">
                                             <div className="flex items-center gap-4 mb-3">
-                                                <img src={writer.avatar_url || 'https://via.placeholder.com/150'} alt={writer.full_name} className="w-14 h-14 rounded-full object-cover" />
+                                                <Avatar src={writer.avatar_url} alt={writer.full_name} className="size-14 rounded-full" />
                                                 <div>
                                                     <h3 className="font-bold text-lg">{writer.full_name}</h3>
                                                     <p className="text-xs text-gray-500">{writer.school}</p>

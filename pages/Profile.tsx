@@ -15,6 +15,7 @@ import { GlassButton } from '../components/ui/GlassButton';
 import { GlassInput } from '../components/ui/GlassInput';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
+import { Avatar } from '../components/ui/Avatar';
 
 export const Profile = ({ user: currentUser }: { user: any }) => {
     const { userId } = useParams();
@@ -272,10 +273,12 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                     )}
 
                                     <div className="relative mb-4 mt-2 group-hover:scale-105 transition-transform duration-300">
-                                        <div
-                                            className="size-32 rounded-full bg-cover bg-center border-4 border-white shadow-lg"
-                                            style={{ backgroundImage: `url('${profileUser.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profileUser.id}`}')` }}
-                                        ></div>
+                                        <Avatar
+                                            src={profileUser.avatar_url}
+                                            alt={profileUser.full_name}
+                                            className="size-32 rounded-full border-4 border-white shadow-lg"
+                                            fallback={profileUser.full_name?.charAt(0)}
+                                        />
                                         {isOwnProfile && (
                                             <button
                                                 onClick={() => fileInputRef.current?.click()}
@@ -512,7 +515,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                                 {isOwnProfile && (
                                                                     <button
                                                                         onClick={() => handleDeleteSample(item)}
-                                                                        className="absolute top-3 right-3 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-red-500 transition-colors"
+                                                                        className="absolute top-3 right-3 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-red-50 transition-colors"
                                                                     >
                                                                         <Trash2 size={16} />
                                                                     </button>
@@ -626,7 +629,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                             {requests.map((req) => (
                                                                 <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-background-light">
                                                                     <div className="flex items-center gap-3">
-                                                                        <div className="size-10 rounded-full bg-gray-200 bg-cover bg-center" style={{ backgroundImage: `url('${req.fromUser?.avatar_url}')` }}></div>
+                                                                        <Avatar src={req.fromUser?.avatar_url} alt={req.fromUser?.full_name} className="size-10 rounded-full" />
                                                                         <div>
                                                                             <p className="font-bold text-sm">{req.fromUser?.full_name}</p>
                                                                             <p className="text-xs text-secondary">@{req.fromUser?.handle}</p>
@@ -648,7 +651,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                         const otherUser = conn.participants.find((p: any) => p.id !== profileUser.id);
                                                         return (
                                                             <div key={conn.id} className="bg-white p-4 rounded-2xl shadow-sm border border-border-light flex items-center gap-4">
-                                                                <div className="size-12 rounded-full bg-gray-200 bg-cover bg-center" style={{ backgroundImage: `url('${otherUser?.avatar_url}')` }}></div>
+                                                                <Avatar src={otherUser?.avatar_url} alt={otherUser?.full_name} className="size-12 rounded-full" />
                                                                 <div>
                                                                     <p className="font-bold text-text-main">{otherUser?.full_name}</p>
                                                                     <p className="text-xs text-secondary">@{otherUser?.handle}</p>

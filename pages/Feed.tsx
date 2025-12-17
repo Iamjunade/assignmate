@@ -5,6 +5,7 @@ import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { useNavigate } from 'react-router-dom';
 import { dbService as db } from '../services/firestoreService';
 import { format } from 'date-fns';
+import { Avatar } from '../components/ui/Avatar';
 
 interface FeedProps {
     user: User | null;
@@ -106,11 +107,12 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             <div className="flex items-center gap-2 mt-3">
                                                 <div className="flex -space-x-2">
                                                     {stats.activeOrders.slice(0, 3).map((order: any, i: number) => (
-                                                        <img
+                                                        <Avatar
                                                             key={i}
-                                                            src={order.writer_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${order.writer_handle}`}
+                                                            src={order.writer_avatar}
                                                             alt="Writer"
                                                             className="size-6 rounded-full border-2 border-white"
+                                                            fallback={order.writer_handle?.charAt(0)}
                                                         />
                                                     ))}
                                                 </div>
@@ -243,7 +245,12 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                     <div className="bg-secondary-bg rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-border-subtle mb-5">
                                                         <div className="flex items-center gap-3 w-full sm:w-auto">
                                                             <div className="relative">
-                                                                <div className="size-10 rounded-full bg-cover bg-center border border-white shadow-sm" style={{ backgroundImage: `url('${order.writer_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${order.writer_handle}`}')` }}></div>
+                                                                <Avatar
+                                                                    src={order.writer_avatar}
+                                                                    alt={order.writer_handle}
+                                                                    className="size-10 rounded-full border border-white shadow-sm"
+                                                                    fallback={order.writer_handle?.charAt(0)}
+                                                                />
                                                                 {order.writer_verified && (
                                                                     <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5" title="Verified Writer">
                                                                         <span className="material-symbols-outlined text-blue-500 text-[14px] leading-none" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
@@ -290,7 +297,11 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         <div className="bg-white p-5 rounded-[1.5rem] border border-border-subtle shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer">
                                             <div className="flex justify-between items-start mb-3">
                                                 <div className="flex gap-3">
-                                                    <div className="size-12 rounded-xl bg-cover bg-center shadow-sm" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80')" }}></div>
+                                                    <Avatar
+                                                        src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
+                                                        alt="Rohan M."
+                                                        className="size-12 rounded-xl shadow-sm"
+                                                    />
                                                     <div>
                                                         <div className="flex items-center gap-1">
                                                             <h3 className="font-bold text-text-dark">Rohan M.</h3>
