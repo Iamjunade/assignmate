@@ -109,7 +109,9 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         return { data: { ...res.data, session: true } };
       } catch (error: any) {
         console.error("Registration Error:", error);
-        return { error: { message: "Account created but profile setup failed." } };
+        // ROLLBACK: Delete the auth user so they can try again
+        await firebaseAuth.deleteUser();
+        return { error: { message: "Account created but profile setup failed. Please try again." } };
       }
     }
     return res;
