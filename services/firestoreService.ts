@@ -605,6 +605,9 @@ export const dbService = {
         let chats1: any[] = [];
         let chats2: any[] = [];
 
+        // Cache to store user profiles and avoid re-fetching on every message
+        const userCache = new Map<string, any>();
+
         const mergeAndCallback = async () => {
             const allChats = [...chats1, ...chats2];
             // Dedupe
@@ -615,14 +618,20 @@ export const dbService = {
             // Sort
             uniqueChats.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
-            // Hydrate using batch fetch
+            // Identify missing users
             const otherIds = uniqueChats.map((c: any) => c.poster_id === userId ? c.writer_id : c.poster_id);
-            const userMap = await dbService.getUsersBatch(otherIds);
+            const missingIds = otherIds.filter(id => !userCache.has(id));
+
+            // Fetch only missing users
+            if (missingIds.length > 0) {
+                const newUsersMap = await dbService.getUsersBatch(missingIds);
+                newUsersMap.forEach((user, id) => userCache.set(id, user));
+            }
 
             const hydrated = uniqueChats.map((c: any) => {
                 const isPoster = c.poster_id === userId;
                 const otherId = isPoster ? c.writer_id : c.poster_id;
-                const other = userMap.get(otherId);
+                const other = userCache.get(otherId);
 
                 return {
                     ...c,

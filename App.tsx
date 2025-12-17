@@ -1,5 +1,5 @@
 import React, { useState, Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation, useParams, Outlet } from 'react-router-dom';
 import { dbService as db } from './services/firestoreService';
 import { notifications, fcm } from './services/firebase';
 import { GlassLayout } from './components/layout/GlassLayout';
@@ -111,157 +111,98 @@ function AppContent() {
     { label: 'Profile', href: '/profile', onClick: () => navigate('/profile') },
   ];
 
-  // Fix for Full Screen Layout: Render FindWriter independently to bypass GlassLayout constraints
-  if (location.pathname === '/writers') {
-    return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-screen text-slate-400">
-          <Loader2 className="animate-spin" />
-        </div>
-      }>
-        <FindWriter />
-      </Suspense>
-    );
-  }
-
-  // Fix for Feed Layout: Render Feed independently to avoid double sidebar/header
-  if (location.pathname === '/feed') {
-    return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-screen text-slate-400">
-          <Loader2 className="animate-spin" />
-        </div>
-      }>
-        <ProtectedRoute>
-          <Feed user={user} onChat={startChatFromWriter} />
-        </ProtectedRoute>
-      </Suspense>
-    );
-  }
-
-  // Fix for Connections Layout
-  if (location.pathname === '/connections') {
-    return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-screen text-slate-400">
-          <Loader2 className="animate-spin" />
-        </div>
-      }>
-        <ProtectedRoute>
-          {user && <Connections user={user} />}
-        </ProtectedRoute>
-      </Suspense>
-    );
-  }
-
-  // Fix for Chats Layout
-  if (location.pathname.startsWith('/chats')) {
-    return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-screen text-slate-400">
-          <Loader2 className="animate-spin" />
-        </div>
-      }>
-        <ProtectedRoute>
-          <Routes>
-            <Route path="/" element={<ChatListWrapper user={user} />} />
-            <Route path="/:chatId" element={<ChatRoomWrapper user={user} />} />
-          </Routes>
-        </ProtectedRoute>
-      </Suspense>
-    );
-  }
-
   return (
-    <GlassLayout>
-      {location.pathname !== '/' && location.pathname !== '/feed' && location.pathname !== '/auth' && location.pathname !== '/writers' && !location.pathname.startsWith('/profile') && location.pathname !== '/connections' && !location.pathname.startsWith('/chats') && (
-        <GlassNavigation
-          logo={
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(user ? '/feed' : '/')}>
-              <div className="size-10 rounded-xl overflow-hidden">
-                <img src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
-              </div>
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-400">
-                AssignMate
-              </span>
-            </div>
-          }
-          items={user ? authNavItems : navItems}
-          user={user ? { name: user.full_name || user.email } : undefined}
-          onLogin={() => navigate('/auth')}
-          onLogout={async () => {
-            await logout();
-            navigate('/');
-          }}
-        />
-      )}
+    <div className="min-h-screen bg-background">
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen text-slate-400">
+          <Loader2 className="animate-spin" />
+        </div>
+      }>
+        <Routes>
+          {/* --- Dashboard Routes (Self-contained Layouts) --- */}
+          <Route path="/feed" element={
+            <ProtectedRoute>
+              <Feed user={user} onChat={startChatFromWriter} />
+            </ProtectedRoute>
+          } />
 
-      <div className={`${location.pathname !== '/' && location.pathname !== '/auth' ? 'pt-20' : ''} min-h-screen`}>
-        <Suspense fallback={
-          <div className="flex items-center justify-center h-[50vh] text-slate-400">
-            <Loader2 className="animate-spin" />
-          </div>
-        }>
-          <Routes>
+          <Route path="/writers" element={<FindWriter />} />
+
+          <Route path="/connections" element={
+            <ProtectedRoute>
+              {user && <Connections user={user} />}
+            </ProtectedRoute>
+          } />
+
+          <Route path="/chats/*" element={
+            <ProtectedRoute>
+              <Routes>
+                <Route path="/" element={<ChatListWrapper user={user} />} />
+                <Route path="/:chatId" element={<ChatRoomWrapper user={user} />} />
+              </Routes>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              {user && <Profile user={user} />}
+            </ProtectedRoute>
+          } />
+
+          <Route path="/profile/:userId" element={
+            <ProtectedRoute>
+              {user && <Profile user={user} />}
+            </ProtectedRoute>
+          } />
+
+          {/* --- Admin Routes --- */}
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="verifications" element={<AdminVerifications />} />
+            <Route path="chats" element={<AdminChats />} />
+            <Route path="connections" element={<AdminConnections />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
+
+          {/* --- Public Routes (Glass Layout) --- */}
+          <Route element={
+            <GlassLayout>
+              <GlassNavigation
+                logo={
+                  <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(user ? '/feed' : '/')}>
+                    <div className="size-10 rounded-xl overflow-hidden">
+                      <img src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-400">
+                      AssignMate
+                    </span>
+                  </div>
+                }
+                items={user ? authNavItems : navItems}
+                user={user ? { name: user.full_name || user.email } : undefined}
+                onLogin={() => navigate('/auth')}
+                onLogout={async () => {
+                  await logout();
+                  navigate('/');
+                }}
+              />
+              <div className="pt-20 min-h-screen">
+                <Outlet />
+              </div>
+            </GlassLayout>
+          }>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth onComplete={() => navigate('/feed')} />} />
             <Route path="/onboarding" element={<Onboarding />} />
-
-            <Route path="/feed" element={
-              <ProtectedRoute>
-                <Feed user={user} onChat={startChatFromWriter} />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/writers" element={<FindWriter />} />
-
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                {user && <Profile user={user} />}
-              </ProtectedRoute>
-            } />
-
-            {/* ✅ Route for viewing other profiles */}
-            <Route path="/profile/:userId" element={
-              <ProtectedRoute>
-                {user && <Profile user={user} />}
-              </ProtectedRoute>
-            } />
-
-            <Route path="/connections" element={
-              <ProtectedRoute>
-                {user && <Connections user={user} />}
-              </ProtectedRoute>
-            } />
-
-            <Route path="/chats" element={
-              <ProtectedRoute>
-                <ChatListWrapper user={user} />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/chats/:chatId" element={
-              <ProtectedRoute>
-                <ChatRoomWrapper user={user} />
-              </ProtectedRoute>
-            } />
-
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-              <Route index element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="verifications" element={<AdminVerifications />} />
-              <Route path="chats" element={<AdminChats />} />
-              <Route path="connections" element={<AdminConnections />} />
-              <Route path="settings" element={<AdminSettings />} />
-            </Route>
-
+            {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-      </div>
-    </GlassLayout>
+          </Route>
+
+        </Routes>
+      </Suspense>
+    </div>
   );
 }
 
