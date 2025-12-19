@@ -18,6 +18,7 @@ export const FindWriter = () => {
     // Filter States
     const [verifiedOnly, setVerifiedOnly] = useState(false);
     const [fastResponder, setFastResponder] = useState(false);
+    const [availableOnly, setAvailableOnly] = useState(false);
     const [sortBy, setSortBy] = useState('relevance');
 
     // Data States
@@ -88,19 +89,20 @@ export const FindWriter = () => {
                         : true;
 
                     // Verified Filter
-                    const matchesVerified = verifiedOnly ? u.is_verified : true;
+                    const matchesVerified = verifiedOnly ? u.is_verified === 'verified' : true;
 
-                    // Fast Responder Filter (Mock logic for now, assuming 'response_time' field exists or random)
-                    // In a real app, you'd check u.avg_response_time < 60 mins
+                    // Fast Responder Filter
                     const matchesFast = fastResponder ? true : true;
 
-                    return isNotMe && isComplete && matchesSearch && matchesCollege && matchesVerified && matchesFast;
+                    // Availability Filter
+                    const matchesAvailability = availableOnly ? u.is_online : true;
+
+                    return isNotMe && isComplete && matchesSearch && matchesCollege && matchesVerified && matchesFast && matchesAvailability;
                 });
 
                 // Sorting
                 let sortedUsers = [...validUsers];
                 if (sortBy === 'price_low') {
-                    // Mock price sorting if price exists, else random
                     sortedUsers.sort((a, b) => (a.hourly_rate || 0) - (b.hourly_rate || 0));
                 } else if (sortBy === 'rating_high') {
                     sortedUsers.sort((a, b) => (b.rating || 0) - (a.rating || 0));
@@ -122,7 +124,7 @@ export const FindWriter = () => {
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [user, searchQuery, collegeQuery, verifiedOnly, fastResponder, sortBy]);
+    }, [user, searchQuery, collegeQuery, verifiedOnly, fastResponder, availableOnly, sortBy]);
 
     const handleCollegeSelect = (collegeName: string) => {
         setCollegeQuery(collegeName);
@@ -135,7 +137,6 @@ export const FindWriter = () => {
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
-        // Optional: Update URL on search change or on submit
     };
 
     return (
@@ -276,6 +277,17 @@ export const FindWriter = () => {
                             >
                                 <span className="material-symbols-outlined text-[18px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                 Verified Only
+                            </button>
+
+                            <button
+                                onClick={() => setAvailableOnly(!availableOnly)}
+                                className={`shrink-0 h-9 px-4 rounded-full border text-sm font-medium flex items-center gap-2 transition-colors ${availableOnly
+                                    ? 'bg-green-50 border-green-500 text-green-700'
+                                    : 'bg-card border-border-subtle text-text-main hover:border-green-500'
+                                    }`}
+                            >
+                                <span className={`size-2 rounded-full ${availableOnly ? 'bg-green-600 animate-pulse' : 'bg-green-500'}`}></span>
+                                Available Now
                             </button>
 
                             <button

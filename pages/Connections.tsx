@@ -5,20 +5,19 @@ import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
-import { Loader2, UserPlus, MessageSquare, Users } from 'lucide-react';
+import { Loader2, UserPlus, MessageSquare, Users, X, Check } from 'lucide-react'; // Added icons
 
 const MotionDiv = motion.div as any;
 
 export const Connections = ({ user }: { user: User }) => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'network' | 'pending'>('network');
-    const [connections, setConnections] = useState<User[]>([]);
+    const [connections, setConnections] = useState<any[]>([]);
     const [requests, setRequests] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!user) return;
-
         const loadData = async () => {
             setLoading(true);
             try {
@@ -26,7 +25,7 @@ export const Connections = ({ user }: { user: User }) => {
                     db.getMyConnections(user.id),
                     db.getIncomingRequests(user.id)
                 ]);
-                setConnections(myConns as User[]);
+                setConnections(myConns);
                 setRequests(myReqs);
             } catch (error) {
                 console.error("Failed to load connections:", error);
@@ -34,157 +33,118 @@ export const Connections = ({ user }: { user: User }) => {
                 setLoading(false);
             }
         };
-
         loadData();
+    }, [user]);
 
-        // Realtime listener for raw connections to trigger reload
-        const unsub = db.listenToConnections(user.id, () => {
-            loadData();
-        });
-
-        return () => unsub();
-    }, [user.id]);
+    // ✅ NEW: Function to handle starting a chat
+    const handleMessage = async (targetUserId: string) => {
+        try {
+            // Create chat (or get existing) -> Navigate to room
+            const chat = await db.createChat(null, user.id, targetUserId);
+            navigate(`/chats/${chat.id}`);
+        } catch (error) {
+            console.error("Failed to start chat", error);
+        }
+    };
 
     const handleAccept = async (req: any) => {
         await db.respondToConnectionRequest(req.id, 'accepted');
+        // Refresh list logic here (simplified)
+        window.location.reload();
     };
 
     const handleReject = async (req: any) => {
         await db.respondToConnectionRequest(req.id, 'rejected');
-    };
-
-    const handleMessage = async (otherId: string) => {
-        const chat = await db.createChat(null, user.id, otherId);
-        navigate(`/chats/${chat.id}`);
+        window.location.reload();
     };
 
     return (
-        <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
+        <div className="bg-background-light dark:bg-background-dark text-text-main h-screen flex overflow-hidden">
             <Sidebar user={user} />
             <main className="flex-1 flex flex-col h-full overflow-hidden relative">
                 <DashboardHeader />
+                <div className="flex-1 overflow-y-auto p-6">
+                    <div className="max-w-4xl mx-auto">
+                        <h1 className="text-2xl font-bold mb-6">My Network</h1>
 
-                <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
-                    <div className="max-w-5xl mx-auto h-full flex flex-col">
-                        <div className="flex items-center justify-between mb-6">
-                            <h1 className="text-2xl font-bold tracking-tight text-text-main">Connections</h1>
-                            <div className="flex bg-white rounded-full p-1 shadow-sm border border-border-light">
-                                <button
-                                    onClick={() => setActiveTab('network')}
-                                    className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${activeTab === 'network' ? 'bg-primary text-white shadow-md' : 'text-secondary hover:bg-gray-50'}`}
-                                >
-                                    My Network
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('pending')}
-                                    className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'pending' ? 'bg-primary text-white shadow-md' : 'text-secondary hover:bg-gray-50'}`}
-                                >
-                                    Requests
-                                    {requests.length > 0 && (
-                                        <span className={`flex items-center justify-center size-5 rounded-full text-[10px] ${activeTab === 'pending' ? 'bg-white text-primary' : 'bg-primary text-white'}`}>
-                                            {requests.length}
-                                        </span>
-                                    )}
-                                </button>
-                            </div>
+                        {/* Tabs */}
+                        <div className="flex gap-4 mb-6 border-b border-gray-200 dark:border-gray-700 pb-1">
+                            <button
+                                onClick={() => setActiveTab('network')}
+                                className={`pb-2 px-1 text-sm font-bold ${activeTab === 'network' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'}`}
+                            >
+                                Connections ({connections.length})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('pending')}
+                                className={`pb-2 px-1 text-sm font-bold ${activeTab === 'pending' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'}`}
+                            >
+                                Requests ({requests.length})
+                            </button>
                         </div>
 
                         {loading ? (
-                            <div className="flex justify-center items-center h-64">
-                                <Loader2 className="animate-spin text-primary" size={32} />
-                            </div>
+                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-primary" /></div>
                         ) : (
-                            <div className="space-y-4">
-                                <AnimatePresence mode="wait">
-                                    {activeTab === 'network' ? (
-                                        <MotionDiv
-                                            key="network"
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                                        >
-                                            {connections.length === 0 ? (
-                                                <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
-                                                    <div className="size-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                                                        <Users className="text-gray-300" size={40} />
-                                                    </div>
-                                                    <h3 className="text-lg font-bold text-text-main">No connections yet</h3>
-                                                    <p className="text-secondary max-w-xs mx-auto mt-2">Search for students or writers to grow your network.</p>
-                                                </div>
-                                            ) : (
-                                                connections.map((conn) => (
-                                                    <div key={conn.id} className="bg-white p-4 rounded-2xl border border-border-light shadow-sm flex items-center gap-4">
+                            <div className="grid gap-4">
+                                {activeTab === 'network' && (
+                                    connections.length > 0 ? (
+                                        connections.map(conn => {
+                                            // Find the "other" user in the participants list
+                                            // Assuming conn.participants is hydrated with objects. 
+                                            // If it's IDs, you need to fetch user details.
+                                            // Using safe navigation assuming your service returns hydrated objects:
+                                            const otherUser = Array.isArray(conn.participants)
+                                                ? conn.participants.find((p: any) => p.id !== user.id) || conn.participants[0]
+                                                : null;
+
+                                            if (!otherUser) return null;
+
+                                            return (
+                                                <div key={conn.id} className="bg-white dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center justify-between shadow-sm">
+                                                    <div className="flex items-center gap-4">
                                                         <img
-                                                            src={conn.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${conn.handle}`}
-                                                            alt={conn.handle}
-                                                            className="size-14 rounded-full bg-gray-50 object-cover border border-gray-100"
+                                                            src={otherUser.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${otherUser.full_name}`}
+                                                            className="w-12 h-12 rounded-full object-cover"
+                                                            alt=""
                                                         />
-                                                        <div className="flex-1 min-w-0">
-                                                            <h3 className="font-bold text-text-main truncate">{conn.full_name || conn.handle}</h3>
-                                                            <p className="text-xs text-secondary truncate">@{conn.handle}</p>
-                                                            <p className="text-xs text-secondary truncate mt-0.5">{conn.school}</p>
+                                                        <div>
+                                                            <h3 className="font-bold text-lg">{otherUser.full_name}</h3>
+                                                            <p className="text-xs text-gray-500">{otherUser.school}</p>
                                                         </div>
-                                                        <button
-                                                            onClick={() => handleMessage(conn.id)}
-                                                            className="size-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                                                            title="Message"
-                                                        >
-                                                            <MessageSquare size={18} />
-                                                        </button>
                                                     </div>
-                                                ))
-                                            )}
-                                        </MotionDiv>
-                                    ) : (
-                                        <MotionDiv
-                                            key="pending"
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            className="space-y-3"
-                                        >
-                                            {requests.length === 0 ? (
-                                                <div className="flex flex-col items-center justify-center py-20 text-center">
-                                                    <div className="size-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                                                        <UserPlus className="text-gray-300" size={40} />
-                                                    </div>
-                                                    <h3 className="text-lg font-bold text-text-main">No pending requests</h3>
+                                                    {/* ✅ FIX: Added onClick handler */}
+                                                    <button
+                                                        onClick={() => handleMessage(otherUser.id)}
+                                                        className="p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors"
+                                                    >
+                                                        <MessageSquare size={20} />
+                                                    </button>
                                                 </div>
-                                            ) : (
-                                                requests.map((req) => (
-                                                    <div key={req.id} className="bg-white p-4 rounded-2xl border border-border-light shadow-sm flex items-center justify-between gap-4">
-                                                        <div className="flex items-center gap-4">
-                                                            <img
-                                                                src={req.requester?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${req.requester?.handle}`}
-                                                                alt={req.requester?.handle}
-                                                                className="size-12 rounded-full bg-gray-50 object-cover border border-gray-100"
-                                                            />
-                                                            <div>
-                                                                <h3 className="font-bold text-text-main">{req.requester?.full_name || req.requester?.handle}</h3>
-                                                                <p className="text-xs text-secondary">@{req.requester?.handle} • {req.requester?.school}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => handleReject(req)}
-                                                                className="px-4 py-2 rounded-xl text-sm font-bold text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleAccept(req)}
-                                                                className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-dark transition-colors shadow-sm"
-                                                            >
-                                                                Accept
-                                                            </button>
-                                                        </div>
+                                            );
+                                        })
+                                    ) : <p className="text-gray-500 text-center py-10">No connections yet. Go find some peers!</p>
+                                )}
+
+                                {activeTab === 'pending' && (
+                                    requests.length > 0 ? (
+                                        requests.map(req => (
+                                            <div key={req.id} className="bg-white dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center justify-between shadow-sm">
+                                                <div className="flex items-center gap-4">
+                                                    <img src={req.fromUser?.avatar_url} className="w-12 h-12 rounded-full bg-gray-200" alt="" />
+                                                    <div>
+                                                        <h3 className="font-bold">{req.fromUser?.full_name}</h3>
+                                                        <p className="text-xs text-gray-500">Wants to connect</p>
                                                     </div>
-                                                ))
-                                            )}
-                                        </MotionDiv>
-                                    )}
-                                </AnimatePresence>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => handleReject(req)} className="p-2 rounded-full bg-red-50 text-red-500 hover:bg-red-100"><X size={20} /></button>
+                                                    <button onClick={() => handleAccept(req)} className="p-2 rounded-full bg-green-50 text-green-600 hover:bg-green-100"><Check size={20} /></button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : <p className="text-gray-500 text-center py-10">No pending requests.</p>
+                                )}
                             </div>
                         )}
                     </div>

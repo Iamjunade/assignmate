@@ -211,6 +211,20 @@ export const presence = {
                 callback(false, 0);
             }
         });
+    },
+
+    setTypingStatus: (chatId: string, userId: string, isTyping: boolean) => {
+        if (!rtdbInstance) return;
+        const typingRef = ref(rtdbInstance, `/typing/${chatId}/${userId}`);
+        set(typingRef, isTyping);
+    },
+
+    listenToTypingStatus: (chatId: string, userId: string, callback: (isTyping: boolean) => void) => {
+        if (!rtdbInstance) return () => { };
+        const typingRef = ref(rtdbInstance, `/typing/${chatId}/${userId}`);
+        return onValue(typingRef, (snapshot) => {
+            callback(snapshot.val() === true);
+        });
     }
 };
 

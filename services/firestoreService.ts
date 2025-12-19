@@ -491,34 +491,29 @@ export const dbService = {
     },
 
     createChat: async (gigId: string | null, posterId: string, writerId: string) => {
-        // Check existing
-        const q = query(
-            collection(getDb(), 'chats'),
-            where('poster_id', '==', posterId),
-            where('writer_id', '==', writerId)
-        );
-        const snap = await getDocs(q);
-        if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+        // 1. Query for existing chat with these exact participants
+        const q = query(collection(getDb(), 'chats'), where('participants', 'array-contains', posterId));
+        const snaps = await getDocs(q);
+        const existing = snaps.docs.find(doc => {
+            const data = doc.data();
+            return data.participants && data.participants.includes(writerId);
+        });
 
-        // Check reverse
-        const q2 = query(
-            collection(getDb(), 'chats'),
-            where('poster_id', '==', writerId),
-            where('writer_id', '==', posterId)
-        );
-        const snap2 = await getDocs(q2);
-        if (!snap2.empty) return { id: snap2.docs[0].id, ...snap2.docs[0].data() };
+        if (existing) return { id: existing.id, ...existing.data() };
 
+        // 2. If none, create new
+        const newChatRef = doc(collection(getDb(), 'chats'));
         const newChat = {
-            gig_id: gigId,
-            poster_id: posterId,
-            writer_id: writerId,
+            participants: [posterId, writerId],
+            poster_id: posterId, // Keep for backward compatibility if needed
+            writer_id: writerId, // Keep for backward compatibility if needed
+            createdAt: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            last_message: null
+            last_message: '',
+            unread_count: 0
         };
-
-        const res = await addDoc(collection(getDb(), 'chats'), newChat);
-        return { id: res.id, ...newChat };
+        await setDoc(newChatRef, newChat);
+        return { id: newChatRef.id, ...newChat };
     },
 
     getMessages: async (chatId: string) => {
@@ -536,7 +531,7 @@ export const dbService = {
             content,
             type,
             created_at: new Date().toISOString(),
-            read_at: null
+            readBy: [senderId] // Initialize with sender
         };
 
         // 1. Add to subcollection
@@ -563,22 +558,30 @@ export const dbService = {
     },
 
     markMessagesAsRead: async (chatId: string, readerId: string) => {
-        // In Firestore, we'd typically have to batch update. 
-        // For simplicity, we'll just update the last read timestamp on the chat member object if we had one.
-        // Or query unread messages and batch update them.
+        // Query messages where readerId is NOT in readBy
+        // Firestore doesn't support "not-in-array" directly easily, so we query all and filter or query by readBy not-contains (not supported)
+        // Alternative: Query messages where sender != readerId
+
         const q = query(
             collection(getDb(), 'chats', chatId, 'messages'),
-            where('read_at', '==', null),
             where('sender_id', '!=', readerId)
         );
         const snap = await getDocs(q);
         const batch = (await import('firebase/firestore')).writeBatch(getDb());
 
+        let count = 0;
         snap.docs.forEach(d => {
-            batch.update(d.ref, { read_at: new Date().toISOString() });
+            const data = d.data();
+            if (!data.readBy || !data.readBy.includes(readerId)) {
+                batch.update(d.ref, {
+                    readBy: arrayUnion(readerId),
+                    read_at: new Date().toISOString() // Keep for backward compat
+                });
+                count++;
+            }
         });
 
-        if (!snap.empty) await batch.commit();
+        if (count > 0) await batch.commit();
     },
 
     listenToMessages: (chatId: string, callback: (messages: any[]) => void) => {
@@ -728,5 +731,14 @@ export const dbService = {
             nextDeadlineProject,
             activeOrders: hydratedOrders
         };
+    },
+
+    // --- STORAGE METHODS ---
+    uploadFile: async (file: File, path: string) => {
+        const { storage } = await import('./firebase');
+        const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+        const storageRef = ref(storage, path);
+        const snapshot = await uploadBytes(storageRef, file);
+        return await getDownloadURL(snapshot.ref);
     }
 };

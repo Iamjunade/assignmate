@@ -326,7 +326,6 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                     {/* Action Buttons */}
                                     <div className="grid grid-cols-2 gap-3 w-full mt-2">
                                         {isOwnProfile ? (
-                                            // ✅ Case 1: My Profile -> Show Edit
                                             <button
                                                 onClick={() => setEditingProfile(!editingProfile)}
                                                 className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-orange-50 text-primary font-bold text-sm hover:bg-orange-100 transition-colors"
@@ -334,21 +333,21 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                 <Edit2 size={16} /> Edit
                                             </button>
                                         ) : (
-                                            // ✅ Case 2: Others' Profile -> Handle Connection Status
                                             <>
                                                 {connectionStatus === 'none' && (
                                                     <button
-                                                        onClick={handleConnect}
+                                                        onClick={async () => {
+                                                            await db.sendConnectionRequest(currentUser.id, profileUser.id);
+                                                            setConnectionStatus('pending_sent');
+                                                            success("Request sent!");
+                                                        }}
                                                         className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-[#1b140d] font-bold text-sm hover:opacity-90 transition-colors shadow-sm"
                                                     >
                                                         <UserPlus size={16} /> Connect
                                                     </button>
                                                 )}
                                                 {connectionStatus === 'pending_sent' && (
-                                                    <button
-                                                        disabled
-                                                        className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-100 text-secondary font-bold text-sm cursor-not-allowed"
-                                                    >
+                                                    <button disabled className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-200 text-gray-500 font-bold text-sm">
                                                         <Clock size={16} /> Pending
                                                     </button>
                                                 )}
@@ -362,8 +361,11 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                 )}
                                                 {connectionStatus === 'connected' && (
                                                     <button
-                                                        onClick={handleMessage}
-                                                        className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-green-50 text-green-600 font-bold text-sm hover:bg-green-100 transition-colors"
+                                                        onClick={async () => {
+                                                            const chat = await db.createChat(null, currentUser.id, profileUser.id);
+                                                            navigate(`/chats/${chat.id}`);
+                                                        }}
+                                                        className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm"
                                                     >
                                                         <MessageSquare size={16} /> Message
                                                     </button>

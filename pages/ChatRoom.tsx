@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { dbService as db } from '../services/firestoreService';
-import { Send, ArrowLeft, Briefcase, Paperclip, Smile, CheckCheck, MoreVertical, Phone, Video } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { presence } from '../services/firebase';
+import { Send, ArrowLeft, Briefcase, Paperclip, Smile, CheckCheck, MoreVertical, Phone, Video, Image as ImageIcon, FileText } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { UserPresence } from '../components/UserPresence';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
@@ -15,8 +16,12 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     const [messages, setMessages] = useState<any[]>([]);
     const [text, setText] = useState('');
     const [chatDetails, setChatDetails] = useState<any>(null);
+    const [isTyping, setIsTyping] = useState(false);
+    const [isOtherTyping, setIsOtherTyping] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
     const endRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         // 1. Fetch Chat Metadata
@@ -25,34 +30,52 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
         // 2. Fetch Messages and Mark as Read
         db.getMessages(chatId).then(msgs => {
             setMessages(msgs);
-            // Mark messages as read when entering the room
             db.markMessagesAsRead(chatId, user.id);
         });
 
         // 3. Realtime Subscription
         const unsubscribe = db.listenToMessages(chatId, (newMessages) => {
             setMessages(newMessages);
-            // Mark as read if the last message is not from me
             const lastMsg = newMessages[newMessages.length - 1];
             if (lastMsg && lastMsg.sender_id !== user.id) {
                 db.markMessagesAsRead(chatId, user.id);
             }
         });
 
-        return () => { unsubscribe(); };
-    }, [chatId, user.id]);
+        // 4. Typing Indicators
+        const unsubTyping = presence.listenToTypingStatus(chatId, user.id === chatDetails?.poster_id ? chatDetails?.writer_id : chatDetails?.poster_id, (typing) => {
+            setIsOtherTyping(typing);
+        });
 
-    // Scroll to bottom when messages change
-    useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+        return () => {
+            unsubscribe();
+            if (unsubTyping) unsubTyping();
+        };
+    }, [chatId, user.id, chatDetails]);
 
-    // Auto-resize textarea
+    // Scroll to bottom
+    useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, isOtherTyping]);
+
+    // Handle Typing Status
     useEffect(() => {
-        if (textareaRef.current) {
-            textareaRef.current.style.height = 'auto';
-            const scrollHeight = textareaRef.current.scrollHeight;
-            textareaRef.current.style.height = `${Math.min(scrollHeight, 128)}px`;
+        if (!chatDetails) return;
+        const timeout = setTimeout(() => {
+            if (isTyping) {
+                setIsTyping(false);
+                presence.setTypingStatus(chatId, user.id, false);
+            }
+        }, 3000);
+
+        return () => clearTimeout(timeout);
+    }, [text, isTyping, chatId, user.id]);
+
+    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setText(e.target.value);
+        if (!isTyping) {
+            setIsTyping(true);
+            presence.setTypingStatus(chatId, user.id, true);
         }
-    }, [text]);
+    };
 
     const send = async (e: any) => {
         e.preventDefault();
@@ -60,15 +83,35 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
         const contentToSend = text;
         setText('');
+        setIsTyping(false);
+        presence.setTypingStatus(chatId, user.id, false);
 
         if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
         const sentMsg = await db.sendMessage(chatId, user.id, contentToSend);
-
         setMessages(prev => {
             if (prev.some(m => m.id === sentMsg.id)) return prev;
             return [...prev, sentMsg];
         });
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        try {
+            const url = await db.uploadFile(file, `chats/${chatId}/${Date.now()}_${file.name}`);
+            const type = file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
+            const content = type === 'IMAGE' ? url : `${file.name}|${url}`;
+
+            const sentMsg = await db.sendMessage(chatId, user.id, content, type);
+            setMessages(prev => [...prev, sentMsg]);
+        } catch (error) {
+            console.error("Upload failed", error);
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     const handleCreateOffer = async () => {
@@ -79,11 +122,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
     const formatTime = (isoString: string) => {
         if (!isoString) return '';
-        return new Date(isoString).toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        });
+        return new Date(isoString).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     };
 
     const handleBack = () => {
@@ -94,10 +133,8 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     return (
         <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />
-
             <main className="flex-1 flex flex-col h-full overflow-hidden relative">
                 <DashboardHeader />
-
                 <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-white lg:rounded-tl-3xl shadow-soft border-l border-t border-border-light">
                     {/* Chat Header */}
                     <div className="flex items-center justify-between px-6 py-4 border-b border-border-light bg-white z-10 sticky top-0">
@@ -125,7 +162,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                             </span>
                                         </div>
                                         <p className="text-xs font-medium text-secondary flex items-center gap-1">
-                                            Response time: &lt; 5 mins • <UserPresence userId={chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id} showLastSeen={true} />
+                                            {isOtherTyping ? <span className="text-primary animate-pulse font-bold">Typing...</span> : <UserPresence userId={chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id} showLastSeen={true} />}
                                         </p>
                                     </div>
                                 </div>
@@ -152,7 +189,6 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
                     {/* Messages Stream */}
                     <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col bg-background/30">
-                        {/* System Trust Message */}
                         <div className="flex justify-center w-full my-4">
                             <div className="bg-orange-50 border border-orange-100 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
                                 <span className="material-symbols-outlined text-primary text-[16px]">shield_lock</span>
@@ -196,21 +232,39 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                             ? 'bg-primary text-white rounded-br-sm shadow-md shadow-primary/20'
                                             : 'bg-white text-text-main rounded-bl-sm border border-border-light'
                                             }`}>
-                                            {m.content}
+                                            {m.type === 'IMAGE' ? (
+                                                <img src={m.content} alt="Shared" className="max-w-full rounded-lg" />
+                                            ) : m.type === 'FILE' ? (
+                                                <a href={m.content.split('|')[1]} target="_blank" rel="noreferrer" className="flex items-center gap-2 underline">
+                                                    <FileText size={20} />
+                                                    {m.content.split('|')[0]}
+                                                </a>
+                                            ) : (
+                                                m.content
+                                            )}
                                         </div>
                                     </div>
 
                                     <span className={`text-[11px] font-medium flex items-center gap-1 ${isMe ? 'text-secondary mr-1' : 'text-secondary ml-12'}`}>
                                         {formatTime(m.created_at)}
                                         {isMe && (
-                                            <span className="material-symbols-outlined text-[14px] text-primary">
-                                                {m.read_at ? 'done_all' : 'done'}
+                                            <span className={`material-symbols-outlined text-[14px] ${m.readBy && m.readBy.length > 1 ? 'text-blue-500' : 'text-gray-400'}`}>
+                                                {m.readBy && m.readBy.length > 1 ? 'done_all' : 'check'}
                                             </span>
                                         )}
                                     </span>
                                 </MotionDiv>
                             );
                         })}
+                        {isOtherTyping && (
+                            <div className="flex items-center gap-2 ml-12 mb-4">
+                                <div className="flex gap-1">
+                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
+                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
+                                </div>
+                            </div>
+                        )}
                         <div ref={endRef} />
                     </div>
 
@@ -220,7 +274,17 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                             onSubmit={send}
                             className="bg-background p-2 pl-4 rounded-[2rem] border border-border-light flex items-end gap-2 shadow-inner focus-within:ring-2 focus-within:ring-primary/20 transition-all"
                         >
-                            <button type="button" className="p-2 mb-1 rounded-full text-secondary hover:text-primary hover:bg-primary/10 transition-colors">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                onChange={handleFileUpload}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="p-2 mb-1 rounded-full text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
+                            >
                                 <span className="material-symbols-outlined rotate-45">attach_file</span>
                             </button>
 
@@ -231,7 +295,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                     placeholder="Type a secure message..."
                                     rows={1}
                                     value={text}
-                                    onChange={e => setText(e.target.value)}
+                                    onChange={handleTextChange}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && !e.shiftKey) {
                                             e.preventDefault();
@@ -245,13 +309,14 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 <span className="material-symbols-outlined">sentiment_satisfied</span>
                             </button>
 
-                            {text.trim() ? (
+                            {text.trim() || isUploading ? (
                                 <MotionButton
                                     whileTap={{ scale: 0.95 }}
                                     type="submit"
-                                    className="size-11 rounded-full bg-primary text-white flex items-center justify-center hover:bg-opacity-90 shadow-md shadow-primary/30 transition-all active:scale-95 mb-0.5"
+                                    disabled={isUploading}
+                                    className={`size-11 rounded-full bg-primary text-white flex items-center justify-center hover:bg-opacity-90 shadow-md shadow-primary/30 transition-all active:scale-95 mb-0.5 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
-                                    <span className="material-symbols-outlined">send</span>
+                                    {isUploading ? <span className="material-symbols-outlined animate-spin">refresh</span> : <span className="material-symbols-outlined">send</span>}
                                 </MotionButton>
                             ) : (
                                 <button disabled className="size-11 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center mb-0.5 cursor-not-allowed">
