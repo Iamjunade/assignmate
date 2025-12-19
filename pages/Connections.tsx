@@ -5,7 +5,7 @@ import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
-import { Loader2, UserPlus, MessageSquare, Users, X, Check } from 'lucide-react'; // Added icons
+import { Loader2, UserPlus, MessageSquare, Users, X, Check } from 'lucide-react';
 
 const MotionDiv = motion.div as any;
 
@@ -21,6 +21,7 @@ export const Connections = ({ user }: { user: User }) => {
         const loadData = async () => {
             setLoading(true);
             try {
+                // Ensure your firestoreService actually returns populated user objects, not just IDs
                 const [myConns, myReqs] = await Promise.all([
                     db.getMyConnections(user.id),
                     db.getIncomingRequests(user.id)
@@ -36,12 +37,19 @@ export const Connections = ({ user }: { user: User }) => {
         loadData();
     }, [user]);
 
-    // ✅ NEW: Function to handle starting a chat
+    // ✅ FIXED: Check for existing chat before creating a new one
     const handleMessage = async (targetUserId: string) => {
         try {
-            // Create chat (or get existing) -> Navigate to room
-            const chat = await db.createChat(null, user.id, targetUserId);
-            navigate(`/chats/${chat.id}`);
+            // 1. Try to find an existing chat first
+            const existingChatId = await db.findExistingChat(user.id, targetUserId);
+
+            if (existingChatId) {
+                navigate(`/chats/${existingChatId}`);
+            } else {
+                // 2. Create new if none exists
+                const chat = await db.createChat(null, user.id, targetUserId);
+                navigate(`/chats/${chat.id}`);
+            }
         } catch (error) {
             console.error("Failed to start chat", error);
         }
@@ -49,7 +57,6 @@ export const Connections = ({ user }: { user: User }) => {
 
     const handleAccept = async (req: any) => {
         await db.respondToConnectionRequest(req.id, 'accepted');
-        // Refresh list logic here (simplified)
         window.location.reload();
     };
 
@@ -90,10 +97,7 @@ export const Connections = ({ user }: { user: User }) => {
                                 {activeTab === 'network' && (
                                     connections.length > 0 ? (
                                         connections.map(conn => {
-                                            // Find the "other" user in the participants list
-                                            // Assuming conn.participants is hydrated with objects. 
-                                            // If it's IDs, you need to fetch user details.
-                                            // Using safe navigation assuming your service returns hydrated objects:
+                                            // Robust check to find the "other" user
                                             const otherUser = Array.isArray(conn.participants)
                                                 ? conn.participants.find((p: any) => p.id !== user.id) || conn.participants[0]
                                                 : null;
@@ -113,7 +117,6 @@ export const Connections = ({ user }: { user: User }) => {
                                                             <p className="text-xs text-gray-500">{otherUser.school}</p>
                                                         </div>
                                                     </div>
-                                                    {/* ✅ FIX: Added onClick handler */}
                                                     <button
                                                         onClick={() => handleMessage(otherUser.id)}
                                                         className="p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors"

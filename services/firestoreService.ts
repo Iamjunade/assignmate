@@ -741,5 +741,33 @@ export const dbService = {
             ...fileData,
             created_at: new Date().toISOString()
         });
+    },
+
+    findExistingChat: async (uid1: string, uid2: string) => {
+        const q = query(collection(getDb(), 'chats'), where('participants', 'array-contains', uid1));
+        const snaps = await getDocs(q);
+        const existingDoc = snaps.docs.find(doc => {
+            const data = doc.data();
+            return data.participants && data.participants.includes(uid2);
+        });
+        return existingDoc ? existingDoc.id : null;
+    },
+
+    getConnectionStatus: async (uid1: string, uid2: string) => {
+        // Check Requests
+        const requestsRef = collection(getDb(), 'requests');
+        const q = query(requestsRef, where('fromId', '==', uid1), where('toId', '==', uid2), where('status', '==', 'pending'));
+        const reqSnap = await getDocs(q);
+        if (!reqSnap.empty) return 'pending';
+
+        // Check Actual Connection
+        const connQ = query(collection(getDb(), 'connections'), where('participants', 'array-contains', uid1));
+        const connSnap = await getDocs(connQ);
+        const isConnected = connSnap.docs.some(doc => {
+            const data = doc.data();
+            return data.participants && data.participants.some((p: any) => (p.id === uid2 || p === uid2));
+        });
+
+        return isConnected ? 'connected' : 'none';
     }
 };
