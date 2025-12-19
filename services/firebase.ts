@@ -149,7 +149,7 @@ export const fcm = {
                 });
 
                 if (currentToken) {
-                    console.log("FCM Token:", currentToken);
+
                     // Save token to Firestore for backend use
                     await setDoc(doc(dbInstance, 'fcm_tokens', userId), {
                         token: currentToken,

@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocat
 import { dbService as db } from './services/firestoreService';
 import { notifications, fcm } from './services/firebase';
 import { GlassLayout } from './components/layout/GlassLayout';
-import { GlassNavigation } from './components/ui/GlassNavigation';
 import { Loader2, GraduationCap, MessageSquare } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider, useToast } from './contexts/ToastContext';
@@ -161,36 +160,12 @@ function AppContent() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="verifications" element={<AdminVerifications />} />
-            <Route path="chats" element={<AdminChats />} />
-            <Route path="connections" element={<AdminConnections />} />
-            <Route path="settings" element={<AdminSettings />} />
           </Route>
 
           {/* --- Public Routes (Glass Layout) --- */}
           <Route element={
             <GlassLayout>
-              <GlassNavigation
-                logo={
-                  <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(user ? '/feed' : '/')}>
-                    <div className="size-10 rounded-xl overflow-hidden">
-                      <img src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
-                    </div>
-                    <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-400">
-                      AssignMate
-                    </span>
-                  </div>
-                }
-                items={user ? authNavItems : navItems}
-                user={user ? { name: user.full_name || user.email } : undefined}
-                onLogin={() => navigate('/auth')}
-                onLogout={async () => {
-                  await logout();
-                  navigate('/');
-                }}
-              />
-              <div className="pt-20 min-h-screen">
-                <Outlet />
-              </div>
+              <Outlet />
             </GlassLayout>
           }>
             <Route path="/" element={<Landing />} />

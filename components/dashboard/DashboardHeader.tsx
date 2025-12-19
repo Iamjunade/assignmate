@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { INDIAN_COLLEGES } from '../../data/colleges';
+
 
 import { dbService } from '../../services/firestoreService';
 
@@ -8,7 +8,9 @@ export const DashboardHeader: React.FC = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [isFocused, setIsFocused] = useState(false);
-    const [results, setResults] = useState<{ colleges: typeof INDIAN_COLLEGES, students: any[] }>({ colleges: [], students: [] });
+    // Use a state to hold the loaded colleges
+    const [colleges, setColleges] = useState<any[]>([]);
+    const [results, setResults] = useState<{ colleges: any[], students: any[] }>({ colleges: [], students: [] });
     const searchRef = useRef<HTMLDivElement>(null);
 
     // Handle click outside to close dropdown
@@ -22,6 +24,23 @@ export const DashboardHeader: React.FC = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Load colleges data dynamically
+    useEffect(() => {
+        let isMounted = true;
+        const loadColleges = async () => {
+            try {
+                const module = await import('../../data/colleges');
+                if (isMounted) {
+                    setColleges(module.INDIAN_COLLEGES);
+                }
+            } catch (error) {
+                console.error("Failed to load colleges data", error);
+            }
+        };
+        loadColleges();
+        return () => { isMounted = false; };
+    }, []);
+
     // Search Logic
     useEffect(() => {
         if (!searchQuery.trim()) {
@@ -32,7 +51,8 @@ export const DashboardHeader: React.FC = () => {
         const query = searchQuery.toLowerCase();
 
         // Filter colleges (limit to 20 for performance)
-        const filteredColleges = INDIAN_COLLEGES.filter(c =>
+        // Now using the 'colleges' state instead of the direct import
+        const filteredColleges = colleges.filter(c =>
             c.name.toLowerCase().includes(query) ||
             c.state.toLowerCase().includes(query) ||
             c.district.toLowerCase().includes(query)
@@ -48,7 +68,7 @@ export const DashboardHeader: React.FC = () => {
         }
 
         setResults(prev => ({ ...prev, colleges: filteredColleges }));
-    }, [searchQuery]);
+    }, [searchQuery, colleges]);
 
     return (
         <header className="h-24 flex items-center justify-between px-4 py-4 bg-[#faf9f7]/90 backdrop-blur-md sticky top-0 z-30">
@@ -81,7 +101,6 @@ export const DashboardHeader: React.FC = () => {
                                             key={college.id}
                                             className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors"
                                             onClick={() => {
-                                                console.log('Navigating to college:', college.name);
                                                 navigate(`/writers?college=${encodeURIComponent(college.name)}`);
                                                 setIsFocused(false);
                                                 setSearchQuery('');
