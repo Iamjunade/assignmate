@@ -211,6 +211,9 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                             const isMe = m.sender_id === user.id;
                             const isSystem = m.content.includes("**OFFER PROPOSAL**");
 
+                            // Check if previous message was from same person (for grouping)
+                            const isSequence = i > 0 && messages[i - 1].sender_id === m.sender_id && !messages[i - 1].content.includes("**OFFER PROPOSAL**");
+
                             if (isSystem) {
                                 return (
                                     <MotionDiv initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={i} className="flex justify-center my-4">
@@ -229,20 +232,24 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     key={m.id || i}
-                                    className={`flex flex-col gap-1 max-w-[85%] md:max-w-[70%] ${isMe ? 'items-end self-end' : 'items-start'}`}
+                                    className={`flex flex-col gap-1 max-w-[85%] md:max-w-[70%] ${isMe ? 'items-end self-end' : 'items-start'} ${isSequence ? 'mt-1' : 'mt-4'}`}
                                 >
                                     <div className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                                         {!isMe && (
-                                            <div
-                                                className="bg-center bg-no-repeat bg-cover rounded-full size-8 shrink-0 mb-1 shadow-sm border border-white"
-                                                style={{ backgroundImage: `url(${chatDetails?.other_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${chatDetails?.other_handle}`})` }}
-                                            ></div>
+                                            <div className="size-8 shrink-0 mb-1">
+                                                {!isSequence && (
+                                                    <div
+                                                        className="bg-center bg-no-repeat bg-cover rounded-full size-8 shadow-sm border border-white"
+                                                        style={{ backgroundImage: `url(${chatDetails?.other_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${chatDetails?.other_handle}`})` }}
+                                                    ></div>
+                                                )}
+                                            </div>
                                         )}
 
-                                        <div className={`p-4 rounded-2xl shadow-sm text-[15px] leading-relaxed break-words whitespace-pre-wrap ${isMe
-                                            ? 'bg-primary text-white rounded-br-sm shadow-md shadow-primary/20'
-                                            : 'bg-white text-text-main rounded-bl-sm border border-border-light'
-                                            }`}>
+                                        <div className={`p-4 shadow-sm text-[15px] leading-relaxed break-words whitespace-pre-wrap ${isMe
+                                            ? 'bg-primary text-white rounded-l-2xl rounded-tr-2xl'
+                                            : 'bg-white text-text-main rounded-r-2xl rounded-tl-2xl border border-border-light'
+                                            } ${isSequence && isMe ? 'rounded-br-md' : 'rounded-br-2xl'} ${isSequence && !isMe ? 'rounded-bl-md' : 'rounded-bl-2xl'}`}>
                                             {m.type === 'IMAGE' ? (
                                                 <img src={m.content} alt="Shared" className="max-w-full rounded-lg" />
                                             ) : m.type === 'FILE' ? (
