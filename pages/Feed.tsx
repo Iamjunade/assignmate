@@ -50,23 +50,6 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
                     <div className="max-w-7xl mx-auto">
                         <div className="w-full flex flex-col gap-8">
-                            {/* Search Bar */}
-                            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-8">
-                                <div className="relative">
-                                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                                    <input
-                                        type="text"
-                                        placeholder="Search for students, writers, or assignments..."
-                                        className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                // ✅ Navigate to FindWriter with search query
-                                                navigate(`/writers?search=${e.currentTarget.value}`);
-                                            }
-                                        }}
-                                    />
-                                </div>
-                            </div>
 
                             {/* Welcome Section */}
                             <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
