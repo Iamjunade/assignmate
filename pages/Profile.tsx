@@ -66,8 +66,8 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                     setProfileUser(data);
                     // Check connection status
                     if (currentUser) {
-                        db.getNetworkMap(currentUser.id).then(map => {
-                            setConnectionStatus(map[userId] as any || 'none');
+                        db.getConnectionStatus(currentUser.id, userId).then(status => {
+                            setConnectionStatus(status as any);
                         });
                     }
                 } else {
@@ -155,8 +155,17 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
 
     const handleMessage = async () => {
         if (!currentUser || !profileUser) return;
-        const chat = await db.createChat(null, currentUser.id, profileUser.id);
-        navigate(`/chats/${chat.id}`);
+        try {
+            const existingChatId = await db.findExistingChat(currentUser.id, profileUser.id);
+            if (existingChatId) {
+                navigate(`/chats/${existingChatId}`);
+            } else {
+                const chat = await db.createChat(null, currentUser.id, profileUser.id);
+                navigate(`/chats/${chat.id}`);
+            }
+        } catch (error) {
+            console.error("Failed to start chat", error);
+        }
     };
 
     const saveProfile = async () => {
@@ -335,45 +344,42 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                             >
                                                 <Edit2 size={16} /> Edit
                                             </button>
+                                        ) : connectionStatus === 'connected' ? (
+                                            <button
+                                                onClick={async () => {
+                                                    const chatId = await db.findExistingChat(currentUser.id, profileUser.id);
+                                                    if (chatId) navigate(`/chats/${chatId}`);
+                                                    else {
+                                                        const newChat = await db.createChat(null, currentUser.id, profileUser.id);
+                                                        navigate(`/chats/${newChat.id}`);
+                                                    }
+                                                }}
+                                                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm"
+                                            >
+                                                <MessageSquare size={16} /> Message
+                                            </button>
+                                        ) : connectionStatus === 'pending_sent' || connectionStatus === 'pending' ? (
+                                            <button disabled className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-200 text-gray-500 font-bold text-sm">
+                                                <Clock size={16} /> Pending
+                                            </button>
+                                        ) : connectionStatus === 'pending_received' ? (
+                                            <button
+                                                onClick={() => setActiveTab('network')}
+                                                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-50 text-blue-600 font-bold text-sm hover:bg-blue-100 transition-colors"
+                                            >
+                                                <UserCheck size={16} /> Respond
+                                            </button>
                                         ) : (
-                                            <>
-                                                {connectionStatus === 'none' && (
-                                                    <button
-                                                        onClick={async () => {
-                                                            await db.sendConnectionRequest(currentUser.id, profileUser.id);
-                                                            setConnectionStatus('pending_sent');
-                                                            success("Request sent!");
-                                                        }}
-                                                        className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-[#1b140d] font-bold text-sm hover:opacity-90 transition-colors shadow-sm"
-                                                    >
-                                                        <UserPlus size={16} /> Connect
-                                                    </button>
-                                                )}
-                                                {connectionStatus === 'pending_sent' && (
-                                                    <button disabled className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-200 text-gray-500 font-bold text-sm">
-                                                        <Clock size={16} /> Pending
-                                                    </button>
-                                                )}
-                                                {connectionStatus === 'pending_received' && (
-                                                    <button
-                                                        onClick={() => setActiveTab('network')}
-                                                        className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-50 text-blue-600 font-bold text-sm hover:bg-blue-100 transition-colors"
-                                                    >
-                                                        <UserCheck size={16} /> Respond
-                                                    </button>
-                                                )}
-                                                {connectionStatus === 'connected' && (
-                                                    <button
-                                                        onClick={async () => {
-                                                            const chat = await db.createChat(null, currentUser.id, profileUser.id);
-                                                            navigate(`/chats/${chat.id}`);
-                                                        }}
-                                                        className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm"
-                                                    >
-                                                        <MessageSquare size={16} /> Message
-                                                    </button>
-                                                )}
-                                            </>
+                                            <button
+                                                onClick={async () => {
+                                                    await db.sendConnectionRequest(currentUser.id, profileUser.id);
+                                                    setConnectionStatus('pending_sent');
+                                                    success("Request sent!");
+                                                }}
+                                                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-[#1b140d] font-bold text-sm hover:opacity-90 transition-colors shadow-sm"
+                                            >
+                                                <UserPlus size={16} /> Connect
+                                            </button>
                                         )}
 
                                         <button className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors">
