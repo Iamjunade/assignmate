@@ -97,42 +97,37 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
         });
     };
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
 
-        // 10MB Limit
-        if (file.size > 10 * 1024 * 1024) {
-            toastError("File too large. Max 10MB.");
-            if (fileInputRef.current) fileInputRef.current.value = '';
-            return;
-        }
+            // 10MB Limit
+            if (file.size > 10 * 1024 * 1024) {
+                toastError("File too large. Max 10MB.");
+                if (fileInputRef.current) fileInputRef.current.value = '';
+                return;
+            }
 
-        setIsUploading(true);
-        try {
-            const path = `chat_files/${chatId}/${Date.now()}_${file.name}`;
-            const url = await db.uploadFile(file, path);
+            setIsUploading(true);
 
-            // Save file metadata to database
-            await db.saveChatFile(chatId, {
-                name: file.name,
-                url: url,
-                type: file.type,
-                size: file.size,
-                uploadedBy: user.id
-            });
+            try {
+                // 1. Upload to Storage
+                const url = await db.uploadChatFile(chatId, file);
 
-            const type = file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
-            const content = type === 'IMAGE' ? url : `${file.name}|${url}`;
+                // 2. Determine Type
+                const type = file.type.startsWith('image/') ? 'image' : 'file';
 
-            const sentMsg = await db.sendMessage(chatId, user.id, content, type);
-            setMessages(prev => [...prev, sentMsg]);
-        } catch (error: any) {
-            console.error("Upload failed", error);
-            toastError(error.message || "Failed to upload file");
-        } finally {
-            setIsUploading(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
+                // 3. Send Message (Pass extra params for file)
+                await db.sendMessage(chatId, user.id, file.name, type, url);
+
+            } catch (error: any) {
+                console.error("File upload failed", error);
+                toastError(error.message || "Failed to upload file");
+            } finally {
+                setIsUploading(false);
+                // Reset input so you can select the same file again if needed
+                if (fileInputRef.current) fileInputRef.current.value = '';
+            }
         }
     };
 
@@ -261,21 +256,31 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                             ? 'bg-primary text-white rounded-l-2xl rounded-tr-2xl'
                                             : 'bg-white text-text-main rounded-r-2xl rounded-tl-2xl border border-border-light'
                                             } ${isSequence && isMe ? 'rounded-br-md' : 'rounded-br-2xl'} ${isSequence && !isMe ? 'rounded-bl-md' : 'rounded-bl-2xl'}`}>
-                                            {m.type === 'IMAGE' ? (
-                                                <img src={m.content} alt="Shared" className="max-w-full rounded-lg" />
-                                            ) : m.type === 'FILE' ? (
-                                                <a href={m.content.split('|')[1]} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-2 rounded-lg bg-background/10 hover:bg-background/20 transition-colors border border-white/20">
-                                                    <div className="bg-white p-2 rounded-lg">
-                                                        <FileText size={24} className="text-primary" />
-                                                    </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-sm truncate max-w-[150px]">{m.content.split('|')[0]}</span>
-                                                        <span className="text-[10px] opacity-80">Click to download</span>
-                                                    </div>
+
+                                            {/* Dynamic Rendering based on Message Type */}
+                                            {m.type === 'image' ? (
+                                                <div className="space-y-1">
+                                                    <img
+                                                        src={m.fileUrl}
+                                                        alt="attachment"
+                                                        className="rounded-lg max-h-60 w-auto object-cover border border-white/20 cursor-pointer"
+                                                        onClick={() => window.open(m.fileUrl, '_blank')}
+                                                    />
+                                                </div>
+                                            ) : m.type === 'file' ? (
+                                                <a
+                                                    href={m.fileUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className={`flex items-center gap-2 underline ${isMe ? 'text-white' : 'text-primary'}`}
+                                                >
+                                                    <span className="material-symbols-outlined">description</span>
+                                                    {m.text} {/* The filename */}
                                                 </a>
                                             ) : (
-                                                m.content
+                                                <p className="text-sm">{m.text || m.content}</p>
                                             )}
+
                                         </div>
                                     </div>
 
@@ -312,7 +317,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 type="file"
                                 ref={fileInputRef}
                                 className="hidden"
-                                onChange={handleFileUpload}
+                                onChange={handleFileSelect}
                             />
                             <button
                                 type="button"

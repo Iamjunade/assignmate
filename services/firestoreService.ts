@@ -517,13 +517,28 @@ export const dbService = {
         return snap.docs.map(d => ({ id: d.id, ...d.data() }));
     },
 
-    sendMessage: async (chatId: string, senderId: string, content: string, type = 'TEXT') => {
+    uploadChatFile: async (chatId: string, file: File) => {
+        const { storage } = await import('./firebase');
+        const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+        try {
+            const path = `chat_files/${chatId}/${Date.now()}_${file.name}`;
+            const storageRef = ref(storage, path);
+            const snapshot = await uploadBytes(storageRef, file);
+            return await getDownloadURL(snapshot.ref);
+        } catch (error) {
+            console.error("Error uploading file:", error);
+            throw error;
+        }
+    },
+
+    sendMessage: async (chatId: string, senderId: string, text: string, type: string = 'text', fileUrl: string = '') => {
         const newMessage = {
             sender_id: senderId,
-            content,
+            text,
             type,
+            fileUrl,
             created_at: new Date().toISOString(),
-            readBy: [senderId] // Initialize with sender
+            readBy: [senderId]
         };
 
         // 1. Add to subcollection
@@ -531,7 +546,7 @@ export const dbService = {
 
         // 2. Update chat metadata
         await updateDoc(doc(getDb(), 'chats', chatId), {
-            last_message: type === 'TEXT' ? content : `[${type}]`,
+            last_message: type === 'text' ? text : `Sent an ${type}`,
             updated_at: new Date().toISOString()
         });
 
@@ -543,7 +558,7 @@ export const dbService = {
             const senderSnap = await getDoc(doc(getDb(), 'users', senderId));
             const senderName = senderSnap.exists() ? senderSnap.data().handle : 'User';
 
-            notifications.send(receiverId, senderName, type === 'TEXT' ? content : 'Attachment sent', chatId);
+            notifications.send(receiverId, senderName, type === 'text' ? text : 'Attachment sent', chatId);
         }
 
         return { id: res.id, ...newMessage };
