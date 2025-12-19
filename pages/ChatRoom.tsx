@@ -7,12 +7,14 @@ import { UserPresence } from '../components/UserPresence';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../contexts/ToastContext';
 
 const MotionDiv = motion.div as any;
 const MotionButton = motion.button as any;
 
 export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, onBack?: () => void }) => {
     const navigate = useNavigate();
+    const { error: toastError } = useToast();
     const [messages, setMessages] = useState<any[]>([]);
     const [text, setText] = useState('');
     const [chatDetails, setChatDetails] = useState<any>(null);
@@ -99,6 +101,13 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // 10MB Limit
+        if (file.size > 10 * 1024 * 1024) {
+            toastError("File too large. Max 10MB.");
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
         setIsUploading(true);
         try {
             const path = `chat_files/${chatId}/${Date.now()}_${file.name}`;
@@ -118,10 +127,12 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
             const sentMsg = await db.sendMessage(chatId, user.id, content, type);
             setMessages(prev => [...prev, sentMsg]);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Upload failed", error);
+            toastError(error.message || "Failed to upload file");
         } finally {
             setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
