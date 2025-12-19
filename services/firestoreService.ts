@@ -272,15 +272,7 @@ export const dbService = {
         return { error: null };
     },
 
-    uploadFile: async (file: File) => {
-        if (!storage) throw new Error("Storage not initialized");
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const storageRef = ref(storage, `portfolio/${fileName}`);
 
-        await uploadBytes(storageRef, file);
-        return await getDownloadURL(storageRef);
-    },
 
     addToPortfolio: async (userId: string, imageUrl: string) => {
         const docRef = doc(getDb(), 'users', userId);
@@ -740,5 +732,14 @@ export const dbService = {
         const storageRef = ref(storage, path);
         const snapshot = await uploadBytes(storageRef, file);
         return await getDownloadURL(snapshot.ref);
+    },
+
+    saveChatFile: async (chatId: string, fileData: { name: string, url: string, type: string, size: number, uploadedBy: string }) => {
+        const { addDoc, collection } = await import('firebase/firestore');
+        const filesRef = collection(getDb(), 'chats', chatId, 'files');
+        await addDoc(filesRef, {
+            ...fileData,
+            created_at: new Date().toISOString()
+        });
     }
 };

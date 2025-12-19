@@ -179,7 +179,8 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         if (e.target.files && e.target.files[0]) {
             setIdUploading(true);
             try {
-                const url = await db.uploadFile(e.target.files[0]);
+                const path = `verification/${profileUser.id}/${Date.now()}_${e.target.files[0].name}`;
+                const url = await db.uploadFile(e.target.files[0], path);
                 await db.updateProfile(profileUser.id, { is_verified: 'pending', id_card_url: url });
                 if (isOwnProfile) await refreshProfile();
                 success("ID uploaded for verification");
@@ -195,7 +196,8 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         if (e.target.files && e.target.files[0]) {
             setUploading(true);
             try {
-                const url = await db.uploadFile(e.target.files[0]);
+                const path = `portfolio/${profileUser.id}/${Date.now()}_${e.target.files[0].name}`;
+                const url = await db.uploadFile(e.target.files[0], path);
                 await db.addToPortfolio(profileUser.id, url);
                 if (isOwnProfile) await refreshProfile();
                 // Update local state
@@ -213,7 +215,8 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             try {
-                const url = await db.uploadFile(e.target.files[0]);
+                const path = `avatars/${profileUser.id}/${Date.now()}_${e.target.files[0].name}`;
+                const url = await db.uploadFile(e.target.files[0], path);
                 await db.updateProfile(profileUser.id, { avatar_url: url });
                 if (isOwnProfile) await refreshProfile();
                 setProfileUser({ ...profileUser, avatar_url: url });

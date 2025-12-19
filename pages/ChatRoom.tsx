@@ -101,7 +101,18 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
         setIsUploading(true);
         try {
-            const url = await db.uploadFile(file, `chats/${chatId}/${Date.now()}_${file.name}`);
+            const path = `chat_files/${chatId}/${Date.now()}_${file.name}`;
+            const url = await db.uploadFile(file, path);
+
+            // Save file metadata to database
+            await db.saveChatFile(chatId, {
+                name: file.name,
+                url: url,
+                type: file.type,
+                size: file.size,
+                uploadedBy: user.id
+            });
+
             const type = file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
             const content = type === 'IMAGE' ? url : `${file.name}|${url}`;
 
@@ -235,9 +246,14 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                             {m.type === 'IMAGE' ? (
                                                 <img src={m.content} alt="Shared" className="max-w-full rounded-lg" />
                                             ) : m.type === 'FILE' ? (
-                                                <a href={m.content.split('|')[1]} target="_blank" rel="noreferrer" className="flex items-center gap-2 underline">
-                                                    <FileText size={20} />
-                                                    {m.content.split('|')[0]}
+                                                <a href={m.content.split('|')[1]} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-2 rounded-lg bg-background/10 hover:bg-background/20 transition-colors border border-white/20">
+                                                    <div className="bg-white p-2 rounded-lg">
+                                                        <FileText size={24} className="text-primary" />
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-sm truncate max-w-[150px]">{m.content.split('|')[0]}</span>
+                                                        <span className="text-[10px] opacity-80">Click to download</span>
+                                                    </div>
                                                 </a>
                                             ) : (
                                                 m.content
@@ -285,7 +301,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 onClick={() => fileInputRef.current?.click()}
                                 className="p-2 mb-1 rounded-full text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
                             >
-                                <span className="material-symbols-outlined rotate-45">attach_file</span>
+                                <Paperclip size={20} />
                             </button>
 
                             <div className="flex-1 py-3">
