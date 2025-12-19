@@ -203,7 +203,7 @@ export const FindWriter = () => {
                             </p>
 
                             {/* Search Pill */}
-                            <div className="w-full max-w-2xl p-2 bg-white dark:bg-card-bg rounded-full shadow-lg shadow-primary/5 flex flex-col md:flex-row items-center gap-2 border border-border-subtle relative z-50">
+                            <div className="w-full max-w-2xl p-2 bg-card dark:bg-card-dark rounded-full shadow-lg shadow-primary/5 flex flex-col md:flex-row items-center gap-2 border border-border-subtle relative z-50">
                                 <div className="flex-1 flex items-center px-4 h-12 w-full">
                                     <span className="material-symbols-outlined text-text-muted">search</span>
                                     <input
@@ -230,7 +230,7 @@ export const FindWriter = () => {
                                     />
                                     {/* Dropdown Results */}
                                     {isFocused && filteredColleges.length > 0 && (
-                                        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-card-bg rounded-xl shadow-xl border border-border-subtle max-h-80 overflow-y-auto z-[100]">
+                                        <div className="absolute top-full left-0 right-0 mt-2 bg-card dark:bg-card-dark rounded-xl shadow-xl border border-border-subtle max-h-80 overflow-y-auto z-[100]">
                                             {filteredColleges.map((college) => (
                                                 <div
                                                     key={college.id}
@@ -270,8 +270,8 @@ export const FindWriter = () => {
                             <button
                                 onClick={() => setVerifiedOnly(!verifiedOnly)}
                                 className={`shrink-0 h-9 px-4 rounded-full border text-sm font-medium flex items-center gap-2 transition-colors ${verifiedOnly
-                                        ? 'bg-primary/10 border-primary text-primary'
-                                        : 'bg-card-bg border-border-subtle text-text-main hover:border-primary'
+                                    ? 'bg-primary/10 border-primary text-primary'
+                                    : 'bg-card border-border-subtle text-text-main hover:border-primary'
                                     }`}
                             >
                                 <span className="material-symbols-outlined text-[18px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
@@ -281,8 +281,8 @@ export const FindWriter = () => {
                             <button
                                 onClick={() => setFastResponder(!fastResponder)}
                                 className={`shrink-0 h-9 px-4 rounded-full border text-sm font-medium flex items-center gap-2 transition-colors ${fastResponder
-                                        ? 'bg-yellow-50 border-yellow-500 text-yellow-700'
-                                        : 'bg-card-bg border-border-subtle text-text-main hover:border-yellow-500'
+                                    ? 'bg-yellow-50 border-yellow-500 text-yellow-700'
+                                    : 'bg-card border-border-subtle text-text-main hover:border-yellow-500'
                                     }`}
                             >
                                 <span className="material-symbols-outlined text-[18px] text-yellow-600">bolt</span>
