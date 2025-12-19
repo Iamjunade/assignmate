@@ -686,7 +686,13 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                                     <p className="font-bold text-text-main">{otherUser?.full_name}</p>
                                                                     <p className="text-xs text-secondary">@{otherUser?.handle}</p>
                                                                 </div>
-                                                                <button className="ml-auto p-2 rounded-full hover:bg-gray-100 text-secondary">
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        const chat = await db.createChat(null, currentUser.id, otherUser.id);
+                                                                        navigate(`/chats/${chat.id}`);
+                                                                    }}
+                                                                    className="ml-auto p-2 rounded-full hover:bg-gray-100 text-secondary"
+                                                                >
                                                                     <MessageSquare size={18} />
                                                                 </button>
                                                             </div>
