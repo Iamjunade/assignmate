@@ -41,6 +41,13 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
         }).format(amount);
     };
 
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Good Morning';
+        if (hour < 18) return 'Good Afternoon';
+        return 'Good Evening';
+    };
+
     return (
         <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />
@@ -59,7 +66,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         {format(new Date(), 'MMM d')} • Student Dashboard
                                     </div>
                                     <h1 className="text-3xl md:text-4xl font-extrabold text-text-dark tracking-tight leading-tight">
-                                        Good Morning, {user?.full_name?.split(' ')[0] || 'Student'}.
+                                        {getGreeting()}, {user?.full_name?.split(' ')[0] || 'Student'}.
                                     </h1>
                                     <p className="text-text-muted mt-2 text-lg">Your academic tasks are under control.</p>
                                 </div>
