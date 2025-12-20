@@ -231,16 +231,29 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         if (e.target.files && e.target.files[0]) {
             setUploading(true);
             try {
-                const path = `portfolio/${profileUser.id}/${Date.now()}_${e.target.files[0].name}`;
-                const url = await db.uploadFile(e.target.files[0], path);
+                const file = e.target.files[0];
+                console.log("Starting Portfolio Upload...");
+                console.log("Current User ID:", currentUser?.id);
+                console.log("Profile User ID:", profileUser?.id);
+
+                const path = `portfolio/${profileUser.id}/${Date.now()}_${file.name}`;
+                console.log("Upload Path:", path);
+
+                const url = await db.uploadFile(file, path);
+                console.log("Upload Success. URL:", url);
+
                 await db.addToPortfolio(profileUser.id, url);
                 if (isOwnProfile) await refreshProfile();
+
                 // Update local state
                 const updatedPortfolio = [...(profileUser.portfolio || []), url];
                 setProfileUser({ ...profileUser, portfolio: updatedPortfolio });
                 success("Portfolio item added");
-            } catch (e) {
-                error("Failed to upload portfolio item");
+            } catch (e: any) {
+                console.error("Portfolio Upload Failed:", e);
+                console.error("Error Code:", e.code);
+                console.error("Error Message:", e.message);
+                error("Failed to upload portfolio item: " + (e.message || "Unknown error"));
             } finally {
                 setUploading(false);
             }
@@ -250,14 +263,21 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             try {
-                const path = `avatars/${profileUser.id}/${Date.now()}_${e.target.files[0].name}`;
-                const url = await db.uploadFile(e.target.files[0], path);
+                const file = e.target.files[0];
+                console.log("Starting Avatar Upload...");
+                console.log("Path User ID:", profileUser.id);
+
+                const path = `avatars/${profileUser.id}/${Date.now()}_${file.name}`;
+                console.log("Avatar Path:", path);
+
+                const url = await db.uploadFile(file, path);
                 await db.updateProfile(profileUser.id, { avatar_url: url });
                 if (isOwnProfile) await refreshProfile();
                 setProfileUser({ ...profileUser, avatar_url: url });
                 success("Avatar updated");
-            } catch (e) {
-                error("Failed to upload avatar");
+            } catch (e: any) {
+                console.error("Avatar Upload Failed:", e);
+                error("Failed to upload avatar: " + e.message);
             }
         }
     };
