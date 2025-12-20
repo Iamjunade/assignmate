@@ -9,7 +9,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<any>;
   loginWithGoogle: () => Promise<any>;
-  // ✅ FIXED: Accepts all 7 parameters from Auth.tsx
+  // ✅ FIXED: Now accepts 7 arguments including fullName and bio
   register: (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => Promise<any>;
   completeGoogleSignup: (handle: string, school: string, is_writer: boolean, bio?: string) => Promise<void>;
   loginAnonymously: () => Promise<any>;
@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const syncingRef = useRef<string | null>(null);
 
+  // Sync user profile from Firestore
   const syncUser = async (fbUser: any) => {
     const userId = fbUser.uid;
     if (syncingRef.current === userId) return;
@@ -42,19 +43,22 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         } as User);
         presence.init(userId);
       } else {
-        // ✅ FIXED: Using 'null' for avatar to prevent Firestore crash
+        // ✅ FIXED: Use 'null' for avatar (Firestore crashes on undefined)
+        // ✅ FIXED: Use 'true' for is_incomplete to force Onboarding
         const newProfile = {
           id: userId,
           email: fbUser.email || '',
           handle: fbUser.displayName?.replace(/\s+/g, '_').toLowerCase() || 'user_' + userId.substring(0, 6),
           school: 'Not Specified',
-          avatar_url: fbUser.photoURL || null,
+          avatar_url: fbUser.photoURL || null, // <--- CRITICAL FIX
           full_name: fbUser.displayName || 'Student',
           xp: 0,
           is_writer: false,
-          is_incomplete: true // Triggers onboarding
+          is_incomplete: true
         };
-        // Do not save to DB yet, wait for onboarding
+
+        // Create the partial profile so we don't get 404s
+        await userApi.createProfile(userId, newProfile);
         setUser(newProfile as User);
       }
     } catch (e) {
@@ -82,19 +86,20 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     setUser(null);
   };
 
-  // ✅ FIXED: Saves fullName and Bio
+  // ✅ FIXED: register function now SAVES the name and bio
   const register = async (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => {
     const res = await firebaseAuth.register(email, pass);
     if (res.error) return res;
 
     if (res.data?.user) {
       try {
+        // Create full profile immediately
         const profile = await userApi.createProfile(res.data.user.uid, {
           handle,
           school,
           email,
-          full_name: fullName, // Saved!
-          bio: bio || '',      // Saved!
+          full_name: fullName, // <--- SAVED HERE
+          bio: bio || '',      // <--- SAVED HERE
           is_writer,
           is_incomplete: false,
           avatar_url: null
@@ -106,6 +111,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
         return { data: { ...res.data, session: true } };
       } catch (error: any) {
+        console.error("Registration Error:", error);
         return { error: { message: "Account created but profile setup failed." } };
       }
     }
@@ -132,6 +138,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       notificationService.sendWelcome(user.id, handle).catch(console.error);
 
     } catch (e: any) {
+      console.error("Profile Completion Failed:", e);
       throw e;
     }
   };
