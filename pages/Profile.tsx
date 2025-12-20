@@ -172,6 +172,16 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     };
 
     const handleWriterToggle = async (checked: boolean) => {
+        // Enforce portfolio requirement when enabling writer mode
+        if (checked) {
+            const hasPortfolio = profileUser.portfolio && profileUser.portfolio.length > 0;
+            if (!hasPortfolio) {
+                error("Please upload at least one work sample to become a writer.");
+                setActiveTab('portfolio');
+                return;
+            }
+        }
+
         setIsWriter(checked);
         try {
             await db.updateProfile(profileUser.id, { is_writer: checked });
