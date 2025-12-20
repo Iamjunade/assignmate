@@ -47,7 +47,9 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     const [bio, setBio] = useState('');
     const [school, setSchool] = useState('');
     const [fullName, setFullName] = useState('');
+
     const [visibility, setVisibility] = useState('global');
+    const [isWriter, setIsWriter] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const idInputRef = useRef<HTMLInputElement>(null);
@@ -88,6 +90,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
             setSchool(profileUser.school || '');
             setFullName(profileUser.full_name || '');
             setVisibility(profileUser.visibility || 'global');
+            setIsWriter(profileUser.is_writer || false);
         }
     }, [profileUser]);
 
@@ -174,7 +177,8 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                 bio,
                 school,
                 visibility,
-                full_name: fullName
+                full_name: fullName,
+                is_writer: isWriter
             });
             setEditingProfile(false);
             if (isOwnProfile) await refreshProfile();
@@ -587,6 +591,22 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                             <label className="block text-sm font-bold text-secondary mb-1">School / University</label>
                                                             <CollegeAutocomplete value={school} onChange={setSchool} />
                                                         </div>
+                                                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                                            <div>
+                                                                <h4 className="font-bold text-text-main text-sm">Available as Writer</h4>
+                                                                <p className="text-xs text-secondary">Allow others to find you and request assignments</p>
+                                                            </div>
+                                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isWriter}
+                                                                    onChange={(e) => setIsWriter(e.target.checked)}
+                                                                    className="sr-only peer"
+                                                                />
+                                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                                            </label>
+                                                        </div>
+
                                                         <div className="flex gap-3 pt-4">
                                                             <GlassButton onClick={saveProfile} variant="primary">Save Changes</GlassButton>
                                                             <GlassButton onClick={() => setEditingProfile(false)} variant="secondary">Cancel</GlassButton>
