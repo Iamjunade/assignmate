@@ -451,18 +451,12 @@ export const dbService = {
     getChats: async (userId: string) => {
         try {
             if (!userId) return [];
-            const q1 = query(collection(getDb(), 'chats'), where('poster_id', '==', userId));
-            const q2 = query(collection(getDb(), 'chats'), where('writer_id', '==', userId));
+            const q = query(collection(getDb(), 'chats'), where('participants', 'array-contains', userId));
+            const snap = await getDocs(q);
+            const chats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-            const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-            // Merge and deduplicate by ID
-            const chatMap = new Map();
-            [...snap1.docs, ...snap2.docs].forEach(d => chatMap.set(d.id, { id: d.id, ...d.data() }));
-
-            const chats = Array.from(chatMap.values());
-
-            // Sort manually since we merged results
-            chats.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+            // Sort manually
+            chats.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
             // Hydrate with user data
             const otherIds = chats.map((c: any) => c.poster_id === userId ? c.writer_id : c.poster_id);
@@ -659,33 +653,21 @@ export const dbService = {
 
     listenToChats: (userId: string, callback: (chats: any[]) => void) => {
         if (!userId) return () => { };
-        // Listening to complex queries is hard, so we'll listen to the collection and filter client-side 
-        // OR set up two listeners. For simplicity/cost, we'll poll or just listen to one query if possible.
-        // Better approach: Listen to 'chats' where poster_id == userId OR writer_id == userId.
-        // Firestore OR queries in snapshot are tricky. Let's use two listeners and merge.
 
-        const q1 = query(collection(getDb(), 'chats'), where('poster_id', '==', userId));
-        const q2 = query(collection(getDb(), 'chats'), where('writer_id', '==', userId));
-
-        let chats1: any[] = [];
-        let chats2: any[] = [];
+        const q = query(collection(getDb(), 'chats'), where('participants', 'array-contains', userId));
 
         // Cache to store user profiles and avoid re-fetching on every message
         const userCache = new Map<string, any>();
 
-        const mergeAndCallback = async () => {
+        return onSnapshot(q, async (snap) => {
             try {
-                const allChats = [...chats1, ...chats2];
-                // Dedupe
-                const chatMap = new Map();
-                allChats.forEach(c => chatMap.set(c.id, c));
-                const uniqueChats = Array.from(chatMap.values());
+                const chats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
                 // Sort
-                uniqueChats.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+                chats.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
                 // Identify missing users
-                const otherIds = uniqueChats.map((c: any) => c.poster_id === userId ? c.writer_id : c.poster_id);
+                const otherIds = chats.map((c: any) => c.poster_id === userId ? c.writer_id : c.poster_id);
                 const missingIds = otherIds.filter(id => !userCache.has(id));
 
                 // Fetch only missing users
@@ -694,7 +676,7 @@ export const dbService = {
                     newUsersMap.forEach((user, id) => userCache.set(id, user));
                 }
 
-                const hydrated = uniqueChats.map((c: any) => {
+                const hydrated = chats.map((c: any) => {
                     const isPoster = c.poster_id === userId;
                     const otherId = isPoster ? c.writer_id : c.poster_id;
                     const other = userCache.get(otherId);
@@ -709,60 +691,29 @@ export const dbService = {
                 });
                 callback(hydrated);
             } catch (error) {
-                console.error("Error in listenToChats merge:", error);
-                // In case of error, try to return what we have without hydration if possible, or just empty
-                // callback([]); 
+                console.error("Error in listenToChats:", error);
             }
-        };
-
-        const unsub1 = onSnapshot(q1, (snap) => {
-            chats1 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            mergeAndCallback();
         }, (error) => {
-            console.error("Error listening to chats (poster):", error);
+            console.error("Error listening to chats:", error);
         });
-
-        const unsub2 = onSnapshot(q2, (snap) => {
-            chats2 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            mergeAndCallback();
-        }, (error) => {
-            console.error("Error listening to chats (writer):", error);
-        });
-
-        return () => { unsub1(); unsub2(); };
     },
 
     listenToUnreadCount: (userId: string, callback: (count: number) => void) => {
         if (!userId) return () => { };
 
-        const q1 = query(collection(getDb(), 'chats'), where('poster_id', '==', userId));
-        const q2 = query(collection(getDb(), 'chats'), where('writer_id', '==', userId));
+        const q = query(collection(getDb(), 'chats'), where('participants', 'array-contains', userId));
 
-        const calculateTotal = (chats1: any[], chats2: any[]) => {
+        return onSnapshot(q, (snap) => {
             let total = 0;
-            chats1.forEach(c => total += (c.unread_count_poster || 0));
-            chats2.forEach(c => total += (c.unread_count_writer || 0));
+            snap.docs.forEach(d => {
+                const c = d.data();
+                const isPoster = c.poster_id === userId;
+                total += isPoster ? (c.unread_count_poster || 0) : (c.unread_count_writer || 0);
+            });
             callback(total);
-        };
-
-        let chats1: any[] = [];
-        let chats2: any[] = [];
-
-        const unsub1 = onSnapshot(q1, (snap) => {
-            chats1 = snap.docs.map(d => d.data());
-            calculateTotal(chats1, chats2);
         }, (error) => {
-            console.error("Error listening to unread count (poster):", error);
+            console.error("Error listening to unread count:", error);
         });
-
-        const unsub2 = onSnapshot(q2, (snap) => {
-            chats2 = snap.docs.map(d => d.data());
-            calculateTotal(chats1, chats2);
-        }, (error) => {
-            console.error("Error listening to unread count (writer):", error);
-        });
-
-        return () => { unsub1(); unsub2(); };
     },
 
     // --- ADMIN METHODS ---
