@@ -99,7 +99,7 @@ export const notifications = {
     },
 
     listen: (userId: string, onNotify: (data: any) => void) => {
-        if (!dbInstance) return () => { };
+        if (!dbInstance || !userId) return () => { };
 
         const q = query(
             collection(dbInstance, 'notifications'),

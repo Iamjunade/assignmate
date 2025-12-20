@@ -44,7 +44,7 @@ export const userApi = {
     getProfile: async (id: string) => {
         const docRef = doc(getDb(), 'users', id);
         const docSnap = await getDoc(docRef);
-        return docSnap.exists() ? docSnap.data() : null;
+        return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
     },
 
     createProfile: async (id: string, metadata: any) => {
