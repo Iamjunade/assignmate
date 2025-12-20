@@ -224,10 +224,10 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
                         {messages.map((m, i) => {
                             const isMe = m.sender_id === user.id;
-                            const isSystem = m.content.includes("**OFFER PROPOSAL**");
+                            const isSystem = m.content?.includes("**OFFER PROPOSAL**");
 
                             // Check if previous message was from same person (for grouping)
-                            const isSequence = i > 0 && messages[i - 1].sender_id === m.sender_id && !messages[i - 1].content.includes("**OFFER PROPOSAL**");
+                            const isSequence = i > 0 && messages[i - 1].sender_id === m.sender_id && !messages[i - 1].content?.includes("**OFFER PROPOSAL**");
 
                             if (isSystem) {
                                 return (
