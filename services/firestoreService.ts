@@ -449,37 +449,42 @@ export const dbService = {
 
     // --- CHAT SYSTEM ---
     getChats: async (userId: string) => {
-        if (!userId) return [];
-        const q1 = query(collection(getDb(), 'chats'), where('poster_id', '==', userId));
-        const q2 = query(collection(getDb(), 'chats'), where('writer_id', '==', userId));
+        try {
+            if (!userId) return [];
+            const q1 = query(collection(getDb(), 'chats'), where('poster_id', '==', userId));
+            const q2 = query(collection(getDb(), 'chats'), where('writer_id', '==', userId));
 
-        const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-        // Merge and deduplicate by ID
-        const chatMap = new Map();
-        [...snap1.docs, ...snap2.docs].forEach(d => chatMap.set(d.id, { id: d.id, ...d.data() }));
+            const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+            // Merge and deduplicate by ID
+            const chatMap = new Map();
+            [...snap1.docs, ...snap2.docs].forEach(d => chatMap.set(d.id, { id: d.id, ...d.data() }));
 
-        const chats = Array.from(chatMap.values());
+            const chats = Array.from(chatMap.values());
 
-        // Sort manually since we merged results
-        chats.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+            // Sort manually since we merged results
+            chats.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
-        // Hydrate with user data
-        const otherIds = chats.map((c: any) => c.poster_id === userId ? c.writer_id : c.poster_id);
-        const userMap = await dbService.getUsersBatch(otherIds);
+            // Hydrate with user data
+            const otherIds = chats.map((c: any) => c.poster_id === userId ? c.writer_id : c.poster_id);
+            const userMap = await dbService.getUsersBatch(otherIds);
 
-        return chats.map((c: any) => {
-            const isPoster = c.poster_id === userId;
-            const otherId = isPoster ? c.writer_id : c.poster_id;
-            const other = userMap.get(otherId);
+            return chats.map((c: any) => {
+                const isPoster = c.poster_id === userId;
+                const otherId = isPoster ? c.writer_id : c.poster_id;
+                const other = userMap.get(otherId);
 
-            return {
-                ...c,
-                gig_title: 'Direct Chat',
-                other_handle: other?.handle || 'User',
-                other_avatar: other?.avatar_url,
-                unread_count: isPoster ? (c.unread_count_poster || 0) : (c.unread_count_writer || 0)
-            };
-        });
+                return {
+                    ...c,
+                    gig_title: 'Direct Chat',
+                    other_handle: other?.handle || 'User',
+                    other_avatar: other?.avatar_url,
+                    unread_count: isPoster ? (c.unread_count_poster || 0) : (c.unread_count_writer || 0)
+                };
+            });
+        } catch (error) {
+            console.error("Error fetching chats:", error);
+            return [];
+        }
     },
 
     getChatDetails: async (chatId: string, userId: string) => {
@@ -518,7 +523,6 @@ export const dbService = {
             poster_id: posterId, // Keep for backward compatibility if needed
             writer_id: writerId, // Keep for backward compatibility if needed
             createdAt: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             last_message: '',
             unread_count_poster: 0,
@@ -670,49 +674,59 @@ export const dbService = {
         const userCache = new Map<string, any>();
 
         const mergeAndCallback = async () => {
-            const allChats = [...chats1, ...chats2];
-            // Dedupe
-            const chatMap = new Map();
-            allChats.forEach(c => chatMap.set(c.id, c));
-            const uniqueChats = Array.from(chatMap.values());
+            try {
+                const allChats = [...chats1, ...chats2];
+                // Dedupe
+                const chatMap = new Map();
+                allChats.forEach(c => chatMap.set(c.id, c));
+                const uniqueChats = Array.from(chatMap.values());
 
-            // Sort
-            uniqueChats.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+                // Sort
+                uniqueChats.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
-            // Identify missing users
-            const otherIds = uniqueChats.map((c: any) => c.poster_id === userId ? c.writer_id : c.poster_id);
-            const missingIds = otherIds.filter(id => !userCache.has(id));
+                // Identify missing users
+                const otherIds = uniqueChats.map((c: any) => c.poster_id === userId ? c.writer_id : c.poster_id);
+                const missingIds = otherIds.filter(id => !userCache.has(id));
 
-            // Fetch only missing users
-            if (missingIds.length > 0) {
-                const newUsersMap = await dbService.getUsersBatch(missingIds);
-                newUsersMap.forEach((user, id) => userCache.set(id, user));
+                // Fetch only missing users
+                if (missingIds.length > 0) {
+                    const newUsersMap = await dbService.getUsersBatch(missingIds);
+                    newUsersMap.forEach((user, id) => userCache.set(id, user));
+                }
+
+                const hydrated = uniqueChats.map((c: any) => {
+                    const isPoster = c.poster_id === userId;
+                    const otherId = isPoster ? c.writer_id : c.poster_id;
+                    const other = userCache.get(otherId);
+
+                    return {
+                        ...c,
+                        gig_title: 'Direct Chat',
+                        other_handle: other?.handle || 'User',
+                        other_avatar: other?.avatar_url,
+                        unread_count: isPoster ? (c.unread_count_poster || 0) : (c.unread_count_writer || 0)
+                    };
+                });
+                callback(hydrated);
+            } catch (error) {
+                console.error("Error in listenToChats merge:", error);
+                // In case of error, try to return what we have without hydration if possible, or just empty
+                // callback([]); 
             }
-
-            const hydrated = uniqueChats.map((c: any) => {
-                const isPoster = c.poster_id === userId;
-                const otherId = isPoster ? c.writer_id : c.poster_id;
-                const other = userCache.get(otherId);
-
-                return {
-                    ...c,
-                    gig_title: 'Direct Chat',
-                    other_handle: other?.handle || 'User',
-                    other_avatar: other?.avatar_url,
-                    unread_count: isPoster ? (c.unread_count_poster || 0) : (c.unread_count_writer || 0)
-                };
-            });
-            callback(hydrated);
         };
 
         const unsub1 = onSnapshot(q1, (snap) => {
             chats1 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             mergeAndCallback();
+        }, (error) => {
+            console.error("Error listening to chats (poster):", error);
         });
 
         const unsub2 = onSnapshot(q2, (snap) => {
             chats2 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             mergeAndCallback();
+        }, (error) => {
+            console.error("Error listening to chats (writer):", error);
         });
 
         return () => { unsub1(); unsub2(); };
@@ -737,11 +751,15 @@ export const dbService = {
         const unsub1 = onSnapshot(q1, (snap) => {
             chats1 = snap.docs.map(d => d.data());
             calculateTotal(chats1, chats2);
+        }, (error) => {
+            console.error("Error listening to unread count (poster):", error);
         });
 
         const unsub2 = onSnapshot(q2, (snap) => {
             chats2 = snap.docs.map(d => d.data());
             calculateTotal(chats1, chats2);
+        }, (error) => {
+            console.error("Error listening to unread count (writer):", error);
         });
 
         return () => { unsub1(); unsub2(); };

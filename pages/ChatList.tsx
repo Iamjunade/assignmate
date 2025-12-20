@@ -23,6 +23,9 @@ export const ChatList = ({ user, onSelect, selectedId }: { user: any, onSelect?:
             db.getChats(user.id).then(data => {
                 setChats(data);
                 setLoading(false);
+            }).catch(err => {
+                console.error("Failed to load chats:", err);
+                setLoading(false);
             });
         };
 
