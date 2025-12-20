@@ -21,6 +21,11 @@ service cloud.firestore {
 
     // --- Chats Collection ---
     match /chats/{chatId} {
+      // Helper to check parent chat participation
+      function isChatParticipant() {
+        return resource.data.poster_id == request.auth.uid || resource.data.writer_id == request.auth.uid;
+      }
+
       // Create: Must be one of the participants
       allow create: if isAuthenticated() && (
         request.resource.data.poster_id == request.auth.uid || 
@@ -28,19 +33,10 @@ service cloud.firestore {
       );
       
       // Read/Update: Must be one of the participants (checking existing data)
-      allow read, update: if isAuthenticated() && (
-        resource.data.poster_id == request.auth.uid || 
-        resource.data.writer_id == request.auth.uid
-      );
+      allow read, update: if isAuthenticated() && isChatParticipant();
 
       // Messages Subcollection
       match /messages/{messageId} {
-        // Helper to check parent chat participation via get()
-        function isChatParticipant() {
-          let chatData = get(/databases/$(database)/documents/chats/$(chatId)).data;
-          return chatData.poster_id == request.auth.uid || chatData.writer_id == request.auth.uid;
-        }
-
         allow read: if isAuthenticated() && isChatParticipant();
         allow create: if isAuthenticated() && isChatParticipant() && request.resource.data.sender_id == request.auth.uid;
       }

@@ -117,7 +117,16 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                 // 2. Determine Type
                 const type = file.type.startsWith('image/') ? 'image' : 'file';
 
-                // 3. Send Message (Pass extra params for file)
+                // 3. Save File Metadata to Firestore
+                await db.saveChatFile(chatId, {
+                    name: file.name,
+                    url: url,
+                    type: file.type,
+                    size: file.size,
+                    uploadedBy: user.id
+                });
+
+                // 4. Send Message (Pass extra params for file)
                 await db.sendMessage(chatId, user.id, file.name, type, url);
 
             } catch (error: any) {
@@ -317,6 +326,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 type="file"
                                 ref={fileInputRef}
                                 className="hidden"
+                                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.7z"
                                 onChange={handleFileSelect}
                             />
                             <button
