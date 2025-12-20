@@ -9,7 +9,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<any>;
   loginWithGoogle: () => Promise<any>;
-  // ✅ FIXED: Updated to accept fullName and bio
+  // ✅ FIXED: Accepts all 7 parameters from Auth.tsx
   register: (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => Promise<any>;
   completeGoogleSignup: (handle: string, school: string, is_writer: boolean, bio?: string) => Promise<void>;
   loginAnonymously: () => Promise<any>;
@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const syncingRef = useRef<string | null>(null);
 
-  // Sync user profile from Firestore
   const syncUser = async (fbUser: any) => {
     const userId = fbUser.uid;
     if (syncingRef.current === userId) return;
@@ -43,20 +42,19 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         } as User);
         presence.init(userId);
       } else {
-        // ✅ FIXED: Handle new Google Users correctly
+        // ✅ FIXED: Using 'null' for avatar to prevent Firestore crash
         const newProfile = {
           id: userId,
           email: fbUser.email || '',
           handle: fbUser.displayName?.replace(/\s+/g, '_').toLowerCase() || 'user_' + userId.substring(0, 6),
           school: 'Not Specified',
-          avatar_url: fbUser.photoURL || null, // FIX: Use null, never undefined
+          avatar_url: fbUser.photoURL || null,
           full_name: fbUser.displayName || 'Student',
           xp: 0,
           is_writer: false,
-          is_incomplete: true // Forces redirect to /onboarding
+          is_incomplete: true // Triggers onboarding
         };
-
-        // Don't save to DB yet, wait for Onboarding to finish
+        // Do not save to DB yet, wait for onboarding
         setUser(newProfile as User);
       }
     } catch (e) {
@@ -84,7 +82,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     setUser(null);
   };
 
-  // ✅ FIXED: Register now accepts and saves fullName and bio
+  // ✅ FIXED: Saves fullName and Bio
   const register = async (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => {
     const res = await firebaseAuth.register(email, pass);
     if (res.error) return res;
@@ -95,8 +93,8 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           handle,
           school,
           email,
-          full_name: fullName, // ✅ Correctly saving Name
-          bio: bio || '',      // ✅ Correctly saving Bio
+          full_name: fullName, // Saved!
+          bio: bio || '',      // Saved!
           is_writer,
           is_incomplete: false,
           avatar_url: null
@@ -108,16 +106,12 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
         return { data: { ...res.data, session: true } };
       } catch (error: any) {
-        console.error("Registration Error:", error);
-        // ROLLBACK: Delete the auth user so they can try again
-        await firebaseAuth.deleteUser();
-        return { error: { message: "Account created but profile setup failed. Please try again." } };
+        return { error: { message: "Account created but profile setup failed." } };
       }
     }
     return res;
   };
 
-  // ✅ FIXED: Complete Google Signup now saves bio
   const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean, bio?: string) => {
     if (!user) throw new Error("User not found.");
 
@@ -128,7 +122,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         email: user.email,
         avatar_url: user.avatar_url || null,
         full_name: user.full_name || 'Student',
-        bio: bio || '', // ✅ Correctly saving Bio
+        bio: bio || '',
         is_writer,
         is_incomplete: false
       });
@@ -138,7 +132,6 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       notificationService.sendWelcome(user.id, handle).catch(console.error);
 
     } catch (e: any) {
-      console.error("Profile Completion Failed:", e);
       throw e;
     }
   };
