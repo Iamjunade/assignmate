@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
     getAuth,
     signInWithPopup,
@@ -41,39 +41,30 @@ const firebaseConfig = {
     messagingSenderId: (import.meta as any).env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     appId: (import.meta as any).env.VITE_FIREBASE_APP_ID,
     measurementId: (import.meta as any).env.VITE_FIREBASE_MEASUREMENT_ID,
-    databaseURL: "https://assignmate-cfe7e-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    databaseURL: (import.meta as any).env.VITE_FIREBASE_DATABASE_URL
 };
 
-let app: any;
-let authInstance: any;
-let dbInstance: any;
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+const authInstance = getAuth(app);
+const dbInstance = getFirestore(app);
+const storageInstance = getStorage(app);
+
 let messagingInstance: any;
 let rtdbInstance: any;
-let storageInstance: any;
 
 export const isConfigured = true;
 
+// Initialize RTDB safely
 try {
-    app = initializeApp(firebaseConfig);
-    authInstance = getAuth(app);
-    dbInstance = getFirestore(app);
-
-    // Initialize RTDB safely
-    try {
-        rtdbInstance = getDatabase(app);
-    } catch (e) {
-        console.warn("RTDB Init Failed (Non-critical if not using Presence):", e);
-    }
-
-    try {
-        messagingInstance = getMessaging(app);
-    } catch (e) {
-        console.log("Messaging not supported (e.g., non-https or private mode)");
-    }
-    // Initialize Storage
-    storageInstance = getStorage(app);
+    rtdbInstance = getDatabase(app);
 } catch (e) {
-    console.error("Firebase Init Error:", e);
+    console.warn("RTDB Init Failed (Non-critical if not using Presence):", e);
+}
+
+try {
+    messagingInstance = getMessaging(app);
+} catch (e) {
+    console.log("Messaging not supported (e.g., non-https or private mode)");
 }
 
 export const storage = storageInstance;
