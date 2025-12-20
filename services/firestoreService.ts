@@ -476,7 +476,8 @@ export const dbService = {
                 ...c,
                 gig_title: 'Direct Chat',
                 other_handle: other?.handle || 'User',
-                other_avatar: other?.avatar_url
+                other_avatar: other?.avatar_url,
+                unread_count: isPoster ? (c.unread_count_poster || 0) : (c.unread_count_writer || 0)
             };
         });
     },
@@ -518,8 +519,10 @@ export const dbService = {
             writer_id: writerId, // Keep for backward compatibility if needed
             createdAt: new Date().toISOString(),
             updated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
             last_message: '',
-            unread_count: 0
+            unread_count_poster: 0,
+            unread_count_writer: 0
         };
         await setDoc(newChatRef, newChat);
         return { id: newChatRef.id, ...newChat };
@@ -562,16 +565,32 @@ export const dbService = {
         const res = await addDoc(collection(getDb(), 'chats', chatId, 'messages'), newMessage);
 
         // 2. Update chat metadata
-        await updateDoc(doc(getDb(), 'chats', chatId), {
-            last_message: type === 'text' ? text : `Sent an ${type}`,
-            updated_at: new Date().toISOString()
-        });
+        // 2. Update chat metadata and unread counts
+        const chatRef = doc(getDb(), 'chats', chatId);
+        const chatSnap = await getDoc(chatRef);
 
-        // 3. Notify
-        const chatSnap = await getDoc(doc(getDb(), 'chats', chatId));
         if (chatSnap.exists()) {
             const chatData = chatSnap.data();
-            const receiverId = chatData.poster_id === senderId ? chatData.writer_id : chatData.poster_id;
+            const isSenderPoster = chatData.poster_id === senderId;
+
+            const updates: any = {
+                last_message: type === 'text' ? text : `Sent an ${type}`,
+                updated_at: new Date().toISOString()
+            };
+
+            // Increment unread count for the RECEIVER
+            if (isSenderPoster) {
+                // Sender is poster, increment writer's unread count
+                updates.unread_count_writer = (chatData.unread_count_writer || 0) + 1;
+            } else {
+                // Sender is writer, increment poster's unread count
+                updates.unread_count_poster = (chatData.unread_count_poster || 0) + 1;
+            }
+
+            await updateDoc(chatRef, updates);
+
+            // 3. Notify
+            const receiverId = isSenderPoster ? chatData.writer_id : chatData.poster_id;
             const senderSnap = await getDoc(doc(getDb(), 'users', senderId));
             const senderName = senderSnap.exists() ? senderSnap.data().handle : 'User';
 
@@ -582,10 +601,25 @@ export const dbService = {
     },
 
     markMessagesAsRead: async (chatId: string, readerId: string) => {
-        // Query messages where readerId is NOT in readBy
-        // Firestore doesn't support "not-in-array" directly easily, so we query all and filter or query by readBy not-contains (not supported)
-        // Alternative: Query messages where sender != readerId
+        const chatRef = doc(getDb(), 'chats', chatId);
+        const chatSnap = await getDoc(chatRef);
 
+        if (chatSnap.exists()) {
+            const chatData = chatSnap.data();
+            const isReaderPoster = chatData.poster_id === readerId;
+
+            // Reset unread count for the READER
+            const updates: any = {};
+            if (isReaderPoster) {
+                updates.unread_count_poster = 0;
+            } else {
+                updates.unread_count_writer = 0;
+            }
+
+            await updateDoc(chatRef, updates);
+        }
+
+        // Also mark individual messages as read (existing logic)
         const q = query(
             collection(getDb(), 'chats', chatId, 'messages'),
             where('sender_id', '!=', readerId)
@@ -664,7 +698,8 @@ export const dbService = {
                     ...c,
                     gig_title: 'Direct Chat',
                     other_handle: other?.handle || 'User',
-                    other_avatar: other?.avatar_url
+                    other_avatar: other?.avatar_url,
+                    unread_count: isPoster ? (c.unread_count_poster || 0) : (c.unread_count_writer || 0)
                 };
             });
             callback(hydrated);
@@ -678,6 +713,35 @@ export const dbService = {
         const unsub2 = onSnapshot(q2, (snap) => {
             chats2 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             mergeAndCallback();
+        });
+
+        return () => { unsub1(); unsub2(); };
+    },
+
+    listenToUnreadCount: (userId: string, callback: (count: number) => void) => {
+        if (!userId) return () => { };
+
+        const q1 = query(collection(getDb(), 'chats'), where('poster_id', '==', userId));
+        const q2 = query(collection(getDb(), 'chats'), where('writer_id', '==', userId));
+
+        const calculateTotal = (chats1: any[], chats2: any[]) => {
+            let total = 0;
+            chats1.forEach(c => total += (c.unread_count_poster || 0));
+            chats2.forEach(c => total += (c.unread_count_writer || 0));
+            callback(total);
+        };
+
+        let chats1: any[] = [];
+        let chats2: any[] = [];
+
+        const unsub1 = onSnapshot(q1, (snap) => {
+            chats1 = snap.docs.map(d => d.data());
+            calculateTotal(chats1, chats2);
+        });
+
+        const unsub2 = onSnapshot(q2, (snap) => {
+            chats2 = snap.docs.map(d => d.data());
+            calculateTotal(chats1, chats2);
         });
 
         return () => { unsub1(); unsub2(); };

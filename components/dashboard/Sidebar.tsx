@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from '../../types';
 
 import { useAuth } from '../../contexts/AuthContext';
+import { dbService } from '../../services/firestoreService';
+import { useState, useEffect } from 'react';
 
 interface SidebarProps {
     user: User | null;
@@ -12,6 +14,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { logout } = useAuth();
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    useEffect(() => {
+        if (user?.id) {
+            const unsubscribe = dbService.listenToUnreadCount(user.id, (count) => {
+                setUnreadCount(count);
+            });
+            return () => unsubscribe();
+        }
+    }, [user?.id]);
 
     const isActive = (path: string) => location.pathname === path;
 
@@ -63,7 +75,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 >
                     <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">chat_bubble</span>
                     <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Messages</span>
-                    <span className="ml-auto bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">3</span>
+                    {unreadCount > 0 && (
+                        <span className="ml-auto bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">{unreadCount}</span>
+                    )}
                 </a>
 
                 <div className="mt-8 mb-2 px-4 text-xs font-bold text-text-muted uppercase tracking-wider">Settings</div>
