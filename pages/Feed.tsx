@@ -23,6 +23,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
         activeOrders: []
     });
     const [loading, setLoading] = useState(true);
+    const [verifiedWriters, setVerifiedWriters] = useState<any[]>([]);
 
     useEffect(() => {
         if (user) {
@@ -30,6 +31,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                 setStats(data);
                 setLoading(false);
             });
+            db.getVerifiedWriters(user.school).then(setVerifiedWriters);
         }
     }, [user]);
 
@@ -258,34 +260,52 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                 </button>
                                             </div>
                                         </div>
-                                        {/* Placeholder for Verified Writers - Can be dynamic later */}
-                                        <div className="bg-white p-5 rounded-[1.5rem] border border-border-subtle shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer">
-                                            <div className="flex justify-between items-start mb-3">
-                                                <div className="flex gap-3">
-                                                    <Avatar
-                                                        src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
-                                                        alt="Rohan M."
-                                                        className="size-12 rounded-xl shadow-sm"
-                                                    />
-                                                    <div>
-                                                        <div className="flex items-center gap-1">
-                                                            <h3 className="font-bold text-text-dark">Rohan M.</h3>
-                                                            <span className="material-symbols-outlined text-blue-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                        {/* Verified Writers List */}
+                                        {verifiedWriters.length > 0 ? (
+                                            verifiedWriters.map((writer) => (
+                                                <div key={writer.id} onClick={() => navigate(`/profile/${writer.id}`)} className="bg-white p-5 rounded-[1.5rem] border border-border-subtle shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer mb-4">
+                                                    <div className="flex justify-between items-start mb-3">
+                                                        <div className="flex gap-3">
+                                                            <Avatar
+                                                                src={writer.avatar_url}
+                                                                alt={writer.handle}
+                                                                className="size-12 rounded-xl shadow-sm"
+                                                                fallback={writer.handle?.charAt(0)}
+                                                            />
+                                                            <div>
+                                                                <div className="flex items-center gap-1">
+                                                                    <h3 className="font-bold text-text-dark">{writer.handle}</h3>
+                                                                    <span className="material-symbols-outlined text-blue-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                                                </div>
+                                                                <p className="text-xs text-text-muted line-clamp-1">{writer.bio || `${writer.school}`}</p>
+                                                                <div className="flex items-center gap-1 mt-1 text-xs font-bold text-text-dark">
+                                                                    <span className="material-symbols-outlined text-amber-400 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                                                    4.9 <span className="text-text-muted font-medium">({writer.reviews_count || 0})</span>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <p className="text-xs text-text-muted">M.Sc Physics â€¢ Delhi University</p>
-                                                        <div className="flex items-center gap-1 mt-1 text-xs font-bold text-text-dark">
-                                                            <span className="material-symbols-outlined text-amber-400 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                                            4.9 <span className="text-text-muted font-medium">(120)</span>
-                                                        </div>
+                                                        {writer.total_earned > 1000 && (
+                                                            <span className="bg-orange-50 text-orange-700 text-[10px] font-bold px-2 py-1 rounded-lg border border-orange-100">Top Rated</span>
+                                                        )}
                                                     </div>
+                                                    {writer.tags && writer.tags.length > 0 && (
+                                                        <div className="flex gap-2 mt-4 flex-wrap">
+                                                            {writer.tags.slice(0, 3).map((tag: string, i: number) => (
+                                                                <span key={i} className="bg-gray-50 text-text-muted text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-gray-100">{tag}</span>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <span className="bg-orange-50 text-orange-700 text-[10px] font-bold px-2 py-1 rounded-lg border border-orange-100">Top Rated</span>
+                                            ))
+                                        ) : (
+                                            <div className="bg-white p-8 rounded-[1.5rem] border border-border-subtle text-center">
+                                                <div className="bg-gray-50 size-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                    <span className="material-symbols-outlined text-gray-400">school</span>
+                                                </div>
+                                                <p className="text-text-dark font-bold text-sm">No verified writers yet</p>
+                                                <p className="text-xs text-text-muted mt-1">Be the first verified writer at {user?.school || 'your university'}!</p>
                                             </div>
-                                            <div className="flex gap-2 mt-4">
-                                                <span className="bg-gray-50 text-text-muted text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-gray-100">Physics</span>
-                                                <span className="bg-gray-50 text-text-muted text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-gray-100">Calculus</span>
-                                            </div>
-                                        </div>
+                                        )}
                                     </section>
                                 </div>
                             </div>

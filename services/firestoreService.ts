@@ -255,6 +255,23 @@ export const dbService = {
         return writers;
     },
 
+    getVerifiedWriters: async (college?: string, limitCount: number = 5) => {
+        const usersRef = collection(getDb(), 'users');
+        const constraints: any[] = [
+            where('is_writer', '==', true),
+            where('is_verified', '==', 'verified'),
+            limit(limitCount)
+        ];
+
+        if (college) {
+            constraints.push(where('search_school', '==', college.toLowerCase()));
+        }
+
+        const q = query(usersRef, ...constraints);
+        const snap = await getDocs(q);
+        return snap.docs.map(d => d.data());
+    },
+
     updateProfile: async (userId: string, updates: any) => {
         const docRef = doc(getDb(), 'users', userId);
 
