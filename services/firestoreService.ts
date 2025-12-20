@@ -255,12 +255,12 @@ export const dbService = {
         return writers;
     },
 
-    getDashboardWriters: async (college?: string, limitCount: number = 5) => {
+    getDashboardWriters: async (college?: string, limitCount: number = 5, currentUserId?: string) => {
         const usersRef = collection(getDb(), 'users');
         const constraints: any[] = [
             where('is_writer', '==', true),
             // where('is_verified', '==', 'verified'), // Removed to show all writers
-            limit(limitCount)
+            limit(limitCount + 1) // Fetch one extra in case we filter out self
         ];
 
         if (college) {
@@ -269,7 +269,14 @@ export const dbService = {
 
         const q = query(usersRef, ...constraints);
         const snap = await getDocs(q);
-        return snap.docs.map(d => d.data());
+
+        let writers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        if (currentUserId) {
+            writers = writers.filter((w: any) => w.id !== currentUserId);
+        }
+
+        return writers.slice(0, limitCount);
     },
 
     updateProfile: async (userId: string, updates: any) => {

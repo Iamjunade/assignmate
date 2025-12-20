@@ -31,7 +31,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                 setStats(data);
                 setLoading(false);
             });
-            db.getDashboardWriters(user.school).then(setDashboardWriters);
+            db.getDashboardWriters(user.school, 5, user.id).then(setDashboardWriters);
         }
     }, [user]);
 
