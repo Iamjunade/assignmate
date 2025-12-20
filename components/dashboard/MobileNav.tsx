@@ -10,7 +10,7 @@ export const MobileNav = () => {
     const navItems = [
         { icon: 'dashboard', label: 'Home', path: '/feed' },
         { icon: 'assignment', label: 'Projects', path: '/projects' },
-        { icon: 'add_circle', label: 'Post', path: '/post-project', isPrimary: true },
+        { icon: 'search', label: 'Search', path: '/writers', isPrimary: true },
         { icon: 'chat_bubble', label: 'Chat', path: '/chats' },
         { icon: 'person', label: 'Profile', path: '/profile' },
     ];
