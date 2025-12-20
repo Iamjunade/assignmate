@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { dbService as db } from '../services/firestoreService';
 import { format } from 'date-fns';
 import { Avatar } from '../components/ui/Avatar';
+import { MobileNav } from '../components/dashboard/MobileNav';
 
 interface FeedProps {
     user: User | null;
@@ -311,6 +312,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                     </div>
                 </div>
             </main>
+            <MobileNav />
         </div>
     );
 };

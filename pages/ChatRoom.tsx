@@ -157,23 +157,25 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     };
 
     return (
-        <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
+        <div className="bg-background text-text-dark antialiased h-screen supports-[height:100dvh]:h-[100dvh] overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />
             <main className="flex-1 flex flex-col h-full overflow-hidden relative">
-                <DashboardHeader />
-                <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-white lg:rounded-tl-3xl shadow-soft border-l border-t border-border-light">
+                <div className="hidden lg:block">
+                    <DashboardHeader />
+                </div>
+                <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-white lg:rounded-tl-3xl shadow-soft lg:border-l lg:border-t border-border-light">
                     {/* Chat Header */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-border-light bg-white z-10 sticky top-0">
-                        <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-border-light bg-white z-10 sticky top-0">
+                        <div className="flex items-center gap-3 md:gap-4">
                             <button onClick={handleBack} className="p-2 -ml-2 text-secondary hover:bg-background rounded-full transition-colors">
                                 <ArrowLeft size={22} />
                             </button>
                             {chatDetails ? (
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-3 md:gap-4">
                                     <div className="relative">
                                         <img
                                             src={chatDetails.other_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${chatDetails.other_handle}`}
-                                            className="bg-center bg-no-repeat bg-cover rounded-full size-11 shadow-sm object-cover bg-background border border-border-light"
+                                            className="bg-center bg-no-repeat bg-cover rounded-full size-10 md:size-11 shadow-sm object-cover bg-background border border-border-light"
                                             alt={chatDetails.other_handle}
                                         />
                                         <div className="absolute bottom-0 right-0 block size-3 rounded-full ring-2 ring-white bg-white overflow-hidden">
@@ -182,9 +184,9 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <h2 className="text-lg font-bold text-text-main leading-tight">{chatDetails.other_handle}</h2>
+                                            <h2 className="text-base md:text-lg font-bold text-text-main leading-tight">{chatDetails.other_handle}</h2>
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wide border border-blue-100">
-                                                <span className="material-symbols-outlined text-[12px]">verified</span> Verified Peer
+                                                <span className="material-symbols-outlined text-[12px]">verified</span> <span className="hidden sm:inline">Verified Peer</span><span className="sm:hidden">Verified</span>
                                             </span>
                                         </div>
                                         <p className="text-xs font-medium text-secondary flex items-center gap-1">
@@ -202,7 +204,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 </div>
                             )}
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 md:gap-3">
                             <button onClick={handleCreateOffer} className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-background border border-border-light text-sm font-bold text-secondary hover:bg-gray-50 transition shadow-sm">
                                 <span className="material-symbols-outlined text-[18px]">receipt_long</span>
                                 Create Offer
@@ -214,11 +216,11 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                     </div>
 
                     {/* Messages Stream */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col bg-background/30">
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 flex flex-col bg-background/30">
                         <div className="flex justify-center w-full my-4">
                             <div className="bg-orange-50 border border-orange-100 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
                                 <span className="material-symbols-outlined text-primary text-[16px]">shield_lock</span>
-                                <p className="text-xs text-secondary font-medium">Bank-Grade Trust: Payments held in escrow until you approve the work.</p>
+                                <p className="text-[10px] md:text-xs text-secondary font-medium text-center">Payments held in escrow until approval.</p>
                             </div>
                         </div>
 
@@ -261,7 +263,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                             </div>
                                         )}
 
-                                        <div className={`p-4 shadow-sm text-[15px] leading-relaxed break-words whitespace-pre-wrap ${isMe
+                                        <div className={`p-3 md:p-4 shadow-sm text-[15px] leading-relaxed break-words whitespace-pre-wrap ${isMe
                                             ? 'bg-primary text-white rounded-l-2xl rounded-tr-2xl'
                                             : 'bg-white text-text-main rounded-r-2xl rounded-tl-2xl border border-border-light'
                                             } ${isSequence && isMe ? 'rounded-br-md' : 'rounded-br-2xl'} ${isSequence && !isMe ? 'rounded-bl-md' : 'rounded-bl-2xl'}`}>
@@ -317,10 +319,10 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                     </div>
 
                     {/* Input Area */}
-                    <div className="p-6 pt-2 bg-white border-t border-border-light z-20">
+                    <div className="p-2 md:p-6 pt-2 bg-white border-t border-border-light z-20 pb-safe">
                         <form
                             onSubmit={send}
-                            className="bg-background p-2 pl-4 rounded-[2rem] border border-border-light flex items-end gap-2 shadow-inner focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+                            className="bg-background p-2 pl-3 md:pl-4 rounded-[2rem] border border-border-light flex items-end gap-2 shadow-inner focus-within:ring-2 focus-within:ring-primary/20 transition-all"
                         >
                             <input
                                 type="file"
@@ -354,7 +356,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 />
                             </div>
 
-                            <button type="button" className="p-2 mb-1 rounded-full text-secondary hover:text-text-main transition-colors">
+                            <button type="button" className="p-2 mb-1 rounded-full text-secondary hover:text-text-main transition-colors hidden sm:block">
                                 <span className="material-symbols-outlined">sentiment_satisfied</span>
                             </button>
 
@@ -373,7 +375,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 </button>
                             )}
                         </form>
-                        <div className="text-center mt-2">
+                        <div className="text-center mt-2 hidden md:block">
                             <p className="text-[10px] text-secondary">Press Enter to send. Messages are protected by <span className="text-text-main font-bold">AssignMate Secure Guarantee™</span></p>
                         </div>
                     </div>

@@ -71,10 +71,15 @@ export const DashboardHeader: React.FC = () => {
     }, [searchQuery, colleges]);
 
     return (
-        <header className="h-24 flex items-center justify-between px-4 py-4 bg-[#faf9f7]/90 backdrop-blur-md sticky top-0 z-30">
-            <button className="lg:hidden p-2 -ml-2 text-text-dark">
-                <span className="material-symbols-outlined">menu</span>
-            </button>
+        <header className="h-16 md:h-24 flex items-center justify-between px-4 py-4 bg-[#faf9f7]/90 backdrop-blur-md sticky top-0 z-30 transition-all duration-300">
+            {/* Mobile Logo */}
+            <div className="lg:hidden flex items-center gap-2 text-text-dark mr-4">
+                <div className="size-8 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
+                </div>
+                <span className="text-lg font-extrabold tracking-tight hidden sm:block">AssignMate</span>
+            </div>
+
             <div className="hidden md:flex flex-1 max-w-lg z-50">
                 <div className="relative w-full group" ref={searchRef}>
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -156,22 +161,22 @@ export const DashboardHeader: React.FC = () => {
                     )}
                 </div>
             </div>
-            <div className="flex items-center gap-3 ml-auto">
-                <button className="relative p-2.5 bg-white text-text-dark hover:bg-primary-light rounded-full transition-colors border border-border-subtle shadow-sm group">
-                    <span className="material-symbols-outlined group-hover:text-primary transition-colors">notifications</span>
-                    <span className="absolute top-2.5 right-3 size-2 bg-red-500 rounded-full border-2 border-white"></span>
+            <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+                <button className="relative p-2 md:p-2.5 bg-white text-text-dark hover:bg-primary-light rounded-full transition-colors border border-border-subtle shadow-sm group">
+                    <span className="material-symbols-outlined group-hover:text-primary transition-colors text-[20px] md:text-[24px]">notifications</span>
+                    <span className="absolute top-2 right-2.5 size-2 bg-red-500 rounded-full border-2 border-white"></span>
                 </button>
                 <button
                     onClick={() => navigate('/writers')}
-                    className="hidden sm:flex items-center justify-center rounded-full h-11 px-6 bg-white border border-border-subtle text-text-dark text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm"
+                    className="hidden lg:flex items-center justify-center rounded-full h-11 px-6 bg-white border border-border-subtle text-text-dark text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm"
                 >
                     Find a Writer
                 </button>
                 <button
                     onClick={() => navigate('/post-project')}
-                    className="flex items-center justify-center gap-2 rounded-full h-11 px-6 bg-text-dark text-white text-sm font-bold shadow-lg shadow-gray-200 hover:shadow-xl hover:scale-105 transition-all"
+                    className="flex items-center justify-center gap-2 rounded-full h-10 md:h-11 px-4 md:px-6 bg-text-dark text-white text-sm font-bold shadow-lg shadow-gray-200 hover:shadow-xl hover:scale-105 transition-all"
                 >
-                    <span className="material-symbols-outlined text-lg">add</span> Post Project
+                    <span className="material-symbols-outlined text-lg">add</span> <span className="hidden sm:inline">Post Project</span><span className="sm:hidden">Post</span>
                 </button>
             </div>
         </header>

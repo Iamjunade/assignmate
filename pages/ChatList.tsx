@@ -7,6 +7,7 @@ import { UserPresence } from '../components/UserPresence';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { useNavigate } from 'react-router-dom';
+import { MobileNav } from '../components/dashboard/MobileNav';
 
 const MotionDiv = motion.div as any;
 
@@ -58,7 +59,7 @@ export const ChatList = ({ user, onSelect, selectedId }: { user: any, onSelect?:
     };
 
     return (
-        <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
+        <div className="bg-background text-text-dark antialiased h-screen supports-[height:100dvh]:h-[100dvh] overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />
 
             <main className="flex-1 flex flex-col h-full overflow-hidden relative">
@@ -168,6 +169,7 @@ export const ChatList = ({ user, onSelect, selectedId }: { user: any, onSelect?:
                     </div>
                 </div>
             </main>
+            <MobileNav />
         </div>
     );
 };
