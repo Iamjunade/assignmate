@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { User } from '../types';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
@@ -63,22 +63,12 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                             <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
                                 <div>
                                     <div className="text-sm font-bold text-primary mb-1 tracking-wide uppercase">
-                                        {format(new Date(), 'MMM d')} • Student Dashboard
+                                        {format(new Date(), 'MMM d')} â€¢ Student Dashboard
                                     </div>
                                     <h1 className="text-3xl md:text-4xl font-extrabold text-text-dark tracking-tight leading-tight">
                                         {getGreeting()}, {user?.full_name?.split(' ')[0] || 'Student'}.
                                     </h1>
                                     <p className="text-text-muted mt-2 text-lg">Your academic tasks are under control.</p>
-                                </div>
-                                <div className="w-full xl:w-auto bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow cursor-pointer">
-                                    <div className="bg-white p-2.5 rounded-full shadow-sm text-emerald-600 z-10">
-                                        <span className="material-symbols-outlined">shield_lock</span>
-                                    </div>
-                                    <div className="flex-1 z-10">
-                                        <h3 className="text-sm font-bold text-text-dark">Escrow Protected Payments</h3>
-                                        <p className="text-xs text-text-muted mt-0.5">Funds released only when you're 100% satisfied.</p>
-                                    </div>
-                                    <span className="material-symbols-outlined text-emerald-200 absolute -right-4 -bottom-4 text-[100px] opacity-20">verified_user</span>
                                 </div>
                             </div>
 
@@ -113,22 +103,6 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     </div>
                                 </div>
 
-                                {/* Escrow Balance */}
-                                <div className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
-                                    <div className="flex justify-between items-start mb-4 relative z-10">
-                                        <h3 className="text-text-muted font-bold text-sm">Escrow Balance</h3>
-                                        <div className="size-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                            <span className="material-symbols-outlined">account_balance</span>
-                                        </div>
-                                    </div>
-                                    <div className="relative z-10">
-                                        <span className="text-4xl font-extrabold text-text-dark tracking-tight">{formatCurrency(stats.escrowBalance)}</span>
-                                        <div className="flex items-center gap-1.5 mt-3 text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded-lg">
-                                            <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                                            <span className="text-xs font-bold">Funds Secured</span>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 {/* Next Deadline */}
                                 <div className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
@@ -225,7 +199,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                                     <h3 className="text-lg font-bold text-text-dark">{order.title}</h3>
                                                                     <span className="px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-700 text-[10px] font-bold uppercase tracking-wider border border-orange-100">Work In Progress</span>
                                                                 </div>
-                                                                <p className="text-sm text-text-muted">ID: #{order.id.substring(0, 6).toUpperCase()} • Due: {format(new Date(order.deadline), 'MMM d')}</p>
+                                                                <p className="text-sm text-text-muted">ID: #{order.id.substring(0, 6).toUpperCase()} â€¢ Due: {format(new Date(order.deadline), 'MMM d')}</p>
                                                             </div>
                                                         </div>
                                                         <button className="size-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-text-muted transition-colors">
@@ -298,7 +272,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                             <h3 className="font-bold text-text-dark">Rohan M.</h3>
                                                             <span className="material-symbols-outlined text-blue-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                                         </div>
-                                                        <p className="text-xs text-text-muted">M.Sc Physics • Delhi University</p>
+                                                        <p className="text-xs text-text-muted">M.Sc Physics â€¢ Delhi University</p>
                                                         <div className="flex items-center gap-1 mt-1 text-xs font-bold text-text-dark">
                                                             <span className="material-symbols-outlined text-amber-400 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                                                             4.9 <span className="text-text-muted font-medium">(120)</span>

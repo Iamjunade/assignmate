@@ -73,7 +73,7 @@ export const Landing = () => {
                                 Beat the <span className="text-primary relative inline-block">Last-Minute Panic<svg className="absolute w-full h-3 -bottom-1 left-0 text-primary opacity-40" preserveAspectRatio="none" viewBox="0 0 100 10"><path d="M0 5 Q 50 10 100 5" fill="none" stroke="currentColor" strokeWidth="8"></path></svg></span>. India's #1 Student Marketplace.
                             </h1>
                             <p className="text-lg text-gray-600 dark:text-gray-300 md:text-xl leading-relaxed max-w-lg">
-                                Connect with verified top-tier peers from your own college. Assignments done fast, payments held safe in escrow.
+                                Connect with verified top-tier peers from your own college. Assignments done fast, payments held safe.
                             </p>
                             <div className="flex flex-wrap gap-4">
                                 <button onClick={handleLogin} className="flex items-center justify-center rounded-full h-14 px-8 bg-primary text-[#1b140d] text-base font-bold shadow-xl shadow-primary/25 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
@@ -180,8 +180,8 @@ export const Landing = () => {
                             <div className="w-14 h-14 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <span className="material-symbols-outlined text-green-500 text-3xl">savings</span>
                             </div>
-                            <h3 className="text-xl font-bold mb-3 text-[#1b140d] dark:text-white">Escrow Security</h3>
-                            <p className="text-gray-600 dark:text-gray-400">We hold your money safely in an escrow vault. The writer only gets paid when you approve the work.</p>
+                            <h3 className="text-xl font-bold mb-3 text-[#1b140d] dark:text-white">Secure Payments</h3>
+                            <p className="text-gray-600 dark:text-gray-400">We hold your money safely. The writer only gets paid when you approve the work.</p>
                         </div>
                     </div>
                 </div>
@@ -276,7 +276,7 @@ export const Landing = () => {
                                                 <span className="material-symbols-outlined">lock</span>
                                             </div>
                                             <div>
-                                                <h3 className="text-lg font-bold text-[#1b140d] dark:text-white">Deposit funds to Safe Escrow</h3>
+                                                <h3 className="text-lg font-bold text-[#1b140d] dark:text-white">Deposit funds securely</h3>
                                                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Pay upfront to show commitment. We hold the money. The writer doesn't get it yet.</p>
                                             </div>
                                         </div>
@@ -340,7 +340,7 @@ export const Landing = () => {
                                     <span className="material-symbols-outlined text-sm fill-current">star</span>
                                     <span className="material-symbols-outlined text-sm fill-current">star</span>
                                 </div>
-                                <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"Security was my main concern. Seeing the verified tick and knowing my money was in Escrow made me feel safe trying this out."</p>
+                                <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"Security was my main concern. Seeing the verified tick and knowing my money was safe made me feel safe trying this out."</p>
                                 <div className="flex items-center gap-3">
                                     <img alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2yNIYgHyb_Jn7XF-GDsKJvdtb6FVytPUB4W8FydVYGvhJC70cfuEXL6vHEtdiG3Gy-UtnvjyxUaTTw3Cn-SXPXdPf9SWf_aFOGP2ei0MYyRb-ENiUlJP-aze9BjRzHsVqV3ezMbDY0LpbVqnMCer8qVDMyATODoJELtAoIEPPnEUTeiTtDoCQLrc-mTuqP6eAweXl7QDTduNxEmccBqlUlcWOtXG4Y0RrgRujypk64PbzW2R_-YUL-Drnw_Lg5G8fAb37b9HQZ4s0" />
                                     <div>

@@ -220,7 +220,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                         <div className="flex justify-center w-full my-4">
                             <div className="bg-orange-50 border border-orange-100 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
                                 <span className="material-symbols-outlined text-primary text-[16px]">shield_lock</span>
-                                <p className="text-[10px] md:text-xs text-secondary font-medium text-center">Payments held in escrow until approval.</p>
+                                <p className="text-[10px] md:text-xs text-secondary font-medium text-center">Payments held securely until approval.</p>
                             </div>
                         </div>
 

@@ -65,13 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Messages</span>
                     <span className="ml-auto bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">3</span>
                 </a>
-                <a
-                    onClick={() => navigate('/escrow')}
-                    className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/escrow') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
-                >
-                    <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">account_balance_wallet</span>
-                    <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Escrow</span>
-                </a>
+
                 <div className="mt-8 mb-2 px-4 text-xs font-bold text-text-muted uppercase tracking-wider">Settings</div>
                 <a
                     onClick={() => navigate('/profile')}
