@@ -255,11 +255,11 @@ export const dbService = {
         return writers;
     },
 
-    getVerifiedWriters: async (college?: string, limitCount: number = 5) => {
+    getDashboardWriters: async (college?: string, limitCount: number = 5) => {
         const usersRef = collection(getDb(), 'users');
         const constraints: any[] = [
             where('is_writer', '==', true),
-            where('is_verified', '==', 'verified'),
+            // where('is_verified', '==', 'verified'), // Removed to show all writers
             limit(limitCount)
         ];
 

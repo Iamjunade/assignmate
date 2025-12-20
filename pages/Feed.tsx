@@ -23,7 +23,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
         activeOrders: []
     });
     const [loading, setLoading] = useState(true);
-    const [verifiedWriters, setVerifiedWriters] = useState<any[]>([]);
+    const [dashboardWriters, setDashboardWriters] = useState<any[]>([]);
 
     useEffect(() => {
         if (user) {
@@ -31,7 +31,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                 setStats(data);
                 setLoading(false);
             });
-            db.getVerifiedWriters(user.school).then(setVerifiedWriters);
+            db.getDashboardWriters(user.school).then(setDashboardWriters);
         }
     }, [user]);
 
@@ -250,7 +250,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     {/* Verified Writers Section */}
                                     <section>
                                         <div className="flex items-center justify-between mb-5">
-                                            <h2 className="text-lg font-bold text-text-dark">Verified at {user?.school || 'Your University'}</h2>
+                                            <h2 className="text-lg font-bold text-text-dark">Writers at {user?.school || 'Your University'}</h2>
                                             <div className="flex gap-2">
                                                 <button className="size-8 rounded-full bg-white border border-border-subtle flex items-center justify-center text-text-muted hover:bg-gray-50 transition-colors">
                                                     <span className="material-symbols-outlined text-[18px]">chevron_left</span>
@@ -261,8 +261,8 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             </div>
                                         </div>
                                         {/* Verified Writers List */}
-                                        {verifiedWriters.length > 0 ? (
-                                            verifiedWriters.map((writer) => (
+                                        {dashboardWriters.length > 0 ? (
+                                            dashboardWriters.map((writer) => (
                                                 <div key={writer.id} onClick={() => navigate(`/profile/${writer.id}`)} className="bg-white p-5 rounded-[1.5rem] border border-border-subtle shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer mb-4">
                                                     <div className="flex justify-between items-start mb-3">
                                                         <div className="flex gap-3">
@@ -302,8 +302,8 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                 <div className="bg-gray-50 size-12 rounded-full flex items-center justify-center mx-auto mb-3">
                                                     <span className="material-symbols-outlined text-gray-400">school</span>
                                                 </div>
-                                                <p className="text-text-dark font-bold text-sm">No verified writers yet</p>
-                                                <p className="text-xs text-text-muted mt-1">Be the first verified writer at {user?.school || 'your university'}!</p>
+                                                <p className="text-text-dark font-bold text-sm">No writers yet</p>
+                                                <p className="text-xs text-text-muted mt-1">Be the first writer at {user?.school || 'your university'}!</p>
                                             </div>
                                         )}
                                     </section>
