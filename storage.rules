@@ -34,6 +34,24 @@ service firebase.storage {
       allow write: if isAuthenticated() && request.auth.uid == userId;
       allow read: if isAuthenticated();
     }
+
+    // Portfolio Images
+    match /portfolio/{userId}/{allPaths=**} {
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+      allow read: if isAuthenticated();
+    }
+
+    // Avatars
+    match /avatars/{userId}/{allPaths=**} {
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+      allow read: if isAuthenticated();
+    }
+
+    // Verification IDs
+    match /verification/{userId}/{allPaths=**} {
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+      allow read: if isAuthenticated() && request.auth.uid == userId; // Only user can read their own ID
+    }
     
     // Default: Deny all other access
     match /{allPaths=**} {
