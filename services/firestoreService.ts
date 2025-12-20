@@ -298,11 +298,23 @@ export const dbService = {
 
 
 
-    addToPortfolio: async (userId: string, imageUrl: string) => {
+    addToPortfolio: async (userId: string, file: File) => {
+        const { storage } = await import('./firebase');
+        const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+
+        // 1. Upload to Storage
+        const path = `portfolio/${userId}/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, path);
+        const snapshot = await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(snapshot.ref);
+
+        // 2. Update Firestore
         const docRef = doc(getDb(), 'users', userId);
         await updateDoc(docRef, {
-            portfolio: arrayUnion(imageUrl)
+            portfolio: arrayUnion(url)
         });
+
+        return url;
     },
 
     deleteFromPortfolio: async (userId: string, urlToDelete: string) => {

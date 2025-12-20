@@ -233,16 +233,11 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
             try {
                 const file = e.target.files[0];
                 console.log("Starting Portfolio Upload...");
-                console.log("Current User ID:", currentUser?.id);
-                console.log("Profile User ID:", profileUser?.id);
 
-                const path = `portfolio/${profileUser.id}/${Date.now()}_${file.name}`;
-                console.log("Upload Path:", path);
-
-                const url = await db.uploadFile(file, path);
+                // Use the new addToPortfolio method which handles upload + DB update
+                const url = await db.addToPortfolio(profileUser.id, file);
                 console.log("Upload Success. URL:", url);
 
-                await db.addToPortfolio(profileUser.id, url);
                 if (isOwnProfile) await refreshProfile();
 
                 // Update local state
@@ -251,8 +246,6 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                 success("Portfolio item added");
             } catch (e: any) {
                 console.error("Portfolio Upload Failed:", e);
-                console.error("Error Code:", e.code);
-                console.error("Error Message:", e.message);
                 error("Failed to upload portfolio item: " + (e.message || "Unknown error"));
             } finally {
                 setUploading(false);
