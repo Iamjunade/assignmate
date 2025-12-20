@@ -171,6 +171,18 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         }
     };
 
+    const handleWriterToggle = async (checked: boolean) => {
+        setIsWriter(checked);
+        try {
+            await db.updateProfile(profileUser.id, { is_writer: checked });
+            setProfileUser({ ...profileUser, is_writer: checked });
+            success(checked ? "You are now listed as a writer" : "You are no longer listed as a writer");
+        } catch (e) {
+            setIsWriter(!checked);
+            error("Failed to update status");
+        }
+    };
+
     const saveProfile = async () => {
         try {
             await db.updateProfile(profileUser.id, {
@@ -394,15 +406,27 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                     {/* Availability Status */}
                                     <div className="mt-6 pt-6 border-t border-border-light w-full flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className={`size-2.5 rounded-full ${profileUser.is_online ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
+                                            <div className={`size-2.5 rounded-full ${isWriter ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
                                             <span className="text-sm font-medium text-secondary">
-                                                {profileUser.is_online ? 'Available Now' : 'Offline'}
+                                                {isWriter ? 'Writer Mode On' : 'Writer Mode Off'}
                                             </span>
                                         </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" checked={profileUser.is_online} className="sr-only peer" readOnly />
-                                            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
-                                        </label>
+                                        {isOwnProfile ? (
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isWriter}
+                                                    onChange={(e) => handleWriterToggle(e.target.checked)}
+                                                    className="sr-only peer"
+                                                />
+                                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                                            </label>
+                                        ) : (
+                                            <label className="relative inline-flex items-center cursor-default">
+                                                <input type="checkbox" checked={isWriter} className="sr-only peer" readOnly />
+                                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                                            </label>
+                                        )}
                                     </div>
                                 </div>
 
@@ -590,21 +614,6 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                         <div>
                                                             <label className="block text-sm font-bold text-secondary mb-1">School / University</label>
                                                             <CollegeAutocomplete value={school} onChange={setSchool} />
-                                                        </div>
-                                                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                                            <div>
-                                                                <h4 className="font-bold text-text-main text-sm">Available as Writer</h4>
-                                                                <p className="text-xs text-secondary">Allow others to find you and request assignments</p>
-                                                            </div>
-                                                            <label className="relative inline-flex items-center cursor-pointer">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={isWriter}
-                                                                    onChange={(e) => setIsWriter(e.target.checked)}
-                                                                    className="sr-only peer"
-                                                                />
-                                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                                            </label>
                                                         </div>
 
                                                         <div className="flex gap-3 pt-4">
