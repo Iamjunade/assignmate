@@ -172,7 +172,11 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                             </button>
                             {chatDetails ? (
                                 <div className="flex items-center gap-3 md:gap-4">
-                                    <div className="relative">
+                                    {/* Clickable avatar - navigates to profile */}
+                                    <div
+                                        className="relative cursor-pointer hover:opacity-80 transition-opacity"
+                                        onClick={() => navigate(`/profile/${chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id}`)}
+                                    >
                                         <img
                                             src={chatDetails.other_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${chatDetails.other_handle}`}
                                             className="bg-center bg-no-repeat bg-cover rounded-full size-10 md:size-11 shadow-sm object-cover bg-background border border-border-light"
@@ -184,7 +188,13 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <h2 className="text-base md:text-lg font-bold text-text-main leading-tight">{chatDetails.other_handle}</h2>
+                                            {/* Clickable handle - navigates to profile */}
+                                            <h2
+                                                className="text-base md:text-lg font-bold text-text-main leading-tight cursor-pointer hover:text-primary transition-colors"
+                                                onClick={() => navigate(`/profile/${chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id}`)}
+                                            >
+                                                {chatDetails.other_handle}
+                                            </h2>
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wide border border-blue-100">
                                                 <span className="material-symbols-outlined text-[12px]">verified</span> <span className="hidden sm:inline">Verified Peer</span><span className="sm:hidden">Verified</span>
                                             </span>
