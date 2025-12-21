@@ -4,11 +4,16 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
 const supabaseAnonKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
 
+console.log('[Supabase Storage] Initializing...');
+console.log('[Supabase Storage] URL configured:', supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'MISSING!');
+console.log('[Supabase Storage] Key configured:', supabaseAnonKey ? 'Yes (hidden)' : 'MISSING!');
+
 if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('[Supabase Storage] Missing environment variables. File uploads will fail.');
+    console.error('[Supabase Storage] ❌ Missing environment variables. File uploads will fail.');
 }
 
 const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+
 
 // Bucket names
 const BUCKETS = {
