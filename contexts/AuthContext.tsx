@@ -25,10 +25,20 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const syncingRef = useRef<string | null>(null);
+  const skipNextSyncRef = useRef<boolean>(false); // Flag to prevent race condition after registration
+
 
   // Sync user profile from Firestore
   const syncUser = async (fbUser: any) => {
     const userId = fbUser.uid;
+
+    // Skip sync if register() just set the user (prevents race condition)
+    if (skipNextSyncRef.current) {
+      skipNextSyncRef.current = false;
+      setLoading(false);
+      return;
+    }
+
     if (syncingRef.current === userId) return;
     syncingRef.current = userId;
 
@@ -105,6 +115,8 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           avatar_url: null
         });
 
+        // Set flag to skip next syncUser call (prevents race condition with onAuthStateChanged)
+        skipNextSyncRef.current = true;
         setUser({ ...profile, email: res.data.user.email || email, is_incomplete: false });
         presence.init(res.data.user.uid);
         notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
