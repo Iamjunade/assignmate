@@ -16,7 +16,7 @@ import {
     arrayRemove,
     onSnapshot
 } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Keep for backwards compat if needed
 import { db, storage } from './firebase';
 import { collegeService } from './collegeService';
 import { notifications } from './firebase';
@@ -299,14 +299,10 @@ export const dbService = {
 
 
     addToPortfolio: async (userId: string, file: File) => {
-        const { storage } = await import('./firebase');
-        const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+        const { supabaseStorage } = await import('./supabaseStorage');
 
-        // 1. Upload to Storage
-        const path = `portfolio/${userId}/${Date.now()}_${file.name}`;
-        const storageRef = ref(storage, path);
-        const snapshot = await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(snapshot.ref);
+        // 1. Upload to Supabase Storage
+        const url = await supabaseStorage.uploadPortfolio(userId, file);
 
         // 2. Update Firestore
         const docRef = doc(getDb(), 'users', userId);
@@ -555,13 +551,9 @@ export const dbService = {
     },
 
     uploadChatFile: async (chatId: string, file: File) => {
-        const { storage } = await import('./firebase');
-        const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+        const { supabaseStorage } = await import('./supabaseStorage');
         try {
-            const path = `chat_files/${chatId}/${Date.now()}_${file.name}`;
-            const storageRef = ref(storage, path);
-            const snapshot = await uploadBytes(storageRef, file);
-            return await getDownloadURL(snapshot.ref);
+            return await supabaseStorage.uploadChatFile(chatId, file);
         } catch (error) {
             console.error("Error uploading file:", error);
             throw error;
@@ -809,13 +801,10 @@ export const dbService = {
         };
     },
 
-    // --- STORAGE METHODS ---
+    // --- STORAGE METHODS (Now using Supabase) ---
     uploadFile: async (file: File, path: string) => {
-        const { storage } = await import('./firebase');
-        const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
-        const storageRef = ref(storage, path);
-        const snapshot = await uploadBytes(storageRef, file);
-        return await getDownloadURL(snapshot.ref);
+        const { supabaseStorage } = await import('./supabaseStorage');
+        return await supabaseStorage.uploadFile(file, path);
     },
 
     saveChatFile: async (chatId: string, fileData: { name: string, url: string, type: string, size: number, uploadedBy: string }) => {
