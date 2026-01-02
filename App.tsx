@@ -31,6 +31,7 @@ const Onboarding = lazy(() => import('./pages/Onboarding').then(module => ({ def
 const FindWriter = lazy(() => import('./pages/FindWriter').then(module => ({ default: module.FindWriter })));
 const AdminVerifications = lazy(() => import('./admin/pages/AdminVerifications').then(module => ({ default: module.AdminVerifications })));
 const PitchDeck = lazy(() => import('./pages/PitchDeck').then(module => ({ default: module.PitchDeck })));
+const Documentation = lazy(() => import('./pages/Documentation').then(module => ({ default: module.Documentation })));
 
 export default function AppWrapper() {
   return (
@@ -165,6 +166,10 @@ function AppContent() {
 
           {/* --- Pitch Deck --- */}
           <Route path="/pitch" element={<PitchDeck />} />
+
+          {/* --- Documentation --- */}
+          <Route path="/docs" element={<Documentation />} />
+          <Route path="/docs/:section" element={<Documentation />} />
 
           {/* --- Public Routes (Glass Layout) --- */}
           <Route element={
