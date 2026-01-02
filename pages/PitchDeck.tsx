@@ -412,10 +412,10 @@ export function PitchDeck() {
                             initial={{ scale: 0, rotate: -180 }}
                             animate={{ scale: 1, rotate: 0 }}
                             transition={{ delay: 0.2, type: 'spring', damping: 15 }}
-                            className={`p-6 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 mb-8 ${slide.color}`}
+                            className={`p-8 rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 mb-8 ${slide.color}`}
                         >
                             {slide.type === 'hero' ? (
-                                <img src="/logo.png" alt="AssignMate Logo" className="w-24 h-24 object-contain drop-shadow-2xl" />
+                                <img src="/logo.png" alt="AssignMate Logo" className="w-40 h-40 object-contain drop-shadow-2xl" />
                             ) : (
                                 <Icon className="w-16 h-16" />
                             )}
@@ -478,8 +478,8 @@ export function PitchDeck() {
                                     key={idx}
                                     onClick={() => setCurrentSlide(idx)}
                                     className={`transition-all duration-300 rounded-full ${idx === currentSlide
-                                            ? 'w-10 h-2 bg-primary'
-                                            : 'w-2 h-2 bg-white/30 hover:bg-white/50'
+                                        ? 'w-10 h-2 bg-primary'
+                                        : 'w-2 h-2 bg-white/30 hover:bg-white/50'
                                         }`}
                                 />
                             ))}
