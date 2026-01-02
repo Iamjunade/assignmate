@@ -295,7 +295,11 @@ export function PitchDeck() {
                                 className="flex flex-col items-center mb-8"
                             >
                                 <div className={`p-4 rounded-2xl bg-white/5 border border-white/10 mb-6 ${slide.color}`}>
-                                    <Icon className="w-12 h-12" />
+                                    {slide.type === 'hero' ? (
+                                        <img src="/logo.png" alt="AssignMate Logo" className="w-20 h-20 object-contain drop-shadow-lg" />
+                                    ) : (
+                                        <Icon className="w-12 h-12" />
+                                    )}
                                 </div>
                                 <h2 className={`text-lg font-bold tracking-widest uppercase mb-2 ${slide.color}`}>{slide.subtitle}</h2>
                                 <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight">{slide.title}</h1>
