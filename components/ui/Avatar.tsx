@@ -32,6 +32,7 @@ export const Avatar: React.FC<AvatarProps> = ({ src, alt, className = '', fallba
                     src={src}
                     alt={alt || 'Avatar'}
                     className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
                     onError={() => setError(true)}
                 />
             ) : (
