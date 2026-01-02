@@ -24,7 +24,7 @@ const slides = [
         icon: GraduationCap,
         content: "The secure, gamified marketplace connecting students with verified academic talent.",
         details: "Bridging the gap between academic pressure and reliable assistance with trust and technology.",
-        color: "text-blue-400"
+        color: "text-primary"
     },
     {
         id: 'problem',
@@ -38,7 +38,7 @@ const slides = [
             "Lack of Verified Talent",
             "Unsafe Payment Methods"
         ],
-        color: "text-red-400"
+        color: "text-orange-400"
     },
     {
         id: 'solution',
@@ -61,7 +61,7 @@ const slides = [
         icon: Users,
         content: "Focusing on the massive demographic of engineering students requiring high-quality notes and assignments.",
         details: "Initial dataset includes thousands of engineering colleges across India, creating a precise target audience.",
-        color: "text-purple-400"
+        color: "text-blue-400"
     },
     {
         id: 'business',
@@ -88,7 +88,7 @@ const slides = [
             "Design: Glassmorphism + Framer Motion",
             "Analysis: AI-driven content verification (Planned)"
         ],
-        color: "text-cyan-400"
+        color: "text-primary-light"
     },
     {
         id: 'roadmap',
@@ -102,7 +102,7 @@ const slides = [
             "Q3: AI Tutoring Integration",
             "Q4: Global Expansion"
         ],
-        color: "text-pink-400"
+        color: "text-purple-400"
     },
     {
         id: 'team',
@@ -111,7 +111,7 @@ const slides = [
         icon: Globe,
         content: "Developed by a passionate team dedicated to solving real student problems through innovative technology.",
         details: "Visit our website for more information.",
-        color: "text-orange-400"
+        color: "text-orange-300"
     }
 ];
 
@@ -146,15 +146,21 @@ export function PitchDeck() {
     const Icon = slide.icon;
 
     return (
-        <div className="fixed inset-0 bg-slate-950 text-white overflow-hidden flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        // Branded Dark Background
+        <div className="fixed inset-0 bg-[#1b140d] text-white overflow-hidden flex items-center justify-center font-display">
+            {/* Premium Noise & Gradients */}
+            <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E")`
+            }}></div>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none"></div>
+            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-orange-600/10 blur-[100px] rounded-full pointer-events-none"></div>
 
             {/* Navigation Controls */}
-            <div className="absolute inset-0 flex items-center justify-between px-4 z-20 pointer-events-none">
-                <GlassButton onClick={prevSlide} className="pointer-events-auto p-4 rounded-full">
+            <div className="absolute inset-0 flex items-center justify-between px-6 md:px-12 z-20 pointer-events-none">
+                <GlassButton onClick={prevSlide} className="pointer-events-auto p-4 rounded-full border-white/10 hover:bg-white/10 text-white/50 hover:text-white transition-colors">
                     <ChevronLeft className="w-8 h-8" />
                 </GlassButton>
-                <GlassButton onClick={nextSlide} className="pointer-events-auto p-4 rounded-full">
+                <GlassButton onClick={nextSlide} className="pointer-events-auto p-4 rounded-full border-white/10 hover:bg-white/10 text-white/50 hover:text-white transition-colors">
                     <ChevronRight className="w-8 h-8" />
                 </GlassButton>
             </div>
@@ -164,36 +170,39 @@ export function PitchDeck() {
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentSlide}
-                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        initial={{ opacity: 0, y: 30, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -50, scale: 0.9 }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        exit={{ opacity: 0, y: -30, scale: 0.95 }}
+                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} // smooth easeOutQuint
                         className="w-full"
                     >
-                        <GlassCard className="p-12 md:p-16 min-h-[60vh] flex flex-col items-center justify-center text-center relative overflow-hidden border-white/10">
-                            {/* Background Glow */}
-                            <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-br ${slide.color.replace('text-', 'from-').replace('-400', '-500')} to-transparent opacity-20 blur-3xl rounded-full pointer-events-none`} />
+                        <GlassCard className="p-12 md:p-20 min-h-[60vh] flex flex-col items-center justify-center text-center relative overflow-hidden border-white/5 bg-white/5 backdrop-blur-3xl shadow-2xl shadow-black/50">
+
+                            {/* Slide Specific Glow */}
+                            <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-gradient-to-br ${slide.color.replace('text-', 'from-')} to-transparent opacity-20 blur-3xl rounded-full pointer-events-none`} />
 
                             <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{ delay: 0.2, type: "spring" }}
-                                className={`mb-8 p-6 rounded-2xl bg-white/5 border border-white/10 ${slide.color}`}
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 20 }}
+                                className={`mb-8 p-6 rounded-3xl bg-white/5 border border-white/10 ${slide.color} shadow-lg`}
                             >
-                                <Icon className="w-24 h-24" />
+                                <Icon className="w-20 h-20" />
                             </motion.div>
 
                             <motion.h1
-                                className="text-5xl md:text-7xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70"
+                                className="text-4xl md:text-6xl font-black mb-4 tracking-tight"
                             >
-                                {slide.title}
+                                <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
+                                    {slide.title}
+                                </span>
                             </motion.h1>
 
-                            <motion.h2 className={`text-2xl md:text-3xl font-light mb-8 ${slide.color}`}>
+                            <motion.h2 className={`text-xl md:text-2xl font-medium mb-8 ${slide.color} tracking-wide uppercase opacity-90`}>
                                 {slide.subtitle}
                             </motion.h2>
 
-                            <motion.p className="text-xl text-gray-300 max-w-3xl leading-relaxed mb-8">
+                            <motion.p className="text-xl md:text-2xl text-gray-400 max-w-3xl leading-relaxed mb-10 font-light">
                                 {slide.content}
                             </motion.p>
 
@@ -202,13 +211,13 @@ export function PitchDeck() {
                                     {slide.points.map((point, index) => (
                                         <motion.div
                                             key={index}
-                                            initial={{ opacity: 0, x: -20 }}
+                                            initial={{ opacity: 0, x: -10 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.4 + index * 0.1 }}
-                                            className="flex items-center space-x-3 bg-white/5 p-4 rounded-xl border border-white/5"
+                                            transition={{ delay: 0.3 + index * 0.1 }}
+                                            className="flex items-center space-x-3 bg-white/5 p-4 rounded-xl border border-white/5 hover:bg-white/10 transition-colors"
                                         >
-                                            <div className={`w-2 h-2 rounded-full ${slide.color.replace('text-', 'bg-')}`} />
-                                            <span className="text-lg text-gray-200">{point}</span>
+                                            <div className={`w-2 h-2 rounded-full ${slide.color.replace('text-', 'bg-')} shadow-[0_0_10px_currentColor]`} />
+                                            <span className="text-lg text-gray-300 font-medium">{point}</span>
                                         </motion.div>
                                     ))}
                                 </div>
@@ -219,31 +228,45 @@ export function PitchDeck() {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.5 }}
-                                    className="text-gray-400 mt-8 italic"
+                                    className="text-gray-500 mt-10 text-sm italic"
                                 >
                                     {slide.details}
                                 </motion.p>
                             )}
                         </GlassCard>
+
+                        {/* Meta Minds Branding Footer */}
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-30 text-xs tracking-widest uppercase">
+                            AssignMate Pitch Deck • 2026
+                        </div>
+
                     </motion.div>
                 </AnimatePresence>
             </div>
 
             {/* Progress Dots */}
-            <div className="absolute bottom-10 left-0 right-0 z-20 flex justify-center space-x-3">
+            <div className="absolute bottom-10 inset-x-0 flex justify-center space-x-2 z-30">
                 {slides.map((_, index) => (
                     <button
                         key={index}
                         onClick={() => setCurrentSlide(index)}
-                        className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-white w-10' : 'bg-white/30 hover:bg-white/50'
+                        className={`h-1.5 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-primary w-12' : 'bg-white/20 w-4 hover:bg-white/40'
                             }`}
                     />
                 ))}
             </div>
 
             {/* Escape Hint */}
-            <div className="absolute top-6 right-6 text-white/30 text-sm z-20">
-                Press ESC to exit
+            <div className="absolute top-8 right-8 text-white/20 text-xs font-bold tracking-widest z-20 uppercase border border-white/10 px-3 py-1 rounded-full">
+                ESC to Exit
+            </div>
+
+            {/* Logo Watermark */}
+            <div className="absolute top-8 left-8 flex items-center gap-3 opacity-80 z-20">
+                <div className="size-8 rounded-lg overflow-hidden bg-white/10 p-1">
+                    <img src="/logo.png" alt="Logo" className="w-full h-full object-contain brightness-0 invert" />
+                </div>
+                <span className="text-white font-bold tracking-tight">AssignMate</span>
             </div>
         </div>
     );
