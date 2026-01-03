@@ -11,7 +11,7 @@ export const Onboarding = () => {
     const { error, success } = useToast();
 
     const [loading, setLoading] = useState(false);
-    const [form, setForm] = useState({ handle: '', school: '', bio: '' });
+    const [form, setForm] = useState({ fullName: '', handle: '', school: '', bio: '' });
     const [isWriter, setIsWriter] = useState(false);
 
     // Redirect if user is already complete or not logged in
@@ -26,6 +26,10 @@ export const Onboarding = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (!form.fullName || form.fullName.length < 2) {
+            error("Please enter your full name.");
+            return;
+        }
         if (!form.school) {
             error("Please select your college.");
             return;
@@ -37,7 +41,7 @@ export const Onboarding = () => {
 
         setLoading(true);
         try {
-            await completeGoogleSignup(form.handle, form.school, isWriter, form.bio);
+            await completeGoogleSignup(form.handle, form.school, isWriter, form.bio, form.fullName);
             success("Profile setup complete! Welcome.");
             // Navigation handled by useEffect when user state updates
         } catch (err: any) {
@@ -61,6 +65,22 @@ export const Onboarding = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Full Name Field */}
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Full Name</label>
+                        <div className="relative group">
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">person</span>
+                            <input
+                                className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-medium text-[#1b140d] dark:text-white placeholder-gray-400 transition-all outline-none"
+                                placeholder="Enter your full name"
+                                type="text"
+                                value={form.fullName}
+                                onChange={e => setForm({ ...form, fullName: e.target.value })}
+                                required
+                            />
+                        </div>
+                    </div>
+
                     <div className="space-y-2">
                         <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Choose a Handle</label>
                         <div className="relative group">
@@ -77,6 +97,7 @@ export const Onboarding = () => {
                                 required
                             />
                         </div>
+                        <p className="text-xs text-gray-400 ml-1">Your unique @username (letters, numbers, underscores only)</p>
                     </div>
 
                     <div className="space-y-2 relative z-50">

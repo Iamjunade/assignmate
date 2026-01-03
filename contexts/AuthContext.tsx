@@ -11,7 +11,7 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<any>;
   // ✅ FIXED: Now accepts 7 arguments including fullName and bio
   register: (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => Promise<any>;
-  completeGoogleSignup: (handle: string, school: string, is_writer: boolean, bio?: string) => Promise<void>;
+  completeGoogleSignup: (handle: string, school: string, is_writer: boolean, bio?: string, fullName?: string) => Promise<void>;
   loginAnonymously: () => Promise<any>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -130,7 +130,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     return res;
   };
 
-  const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean, bio?: string) => {
+  const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean, bio?: string, fullName?: string) => {
     if (!user) throw new Error("User not found.");
 
     try {
@@ -139,7 +139,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         school,
         email: user.email,
         avatar_url: user.avatar_url || null,
-        full_name: user.full_name || 'Student',
+        full_name: fullName || user.full_name || 'Student',
         bio: bio || '',
         is_writer,
         is_incomplete: false
