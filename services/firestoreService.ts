@@ -660,6 +660,8 @@ export const dbService = {
         return onSnapshot(q, (snapshot) => {
             const messages = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
             callback(messages);
+        }, (error) => {
+            console.error('[Chat] Error listening to messages:', error);
         });
     },
 

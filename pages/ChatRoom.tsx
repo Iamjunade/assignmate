@@ -25,17 +25,20 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // 1. Fetch Chat Details on mount
     useEffect(() => {
-        // 1. Fetch Chat Metadata
-        db.getChatDetails(chatId, user.id).then(setChatDetails);
+        db.getChatDetails(chatId, user.id).then(setChatDetails).catch(console.error);
+    }, [chatId, user.id]);
 
-        // 2. Fetch Messages and Mark as Read
+    // 2. Message Subscription - runs once on mount
+    useEffect(() => {
+        // Initial fetch
         db.getMessages(chatId).then(msgs => {
             setMessages(msgs);
             db.markMessagesAsRead(chatId, user.id);
-        });
+        }).catch(console.error);
 
-        // 3. Realtime Subscription
+        // Realtime listener
         const unsubscribe = db.listenToMessages(chatId, (newMessages) => {
             setMessages(newMessages);
             const lastMsg = newMessages[newMessages.length - 1];
@@ -44,13 +47,19 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
             }
         });
 
-        // 4. Typing Indicators
-        const unsubTyping = presence.listenToTypingStatus(chatId, user.id === chatDetails?.poster_id ? chatDetails?.writer_id : chatDetails?.poster_id, (typing) => {
+        return () => unsubscribe();
+    }, [chatId, user.id]);
+
+    // 3. Typing Indicators - depends on chatDetails
+    useEffect(() => {
+        if (!chatDetails) return;
+
+        const otherId = user.id === chatDetails.poster_id ? chatDetails.writer_id : chatDetails.poster_id;
+        const unsubTyping = presence.listenToTypingStatus(chatId, otherId, (typing) => {
             setIsOtherTyping(typing);
         });
 
         return () => {
-            unsubscribe();
             if (unsubTyping) unsubTyping();
         };
     }, [chatId, user.id, chatDetails]);
