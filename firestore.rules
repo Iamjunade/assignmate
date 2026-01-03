@@ -21,12 +21,20 @@ service cloud.firestore {
 
     // --- Chats Collection ---
     match /chats/{chatId} {
-      // Helper to check parent chat participation
+      // Helper to check chat participation for the PARENT chat document
       function isChatParticipant() {
         // Check both the participants array AND legacy poster_id/writer_id fields
         return request.auth.uid in resource.data.participants ||
                resource.data.poster_id == request.auth.uid || 
                resource.data.writer_id == request.auth.uid;
+      }
+      
+      // Helper for subcollections - fetches parent chat document
+      function isParentChatParticipant() {
+        let chat = get(/databases/$(database)/documents/chats/$(chatId)).data;
+        return request.auth.uid in chat.participants ||
+               chat.poster_id == request.auth.uid || 
+               chat.writer_id == request.auth.uid;
       }
 
       // Create: Must be one of the participants
@@ -38,16 +46,17 @@ service cloud.firestore {
       // Read/Update: Must be one of the participants (checking existing data)
       allow read, update: if isAuthenticated() && isChatParticipant();
 
-      // Messages Subcollection
+      // Messages Subcollection - MUST use isParentChatParticipant()
       match /messages/{messageId} {
-        allow read: if isAuthenticated() && isChatParticipant();
-        allow create: if isAuthenticated() && isChatParticipant() && request.resource.data.sender_id == request.auth.uid;
+        allow read: if isAuthenticated() && isParentChatParticipant();
+        allow create: if isAuthenticated() && isParentChatParticipant() && request.resource.data.sender_id == request.auth.uid;
+        allow update: if isAuthenticated() && isParentChatParticipant();
       }
 
-      // Files Subcollection (Metadata)
+      // Files Subcollection (Metadata) - MUST use isParentChatParticipant()
       match /files/{fileId} {
-        allow read: if isAuthenticated() && isChatParticipant();
-        allow create: if isAuthenticated() && isChatParticipant();
+        allow read: if isAuthenticated() && isParentChatParticipant();
+        allow create: if isAuthenticated() && isParentChatParticipant();
       }
     }
 
