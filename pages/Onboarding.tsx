@@ -5,6 +5,15 @@ import { useToast } from '../contexts/ToastContext';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
 import { Search, PenTool } from 'lucide-react';
 
+// Helper to check if profile is complete
+const isProfileComplete = (user: any): boolean => {
+    if (!user) return false;
+    const hasFullName = user.full_name && user.full_name !== 'Student' && user.full_name.trim().length >= 2;
+    const hasHandle = user.handle && user.handle.length >= 3;
+    const hasSchool = user.school && user.school !== 'Not Specified' && user.school.trim().length > 0;
+    return hasFullName && hasHandle && hasSchool && !user.is_incomplete;
+};
+
 export const Onboarding = () => {
     const navigate = useNavigate();
     const { user, completeGoogleSignup } = useAuth();
@@ -14,11 +23,24 @@ export const Onboarding = () => {
     const [form, setForm] = useState({ fullName: '', handle: '', school: '', bio: '' });
     const [isWriter, setIsWriter] = useState(false);
 
+    // Pre-fill form with existing user data
+    useEffect(() => {
+        if (user) {
+            setForm({
+                fullName: (user.full_name && user.full_name !== 'Student') ? user.full_name : '',
+                handle: user.handle || '',
+                school: (user.school && user.school !== 'Not Specified') ? user.school : '',
+                bio: user.bio || ''
+            });
+            setIsWriter(user.is_writer || false);
+        }
+    }, [user]);
+
     // Redirect if user is already complete or not logged in
     useEffect(() => {
         if (!user) {
             navigate('/auth');
-        } else if (!user.is_incomplete) {
+        } else if (isProfileComplete(user)) {
             navigate('/feed');
         }
     }, [user, navigate]);
