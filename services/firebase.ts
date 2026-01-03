@@ -136,7 +136,7 @@ export const fcm = {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
                 const currentToken = await getToken(messagingInstance, {
-                    vapidKey: "BBlG6uz8HQjkYoEfJxxcBhcUC8HFb3uWH2z4zEclEk7KUBG_zTQaFHyAFwzAmzmUKPRK7xxUveJNVCI3pV9yZNo"
+                    vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY
                 });
 
                 if (currentToken) {

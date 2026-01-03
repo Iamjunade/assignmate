@@ -510,7 +510,8 @@ export const dbService = {
             id: chatId,
             ...data,
             other_handle: other?.handle || 'Unknown',
-            other_avatar: other?.avatar_url
+            other_avatar: other?.avatar_url,
+            other_verified: other?.is_verified || 'none'
         };
     },
 

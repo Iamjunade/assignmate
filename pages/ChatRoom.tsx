@@ -195,9 +195,11 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                             >
                                                 {chatDetails.other_handle}
                                             </h2>
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wide border border-blue-100">
-                                                <span className="material-symbols-outlined text-[12px]">verified</span> <span className="hidden sm:inline">Verified Peer</span><span className="sm:hidden">Verified</span>
-                                            </span>
+                                            {chatDetails.other_verified === 'verified' && (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wide border border-blue-100">
+                                                    <span className="material-symbols-outlined text-[12px]">verified</span> <span className="hidden sm:inline">Verified</span>
+                                                </span>
+                                            )}
                                         </div>
                                         <p className="text-xs font-medium text-secondary flex items-center gap-1">
                                             {isOtherTyping ? <span className="text-primary animate-pulse font-bold">Typing...</span> : <UserPresence userId={chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id} showLastSeen={true} />}
