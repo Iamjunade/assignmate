@@ -23,7 +23,10 @@ service cloud.firestore {
     match /chats/{chatId} {
       // Helper to check parent chat participation
       function isChatParticipant() {
-        return resource.data.poster_id == request.auth.uid || resource.data.writer_id == request.auth.uid;
+        // Check both the participants array AND legacy poster_id/writer_id fields
+        return request.auth.uid in resource.data.participants ||
+               resource.data.poster_id == request.auth.uid || 
+               resource.data.writer_id == request.auth.uid;
       }
 
       // Create: Must be one of the participants
