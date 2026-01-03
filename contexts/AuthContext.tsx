@@ -160,7 +160,22 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   };
   const loginWithGoogle = firebaseAuth.loginWithGoogle;
   const loginAnonymously = firebaseAuth.loginAnonymously;
-  const deleteAccount = async () => { if (!user) return; try { await userApi.deleteProfile(user.id); const res = await firebaseAuth.deleteUser(); if (res.error) throw res.error; setUser(null); } catch (error) { throw error; } };
+  const deleteAccount = async () => {
+    if (!user) return;
+
+    try {
+      await userApi.deleteProfile(user.id);
+      const res = await firebaseAuth.deleteUser();
+
+      if (res.error) {
+        throw res.error;
+      }
+
+      setUser(null);
+    } catch (error) {
+      throw error;
+    }
+  };
   const resetPassword = async (email: string) => { const res = await firebaseAuth.resetPassword(email); if (res.error) throw res.error; };
 
   return (
