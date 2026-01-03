@@ -311,6 +311,42 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
 
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
                     <div className="max-w-7xl mx-auto">
+                        {/* Viewing Other's Profile Banner */}
+                        {!isOwnProfile && (
+                            <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl px-6 py-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-blue-100 p-2 rounded-full">
+                                        <Users size={20} className="text-blue-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-blue-900">Viewing @{profileUser.handle}'s profile</p>
+                                        <p className="text-xs text-blue-600">
+                                            {connectionStatus === 'connected' ? '✓ Connected' :
+                                                connectionStatus === 'pending_sent' ? '⏳ Request Pending' :
+                                                    'Not connected yet'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    {connectionStatus === 'connected' ? (
+                                        <button
+                                            onClick={handleMessage}
+                                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm"
+                                        >
+                                            <MessageSquare size={16} /> Message
+                                        </button>
+                                    ) : connectionStatus !== 'pending_sent' && connectionStatus !== 'pending' && (
+                                        <button
+                                            onClick={handleConnect}
+                                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white font-bold text-sm hover:opacity-90 transition-colors shadow-sm"
+                                        >
+                                            <UserPlus size={16} /> Connect
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                             {/* Left Sidebar: Identity & Status */}
@@ -517,13 +553,18 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                             {/* Right Column: Stats & Content */}
                             <div className="lg:col-span-8 xl:col-span-9 space-y-8">
 
-                                {/* Stats Grid */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {/* Stats Grid - Show different stats based on profile ownership */}
+                                <div className={`grid ${isOwnProfile || profileUser.is_writer ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'} gap-4`}>
                                     {[
-                                        { label: 'Total Earned', value: `₹${profileUser.total_earned || 0}`, icon: 'payments', color: 'text-green-600', bg: 'bg-green-50' },
-                                        { label: 'Assignments', value: projectsCompleted, icon: 'assignment', color: 'text-blue-600', bg: 'bg-blue-50' },
+                                        // Private stats - only show on own profile
+                                        ...(isOwnProfile ? [{ label: 'Total Earned', value: `₹${profileUser.total_earned || 0}`, icon: 'payments', color: 'text-green-600', bg: 'bg-green-50' }] : []),
+                                        // Show assignments only for writers or own profile
+                                        ...(isOwnProfile || profileUser.is_writer ? [{ label: 'Assignments', value: projectsCompleted, icon: 'assignment', color: 'text-blue-600', bg: 'bg-blue-50' }] : []),
+                                        // Public stats - always show
                                         { label: 'Rating', value: rating.toFixed(1), icon: 'star', color: 'text-yellow-600', bg: 'bg-yellow-50' },
                                         { label: 'On-Time Rate', value: `${profileUser.on_time_rate || 100}%`, icon: 'schedule', color: 'text-purple-600', bg: 'bg-purple-50' },
+                                        // Show connections count for others
+                                        ...(!isOwnProfile ? [{ label: 'Connections', value: connections.length, icon: 'group', color: 'text-indigo-600', bg: 'bg-indigo-50' }] : []),
                                     ].map((stat, i) => (
                                         <div key={i} className="bg-white p-5 rounded-2xl shadow-sm border border-border-light flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
                                             <div className={`p-3 rounded-full ${stat.bg} mb-3`}>
