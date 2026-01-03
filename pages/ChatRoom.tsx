@@ -27,8 +27,21 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
     // 1. Fetch Chat Details on mount
     useEffect(() => {
-        db.getChatDetails(chatId, user.id).then(setChatDetails).catch(console.error);
-    }, [chatId, user.id]);
+        db.getChatDetails(chatId, user.id)
+            .then((details) => {
+                if (details) {
+                    setChatDetails(details);
+                } else {
+                    toastError("Failed to load chat. Please try again.");
+                    navigate('/chats');
+                }
+            })
+            .catch((err) => {
+                console.error('[ChatRoom] Error loading chat details:', err);
+                toastError("Failed to load chat.");
+                navigate('/chats');
+            });
+    }, [chatId, user.id, navigate, toastError]);
 
     // 2. Message Subscription - runs once on mount
     useEffect(() => {

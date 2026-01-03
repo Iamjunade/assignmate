@@ -497,22 +497,38 @@ export const dbService = {
     },
 
     getChatDetails: async (chatId: string, userId: string) => {
-        const docSnap = await getDoc(doc(getDb(), 'chats', chatId));
-        if (!docSnap.exists()) throw new Error("Not found");
+        try {
+            const docSnap = await getDoc(doc(getDb(), 'chats', chatId));
+            if (!docSnap.exists()) {
+                console.error('[Chat] Chat not found:', chatId);
+                return null;
+            }
 
-        const data = docSnap.data();
-        const isPoster = data.poster_id === userId;
-        const otherId = isPoster ? data.writer_id : data.poster_id;
-        const otherSnap = await getDoc(doc(getDb(), 'users', otherId));
-        const other = otherSnap.exists() ? otherSnap.data() : null;
+            const data = docSnap.data();
+            const isPoster = data.poster_id === userId;
+            const otherId = isPoster ? data.writer_id : data.poster_id;
 
-        return {
-            id: chatId,
-            ...data,
-            other_handle: other?.handle || 'Unknown',
-            other_avatar: other?.avatar_url,
-            other_verified: other?.is_verified || 'none'
-        };
+            let other = null;
+            try {
+                const otherSnap = await getDoc(doc(getDb(), 'users', otherId));
+                other = otherSnap.exists() ? otherSnap.data() : null;
+            } catch (userError) {
+                console.error('[Chat] Error fetching other user:', userError);
+            }
+
+            return {
+                id: chatId,
+                ...data,
+                poster_id: data.poster_id,
+                writer_id: data.writer_id,
+                other_handle: other?.handle || 'Unknown',
+                other_avatar: other?.avatar_url,
+                other_verified: other?.is_verified || 'none'
+            };
+        } catch (error) {
+            console.error('[Chat] Error getting chat details:', error);
+            return null;
+        }
     },
 
     createChat: async (gigId: string | null, posterId: string, writerId: string) => {
