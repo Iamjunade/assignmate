@@ -45,6 +45,11 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
         try {
             // Validation
             if (isReg) {
+                if (!form.fullName || form.fullName.length < 2) {
+                    error("Please enter your full name.");
+                    setLoading(false);
+                    return;
+                }
                 if (!form.handle || form.handle.length < 3) {
                     error("Handle must be at least 3 characters.");
                     setLoading(false);
