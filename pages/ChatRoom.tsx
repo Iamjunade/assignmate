@@ -436,64 +436,66 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                                     initial={{ opacity: 0, y: 5 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     key={m.id || `${dateKey}-${i}`}
-                                                    className={`flex flex-col gap-0.5 max-w-[85%] md:max-w-[70%] ${isMe ? 'items-end self-end' : 'items-start'} ${isSequence ? '' : 'mt-2'}`}
+                                                    className={`w-full flex ${isMe ? 'justify-end' : 'justify-start'} ${isSequence ? '' : 'mt-2'}`}
                                                 >
-                                                    <div className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                                                        {!isMe && (
-                                                            <div className="size-7 shrink-0 mb-1">
-                                                                {!isSequence && (
-                                                                    <Avatar
-                                                                        src={chatDetails?.other_avatar}
-                                                                        alt={chatDetails?.other_handle}
-                                                                        className="size-7 rounded-full"
-                                                                        fallback={chatDetails?.other_handle?.charAt(0)}
-                                                                    />
-                                                                )}
-                                                            </div>
-                                                        )}
-
-                                                        <div className={`px-4 py-2.5 shadow-sm text-[15px] leading-relaxed break-words whitespace-pre-wrap ${isMe
-                                                            ? 'bg-gradient-to-br from-primary to-orange-500 text-white rounded-2xl rounded-br-md'
-                                                            : 'bg-white text-text-dark rounded-2xl rounded-bl-md border border-border-subtle'
-                                                            }`}>
-
-                                                            {/* Dynamic Rendering based on Message Type */}
-                                                            {m.type === 'image' ? (
-                                                                <div className="space-y-1">
-                                                                    <img
-                                                                        src={m.fileUrl}
-                                                                        alt="attachment"
-                                                                        className="rounded-xl max-h-60 w-auto object-cover border border-white/20 cursor-pointer"
-                                                                        onClick={() => window.open(m.fileUrl, '_blank')}
-                                                                    />
+                                                    <div className={`flex flex-col gap-0.5 max-w-[85%] md:max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
+                                                        <div className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                                                            {!isMe && (
+                                                                <div className="size-7 shrink-0 mb-1">
+                                                                    {!isSequence && (
+                                                                        <Avatar
+                                                                            src={chatDetails?.other_avatar}
+                                                                            alt={chatDetails?.other_handle}
+                                                                            className="size-7 rounded-full"
+                                                                            fallback={chatDetails?.other_handle?.charAt(0)}
+                                                                        />
+                                                                    )}
                                                                 </div>
-                                                            ) : m.type === 'file' ? (
-                                                                <a
-                                                                    href={m.fileUrl}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className={`flex items-center gap-2 ${isMe ? 'text-white hover:text-white/80' : 'text-primary hover:text-primary/80'}`}
-                                                                >
-                                                                    <span className="material-symbols-outlined text-lg">attach_file</span>
-                                                                    <span className="underline">{m.text}</span>
-                                                                </a>
-                                                            ) : (
-                                                                <p className="text-sm">{m.text || m.content}</p>
                                                             )}
 
+                                                            <div className={`px-4 py-2.5 shadow-sm text-[15px] leading-relaxed break-words whitespace-pre-wrap ${isMe
+                                                                ? 'bg-gradient-to-br from-primary to-orange-500 text-white rounded-2xl rounded-br-md'
+                                                                : 'bg-white text-text-dark rounded-2xl rounded-bl-md border border-border-subtle'
+                                                                }`}>
+
+                                                                {/* Dynamic Rendering based on Message Type */}
+                                                                {m.type === 'image' ? (
+                                                                    <div className="space-y-1">
+                                                                        <img
+                                                                            src={m.fileUrl}
+                                                                            alt="attachment"
+                                                                            className="rounded-xl max-h-60 w-auto object-cover border border-white/20 cursor-pointer"
+                                                                            onClick={() => window.open(m.fileUrl, '_blank')}
+                                                                        />
+                                                                    </div>
+                                                                ) : m.type === 'file' ? (
+                                                                    <a
+                                                                        href={m.fileUrl}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className={`flex items-center gap-2 ${isMe ? 'text-white hover:text-white/80' : 'text-primary hover:text-primary/80'}`}
+                                                                    >
+                                                                        <span className="material-symbols-outlined text-lg">attach_file</span>
+                                                                        <span className="underline">{m.text}</span>
+                                                                    </a>
+                                                                ) : (
+                                                                    <p className="text-sm">{m.text || m.content}</p>
+                                                                )}
+
+                                                            </div>
                                                         </div>
-                                                    </div>
 
-                                                    {!isSequence && (
-                                                        <span className={`text-[10px] font-medium flex items-center gap-1 mt-1 ${isMe ? 'text-text-muted mr-1' : 'text-text-muted ml-9'}`}>
-                                                            {formatTime(m.created_at)}
-                                                            {isMe && (
-                                                                <span className={`material-symbols-outlined text-xs ${m.readBy && m.readBy.length > 1 ? 'text-blue-500' : 'text-gray-400'}`}>
-                                                                    {m.readBy && m.readBy.length > 1 ? 'done_all' : 'check'}
-                                                                </span>
-                                                            )}
-                                                        </span>
-                                                    )}
+                                                        {!isSequence && (
+                                                            <span className={`text-[10px] font-medium flex items-center gap-1 mt-1 ${isMe ? 'text-text-muted mr-1' : 'text-text-muted ml-9'}`}>
+                                                                {formatTime(m.created_at)}
+                                                                {isMe && (
+                                                                    <span className={`material-symbols-outlined text-xs ${m.readBy && m.readBy.length > 1 ? 'text-blue-500' : 'text-gray-400'}`}>
+                                                                        {m.readBy && m.readBy.length > 1 ? 'done_all' : 'check'}
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </MotionDiv>
                                             );
                                         })}
