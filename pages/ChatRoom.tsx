@@ -524,10 +524,10 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                         </div>
 
                         {/* Input Area */}
-                        <div className="p-3 md:p-4 bg-white border-t border-border-subtle z-20 pb-safe">
+                        <div className="p-3 md:p-4 bg-white border-t border-border-subtle z-20">
                             <form
                                 onSubmit={send}
-                                className="bg-secondary-bg p-2 pl-3 md:pl-4 rounded-2xl border border-border-subtle flex items-end gap-2 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all"
+                                className="relative bg-secondary-bg rounded-2xl border border-border-subtle focus-within:border-primary/40 focus-within:shadow-lg focus-within:shadow-primary/5 transition-all"
                             >
                                 <input
                                     type="file"
@@ -536,23 +536,12 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                     accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.7z"
                                     onChange={handleFileSelect}
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    disabled={isUploading}
-                                    className="size-10 rounded-xl text-text-muted hover:text-primary hover:bg-white flex items-center justify-center transition-colors disabled:opacity-50"
-                                >
-                                    {isUploading ? (
-                                        <span className="material-symbols-outlined animate-spin">refresh</span>
-                                    ) : (
-                                        <Paperclip size={20} />
-                                    )}
-                                </button>
 
-                                <div className="flex-1 py-2">
+                                {/* Text Input */}
+                                <div className="px-4 py-3">
                                     <textarea
                                         ref={textareaRef}
-                                        className="w-full bg-transparent border-none p-0 text-text-dark placeholder-text-muted focus:ring-0 resize-none max-h-32 text-[15px] leading-relaxed"
+                                        className="w-full bg-transparent border-none p-0 text-text-dark placeholder-text-muted focus:ring-0 resize-none max-h-32 text-[15px] leading-relaxed outline-none"
                                         placeholder="Type a message..."
                                         rows={1}
                                         value={text}
@@ -566,27 +555,79 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                     />
                                 </div>
 
-                                {text.trim() ? (
-                                    <MotionButton
-                                        whileTap={{ scale: 0.95 }}
-                                        type="submit"
-                                        className="size-10 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white flex items-center justify-center shadow-md hover:shadow-lg transition-all"
-                                    >
-                                        <span className="material-symbols-outlined">send</span>
-                                    </MotionButton>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        className="size-10 rounded-xl bg-gray-200 text-gray-400 flex items-center justify-center cursor-not-allowed"
-                                        disabled
-                                    >
-                                        <span className="material-symbols-outlined">send</span>
-                                    </button>
-                                )}
+                                {/* Action Bar */}
+                                <div className="flex items-center justify-between px-3 py-2 border-t border-border-subtle/50">
+                                    {/* Left Actions */}
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={isUploading}
+                                            className="size-9 rounded-lg text-text-muted hover:text-primary hover:bg-white flex items-center justify-center transition-all disabled:opacity-50"
+                                            title="Attach file"
+                                        >
+                                            {isUploading ? (
+                                                <span className="material-symbols-outlined text-lg animate-spin">refresh</span>
+                                            ) : (
+                                                <Paperclip size={18} />
+                                            )}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (fileInputRef.current) {
+                                                    fileInputRef.current.accept = 'image/*';
+                                                    fileInputRef.current.click();
+                                                    setTimeout(() => {
+                                                        if (fileInputRef.current) {
+                                                            fileInputRef.current.accept = 'image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.7z';
+                                                        }
+                                                    }, 100);
+                                                }
+                                            }}
+                                            className="size-9 rounded-lg text-text-muted hover:text-primary hover:bg-white flex items-center justify-center transition-all"
+                                            title="Send image"
+                                        >
+                                            <span className="material-symbols-outlined text-lg">image</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="size-9 rounded-lg text-text-muted hover:text-primary hover:bg-white flex items-center justify-center transition-all"
+                                            title="Emoji"
+                                        >
+                                            <span className="material-symbols-outlined text-lg">mood</span>
+                                        </button>
+
+                                        {/* Keyboard shortcut hint */}
+                                        <span className="hidden md:inline-flex items-center ml-2 text-[10px] text-text-muted/70">
+                                            <kbd className="px-1.5 py-0.5 rounded bg-white border border-border-subtle text-[9px] font-medium">Enter</kbd>
+                                            <span className="mx-1">to send</span>
+                                        </span>
+                                    </div>
+
+                                    {/* Send Button */}
+                                    {text.trim() ? (
+                                        <MotionButton
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            type="submit"
+                                            className="h-9 px-5 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
+                                        >
+                                            <span>Send</span>
+                                            <span className="material-symbols-outlined text-base">send</span>
+                                        </MotionButton>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="h-9 px-5 rounded-xl bg-gray-100 text-gray-400 font-bold text-sm flex items-center gap-2 cursor-not-allowed"
+                                            disabled
+                                        >
+                                            <span>Send</span>
+                                            <span className="material-symbols-outlined text-base">send</span>
+                                        </button>
+                                    )}
+                                </div>
                             </form>
-                            <div className="text-center mt-2 hidden md:block">
-                                <p className="text-[10px] text-text-muted">Press Enter to send • Shift+Enter for new line</p>
-                            </div>
                         </div>
                     </div>
                 </div>
