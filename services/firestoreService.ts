@@ -127,15 +127,17 @@ import { User } from '../types';
 export const dbService = {
     getAllUsers: async () => {
         try {
-            // ✅ Filter out incomplete profiles at query level
-            // Increased limit to 500 to ensure all writers from all colleges are visible
+            // Fetch all users without server-side is_incomplete filter
+            // because Firestore won't match docs where the field doesn't exist
             const q = query(
                 collection(getDb(), 'users'),
-                where('is_incomplete', '==', false),
                 limit(500)
             );
             const snapshot = await getDocs(q);
-            return snapshot.docs.map(doc => doc.data());
+            // Filter client-side: exclude users where is_incomplete is explicitly true
+            return snapshot.docs
+                .map(doc => doc.data())
+                .filter(user => user.is_incomplete !== true);
         } catch (error) {
             console.error("Error fetching users:", error);
             return [];
