@@ -49,7 +49,12 @@ service cloud.firestore {
       // Messages Subcollection - MUST use isParentChatParticipant()
       match /messages/{messageId} {
         allow read: if isAuthenticated() && isParentChatParticipant();
-        allow create: if isAuthenticated() && isParentChatParticipant() && request.resource.data.sender_id == request.auth.uid;
+        // Allow create if participant AND (is sender OR is system message)
+        allow create: if isAuthenticated() && isParentChatParticipant() && (
+          request.resource.data.sender_id == request.auth.uid ||
+          request.resource.data.sender_id == 'system'
+        );
+        // Allow update for participants (for marking read, updating offer status)
         allow update: if isAuthenticated() && isParentChatParticipant();
       }
 
@@ -58,6 +63,30 @@ service cloud.firestore {
         allow read: if isAuthenticated() && isParentChatParticipant();
         allow create: if isAuthenticated() && isParentChatParticipant();
       }
+    }
+
+    // --- Orders Collection (Projects/Assignments) ---
+    match /orders/{orderId} {
+      // Read: Student (hirer) or Writer involved in the order
+      allow read: if isAuthenticated() && (
+        resource.data.student_id == request.auth.uid ||
+        resource.data.poster_id == request.auth.uid ||
+        resource.data.writer_id == request.auth.uid
+      );
+      
+      // Create: Must be student/poster or writer in the new order
+      allow create: if isAuthenticated() && (
+        request.resource.data.student_id == request.auth.uid ||
+        request.resource.data.poster_id == request.auth.uid ||
+        request.resource.data.writer_id == request.auth.uid
+      );
+      
+      // Update: Only participants can update
+      allow update: if isAuthenticated() && (
+        resource.data.student_id == request.auth.uid ||
+        resource.data.poster_id == request.auth.uid ||
+        resource.data.writer_id == request.auth.uid
+      );
     }
 
     // --- Requests Collection (Connection Requests) ---
@@ -105,3 +134,4 @@ service cloud.firestore {
     }
   }
 }
+
