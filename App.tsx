@@ -33,6 +33,7 @@ const AdminVerifications = lazy(() => import('./admin/pages/AdminVerifications')
 const PitchDeck = lazy(() => import('./pages/PitchDeck').then(module => ({ default: module.PitchDeck })));
 const Documentation = lazy(() => import('./pages/Documentation').then(module => ({ default: module.Documentation })));
 const TermsOfService = lazy(() => import('./pages/TermsOfService').then(module => ({ default: module.TermsOfService })));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
 
 export default function AppWrapper() {
   return (
@@ -174,6 +175,7 @@ function AppContent() {
 
           {/* --- Legal Pages --- */}
           <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
 
           {/* --- Public Routes (Glass Layout) --- */}
           <Route element={

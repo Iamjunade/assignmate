@@ -427,7 +427,7 @@ export const Landing = () => {
                     <div className="flex flex-col gap-4">
                         <h3 className="font-bold text-[#1b140d] dark:text-white">Legal</h3>
                         <button onClick={() => navigate('/terms')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Terms of Service</button>
-                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Privacy Policy</button>
+                        <button onClick={() => navigate('/privacy')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Privacy Policy</button>
                         <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Academic Integrity</button>
                     </div>
                 </div>
