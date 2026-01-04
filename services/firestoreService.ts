@@ -128,10 +128,11 @@ export const dbService = {
     getAllUsers: async () => {
         try {
             // ✅ Filter out incomplete profiles at query level
+            // Increased limit to 500 to ensure all writers from all colleges are visible
             const q = query(
                 collection(getDb(), 'users'),
                 where('is_incomplete', '==', false),
-                limit(50)
+                limit(500)
             );
             const snapshot = await getDocs(q);
             return snapshot.docs.map(doc => doc.data());
