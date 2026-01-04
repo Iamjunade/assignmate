@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { dbService as db } from '../services/firestoreService';
 import { presence } from '../services/firebase';
-import { Send, ArrowLeft, Briefcase, Paperclip, Smile, CheckCheck, MoreVertical, Phone, Video, Image as ImageIcon, FileText } from 'lucide-react';
+import { ArrowLeft, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserPresence } from '../components/UserPresence';
 import { Sidebar } from '../components/dashboard/Sidebar';
@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
 import { OfferModal, OfferData } from '../components/chat/OfferModal';
 import { OfferCard } from '../components/chat/OfferCard';
+import { Avatar } from '../components/ui/Avatar';
+import { format, isToday, isYesterday } from 'date-fns';
 
 const MotionDiv = motion.div as any;
 const MotionButton = motion.button as any;
@@ -24,6 +26,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     const [isOtherTyping, setIsOtherTyping] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [showOfferModal, setShowOfferModal] = useState(false);
+    const [showActions, setShowActions] = useState(false);
     const endRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -167,6 +170,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
     const handleCreateOffer = () => {
         setShowOfferModal(true);
+        setShowActions(false);
     };
 
     const handleSubmitOffer = async (offerData: OfferData) => {
@@ -213,10 +217,30 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
         return new Date(isoString).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     };
 
+    const formatDateDivider = (dateStr: string) => {
+        const d = new Date(dateStr);
+        if (isToday(d)) return 'Today';
+        if (isYesterday(d)) return 'Yesterday';
+        return format(d, 'EEEE, MMM d');
+    };
+
     const handleBack = () => {
         if (onBack) onBack();
         else navigate('/chats');
     };
+
+    // Group messages by date
+    const getDateKey = (dateStr: string) => {
+        const d = new Date(dateStr);
+        return format(d, 'yyyy-MM-dd');
+    };
+
+    const messagesByDate: { [key: string]: any[] } = {};
+    messages.forEach(m => {
+        const key = getDateKey(m.created_at);
+        if (!messagesByDate[key]) messagesByDate[key] = [];
+        messagesByDate[key].push(m);
+    });
 
     return (
         <div className="bg-background text-text-dark antialiased h-screen supports-[height:100dvh]:h-[100dvh] overflow-hidden flex selection:bg-primary/20 font-display">
@@ -225,11 +249,11 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                 <div className="hidden lg:block">
                     <DashboardHeader />
                 </div>
-                <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-white lg:rounded-tl-3xl shadow-soft lg:border-l lg:border-t border-border-light">
+                <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-white lg:rounded-tl-3xl shadow-soft lg:border-l lg:border-t border-border-subtle">
                     {/* Chat Header */}
-                    <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-border-light bg-white z-10 sticky top-0">
+                    <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-border-subtle bg-white z-10 sticky top-0">
                         <div className="flex items-center gap-3 md:gap-4">
-                            <button onClick={handleBack} className="p-2 -ml-2 text-secondary hover:bg-background rounded-full transition-colors">
+                            <button onClick={handleBack} className="p-2 -ml-2 text-text-muted hover:bg-secondary-bg rounded-full transition-colors">
                                 <ArrowLeft size={22} />
                             </button>
                             {chatDetails ? (
@@ -239,192 +263,240 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                         className="relative cursor-pointer hover:opacity-80 transition-opacity"
                                         onClick={() => navigate(`/profile/${chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id}`)}
                                     >
-                                        <img
-                                            src={chatDetails.other_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${chatDetails.other_handle}`}
-                                            className="bg-center bg-no-repeat bg-cover rounded-full size-10 md:size-11 shadow-sm object-cover bg-background border border-border-light"
+                                        <Avatar
+                                            src={chatDetails.other_avatar}
                                             alt={chatDetails.other_handle}
+                                            className="size-11 md:size-12 rounded-full shadow-sm border-2 border-white"
+                                            fallback={chatDetails.other_handle?.charAt(0)}
                                         />
-                                        <div className="absolute bottom-0 right-0 block size-3 rounded-full ring-2 ring-white bg-white overflow-hidden">
-                                            <UserPresence userId={chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id} size={12} showLastSeen={false} className="w-full h-full" />
+                                        <div className="absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5">
+                                            <UserPresence userId={chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id} size={12} showLastSeen={false} />
                                         </div>
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
                                             {/* Clickable handle - navigates to profile */}
                                             <h2
-                                                className="text-base md:text-lg font-bold text-text-main leading-tight cursor-pointer hover:text-primary transition-colors"
+                                                className="text-base md:text-lg font-bold text-text-dark leading-tight cursor-pointer hover:text-primary transition-colors"
                                                 onClick={() => navigate(`/profile/${chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id}`)}
                                             >
                                                 {chatDetails.other_handle}
                                             </h2>
                                             {chatDetails.other_verified === 'verified' && (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wide border border-blue-100">
-                                                    <span className="material-symbols-outlined text-[12px]">verified</span> <span className="hidden sm:inline">Verified</span>
-                                                </span>
+                                                <span className="material-symbols-outlined text-blue-500 text-base" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                             )}
                                         </div>
-                                        <p className="text-xs font-medium text-secondary flex items-center gap-1">
-                                            {isOtherTyping ? <span className="text-primary animate-pulse font-bold">Typing...</span> : <UserPresence userId={chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id} showLastSeen={true} />}
+                                        <p className="text-xs font-medium text-text-muted flex items-center gap-1">
+                                            {isOtherTyping ? (
+                                                <span className="text-primary font-bold flex items-center gap-1">
+                                                    <span className="flex gap-0.5">
+                                                        <span className="size-1.5 bg-primary rounded-full animate-bounce"></span>
+                                                        <span className="size-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
+                                                        <span className="size-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                                                    </span>
+                                                    typing...
+                                                </span>
+                                            ) : (
+                                                <UserPresence userId={chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id} showLastSeen={true} />
+                                            )}
                                         </p>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-4">
-                                    <div className="size-11 bg-background rounded-full animate-pulse"></div>
+                                    <div className="size-12 bg-secondary-bg rounded-full animate-pulse"></div>
                                     <div className="space-y-2">
-                                        <div className="h-4 w-32 bg-background rounded animate-pulse"></div>
-                                        <div className="h-3 w-24 bg-background rounded animate-pulse"></div>
+                                        <div className="h-4 w-32 bg-secondary-bg rounded animate-pulse"></div>
+                                        <div className="h-3 w-24 bg-secondary-bg rounded animate-pulse"></div>
                                     </div>
                                 </div>
                             )}
                         </div>
-                        <div className="flex items-center gap-2 md:gap-3">
-                            <button onClick={handleCreateOffer} className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-orange-500 text-white text-sm font-bold hover:shadow-lg transition shadow-sm">
-                                <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={handleCreateOffer}
+                                className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white text-sm font-bold hover:shadow-lg hover:scale-[1.02] transition-all"
+                            >
+                                <span className="material-symbols-outlined text-lg">receipt_long</span>
                                 Create Offer
                             </button>
-                            <button onClick={handleCreateOffer} className="md:hidden p-2 rounded-full bg-primary text-white">
-                                <span className="material-symbols-outlined text-lg">receipt_long</span>
+                            <button
+                                onClick={handleCreateOffer}
+                                className="md:hidden size-10 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white flex items-center justify-center shadow-md"
+                            >
+                                <span className="material-symbols-outlined">receipt_long</span>
                             </button>
-                            <button className="p-2 rounded-full hover:bg-background text-secondary transition">
-                                <span className="material-symbols-outlined">more_vert</span>
+                            <button
+                                onClick={() => navigate(`/profile/${chatDetails?.poster_id === user.id ? chatDetails?.writer_id : chatDetails?.poster_id}`)}
+                                className="size-10 rounded-xl bg-secondary-bg text-text-muted hover:bg-gray-200 flex items-center justify-center transition-colors"
+                            >
+                                <span className="material-symbols-outlined">person</span>
                             </button>
                         </div>
                     </div>
 
                     {/* Messages Stream */}
-                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 flex flex-col bg-background/30">
-                        <div className="flex justify-center w-full my-4">
-                            <div className="bg-orange-50 border border-orange-100 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
-                                <span className="material-symbols-outlined text-primary text-[16px]">shield_lock</span>
-                                <p className="text-[10px] md:text-xs text-secondary font-medium text-center">Payments held securely until approval.</p>
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col bg-gradient-to-b from-secondary-bg/50 to-white">
+                        {/* Security Banner */}
+                        <div className="flex justify-center w-full mb-6">
+                            <div className="bg-white border border-border-subtle px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
+                                <span className="material-symbols-outlined text-green-500 text-base">verified_user</span>
+                                <p className="text-[11px] text-text-muted font-medium">Messages are encrypted & payments held securely</p>
                             </div>
                         </div>
 
-                        {messages.map((m, i) => {
-                            const isMe = m.sender_id === user.id;
-                            const isOffer = m.type === 'offer';
-                            const isSystem = m.type === 'system' || m.content?.includes("**OFFER PROPOSAL**");
-
-                            // Check if previous message was from same person (for grouping)
-                            const isSequence = i > 0 && messages[i - 1].sender_id === m.sender_id && !messages[i - 1].type?.includes('offer') && !messages[i - 1].type?.includes('system');
-
-                            // Render Offer Card
-                            if (isOffer && m.offer) {
-                                return (
-                                    <OfferCard
-                                        key={m.id || i}
-                                        offer={{
-                                            id: m.id,
-                                            subject: m.offer.subject,
-                                            title: m.offer.title,
-                                            description: m.offer.description,
-                                            pages: m.offer.pages,
-                                            deadline: m.offer.deadline,
-                                            budget: m.offer.budget,
-                                            status: m.offer.status || 'pending',
-                                            senderId: m.sender_id,
-                                            senderName: m.sender_name
-                                        }}
-                                        isOwn={isMe}
-                                        onAccept={() => handleAcceptOffer(m.id)}
-                                        onReject={() => handleRejectOffer(m.id)}
-                                        timestamp={m.created_at}
-                                    />
-                                );
-                            }
-
-                            // Render System Message
-                            if (isSystem) {
-                                return (
-                                    <MotionDiv initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={i} className="flex justify-center my-4">
-                                        <div className={`px-4 py-2 rounded-full text-center max-w-xs shadow-sm ${m.text?.includes('✅') ? 'bg-green-50 border border-green-100' : m.text?.includes('❌') ? 'bg-red-50 border border-red-100' : 'bg-blue-50 border border-blue-100'}`}>
-                                            <p className={`text-sm font-medium ${m.text?.includes('✅') ? 'text-green-700' : m.text?.includes('❌') ? 'text-red-600' : 'text-blue-700'}`}>{m.text || m.content}</p>
-                                            <div className="text-[10px] text-gray-500 mt-1">{formatTime(m.created_at)}</div>
-                                        </div>
-                                    </MotionDiv>
-                                )
-                            }
-
-                            return (
-                                <MotionDiv
-                                    initial={{ opacity: 0, y: 5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    key={m.id || i}
-                                    className={`flex flex-col gap-1 max-w-[85%] md:max-w-[70%] ${isMe ? 'items-end self-end' : 'items-start'} ${isSequence ? 'mt-1' : 'mt-4'}`}
-                                >
-                                    <div className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                                        {!isMe && (
-                                            <div className="size-8 shrink-0 mb-1">
-                                                {!isSequence && (
-                                                    <div
-                                                        className="bg-center bg-no-repeat bg-cover rounded-full size-8 shadow-sm border border-white"
-                                                        style={{ backgroundImage: `url(${chatDetails?.other_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${chatDetails?.other_handle}`})` }}
-                                                    ></div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        <div className={`p-3 md:p-4 shadow-sm text-[15px] leading-relaxed break-words whitespace-pre-wrap ${isMe
-                                            ? 'bg-primary text-white rounded-l-2xl rounded-tr-2xl'
-                                            : 'bg-white text-text-main rounded-r-2xl rounded-tl-2xl border border-border-light'
-                                            } ${isSequence && isMe ? 'rounded-br-md' : 'rounded-br-2xl'} ${isSequence && !isMe ? 'rounded-bl-md' : 'rounded-bl-2xl'}`}>
-
-                                            {/* Dynamic Rendering based on Message Type */}
-                                            {m.type === 'image' ? (
-                                                <div className="space-y-1">
-                                                    <img
-                                                        src={m.fileUrl}
-                                                        alt="attachment"
-                                                        className="rounded-lg max-h-60 w-auto object-cover border border-white/20 cursor-pointer"
-                                                        onClick={() => window.open(m.fileUrl, '_blank')}
-                                                    />
-                                                </div>
-                                            ) : m.type === 'file' ? (
-                                                <a
-                                                    href={m.fileUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className={`flex items-center gap-2 underline ${isMe ? 'text-white' : 'text-primary'}`}
-                                                >
-                                                    <span className="material-symbols-outlined">description</span>
-                                                    {m.text} {/* The filename */}
-                                                </a>
-                                            ) : (
-                                                <p className="text-sm">{m.text || m.content}</p>
-                                            )}
-
-                                        </div>
+                        {/* Messages grouped by date */}
+                        {Object.entries(messagesByDate).map(([dateKey, dayMessages]) => (
+                            <div key={dateKey}>
+                                {/* Date Divider */}
+                                <div className="flex items-center justify-center my-6">
+                                    <div className="bg-white border border-border-subtle px-4 py-1.5 rounded-full">
+                                        <span className="text-xs font-bold text-text-muted">{formatDateDivider(dayMessages[0].created_at)}</span>
                                     </div>
+                                </div>
 
-                                    <span className={`text-[11px] font-medium flex items-center gap-1 ${isMe ? 'text-secondary mr-1' : 'text-secondary ml-12'}`}>
-                                        {formatTime(m.created_at)}
-                                        {isMe && (
-                                            <span className={`material-symbols-outlined text-[14px] ${m.readBy && m.readBy.length > 1 ? 'text-blue-500' : 'text-gray-400'}`}>
-                                                {m.readBy && m.readBy.length > 1 ? 'done_all' : 'check'}
-                                            </span>
-                                        )}
-                                    </span>
-                                </MotionDiv>
-                            );
-                        })}
-                        {isOtherTyping && (
-                            <div className="flex items-center gap-2 ml-12 mb-4">
-                                <div className="flex gap-1">
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
+                                {/* Messages for this day */}
+                                <div className="space-y-1">
+                                    {dayMessages.map((m, i) => {
+                                        const isMe = m.sender_id === user.id;
+                                        const isOffer = m.type === 'offer';
+                                        const isSystem = m.type === 'system' || m.content?.includes("**OFFER PROPOSAL**");
+
+                                        // Check if previous message was from same person (for grouping)
+                                        const prevMsg = i > 0 ? dayMessages[i - 1] : null;
+                                        const isSequence = prevMsg && prevMsg.sender_id === m.sender_id && !prevMsg.type?.includes('offer') && !prevMsg.type?.includes('system');
+
+                                        // Render Offer Card
+                                        if (isOffer && m.offer) {
+                                            return (
+                                                <OfferCard
+                                                    key={m.id || i}
+                                                    offer={{
+                                                        id: m.id,
+                                                        subject: m.offer.subject,
+                                                        title: m.offer.title,
+                                                        description: m.offer.description,
+                                                        pages: m.offer.pages,
+                                                        deadline: m.offer.deadline,
+                                                        budget: m.offer.budget,
+                                                        status: m.offer.status || 'pending',
+                                                        senderId: m.sender_id,
+                                                        senderName: m.sender_name
+                                                    }}
+                                                    isOwn={isMe}
+                                                    onAccept={() => handleAcceptOffer(m.id)}
+                                                    onReject={() => handleRejectOffer(m.id)}
+                                                    timestamp={m.created_at}
+                                                />
+                                            );
+                                        }
+
+                                        // Render System Message
+                                        if (isSystem) {
+                                            return (
+                                                <MotionDiv initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={m.id || i} className="flex justify-center my-4">
+                                                    <div className={`px-4 py-2 rounded-2xl text-center max-w-sm shadow-sm ${m.text?.includes('✅') ? 'bg-green-50 border border-green-100' : m.text?.includes('❌') ? 'bg-red-50 border border-red-100' : 'bg-blue-50 border border-blue-100'}`}>
+                                                        <p className={`text-sm font-medium ${m.text?.includes('✅') ? 'text-green-700' : m.text?.includes('❌') ? 'text-red-600' : 'text-blue-700'}`}>{m.text || m.content}</p>
+                                                    </div>
+                                                </MotionDiv>
+                                            )
+                                        }
+
+                                        return (
+                                            <MotionDiv
+                                                initial={{ opacity: 0, y: 5 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                key={m.id || `${dateKey}-${i}`}
+                                                className={`flex flex-col gap-0.5 max-w-[85%] md:max-w-[70%] ${isMe ? 'items-end self-end' : 'items-start'} ${isSequence ? 'mt-0.5' : 'mt-4'}`}
+                                            >
+                                                <div className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                                                    {!isMe && (
+                                                        <div className="size-7 shrink-0 mb-1">
+                                                            {!isSequence && (
+                                                                <Avatar
+                                                                    src={chatDetails?.other_avatar}
+                                                                    alt={chatDetails?.other_handle}
+                                                                    className="size-7 rounded-full"
+                                                                    fallback={chatDetails?.other_handle?.charAt(0)}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    <div className={`px-4 py-2.5 shadow-sm text-[15px] leading-relaxed break-words whitespace-pre-wrap ${isMe
+                                                        ? 'bg-gradient-to-br from-primary to-orange-500 text-white rounded-2xl rounded-br-md'
+                                                        : 'bg-white text-text-dark rounded-2xl rounded-bl-md border border-border-subtle'
+                                                        }`}>
+
+                                                        {/* Dynamic Rendering based on Message Type */}
+                                                        {m.type === 'image' ? (
+                                                            <div className="space-y-1">
+                                                                <img
+                                                                    src={m.fileUrl}
+                                                                    alt="attachment"
+                                                                    className="rounded-xl max-h-60 w-auto object-cover border border-white/20 cursor-pointer"
+                                                                    onClick={() => window.open(m.fileUrl, '_blank')}
+                                                                />
+                                                            </div>
+                                                        ) : m.type === 'file' ? (
+                                                            <a
+                                                                href={m.fileUrl}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className={`flex items-center gap-2 ${isMe ? 'text-white hover:text-white/80' : 'text-primary hover:text-primary/80'}`}
+                                                            >
+                                                                <span className="material-symbols-outlined text-lg">attach_file</span>
+                                                                <span className="underline">{m.text}</span>
+                                                            </a>
+                                                        ) : (
+                                                            <p className="text-sm">{m.text || m.content}</p>
+                                                        )}
+
+                                                    </div>
+                                                </div>
+
+                                                {!isSequence && (
+                                                    <span className={`text-[10px] font-medium flex items-center gap-1 mt-1 ${isMe ? 'text-text-muted mr-1' : 'text-text-muted ml-9'}`}>
+                                                        {formatTime(m.created_at)}
+                                                        {isMe && (
+                                                            <span className={`material-symbols-outlined text-xs ${m.readBy && m.readBy.length > 1 ? 'text-blue-500' : 'text-gray-400'}`}>
+                                                                {m.readBy && m.readBy.length > 1 ? 'done_all' : 'check'}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </MotionDiv>
+                                        );
+                                    })}
                                 </div>
                             </div>
-                        )}
+                        ))}
+
+                        {/* Typing Indicator */}
+                        <AnimatePresence>
+                            {isOtherTyping && (
+                                <MotionDiv
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    className="flex items-center gap-2 ml-9 mb-4"
+                                >
+                                    <div className="bg-white px-4 py-3 rounded-2xl border border-border-subtle flex items-center gap-1">
+                                        <span className="size-2 bg-gray-400 rounded-full animate-bounce"></span>
+                                        <span className="size-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
+                                        <span className="size-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                                    </div>
+                                </MotionDiv>
+                            )}
+                        </AnimatePresence>
                         <div ref={endRef} />
                     </div>
 
                     {/* Input Area */}
-                    <div className="p-2 md:p-6 pt-2 bg-white border-t border-border-light z-20 pb-safe">
+                    <div className="p-3 md:p-4 bg-white border-t border-border-subtle z-20 pb-safe">
                         <form
                             onSubmit={send}
-                            className="bg-background p-2 pl-3 md:pl-4 rounded-[2rem] border border-border-light flex items-end gap-2 shadow-inner focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+                            className="bg-secondary-bg p-2 pl-3 md:pl-4 rounded-2xl border border-border-subtle flex items-end gap-2 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all"
                         >
                             <input
                                 type="file"
@@ -436,16 +508,21 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                className="p-2 mb-1 rounded-full text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
+                                disabled={isUploading}
+                                className="size-10 rounded-xl text-text-muted hover:text-primary hover:bg-white flex items-center justify-center transition-colors disabled:opacity-50"
                             >
-                                <Paperclip size={20} />
+                                {isUploading ? (
+                                    <span className="material-symbols-outlined animate-spin">refresh</span>
+                                ) : (
+                                    <Paperclip size={20} />
+                                )}
                             </button>
 
-                            <div className="flex-1 py-3">
+                            <div className="flex-1 py-2">
                                 <textarea
                                     ref={textareaRef}
-                                    className="w-full bg-transparent border-none p-0 text-text-main placeholder-secondary focus:ring-0 resize-none max-h-32 text-[15px] leading-relaxed"
-                                    placeholder="Type a secure message..."
+                                    className="w-full bg-transparent border-none p-0 text-text-dark placeholder-text-muted focus:ring-0 resize-none max-h-32 text-[15px] leading-relaxed"
+                                    placeholder="Type a message..."
                                     rows={1}
                                     value={text}
                                     onChange={handleTextChange}
@@ -458,27 +535,26 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 />
                             </div>
 
-                            <button type="button" className="p-2 mb-1 rounded-full text-secondary hover:text-text-main transition-colors hidden sm:block">
-                                <span className="material-symbols-outlined">sentiment_satisfied</span>
-                            </button>
-
-                            {text.trim() || isUploading ? (
+                            {text.trim() ? (
                                 <MotionButton
                                     whileTap={{ scale: 0.95 }}
                                     type="submit"
-                                    disabled={isUploading}
-                                    className={`size-11 rounded-full bg-primary text-white flex items-center justify-center hover:bg-opacity-90 shadow-md shadow-primary/30 transition-all active:scale-95 mb-0.5 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className="size-10 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white flex items-center justify-center shadow-md hover:shadow-lg transition-all"
                                 >
-                                    {isUploading ? <span className="material-symbols-outlined animate-spin">refresh</span> : <span className="material-symbols-outlined">send</span>}
+                                    <span className="material-symbols-outlined">send</span>
                                 </MotionButton>
                             ) : (
-                                <button disabled className="size-11 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center mb-0.5 cursor-not-allowed">
+                                <button
+                                    type="button"
+                                    className="size-10 rounded-xl bg-gray-200 text-gray-400 flex items-center justify-center cursor-not-allowed"
+                                    disabled
+                                >
                                     <span className="material-symbols-outlined">send</span>
                                 </button>
                             )}
                         </form>
                         <div className="text-center mt-2 hidden md:block">
-                            <p className="text-[10px] text-secondary">Press Enter to send. Messages are protected by <span className="text-text-main font-bold">AssignMate Secure Guarantee™</span></p>
+                            <p className="text-[10px] text-text-muted">Press Enter to send • Shift+Enter for new line</p>
                         </div>
                     </div>
                 </div>
