@@ -30,6 +30,7 @@ const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: 
 const Connections = lazy(() => import('./pages/Connections').then(module => ({ default: module.Connections })));
 const Onboarding = lazy(() => import('./pages/Onboarding').then(module => ({ default: module.Onboarding })));
 const FindWriter = lazy(() => import('./pages/FindWriter').then(module => ({ default: module.FindWriter })));
+const Projects = lazy(() => import('./pages/Projects').then(module => ({ default: module.Projects })));
 const AdminVerifications = lazy(() => import('./admin/pages/AdminVerifications').then(module => ({ default: module.AdminVerifications })));
 const PitchDeck = lazy(() => import('./pages/PitchDeck').then(module => ({ default: module.PitchDeck })));
 const Documentation = lazy(() => import('./pages/Documentation').then(module => ({ default: module.Documentation })));
@@ -133,6 +134,12 @@ function AppContent() {
           } />
 
           <Route path="/writers" element={<FindWriter />} />
+
+          <Route path="/projects" element={
+            <ProtectedRoute>
+              {user && <Projects user={user} />}
+            </ProtectedRoute>
+          } />
 
           <Route path="/connections" element={
             <ProtectedRoute>
