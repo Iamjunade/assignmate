@@ -5,7 +5,6 @@ import { ArrowLeft, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserPresence } from '../components/UserPresence';
 import { Sidebar } from '../components/dashboard/Sidebar';
-import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
 import { OfferModal, OfferData } from '../components/chat/OfferModal';
@@ -275,9 +274,6 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
             <Sidebar user={user} />
             <main className="flex-1 flex h-full overflow-hidden relative">
                 <div className="flex-1 flex flex-col h-full overflow-hidden">
-                    <div className="hidden lg:block">
-                        <DashboardHeader />
-                    </div>
                     <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-white lg:rounded-tl-3xl shadow-soft lg:border-l lg:border-t border-border-subtle">
                         {/* Chat Header */}
                         <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-border-subtle bg-white z-10 sticky top-0">
