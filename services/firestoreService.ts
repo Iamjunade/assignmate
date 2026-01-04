@@ -937,6 +937,32 @@ export const dbService = {
     },
 
     findExistingChat: async (uid1: string, uid2: string) => {
+        const q = query(collection(getDb(), 'chats'), where('participants', 'array-contains', uid1));
+        const snap = await getDocs(q);
+        return snap.docs.find(doc => {
+            const participants = doc.data().participants || [];
+            return participants.includes(uid2);
+        });
+    },
+
+    // --- PROJECT/GIG METHODS ---
+    getUserProjects: async (userId: string) => {
+        const q = query(
+            collection(getDb(), 'gigs'),
+            where('poster_id', '==', userId),
+            orderBy('created_at', 'desc')
+        );
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
+
+    getConnectionStatus: async (uid1: string, uid2: string) => {
+        // Check Requests
+        const requestsRef = collection(getDb(), 'requests');
+        const q = query(requestsRef, where('fromId', '==', uid1), where('toId', '==', uid2), where('status', '==', 'pending'));
+        const reqSnap = await getDocs(q);
+        if (!reqSnap.empty) return 'pending';
+
         // Check Actual Connection
         const connQ = query(collection(getDb(), 'connections'), where('participants', 'array-contains', uid1));
         const connSnap = await getDocs(connQ);
