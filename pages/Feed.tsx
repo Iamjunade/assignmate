@@ -40,6 +40,21 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                 setLoading(false);
             });
 
+            // Real-time listener for active orders (updates immediately when offer accepted)
+            const unsubOrders = db.listenToActiveOrders(user.id, (orders) => {
+                setStats((prev: any) => ({
+                    ...prev,
+                    activeOrders: orders,
+                    activeCount: orders.length,
+                    // Recalculate next deadline
+                    nextDeadline: orders.length > 0 && orders[0].deadline
+                        ? Math.max(0, Math.ceil((new Date(orders[0].deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+                        : null,
+                    nextDeadlineProject: orders.length > 0 ? orders[0].title : null
+                }));
+                setLoading(false);
+            });
+
             // Load chats
             db.getChats(user.id).then(chats => {
                 setRecentChats(chats.slice(0, 5));
@@ -60,6 +75,11 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                     setTopWriters(writers.slice(0, 4));
                 });
             }
+
+            // Cleanup listener
+            return () => {
+                unsubOrders();
+            };
         }
     }, [user, isWriterMode]);
 

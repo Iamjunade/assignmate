@@ -844,6 +844,83 @@ export const dbService = {
         };
     },
 
+    // Real-time listener for active orders (for immediate updates)
+    listenToActiveOrders: (userId: string, callback: (orders: any[]) => void) => {
+        if (!userId) {
+            callback([]);
+            return () => { };
+        }
+
+        // Create two listeners - one for student orders, one for writer orders
+        const studentOrdersQuery = query(
+            collection(getDb(), 'orders'),
+            where('student_id', '==', userId),
+            where('status', '==', 'in_progress')
+        );
+
+        const writerOrdersQuery = query(
+            collection(getDb(), 'orders'),
+            where('writer_id', '==', userId),
+            where('status', '==', 'in_progress')
+        );
+
+        const orderMap = new Map<string, any>();
+        let studentOrders: any[] = [];
+        let writerOrders: any[] = [];
+
+        const processOrders = async () => {
+            // Merge orders
+            orderMap.clear();
+            studentOrders.forEach(o => orderMap.set(o.id, o));
+            writerOrders.forEach(o => orderMap.set(o.id, o));
+
+            // Sort by deadline
+            const allOrders = Array.from(orderMap.values()).sort((a, b) => {
+                if (!a.deadline) return 1;
+                if (!b.deadline) return -1;
+                return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+            });
+
+            // Hydrate with writer data
+            const hydratedOrders = await Promise.all(allOrders.map(async (order) => {
+                if (!order.writer_id) return order;
+                try {
+                    const writerSnap = await getDoc(doc(getDb(), 'users', order.writer_id));
+                    if (writerSnap.exists()) {
+                        const w = writerSnap.data();
+                        return {
+                            ...order,
+                            writer_handle: w.handle,
+                            writer_avatar: w.avatar_url,
+                            writer_school: w.school,
+                            writer_verified: w.is_verified === 'verified'
+                        };
+                    }
+                } catch (e) {
+                    console.error("Error hydrating order:", e);
+                }
+                return order;
+            }));
+
+            callback(hydratedOrders);
+        };
+
+        const unsubStudent = onSnapshot(studentOrdersQuery, (snap) => {
+            studentOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            processOrders();
+        });
+
+        const unsubWriter = onSnapshot(writerOrdersQuery, (snap) => {
+            writerOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            processOrders();
+        });
+
+        return () => {
+            unsubStudent();
+            unsubWriter();
+        };
+    },
+
     // --- STORAGE METHODS (Now using Supabase) ---
     uploadFile: async (file: File, path: string) => {
         const { supabaseStorage } = await import('./supabaseStorage');
