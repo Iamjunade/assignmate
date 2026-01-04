@@ -26,7 +26,7 @@ export const Projects = ({ user }: ProjectsProps) => {
     const loadProjects = async () => {
         try {
             setLoading(true);
-            const userProjects = await dbService.getUserProjects(user!.id);
+            const userProjects = await dbService.getUserProjects(user!.id) as Gig[];
             setProjects(userProjects);
         } catch (error) {
             console.error('Error loading projects:', error);
@@ -153,8 +153,8 @@ export const Projects = ({ user }: ProjectsProps) => {
                                 <button
                                     onClick={() => setFilterStatus('all')}
                                     className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${filterStatus === 'all'
-                                            ? 'bg-primary text-white shadow-sm'
-                                            : 'text-text-muted hover:bg-secondary-bg'
+                                        ? 'bg-primary text-white shadow-sm'
+                                        : 'text-text-muted hover:bg-secondary-bg'
                                         }`}
                                 >
                                     All ({stats.total})
@@ -162,8 +162,8 @@ export const Projects = ({ user }: ProjectsProps) => {
                                 <button
                                     onClick={() => setFilterStatus(GigStatus.LIVE)}
                                     className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${filterStatus === GigStatus.LIVE
-                                            ? 'bg-green-500 text-white shadow-sm'
-                                            : 'text-text-muted hover:bg-secondary-bg'
+                                        ? 'bg-green-500 text-white shadow-sm'
+                                        : 'text-text-muted hover:bg-secondary-bg'
                                         }`}
                                 >
                                     Active ({stats.live})
@@ -171,8 +171,8 @@ export const Projects = ({ user }: ProjectsProps) => {
                                 <button
                                     onClick={() => setFilterStatus(GigStatus.TAKEN)}
                                     className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${filterStatus === GigStatus.TAKEN
-                                            ? 'bg-blue-500 text-white shadow-sm'
-                                            : 'text-text-muted hover:bg-secondary-bg'
+                                        ? 'bg-blue-500 text-white shadow-sm'
+                                        : 'text-text-muted hover:bg-secondary-bg'
                                         }`}
                                 >
                                     In Progress ({stats.taken})
@@ -180,8 +180,8 @@ export const Projects = ({ user }: ProjectsProps) => {
                                 <button
                                     onClick={() => setFilterStatus(GigStatus.COMPLETED)}
                                     className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${filterStatus === GigStatus.COMPLETED
-                                            ? 'bg-gray-500 text-white shadow-sm'
-                                            : 'text-text-muted hover:bg-secondary-bg'
+                                        ? 'bg-gray-500 text-white shadow-sm'
+                                        : 'text-text-muted hover:bg-secondary-bg'
                                         }`}
                                 >
                                     Completed ({stats.completed})
