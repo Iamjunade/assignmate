@@ -764,16 +764,37 @@ export const dbService = {
     // --- DASHBOARD METHODS ---
     getDashboardStats: async (userId: string) => {
         if (!userId) return { activeCount: 0, escrowBalance: 0, nextDeadline: null, nextDeadlineProject: null, activeOrders: [] };
-        // 1. Get Active Orders (where student_id == userId AND status == 'in_progress')
-        const q = query(
+
+        // 1. Get Active Orders - Query for both student_id (hirer) and writer_id
+        // This ensures both students and writers see their active projects
+        const studentOrdersQuery = query(
             collection(getDb(), 'orders'),
             where('student_id', '==', userId),
-            where('status', '==', 'in_progress'),
-            orderBy('deadline', 'asc')
+            where('status', '==', 'in_progress')
         );
 
-        const snap = await getDocs(q);
-        const activeOrders = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+        const writerOrdersQuery = query(
+            collection(getDb(), 'orders'),
+            where('writer_id', '==', userId),
+            where('status', '==', 'in_progress')
+        );
+
+        const [studentSnap, writerSnap] = await Promise.all([
+            getDocs(studentOrdersQuery),
+            getDocs(writerOrdersQuery)
+        ]);
+
+        // Merge and deduplicate
+        const orderMap = new Map();
+        studentSnap.docs.forEach(d => orderMap.set(d.id, { id: d.id, ...d.data() }));
+        writerSnap.docs.forEach(d => orderMap.set(d.id, { id: d.id, ...d.data() }));
+
+        // Sort by deadline
+        const activeOrders = Array.from(orderMap.values()).sort((a: any, b: any) => {
+            if (!a.deadline) return 1;
+            if (!b.deadline) return -1;
+            return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+        }) as any[];
 
         // 2. Calculate Stats
         const activeCount = activeOrders.length;
@@ -948,7 +969,8 @@ export const dbService = {
                 await setDoc(doc(getDb(), 'orders', orderId), {
                     id: orderId,
                     chat_id: chatId,
-                    poster_id: offer.senderId,
+                    student_id: offer.senderId, // The person who sent the offer (student/hirer)
+                    poster_id: offer.senderId, // Keep for backward compatibility
                     writer_id: userId, // The person accepting is the writer
                     title: offer.title,
                     subject: offer.subject,
@@ -956,6 +978,7 @@ export const dbService = {
                     pages: offer.pages,
                     deadline: offer.deadline,
                     budget: offer.budget,
+                    amount: offer.budget, // For escrow balance calculation
                     status: 'in_progress',
                     completion_percentage: 0,
                     created_at: new Date().toISOString(),
