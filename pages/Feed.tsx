@@ -364,37 +364,8 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                 </div>
                             </div>
 
-                            {/* Quick Search by Category */}
-                            <section className="bg-white p-5 md:p-6 rounded-2xl shadow-card border border-border-subtle">
-                                <div className="flex items-center justify-between mb-5">
-                                    <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-primary">category</span>
-                                        Find Help By Subject
-                                    </h2>
-                                    <button onClick={() => navigate('/writers')} className="text-sm font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1">
-                                        Browse All
-                                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                                    </button>
-                                </div>
-
-                                <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-                                    {quickCategories.map((cat, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => navigate(`/writers?search=${cat.label}`)}
-                                            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-secondary-bg hover:bg-primary/5 hover:scale-[1.02] transition-all group"
-                                        >
-                                            <div className={`size-12 rounded-xl ${cat.color} text-white flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow`}>
-                                                <span className="material-symbols-outlined">{cat.icon}</span>
-                                            </div>
-                                            <span className="text-xs font-bold text-text-dark group-hover:text-primary transition-colors">{cat.label}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </section>
-
                             {/* Stats Row */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {/* Active Projects */}
                                 <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle group hover:shadow-soft transition-all">
                                     <div className="flex justify-between items-start mb-3">
@@ -405,24 +376,6 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     </div>
                                     <span className="text-3xl font-extrabold text-text-dark">{stats.activeCount}</span>
                                     <p className="text-xs text-text-muted mt-1">In progress</p>
-                                </div>
-
-                                {/* Next Deadline */}
-                                <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle group hover:shadow-soft transition-all">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">Next Deadline</h3>
-                                        <div className="size-9 rounded-xl bg-red-50 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <span className="material-symbols-outlined text-xl">timer</span>
-                                        </div>
-                                    </div>
-                                    {stats.nextDeadline !== null ? (
-                                        <>
-                                            <span className="text-3xl font-extrabold text-text-dark">{stats.nextDeadline}</span>
-                                            <span className="text-lg font-bold text-text-muted ml-1">days</span>
-                                        </>
-                                    ) : (
-                                        <span className="text-xl font-bold text-text-muted">No deadlines</span>
-                                    )}
                                 </div>
 
                                 {/* My Network - Clickable */}
