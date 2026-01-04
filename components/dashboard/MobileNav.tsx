@@ -50,7 +50,7 @@ export const MobileNav = () => {
             className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-border-subtle z-50 safe-area-bottom shadow-[0_-2px_20px_-8px_rgba(0,0,0,0.12)]"
             aria-label="Mobile navigation"
         >
-            <div className="flex items-center justify-around max-w-md mx-auto px-safe">
+            <div className="flex items-end justify-around max-w-md mx-auto px-2 pb-2 pt-1">
                 {navItems.map((item) => {
                     const active = isActive(item.path);
 
@@ -60,18 +60,19 @@ export const MobileNav = () => {
                                 key={item.path}
                                 onClick={() => navigate(item.path)}
                                 className={`
-                                    relative -top-6 touch-target-lg
-                                    p-4 rounded-full shadow-lg 
+                                    relative touch-target-lg
+                                    p-4 rounded-full shadow-xl -mb-4
                                     transition-all duration-200 ease-out
                                     touch-feedback
+                                    ring-4 ring-white dark:ring-slate-900
                                     ${isWriterMode
-                                        ? 'bg-gradient-to-r from-primary to-orange-500 text-white shadow-primary/30 hover:shadow-xl active:shadow-primary/40'
-                                        : 'bg-primary text-white shadow-primary/30 hover:shadow-xl active:shadow-primary/40'
+                                        ? 'bg-gradient-to-r from-primary to-orange-500 text-white shadow-primary/40 hover:shadow-2xl active:shadow-primary/50'
+                                        : 'bg-primary text-white shadow-primary/40 hover:shadow-2xl active:shadow-primary/50'
                                     }
                                 `}
                                 aria-label={item.label}
                             >
-                                <span className="material-symbols-outlined text-2xl" aria-hidden="true">
+                                <span className="material-symbols-outlined text-[28px]" aria-hidden="true">
                                     {item.icon}
                                 </span>
                             </button>
@@ -84,7 +85,7 @@ export const MobileNav = () => {
                             onClick={() => navigate(item.path)}
                             className={`
                                 relative flex flex-col items-center gap-1 touch-target
-                                py-2 px-3 transition-all duration-200 ease-out
+                                py-2 px-2 transition-all duration-200 ease-out min-w-[64px]
                                 touch-feedback-subtle
                                 ${active
                                     ? 'text-primary'
@@ -96,7 +97,7 @@ export const MobileNav = () => {
                         >
                             <div className="relative">
                                 <span
-                                    className="material-symbols-outlined text-2xl transition-all duration-200"
+                                    className="material-symbols-outlined text-[26px] transition-all duration-200"
                                     style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
                                     aria-hidden="true"
                                 >
@@ -104,14 +105,14 @@ export const MobileNav = () => {
                                 </span>
                                 {item.badge && item.badge > 0 && (
                                     <span
-                                        className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-sm"
+                                        className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-sm"
                                         aria-label={`${item.badge} unread`}
                                     >
                                         {item.badge > 9 ? '9+' : item.badge}
                                     </span>
                                 )}
                             </div>
-                            <span className="text-[11px] font-semibold whitespace-nowrap">
+                            <span className="text-[10px] font-semibold whitespace-nowrap">
                                 {item.label}
                             </span>
                         </button>
