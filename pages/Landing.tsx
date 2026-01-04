@@ -422,12 +422,12 @@ export const Landing = () => {
                         <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Help Center</button>
                         <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Contact Us</button>
                         <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Dispute Resolution</button>
-                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Community Guidelines</button>
                     </div>
                     <div className="flex flex-col gap-4">
                         <h3 className="font-bold text-[#1b140d] dark:text-white">Legal</h3>
                         <button onClick={() => navigate('/terms')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Terms of Service</button>
                         <button onClick={() => navigate('/privacy')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Privacy Policy</button>
+                        <button onClick={() => navigate('/community-guidelines')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Community Guidelines</button>
                         <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Academic Integrity</button>
                     </div>
                 </div>

@@ -10,6 +10,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminRoute } from './components/AdminRoute';
 import { User } from './types';
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
+import { ScrollToTop } from './components/ScrollToTop';
 
 // Admin Components
 import { AdminLayout } from './admin/layouts/AdminLayout';
@@ -34,11 +35,13 @@ const PitchDeck = lazy(() => import('./pages/PitchDeck').then(module => ({ defau
 const Documentation = lazy(() => import('./pages/Documentation').then(module => ({ default: module.Documentation })));
 const TermsOfService = lazy(() => import('./pages/TermsOfService').then(module => ({ default: module.TermsOfService })));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
+const CommunityGuidelines = lazy(() => import('./pages/CommunityGuidelines').then(module => ({ default: module.CommunityGuidelines })));
 
 export default function AppWrapper() {
   return (
     <GlobalErrorBoundary>
       <Router>
+        <ScrollToTop />
         <ToastProvider>
           <AuthProvider>
             <AppRoutes />
@@ -176,6 +179,7 @@ function AppContent() {
           {/* --- Legal Pages --- */}
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/community-guidelines" element={<CommunityGuidelines />} />
 
           {/* --- Public Routes (Glass Layout) --- */}
           <Route element={
