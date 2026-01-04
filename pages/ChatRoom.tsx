@@ -349,7 +349,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                         {Object.entries(messagesByDate).map(([dateKey, dayMessages]) => (
                             <div key={dateKey}>
                                 {/* Date Divider */}
-                                <div className="flex items-center justify-center my-6">
+                                <div className="flex items-center justify-center my-3">
                                     <div className="bg-white border border-border-subtle px-4 py-1.5 rounded-full">
                                         <span className="text-xs font-bold text-text-muted">{formatDateDivider(dayMessages[0].created_at)}</span>
                                     </div>
@@ -407,7 +407,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                                 initial={{ opacity: 0, y: 5 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 key={m.id || `${dateKey}-${i}`}
-                                                className={`flex flex-col gap-0.5 max-w-[85%] md:max-w-[70%] ${isMe ? 'items-end self-end' : 'items-start'} ${isSequence ? 'mt-0.5' : 'mt-4'}`}
+                                                className={`flex flex-col gap-0.5 max-w-[85%] md:max-w-[70%] ${isMe ? 'items-end self-end' : 'items-start'} ${isSequence ? '' : 'mt-2'}`}
                                             >
                                                 <div className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                                                     {!isMe && (
