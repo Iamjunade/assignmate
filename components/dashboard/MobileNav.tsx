@@ -117,8 +117,7 @@ export const MobileNav = () => {
                                         </span>
                                     )}
                                 </div>
-                                <span className={`text-[11px] font-medium transition-all ${active ? 'font-semibold' : ''
-                                    }`}>
+                                <span className={`text-[11px] font-medium transition-all ${active ? 'font-semibold' : ''}`}>
                                     {item.label}
                                 </span>
                             </button>
@@ -134,4 +133,3 @@ export const MobileNav = () => {
         </nav>
     );
 };
-```
