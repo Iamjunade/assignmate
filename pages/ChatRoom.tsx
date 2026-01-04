@@ -11,6 +11,7 @@ import { OfferModal, OfferData } from '../components/chat/OfferModal';
 import { OfferCard } from '../components/chat/OfferCard';
 import { Avatar } from '../components/ui/Avatar';
 import { format, isToday, isYesterday } from 'date-fns';
+import EmojiPicker from 'emoji-picker-react';
 
 const MotionDiv = motion.div as any;
 const MotionButton = motion.button as any;
@@ -26,6 +27,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     const [isUploading, setIsUploading] = useState(false);
     const [showOfferModal, setShowOfferModal] = useState(false);
     const [showActions, setShowActions] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [connections, setConnections] = useState<any[]>([]);
     const [recentChats, setRecentChats] = useState<any[]>([]);
     const endRef = useRef<HTMLDivElement>(null);
@@ -182,6 +184,12 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                 if (fileInputRef.current) fileInputRef.current.value = '';
             }
         }
+    };
+
+    const onEmojiClick = (emojiObject: any) => {
+        setText((prev) => prev + emojiObject.emoji);
+        // Don't close picker automatically to allow multiple emoji selection or keep it open
+        // setShowEmojiPicker(false); 
     };
 
     const handleCreateOffer = () => {
@@ -586,19 +594,35 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                         >
                                             <span className="material-symbols-outlined text-lg">image</span>
                                         </button>
-                                        <button
-                                            type="button"
-                                            className="size-9 rounded-lg text-text-muted hover:text-primary hover:bg-white flex items-center justify-center transition-all"
-                                            title="Emoji"
-                                        >
-                                            <span className="material-symbols-outlined text-lg">mood</span>
-                                        </button>
+                                        <div className="relative">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                                className={`size-9 rounded-lg hover:text-primary hover:bg-white flex items-center justify-center transition-all ${showEmojiPicker ? 'text-primary bg-white shadow-sm' : 'text-text-muted'}`}
+                                                title="Emoji"
+                                            >
+                                                <span className="material-symbols-outlined text-lg">mood</span>
+                                            </button>
 
-                                        {/* Keyboard shortcut hint */}
-                                        <span className="hidden md:inline-flex items-center ml-2 text-[10px] text-text-muted/70">
-                                            <kbd className="px-1.5 py-0.5 rounded bg-white border border-border-subtle text-[9px] font-medium">Enter</kbd>
-                                            <span className="mx-1">to send</span>
-                                        </span>
+                                            {/* Emoji Picker Popover */}
+                                            {showEmojiPicker && (
+                                                <div className="absolute bottom-12 left-0 shadow-xl rounded-2xl z-50">
+                                                    <div
+                                                        className="fixed inset-0 z-40"
+                                                        onClick={() => setShowEmojiPicker(false)}
+                                                    ></div>
+                                                    <div className="relative z-50">
+                                                        <EmojiPicker
+                                                            onEmojiClick={onEmojiClick}
+                                                            width={300}
+                                                            height={400}
+                                                            searchDisabled={false}
+                                                            previewConfig={{ showPreview: false }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Send Button */}
