@@ -8,19 +8,22 @@ import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
+import { OfferModal, OfferData } from '../components/chat/OfferModal';
+import { OfferCard } from '../components/chat/OfferCard';
 
 const MotionDiv = motion.div as any;
 const MotionButton = motion.button as any;
 
 export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, onBack?: () => void }) => {
     const navigate = useNavigate();
-    const { error: toastError } = useToast();
+    const { error: toastError, success: toastSuccess } = useToast();
     const [messages, setMessages] = useState<any[]>([]);
     const [text, setText] = useState('');
     const [chatDetails, setChatDetails] = useState<any>(null);
     const [isTyping, setIsTyping] = useState(false);
     const [isOtherTyping, setIsOtherTyping] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [showOfferModal, setShowOfferModal] = useState(false);
     const endRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -162,10 +165,47 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
         }
     };
 
-    const handleCreateOffer = async () => {
-        const msg = `📋 **OFFER PROPOSAL**\nI'd like to hire you for an assignment. Let's discuss the details and price.`;
-        const sentMsg = await db.sendMessage(chatId, user.id, msg);
-        setMessages(prev => [...prev, sentMsg]);
+    const handleCreateOffer = () => {
+        setShowOfferModal(true);
+    };
+
+    const handleSubmitOffer = async (offerData: OfferData) => {
+        try {
+            const sentOffer = await db.sendOffer(chatId, user.id, user.full_name || user.handle, {
+                subject: offerData.subject,
+                title: offerData.title,
+                description: offerData.description,
+                pages: offerData.pages,
+                deadline: offerData.deadline,
+                budget: offerData.budget
+            });
+            setMessages(prev => [...prev, sentOffer]);
+            toastSuccess("Offer sent successfully!");
+        } catch (error: any) {
+            console.error("Failed to send offer", error);
+            toastError(error.message || "Failed to send offer");
+            throw error;
+        }
+    };
+
+    const handleAcceptOffer = async (messageId: string) => {
+        try {
+            await db.respondToOffer(chatId, messageId, user.id, 'accepted');
+            toastSuccess("Offer accepted! Project started.");
+        } catch (error: any) {
+            console.error("Failed to accept offer", error);
+            toastError(error.message || "Failed to accept offer");
+        }
+    };
+
+    const handleRejectOffer = async (messageId: string) => {
+        try {
+            await db.respondToOffer(chatId, messageId, user.id, 'rejected');
+            toastSuccess("Offer declined.");
+        } catch (error: any) {
+            console.error("Failed to reject offer", error);
+            toastError(error.message || "Failed to decline offer");
+        }
     };
 
     const formatTime = (isoString: string) => {
@@ -239,9 +279,12 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                             )}
                         </div>
                         <div className="flex items-center gap-2 md:gap-3">
-                            <button onClick={handleCreateOffer} className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-background border border-border-light text-sm font-bold text-secondary hover:bg-gray-50 transition shadow-sm">
+                            <button onClick={handleCreateOffer} className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-orange-500 text-white text-sm font-bold hover:shadow-lg transition shadow-sm">
                                 <span className="material-symbols-outlined text-[18px]">receipt_long</span>
                                 Create Offer
+                            </button>
+                            <button onClick={handleCreateOffer} className="md:hidden p-2 rounded-full bg-primary text-white">
+                                <span className="material-symbols-outlined text-lg">receipt_long</span>
                             </button>
                             <button className="p-2 rounded-full hover:bg-background text-secondary transition">
                                 <span className="material-symbols-outlined">more_vert</span>
@@ -260,19 +303,44 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
                         {messages.map((m, i) => {
                             const isMe = m.sender_id === user.id;
-                            const isSystem = m.content?.includes("**OFFER PROPOSAL**");
+                            const isOffer = m.type === 'offer';
+                            const isSystem = m.type === 'system' || m.content?.includes("**OFFER PROPOSAL**");
 
                             // Check if previous message was from same person (for grouping)
-                            const isSequence = i > 0 && messages[i - 1].sender_id === m.sender_id && !messages[i - 1].content?.includes("**OFFER PROPOSAL**");
+                            const isSequence = i > 0 && messages[i - 1].sender_id === m.sender_id && !messages[i - 1].type?.includes('offer') && !messages[i - 1].type?.includes('system');
 
+                            // Render Offer Card
+                            if (isOffer && m.offer) {
+                                return (
+                                    <OfferCard
+                                        key={m.id || i}
+                                        offer={{
+                                            id: m.id,
+                                            subject: m.offer.subject,
+                                            title: m.offer.title,
+                                            description: m.offer.description,
+                                            pages: m.offer.pages,
+                                            deadline: m.offer.deadline,
+                                            budget: m.offer.budget,
+                                            status: m.offer.status || 'pending',
+                                            senderId: m.sender_id,
+                                            senderName: m.sender_name
+                                        }}
+                                        isOwn={isMe}
+                                        onAccept={() => handleAcceptOffer(m.id)}
+                                        onReject={() => handleRejectOffer(m.id)}
+                                        timestamp={m.created_at}
+                                    />
+                                );
+                            }
+
+                            // Render System Message
                             if (isSystem) {
                                 return (
                                     <MotionDiv initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={i} className="flex justify-center my-4">
-                                        <div className="bg-green-50 border border-green-100 p-4 rounded-2xl text-center max-w-xs shadow-sm">
-                                            <Briefcase className="mx-auto text-green-600 mb-2" size={24} />
-                                            <p className="text-sm font-bold text-green-900">Offer Proposal</p>
-                                            <p className="text-xs text-green-700 mt-1">Hire request sent.</p>
-                                            <div className="text-[10px] text-green-600 mt-2 font-medium">{formatTime(m.created_at)}</div>
+                                        <div className={`px-4 py-2 rounded-full text-center max-w-xs shadow-sm ${m.text?.includes('✅') ? 'bg-green-50 border border-green-100' : m.text?.includes('❌') ? 'bg-red-50 border border-red-100' : 'bg-blue-50 border border-blue-100'}`}>
+                                            <p className={`text-sm font-medium ${m.text?.includes('✅') ? 'text-green-700' : m.text?.includes('❌') ? 'text-red-600' : 'text-blue-700'}`}>{m.text || m.content}</p>
+                                            <div className="text-[10px] text-gray-500 mt-1">{formatTime(m.created_at)}</div>
                                         </div>
                                     </MotionDiv>
                                 )
@@ -415,6 +483,14 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                     </div>
                 </div>
             </main>
+
+            {/* Offer Modal */}
+            <OfferModal
+                isOpen={showOfferModal}
+                onClose={() => setShowOfferModal(false)}
+                onSubmit={handleSubmitOffer}
+                recipientName={chatDetails?.other_handle}
+            />
         </div>
     );
 };
