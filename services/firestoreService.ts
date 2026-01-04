@@ -933,172 +933,149 @@ export const dbService = {
         await addDoc(filesRef, {
             ...fileData,
             created_at: new Date().toISOString()
+        });
+    },
+
     findExistingChat: async (uid1: string, uid2: string) => {
-                const q = query(collection(getDb(), 'chats'), where('participants', 'array-contains', uid1));
-                const snap = await getDocs(q);
-                return snap.docs.find(doc => {
-                    const participants = doc.data().participants || [];
-                    return participants.includes(uid2);
-                });
+        // Check Actual Connection
+        const connQ = query(collection(getDb(), 'connections'), where('participants', 'array-contains', uid1));
+        const connSnap = await getDocs(connQ);
+        const isConnected = connSnap.docs.some(doc => {
+            const data = doc.data();
+            return data.participants && data.participants.some((p: any) => (p.id === uid2 || p === uid2));
+        });
+
+        return isConnected ? 'connected' : 'none';
+    },
+
+    // ==========================================
+    // OFFER SYSTEM
+    // ==========================================
+
+    sendOffer: async (chatId: string, senderId: string, senderName: string, offerData: {
+        subject: string;
+        title: string;
+        description?: string;
+        pages: number;
+        deadline: string;
+        budget: number;
+    }) => {
+        const offer = {
+            sender_id: senderId,
+            sender_name: senderName,
+            type: 'offer',
+            text: `📋 Project Offer: ${offerData.title}`,
+            offer: {
+                ...offerData,
+                status: 'pending' as 'pending' | 'accepted' | 'rejected',
+                senderId: senderId,
+                senderName: senderName
             },
-
-            // --- PROJECT/GIG METHODS ---
-            getUserProjects: async (userId: string) => {
-                const q = query(
-                    collection(getDb(), 'gigs'),
-                    where('poster_id', '==', userId),
-                    orderBy('created_at', 'desc')
-                );
-                const snapshot = await getDocs(q);
-                return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            },
-
-            getConnectionStatus: async (uid1: string, uid2: string) => {
-                // Check Requests
-                const requestsRef = collection(getDb(), 'requests');
-                const q = query(requestsRef, where('fromId', '==', uid1), where('toId', '==', uid2), where('status', '==', 'pending'));
-                const reqSnap = await getDocs(q);
-                if (!reqSnap.empty) return 'pending';
-
-                // Check Actual Connection
-                const connQ = query(collection(getDb(), 'connections'), where('participants', 'array-contains', uid1));
-                const connSnap = await getDocs(connQ);
-                const isConnected = connSnap.docs.some(doc => {
-                    const data = doc.data();
-                    return data.participants && data.participants.some((p: any) => (p.id === uid2 || p === uid2));
-                });
-
-                return isConnected ? 'connected' : 'none';
-            },
-
-            // ==========================================
-            // OFFER SYSTEM
-            // ==========================================
-
-            sendOffer: async (chatId: string, senderId: string, senderName: string, offerData: {
-                subject: string;
-                title: string;
-                description?: string;
-                pages: number;
-                deadline: string;
-                budget: number;
-            }) => {
-                const offer = {
-                    sender_id: senderId,
-                    sender_name: senderName,
-                    type: 'offer',
-                    text: `📋 Project Offer: ${offerData.title}`,
-                    offer: {
-                        ...offerData,
-                        status: 'pending' as 'pending' | 'accepted' | 'rejected',
-                        senderId: senderId,
-                        senderName: senderName
-                    },
-                    created_at: new Date().toISOString(),
-                    readBy: [senderId]
-                };
-
-                // Add to messages subcollection
-                const res = await addDoc(collection(getDb(), 'chats', chatId, 'messages'), offer);
-
-                // Update chat metadata
-                const chatRef = doc(getDb(), 'chats', chatId);
-                const chatSnap = await getDoc(chatRef);
-
-                if (chatSnap.exists()) {
-                    const chatData = chatSnap.data();
-                    const isPoster = chatData.poster_id === senderId;
-
-                    await updateDoc(chatRef, {
-                        last_message: `📋 Offer: ${offerData.title}`,
-                        updated_at: new Date().toISOString(),
-                        [isPoster ? 'unread_count_writer' : 'unread_count_poster']: (chatData[isPoster ? 'unread_count_writer' : 'unread_count_poster'] || 0) + 1
-                    });
-                }
-
-                return { id: res.id, ...offer };
-            },
-
-            respondToOffer: async (chatId: string, messageId: string, userId: string, response: 'accepted' | 'rejected') => {
-                const messageRef = doc(getDb(), 'chats', chatId, 'messages', messageId);
-                const messageSnap = await getDoc(messageRef);
-
-                if (!messageSnap.exists()) {
-                    throw new Error('Offer not found');
-                }
-
-                const messageData = messageSnap.data();
-                if (messageData.type !== 'offer') {
-                    throw new Error('Message is not an offer');
-                }
-
-                // Update the offer status
-                await updateDoc(messageRef, {
-                    'offer.status': response,
-                    'offer.respondedAt': new Date().toISOString(),
-                    'offer.respondedBy': userId
-                });
-
-                // If accepted, create a project/order
-                if (response === 'accepted' && messageData.offer) {
-                    const offer = messageData.offer;
-                    const chatRef = doc(getDb(), 'chats', chatId);
-                    const chatSnap = await getDoc(chatRef);
-
-                    if (chatSnap.exists()) {
-                        const chatData = chatSnap.data();
-
-                        // Create the order/project
-                        const orderId = `order_${Date.now()}`;
-                        await setDoc(doc(getDb(), 'orders', orderId), {
-                            id: orderId,
-                            chat_id: chatId,
-                            student_id: offer.senderId, // The person who sent the offer (student/hirer)
-                            poster_id: offer.senderId, // Keep for backward compatibility
-                            writer_id: userId, // The person accepting is the writer
-                            title: offer.title,
-                            subject: offer.subject,
-                            description: offer.description || '',
-                            pages: offer.pages,
-                            deadline: offer.deadline,
-                            budget: offer.budget,
-                            amount: offer.budget, // For escrow balance calculation
-                            status: 'in_progress',
-                            completion_percentage: 0,
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
-                        });
-
-                        // Send a system message about acceptance
-                        await addDoc(collection(getDb(), 'chats', chatId, 'messages'), {
-                            sender_id: 'system',
-                            type: 'system',
-                            text: `✅ Offer accepted! Project "${offer.title}" has been started.`,
-                            created_at: new Date().toISOString(),
-                            readBy: []
-                        });
-                    }
-                } else if (response === 'rejected') {
-                    // Send a system message about rejection
-                    await addDoc(collection(getDb(), 'chats', chatId, 'messages'), {
-                        sender_id: 'system',
-                        type: 'system',
-                        text: `❌ Offer was declined.`,
-                        created_at: new Date().toISOString(),
-                        readBy: []
-                    });
-                }
-
-                return { success: true, status: response };
-            },
-
-            getOffersByChat: async (chatId: string) => {
-                const q = query(
-                    collection(getDb(), 'chats', chatId, 'messages'),
-                    where('type', '==', 'offer'),
-                    orderBy('created_at', 'desc')
-                );
-                const snap = await getDocs(q);
-                return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            }
+            created_at: new Date().toISOString(),
+            readBy: [senderId]
         };
+
+        // Add to messages subcollection
+        const res = await addDoc(collection(getDb(), 'chats', chatId, 'messages'), offer);
+
+        // Update chat metadata
+        const chatRef = doc(getDb(), 'chats', chatId);
+        const chatSnap = await getDoc(chatRef);
+
+        if (chatSnap.exists()) {
+            const chatData = chatSnap.data();
+            const isPoster = chatData.poster_id === senderId;
+
+            await updateDoc(chatRef, {
+                last_message: `📋 Offer: ${offerData.title}`,
+                updated_at: new Date().toISOString(),
+                [isPoster ? 'unread_count_writer' : 'unread_count_poster']: (chatData[isPoster ? 'unread_count_writer' : 'unread_count_poster'] || 0) + 1
+            });
+        }
+
+        return { id: res.id, ...offer };
+    },
+
+    respondToOffer: async (chatId: string, messageId: string, userId: string, response: 'accepted' | 'rejected') => {
+        const messageRef = doc(getDb(), 'chats', chatId, 'messages', messageId);
+        const messageSnap = await getDoc(messageRef);
+
+        if (!messageSnap.exists()) {
+            throw new Error('Offer not found');
+        }
+
+        const messageData = messageSnap.data();
+        if (messageData.type !== 'offer') {
+            throw new Error('Message is not an offer');
+        }
+
+        // Update the offer status
+        await updateDoc(messageRef, {
+            'offer.status': response,
+            'offer.respondedAt': new Date().toISOString(),
+            'offer.respondedBy': userId
+        });
+
+        // If accepted, create a project/order
+        if (response === 'accepted' && messageData.offer) {
+            const offer = messageData.offer;
+            const chatRef = doc(getDb(), 'chats', chatId);
+            const chatSnap = await getDoc(chatRef);
+
+            if (chatSnap.exists()) {
+                const chatData = chatSnap.data();
+
+                // Create the order/project
+                const orderId = `order_${Date.now()}`;
+                await setDoc(doc(getDb(), 'orders', orderId), {
+                    id: orderId,
+                    chat_id: chatId,
+                    student_id: offer.senderId, // The person who sent the offer (student/hirer)
+                    poster_id: offer.senderId, // Keep for backward compatibility
+                    writer_id: userId, // The person accepting is the writer
+                    title: offer.title,
+                    subject: offer.subject,
+                    description: offer.description || '',
+                    pages: offer.pages,
+                    deadline: offer.deadline,
+                    budget: offer.budget,
+                    amount: offer.budget, // For escrow balance calculation
+                    status: 'in_progress',
+                    completion_percentage: 0,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                });
+
+                // Send a system message about acceptance
+                await addDoc(collection(getDb(), 'chats', chatId, 'messages'), {
+                    sender_id: 'system',
+                    type: 'system',
+                    text: `✅ Offer accepted! Project "${offer.title}" has been started.`,
+                    created_at: new Date().toISOString(),
+                    readBy: []
+                });
+            }
+        } else if (response === 'rejected') {
+            // Send a system message about rejection
+            await addDoc(collection(getDb(), 'chats', chatId, 'messages'), {
+                sender_id: 'system',
+                type: 'system',
+                text: `❌ Offer was declined.`,
+                created_at: new Date().toISOString(),
+                readBy: []
+            });
+        }
+
+        return { success: true, status: response };
+    },
+
+    getOffersByChat: async (chatId: string) => {
+        const q = query(
+            collection(getDb(), 'chats', chatId, 'messages'),
+            where('type', '==', 'offer'),
+            orderBy('created_at', 'desc')
+        );
+        const snap = await getDocs(q);
+        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+};
