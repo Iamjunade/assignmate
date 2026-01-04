@@ -15,6 +15,7 @@ import { GlassButton } from '../components/ui/GlassButton';
 import { GlassInput } from '../components/ui/GlassInput';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
+import { MobileNav } from '../components/dashboard/MobileNav';
 import { Avatar } from '../components/ui/Avatar';
 
 export const Profile = ({ user: currentUser }: { user: any }) => {
@@ -870,6 +871,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                     )}
                 </AnimatePresence>
             </main>
+            <MobileNav />
         </div>
     );
 };
