@@ -966,6 +966,16 @@ export const dbService = {
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
 
+    getStudentProjects: async (userId: string) => {
+        const q = query(
+            collection(getDb(), 'orders'),
+            where('student_id', '==', userId),
+            orderBy('created_at', 'desc')
+        );
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
+
     getConnectionStatus: async (uid1: string, uid2: string) => {
         // Check Requests
         const requestsRef = collection(getDb(), 'requests');
