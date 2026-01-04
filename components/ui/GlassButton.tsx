@@ -27,9 +27,9 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
     };
 
     const sizes = {
-        sm: "px-4 py-1.5 text-sm",
-        md: "px-6 py-2.5 text-base",
-        lg: "px-8 py-3.5 text-lg"
+        sm: "px-4 py-2.5 text-sm touch-target",      // min 44px
+        md: "px-6 py-3 text-base touch-target",      // comfortable tap
+        lg: "px-8 py-4 text-lg touch-target-lg"      // large tap target
     };
 
     return (

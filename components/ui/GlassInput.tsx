@@ -32,7 +32,7 @@ export const GlassInput: React.FC<GlassInputProps> = ({
                 <input
                     id={inputId}
                     className={`
-            input-clean
+            input-mobile
             ${icon ? 'pl-10' : 'pl-4'} 
             ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' : ''}
             ${className}

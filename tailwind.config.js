@@ -10,6 +10,13 @@ export default {
     ],
     theme: {
         extend: {
+            screens: {
+                'xs': '360px',   // Small phones (iPhone SE)
+                'sm': '430px',   // Standard phones (iPhone 14 Pro Max)
+                'md': '768px',   // Tablets
+                'lg': '1024px',  // Desktop
+                'xl': '1280px',  // Large desktop
+            },
             colors: {
                 "primary": "#f97316", // Vibrant Orange
                 "primary-hover": "#ea580c",
@@ -68,6 +75,17 @@ export default {
                 display: ['Manrope', 'sans-serif'], // Updated to Manrope
                 body: ['Noto Sans', 'sans-serif'],
             },
+            fontSize: {
+                // Mobile-optimized sizes (prevent iOS zoom on inputs)
+                'xs': ['0.75rem', { lineHeight: '1rem' }],
+                'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+                'base': ['1rem', { lineHeight: '1.5rem' }],    // 16px - prevents zoom
+                'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+                'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+                '2xl': ['1.5rem', { lineHeight: '2rem' }],
+                '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+                '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+            },
             borderRadius: {
                 "lg": "0.5rem",
                 "xl": "0.75rem",
@@ -111,7 +129,15 @@ export default {
                     '0%, 100%': { transform: 'translateY(0)' },
                     '50%': { transform: 'translateY(-10px)' },
                 }
-            }
+            },
+            spacing: {
+                // Mobile-friendly spacing extensions
+                '18': '4.5rem',   // 72px - good for touch targets
+                '22': '5.5rem',   // 88px
+                '88': '22rem',    // 352px
+                '100': '25rem',   // 400px
+                'safe': 'env(safe-area-inset-bottom)',
+            },
         },
     },
     plugins: [],

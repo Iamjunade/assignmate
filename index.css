@@ -83,8 +83,170 @@
     @apply btn text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50;
   }
 
+
   /* Text Utilities */
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-500 via-orange-400 to-amber-500;
+  }
+
+  /* ===================================
+     MOBILE-FIRST UTILITIES
+     =================================== */
+
+  /* Touch Targets - Minimum 44x44px for accessibility */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  .touch-target-lg {
+    @apply min-h-[48px] min-w-[48px];
+  }
+
+  /* Mobile Typography Scale */
+  .text-mobile-xs {
+    @apply text-xs lg:text-sm;
+  }
+
+  .text-mobile-sm {
+    @apply text-sm lg:text-base;
+  }
+
+  .text-mobile-base {
+    @apply text-base lg:text-lg;
+  }
+
+  .text-mobile-lg {
+    @apply text-lg lg:text-xl;
+  }
+
+  .text-mobile-xl {
+    @apply text-xl lg:text-2xl;
+  }
+
+  .text-mobile-2xl {
+    @apply text-2xl lg:text-3xl;
+  }
+
+  .text-mobile-3xl {
+    @apply text-3xl lg:text-4xl;
+  }
+
+  /* Mobile Container Utilities */
+  .mobile-container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .mobile-section {
+    @apply py-6 sm:py-8 lg:py-12;
+  }
+
+  /* Safe Area Utilities (for notched devices) */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+  }
+
+  /* Optimized Mobile Scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  .mobile-scroll-x {
+    @apply overflow-x-auto mobile-scroll;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .mobile-scroll-x::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mobile-Optimized Input */
+  .input-mobile {
+    @apply input-clean text-base;
+    /* Prevent zoom on iOS */
+    font-size: 16px;
+  }
+
+  /* Mobile Card Spacing */
+  .card-mobile {
+    @apply card-clean p-4 sm:p-5 lg:p-6;
+  }
+
+  /* Hide on Mobile Only */
+  .mobile-hidden {
+    @apply hidden lg:block;
+  }
+
+  /* Show on Mobile Only */
+  .mobile-only {
+    @apply block lg:hidden;
+  }
+
+  /* Stack on Mobile */
+  .mobile-stack {
+    @apply flex flex-col lg:flex-row;
+  }
+
+  /* Full Width on Mobile */
+  .mobile-full {
+    @apply w-full lg:w-auto;
+  }
+
+  /* Compact on Mobile */
+  .mobile-compact {
+    @apply text-sm lg:text-base space-y-2 lg:space-y-4;
+  }
+
+  /* Bottom Sheet Base Style (for modals on mobile) */
+  .bottom-sheet {
+    @apply fixed inset-x-0 bottom-0 bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl;
+    @apply lg:relative lg:inset-auto lg:rounded-2xl lg:shadow-card;
+    transform: translateY(0);
+    max-height: 90vh;
+    max-height: 90dvh;
+  }
+
+  /* Sticky Mobile Header/Footer */
+  .sticky-mobile-top {
+    @apply sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm;
+  }
+
+  .sticky-mobile-bottom {
+    @apply sticky bottom-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm;
+  }
+
+  /* Enhanced Touch Feedback */
+  .touch-feedback {
+    @apply active:scale-95 transition-transform duration-100;
+  }
+
+  .touch-feedback-subtle {
+    @apply active:scale-98 transition-transform duration-75;
+  }
+
+  /* Mobile Grid Helpers */
+  .mobile-grid-2 {
+    @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4;
+  }
+
+  .mobile-grid-1 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6;
   }
 }
