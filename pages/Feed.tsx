@@ -24,6 +24,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
     });
     const [loading, setLoading] = useState(true);
     const [dashboardWriters, setDashboardWriters] = useState<any[]>([]);
+    const [topWriters, setTopWriters] = useState<any[]>([]);
     const [incomingRequests, setIncomingRequests] = useState<any[]>([]);
     const [recentChats, setRecentChats] = useState<any[]>([]);
     const [connections, setConnections] = useState<any[]>([]);
@@ -52,7 +53,12 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                 db.getIncomingRequests(user.id).then(setIncomingRequests);
             } else {
                 // Student-specific data: available writers
-                db.getDashboardWriters(user.school, 5, user.id).then(setDashboardWriters);
+                db.getDashboardWriters(user.school, 8, user.id).then(setDashboardWriters);
+                // Also get top writers globally
+                db.getAllUsers().then(users => {
+                    const writers = users.filter((u: any) => u.is_writer === true && u.id !== user.id);
+                    setTopWriters(writers.slice(0, 4));
+                });
             }
         }
     }, [user, isWriterMode]);
@@ -89,6 +95,198 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
         return null;
     }).filter(Boolean).slice(0, 6);
 
+    // Quick action categories
+    const quickCategories = [
+        { icon: 'code', label: 'Programming', color: 'bg-blue-500' },
+        { icon: 'calculate', label: 'Mathematics', color: 'bg-green-500' },
+        { icon: 'science', label: 'Science', color: 'bg-purple-500' },
+        { icon: 'article', label: 'Essays', color: 'bg-orange-500' },
+        { icon: 'psychology', label: 'Psychology', color: 'bg-pink-500' },
+        { icon: 'trending_up', label: 'Business', color: 'bg-cyan-500' },
+    ];
+
+    // If Writer Mode, show writer dashboard
+    if (isWriterMode) {
+        return (
+            <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
+                <Sidebar user={user} />
+                <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+                    <DashboardHeader />
+                    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="w-full flex flex-col gap-8">
+                                {/* Writer Welcome Section */}
+                                <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-primary/10 to-orange-500/10 text-primary border border-primary/20">
+                                                <span className="flex items-center gap-1">
+                                                    <span className="material-symbols-outlined text-sm">edit_note</span>
+                                                    Writer Dashboard
+                                                </span>
+                                            </div>
+                                            <span className="text-sm text-text-muted">• {format(new Date(), 'MMM d, yyyy')}</span>
+                                        </div>
+                                        <h1 className="text-3xl md:text-4xl font-extrabold text-text-dark tracking-tight leading-tight">
+                                            {getGreeting()}, {user?.full_name?.split(' ')[0] || 'Writer'}.
+                                        </h1>
+                                        <p className="text-text-muted mt-2 text-lg">Ready to help fellow students with their assignments.</p>
+                                    </div>
+                                    <button onClick={() => navigate('/profile')} className="h-11 px-5 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-lg">visibility</span>
+                                        View My Profile
+                                    </button>
+                                </div>
+
+                                {/* Writer Stats */}
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+                                    <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <h3 className="text-text-muted font-bold text-sm">Total Earned</h3>
+                                            <div className="size-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
+                                                <span className="material-symbols-outlined">payments</span>
+                                            </div>
+                                        </div>
+                                        <span className="text-3xl font-extrabold text-text-dark">{formatCurrency(user?.total_earned || 0)}</span>
+                                        <p className="text-xs text-green-600 font-medium mt-1">Lifetime earnings</p>
+                                    </div>
+
+                                    <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <h3 className="text-text-muted font-bold text-sm">Active Orders</h3>
+                                            <div className="size-10 rounded-xl bg-orange-50 text-primary flex items-center justify-center">
+                                                <span className="material-symbols-outlined">assignment</span>
+                                            </div>
+                                        </div>
+                                        <span className="text-3xl font-extrabold text-text-dark">{stats.activeCount}</span>
+                                        <p className="text-xs text-text-muted font-medium mt-1">In progress</p>
+                                    </div>
+
+                                    <div onClick={() => navigate('/connections')} className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle cursor-pointer hover:border-blue-200 transition-all">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <h3 className="text-text-muted font-bold text-sm">Pending Requests</h3>
+                                            <div className="size-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                                <span className="material-symbols-outlined">person_add</span>
+                                            </div>
+                                        </div>
+                                        <span className="text-3xl font-extrabold text-text-dark">{incomingRequests.length}</span>
+                                        <p className="text-xs text-blue-600 font-medium mt-1 flex items-center gap-1">Tap to review <span className="material-symbols-outlined text-sm">arrow_forward</span></p>
+                                    </div>
+
+                                    <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <h3 className="text-text-muted font-bold text-sm">On-Time Rate</h3>
+                                            <div className="size-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                                                <span className="material-symbols-outlined">timer</span>
+                                            </div>
+                                        </div>
+                                        <span className="text-3xl font-extrabold text-text-dark">{user?.on_time_rate || 100}%</span>
+                                        <div className="w-full bg-gray-100 rounded-full h-1.5 mt-2">
+                                            <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${user?.on_time_rate || 100}%` }}></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Incoming Requests */}
+                                {incomingRequests.length > 0 && (
+                                    <section className="bg-white p-6 rounded-2xl shadow-card border border-border-subtle">
+                                        <div className="flex items-center justify-between mb-5">
+                                            <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-primary">person_add</span>
+                                                Connection Requests
+                                                <span className="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{incomingRequests.length}</span>
+                                            </h2>
+                                            <button onClick={() => navigate('/connections')} className="text-sm font-bold text-primary">View All</button>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {incomingRequests.slice(0, 3).map((request: any) => (
+                                                <div key={request.id} className="flex items-center gap-4 p-4 rounded-xl bg-secondary-bg hover:bg-primary/5 transition-all">
+                                                    <Avatar src={request.fromUser?.avatar_url} alt={request.fromUser?.full_name} className="size-12 rounded-full" fallback={request.fromUser?.full_name?.charAt(0)} />
+                                                    <div className="flex-1 cursor-pointer" onClick={() => navigate(`/profile/${request.fromUser?.id}`)}>
+                                                        <h4 className="font-bold text-text-dark hover:text-primary transition-colors">{request.fromUser?.full_name}</h4>
+                                                        <p className="text-xs text-text-muted">{request.fromUser?.school}</p>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => db.respondToConnectionRequest(request.id, 'accepted').then(() => setIncomingRequests(prev => prev.filter(r => r.id !== request.id)))} className="h-9 px-4 rounded-lg bg-primary text-white text-sm font-bold">Accept</button>
+                                                        <button onClick={() => db.respondToConnectionRequest(request.id, 'rejected').then(() => setIncomingRequests(prev => prev.filter(r => r.id !== request.id)))} className="h-9 px-4 rounded-lg bg-gray-200 text-text-muted text-sm font-bold">Decline</button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+
+                                {/* Recent Messages & Profile Stats */}
+                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                                    <section className="bg-white p-6 rounded-2xl shadow-card border border-border-subtle">
+                                        <div className="flex items-center justify-between mb-5">
+                                            <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-primary">chat</span>
+                                                Recent Messages
+                                            </h2>
+                                            <button onClick={() => navigate('/chats')} className="text-sm font-bold text-primary">View All</button>
+                                        </div>
+                                        {recentChats.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {recentChats.slice(0, 4).map((chat: any) => (
+                                                    <div key={chat.id} onClick={() => navigate(`/chats/${chat.id}`)} className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary-bg cursor-pointer transition-all">
+                                                        <Avatar src={chat.other_avatar} alt={chat.other_handle} className="size-10 rounded-full" fallback={chat.other_handle?.charAt(0)} />
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-bold text-text-dark text-sm truncate">{chat.other_handle}</h4>
+                                                            <p className="text-xs text-text-muted truncate">{chat.last_message || 'No messages'}</p>
+                                                        </div>
+                                                        {chat.unread_count > 0 && <span className="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{chat.unread_count}</span>}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-8">
+                                                <div className="size-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                    <span className="material-symbols-outlined">chat_bubble</span>
+                                                </div>
+                                                <p className="text-text-muted text-sm">No messages yet</p>
+                                            </div>
+                                        )}
+                                    </section>
+
+                                    <section className="bg-white p-6 rounded-2xl shadow-card border border-border-subtle">
+                                        <h2 className="text-lg font-bold text-text-dark mb-5">Your Profile Stats</h2>
+                                        <div className="flex items-center gap-4 mb-5">
+                                            <Avatar src={user?.avatar_url} alt={user?.full_name} className="size-16 rounded-xl" fallback={user?.full_name?.charAt(0)} />
+                                            <div>
+                                                <h3 className="font-bold text-text-dark text-lg">{user?.full_name}</h3>
+                                                <p className="text-sm text-text-muted">{user?.school}</p>
+                                                <div className="flex items-center gap-1 mt-1">
+                                                    <span className="material-symbols-outlined text-amber-400 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                                    <span className="text-sm font-bold text-text-dark">{user?.rating || '5.0'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3 mb-4">
+                                            <div className="bg-secondary-bg p-4 rounded-xl text-center">
+                                                <p className="text-2xl font-bold text-text-dark">{connections.length}</p>
+                                                <p className="text-xs text-text-muted">Connections</p>
+                                            </div>
+                                            <div className="bg-secondary-bg p-4 rounded-xl text-center">
+                                                <p className="text-2xl font-bold text-text-dark">{user?.portfolio?.length || 0}</p>
+                                                <p className="text-xs text-text-muted">Portfolio Items</p>
+                                            </div>
+                                        </div>
+                                        <button onClick={() => navigate('/profile')} className="w-full py-3 rounded-xl bg-primary/10 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all">Edit Profile</button>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+                <MobileNav />
+            </div>
+        );
+    }
+
+    // ==========================================
+    // STUDENT DASHBOARD (Looking for Help)
+    // ==========================================
     return (
         <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />
@@ -98,599 +296,400 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
 
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
                     <div className="max-w-7xl mx-auto">
-                        <div className="w-full flex flex-col gap-8">
+                        <div className="w-full flex flex-col gap-6">
 
-                            {/* Welcome Section */}
-                            <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isWriterMode
-                                            ? 'bg-gradient-to-r from-primary/10 to-orange-500/10 text-primary border border-primary/20'
-                                            : 'bg-blue-50 text-blue-600 border border-blue-100'
-                                            }`}>
-                                            {isWriterMode ? (
-                                                <span className="flex items-center gap-1">
-                                                    <span className="material-symbols-outlined text-sm">edit_note</span>
-                                                    Writer Dashboard
-                                                </span>
-                                            ) : (
+                            {/* Hero Welcome Section */}
+                            <div className="relative bg-gradient-to-r from-primary via-orange-500 to-red-500 p-6 md:p-8 rounded-3xl text-white overflow-hidden">
+                                {/* Background Pattern */}
+                                <div className="absolute inset-0 opacity-10">
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                                </div>
+
+                                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <div className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm">
                                                 <span className="flex items-center gap-1">
                                                     <span className="material-symbols-outlined text-sm">school</span>
                                                     Student Dashboard
                                                 </span>
-                                            )}
+                                            </div>
+                                            <span className="text-sm text-white/80">• {format(new Date(), 'EEEE, MMM d')}</span>
                                         </div>
-                                        <span className="text-sm text-text-muted">• {format(new Date(), 'MMM d, yyyy')}</span>
+                                        <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight leading-tight mb-2">
+                                            {getGreeting()}, {user?.full_name?.split(' ')[0] || 'Student'}! 👋
+                                        </h1>
+                                        <p className="text-white/90 text-base md:text-lg max-w-xl">
+                                            Need help with your assignments? Connect with verified writers from top universities across India.
+                                        </p>
                                     </div>
-                                    <h1 className="text-3xl md:text-4xl font-extrabold text-text-dark tracking-tight leading-tight">
-                                        {getGreeting()}, {user?.full_name?.split(' ')[0] || 'Student'}.
-                                    </h1>
-                                    <p className="text-text-muted mt-2 text-lg">
-                                        {isWriterMode
-                                            ? "Ready to help fellow students with their assignments."
-                                            : "Your academic tasks are under control."
-                                        }
+
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        <button
+                                            onClick={() => navigate('/writers')}
+                                            className="h-12 px-6 rounded-xl bg-white text-primary font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <span className="material-symbols-outlined">person_search</span>
+                                            Find Writers
+                                        </button>
+                                        <button
+                                            onClick={() => navigate('/connections')}
+                                            className="h-12 px-6 rounded-xl bg-white/20 backdrop-blur-sm text-white font-bold hover:bg-white/30 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <span className="material-symbols-outlined">group</span>
+                                            My Network
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Quick Search by Category */}
+                            <section className="bg-white p-5 md:p-6 rounded-2xl shadow-card border border-border-subtle">
+                                <div className="flex items-center justify-between mb-5">
+                                    <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-primary">category</span>
+                                        Find Help By Subject
+                                    </h2>
+                                    <button onClick={() => navigate('/writers')} className="text-sm font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1">
+                                        Browse All
+                                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                                    {quickCategories.map((cat, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => navigate(`/writers?search=${cat.label}`)}
+                                            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-secondary-bg hover:bg-primary/5 hover:scale-[1.02] transition-all group"
+                                        >
+                                            <div className={`size-12 rounded-xl ${cat.color} text-white flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow`}>
+                                                <span className="material-symbols-outlined">{cat.icon}</span>
+                                            </div>
+                                            <span className="text-xs font-bold text-text-dark group-hover:text-primary transition-colors">{cat.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </section>
+
+                            {/* Stats Row */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {/* Active Projects */}
+                                <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle group hover:shadow-soft transition-all">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">Active Projects</h3>
+                                        <div className="size-9 rounded-xl bg-orange-50 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <span className="material-symbols-outlined text-xl">assignment</span>
+                                        </div>
+                                    </div>
+                                    <span className="text-3xl font-extrabold text-text-dark">{stats.activeCount}</span>
+                                    <p className="text-xs text-text-muted mt-1">In progress</p>
+                                </div>
+
+                                {/* Next Deadline */}
+                                <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle group hover:shadow-soft transition-all">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">Next Deadline</h3>
+                                        <div className="size-9 rounded-xl bg-red-50 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <span className="material-symbols-outlined text-xl">timer</span>
+                                        </div>
+                                    </div>
+                                    {stats.nextDeadline !== null ? (
+                                        <>
+                                            <span className="text-3xl font-extrabold text-text-dark">{stats.nextDeadline}</span>
+                                            <span className="text-lg font-bold text-text-muted ml-1">days</span>
+                                        </>
+                                    ) : (
+                                        <span className="text-xl font-bold text-text-muted">No deadlines</span>
+                                    )}
+                                </div>
+
+                                {/* My Network - Clickable */}
+                                <div
+                                    onClick={() => navigate('/connections')}
+                                    className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle group hover:shadow-soft hover:border-blue-200 transition-all cursor-pointer"
+                                >
+                                    <div className="flex justify-between items-start mb-3">
+                                        <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">My Network</h3>
+                                        <div className="size-9 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <span className="material-symbols-outlined text-xl">group</span>
+                                        </div>
+                                    </div>
+                                    <span className="text-3xl font-extrabold text-text-dark">{connections.length}</span>
+                                    <p className="text-xs text-blue-600 font-medium mt-1 flex items-center gap-1">
+                                        View all <span className="material-symbols-outlined text-xs">arrow_forward</span>
                                     </p>
                                 </div>
 
-                                {/* Quick Actions */}
-                                <div className="flex items-center gap-3">
-                                    {isWriterMode ? (
-                                        <button
-                                            onClick={() => navigate('/profile')}
-                                            className="h-11 px-5 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2"
-                                        >
-                                            <span className="material-symbols-outlined text-lg">visibility</span>
-                                            View My Profile
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => navigate('/writers')}
-                                            className="h-11 px-5 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2"
-                                        >
-                                            <span className="material-symbols-outlined text-lg">person_search</span>
-                                            Find a Writer
-                                        </button>
-                                    )}
+                                {/* Messages */}
+                                <div
+                                    onClick={() => navigate('/chats')}
+                                    className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle group hover:shadow-soft hover:border-green-200 transition-all cursor-pointer"
+                                >
+                                    <div className="flex justify-between items-start mb-3">
+                                        <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">Messages</h3>
+                                        <div className="size-9 rounded-xl bg-green-50 text-green-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <span className="material-symbols-outlined text-xl">chat</span>
+                                        </div>
+                                    </div>
+                                    <span className="text-3xl font-extrabold text-text-dark">{recentChats.length}</span>
+                                    <p className="text-xs text-green-600 font-medium mt-1 flex items-center gap-1">
+                                        Open chats <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                                    </p>
                                 </div>
                             </div>
 
-                            {/* Stats Row - Now Clickable */}
-                            <div className={`grid gap-4 md:gap-6 ${isWriterMode ? 'grid-cols-1 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'}`}>
-                                {isWriterMode ? (
-                                    // Writer Stats
-                                    <>
-                                        {/* Total Earnings */}
-                                        <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
-                                            <div className="flex justify-between items-start mb-3 relative z-10">
-                                                <h3 className="text-text-muted font-bold text-sm">Total Earned</h3>
-                                                <div className="size-10 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 text-green-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                                    <span className="material-symbols-outlined">payments</span>
-                                                </div>
-                                            </div>
-                                            <div className="relative z-10">
-                                                <span className="text-3xl font-extrabold text-text-dark tracking-tight">{formatCurrency(user?.total_earned || 0)}</span>
-                                                <p className="text-xs text-green-600 font-medium mt-1">Lifetime earnings</p>
-                                            </div>
-                                        </div>
+                            {/* Main Content Grid */}
+                            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                                {/* Left Column - Main Content */}
+                                <div className="xl:col-span-2 flex flex-col gap-6">
 
-                                        {/* Active Orders */}
-                                        <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
-                                            <div className="flex justify-between items-start mb-3 relative z-10">
-                                                <h3 className="text-text-muted font-bold text-sm">Active Orders</h3>
-                                                <div className="size-10 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 text-primary flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                                    <span className="material-symbols-outlined">assignment</span>
-                                                </div>
-                                            </div>
-                                            <div className="relative z-10">
-                                                <span className="text-3xl font-extrabold text-text-dark tracking-tight">{stats.activeCount}</span>
-                                                <p className="text-xs text-text-muted font-medium mt-1">In progress</p>
-                                            </div>
-                                        </div>
-
-                                        {/* Pending Requests - CLICKABLE */}
-                                        <div
-                                            onClick={() => navigate('/connections')}
-                                            className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft hover:border-blue-200 transition-all duration-300 cursor-pointer"
-                                        >
-                                            <div className="flex justify-between items-start mb-3 relative z-10">
-                                                <h3 className="text-text-muted font-bold text-sm">Pending Requests</h3>
-                                                <div className="size-10 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                                    <span className="material-symbols-outlined">person_add</span>
-                                                </div>
-                                            </div>
-                                            <div className="relative z-10">
-                                                <span className="text-3xl font-extrabold text-text-dark tracking-tight">{incomingRequests.length}</span>
-                                                <p className="text-xs text-blue-600 font-medium mt-1 flex items-center gap-1">
-                                                    Tap to review
-                                                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* On-Time Rate */}
-                                        <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
-                                            <div className="flex justify-between items-start mb-3 relative z-10">
-                                                <h3 className="text-text-muted font-bold text-sm">On-Time Rate</h3>
-                                                <div className="size-10 rounded-xl bg-gradient-to-br from-purple-50 to-violet-50 text-purple-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                                    <span className="material-symbols-outlined">timer</span>
-                                                </div>
-                                            </div>
-                                            <div className="relative z-10">
-                                                <span className="text-3xl font-extrabold text-text-dark tracking-tight">{user?.on_time_rate || 100}%</span>
-                                                <div className="w-full bg-gray-100 rounded-full h-1.5 mt-2">
-                                                    <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${user?.on_time_rate || 100}%` }}></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    // Student Stats
-                                    <>
-                                        {/* Active Projects */}
-                                        <div className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
-                                            <div className="flex justify-between items-start mb-4 relative z-10">
-                                                <h3 className="text-text-muted font-bold text-sm">Active Projects</h3>
-                                                <div className="size-10 rounded-full bg-orange-50 text-primary flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                                    <span className="material-symbols-outlined">assignment</span>
-                                                </div>
-                                            </div>
-                                            <div className="relative z-10">
-                                                <span className="text-4xl font-extrabold text-text-dark tracking-tight">{stats.activeCount}</span>
-                                                {stats.activeCount > 0 && (
-                                                    <div className="flex items-center gap-2 mt-3">
-                                                        <div className="flex -space-x-2">
-                                                            {stats.activeOrders.slice(0, 3).map((order: any, i: number) => (
-                                                                <Avatar
-                                                                    key={i}
-                                                                    src={order.writer_avatar}
-                                                                    alt="Writer"
-                                                                    className="size-6 rounded-full border-2 border-white"
-                                                                    fallback={order.writer_handle?.charAt(0)}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                        <span className="text-xs font-bold text-text-muted">In Progress</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Next Deadline */}
-                                        <div className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
-                                            <div className="flex justify-between items-start mb-4 relative z-10">
-                                                <h3 className="text-text-muted font-bold text-sm">Next Deadline</h3>
-                                                <div className="size-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                                    <span className="material-symbols-outlined">timer</span>
-                                                </div>
-                                            </div>
-                                            <div className="relative z-10">
-                                                {stats.nextDeadline !== null ? (
-                                                    <>
-                                                        <span className="text-4xl font-extrabold text-text-dark tracking-tight">{stats.nextDeadline} <span className="text-lg font-bold text-text-muted">Days</span></span>
-                                                        <div className="mt-3">
-                                                            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                                                                <div className="h-full bg-red-500 rounded-full" style={{ width: '70%' }}></div>
-                                                            </div>
-                                                            <p className="text-xs font-bold text-red-500 mt-1.5 truncate">{stats.nextDeadlineProject}</p>
-                                                        </div>
-                                                    </>
-                                                ) : (
-                                                    <span className="text-2xl font-bold text-text-muted">No deadlines</span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Connections - CLICKABLE */}
-                                        <div
-                                            onClick={() => navigate('/connections')}
-                                            className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft hover:border-blue-200 transition-all duration-300 cursor-pointer"
-                                        >
-                                            <div className="flex justify-between items-start mb-4 relative z-10">
-                                                <h3 className="text-text-muted font-bold text-sm">My Network</h3>
-                                                <div className="size-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                                    <span className="material-symbols-outlined">group</span>
-                                                </div>
-                                            </div>
-                                            <div className="relative z-10">
-                                                <span className="text-4xl font-extrabold text-text-dark tracking-tight">{connections.length}</span>
-                                                <p className="text-xs text-blue-600 font-medium mt-2 flex items-center gap-1">
-                                                    View all connections
-                                                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Connected People Section */}
-                            {connectedUsers.length > 0 && (
-                                <section className="bg-white p-6 rounded-2xl shadow-card border border-border-subtle">
-                                    <div className="flex items-center justify-between mb-5">
-                                        <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-blue-500">people</span>
-                                            Your Connections
-                                        </h2>
-                                        <button
-                                            onClick={() => navigate('/connections')}
-                                            className="text-sm font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1"
-                                        >
-                                            View All
-                                            <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                                        </button>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-                                        {connectedUsers.map((connUser: any) => (
-                                            <div
-                                                key={connUser.id}
-                                                className="flex flex-col items-center p-4 rounded-xl bg-secondary-bg hover:bg-primary/5 transition-all cursor-pointer group"
-                                            >
-                                                <div
-                                                    className="relative mb-3"
-                                                    onClick={() => navigate(`/profile/${connUser.id}`)}
-                                                >
-                                                    <Avatar
-                                                        src={connUser.avatar_url}
-                                                        alt={connUser.full_name}
-                                                        className="size-14 rounded-full border-2 border-white shadow-md group-hover:border-primary/30 transition-colors"
-                                                        fallback={connUser.full_name?.charAt(0)}
-                                                    />
-                                                    {connUser.is_online && (
-                                                        <div className="absolute bottom-0 right-0 size-4 bg-green-500 rounded-full border-2 border-white"></div>
-                                                    )}
-                                                    {connUser.is_verified === 'verified' && (
-                                                        <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
-                                                            <span className="material-symbols-outlined text-blue-500 text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <p
-                                                    onClick={() => navigate(`/profile/${connUser.id}`)}
-                                                    className="text-sm font-bold text-text-dark text-center truncate w-full group-hover:text-primary transition-colors"
-                                                >
-                                                    {connUser.full_name?.split(' ')[0]}
-                                                </p>
-                                                <p className="text-[10px] text-text-muted text-center truncate w-full">{connUser.school?.split(' ')[0] || 'Student'}</p>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleStartChat(connUser.id);
-                                                    }}
-                                                    className="mt-2 w-full py-1.5 rounded-lg bg-primary/10 text-primary text-[11px] font-bold hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-1"
-                                                >
-                                                    <span className="material-symbols-outlined text-sm">chat</span>
-                                                    Message
+                                    {/* Your Connections - with Message Buttons */}
+                                    {connectedUsers.length > 0 && (
+                                        <section className="bg-white p-5 md:p-6 rounded-2xl shadow-card border border-border-subtle">
+                                            <div className="flex items-center justify-between mb-5">
+                                                <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
+                                                    <span className="material-symbols-outlined text-blue-500">people</span>
+                                                    Your Connections
+                                                </h2>
+                                                <button onClick={() => navigate('/connections')} className="text-sm font-bold text-primary flex items-center gap-1">
+                                                    View All <span className="material-symbols-outlined text-sm">arrow_forward</span>
                                                 </button>
                                             </div>
-                                        ))}
-                                    </div>
-                                </section>
-                            )}
 
-                            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                                {/* Main Content Column */}
-                                <div className="xl:col-span-2 flex flex-col gap-8">
-
-                                    {/* Incoming Requests (Writer Mode) */}
-                                    {isWriterMode && incomingRequests.length > 0 && (
-                                        <section className="flex flex-col gap-5">
-                                            <div className="flex items-center justify-between">
-                                                <h2 className="text-xl font-bold text-text-dark flex items-center gap-2">
-                                                    <span className="material-symbols-outlined text-primary">person_add</span>
-                                                    Connection Requests
-                                                    <span className="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{incomingRequests.length}</span>
-                                                </h2>
-                                                <button onClick={() => navigate('/connections')} className="text-sm font-bold text-primary hover:text-primary-hover transition-colors">View All</button>
-                                            </div>
-
-                                            <div className="space-y-4">
-                                                {incomingRequests.slice(0, 3).map((request: any) => (
-                                                    <div
-                                                        key={request.id}
-                                                        className="bg-white p-5 rounded-2xl border border-border-subtle shadow-card hover:shadow-soft transition-all"
-                                                    >
-                                                        <div className="flex items-center gap-4">
-                                                            <div
-                                                                className="cursor-pointer"
-                                                                onClick={() => navigate(`/profile/${request.fromUser?.id}`)}
-                                                            >
-                                                                <Avatar
-                                                                    src={request.fromUser?.avatar_url}
-                                                                    alt={request.fromUser?.full_name}
-                                                                    className="size-12 rounded-full"
-                                                                    fallback={request.fromUser?.full_name?.charAt(0)}
-                                                                />
-                                                            </div>
-                                                            <div
-                                                                className="flex-1 min-w-0 cursor-pointer"
-                                                                onClick={() => navigate(`/profile/${request.fromUser?.id}`)}
-                                                            >
-                                                                <h4 className="font-bold text-text-dark truncate hover:text-primary transition-colors">{request.fromUser?.full_name || 'Unknown'}</h4>
-                                                                <p className="text-xs text-text-muted truncate">{request.fromUser?.school || 'University'}</p>
-                                                            </div>
-                                                            <div className="flex gap-2">
-                                                                <button
-                                                                    onClick={() => db.respondToConnectionRequest(request.id, 'accepted').then(() => setIncomingRequests(prev => prev.filter(r => r.id !== request.id)))}
-                                                                    className="h-9 px-4 rounded-lg bg-primary text-white text-sm font-bold hover:brightness-105 transition-all"
-                                                                >
-                                                                    Accept
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => db.respondToConnectionRequest(request.id, 'rejected').then(() => setIncomingRequests(prev => prev.filter(r => r.id !== request.id)))}
-                                                                    className="h-9 px-4 rounded-lg bg-gray-100 text-text-muted text-sm font-bold hover:bg-gray-200 transition-all"
-                                                                >
-                                                                    Decline
-                                                                </button>
-                                                            </div>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                                                {connectedUsers.map((connUser: any) => (
+                                                    <div key={connUser.id} className="flex flex-col items-center p-3 rounded-xl bg-secondary-bg hover:bg-primary/5 transition-all group">
+                                                        <div className="relative mb-2 cursor-pointer" onClick={() => navigate(`/profile/${connUser.id}`)}>
+                                                            <Avatar
+                                                                src={connUser.avatar_url}
+                                                                alt={connUser.full_name}
+                                                                className="size-12 rounded-full border-2 border-white shadow-md group-hover:border-primary/30 transition-colors"
+                                                                fallback={connUser.full_name?.charAt(0)}
+                                                            />
+                                                            {connUser.is_online && (
+                                                                <div className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full border-2 border-white"></div>
+                                                            )}
                                                         </div>
+                                                        <p className="text-xs font-bold text-text-dark text-center truncate w-full cursor-pointer hover:text-primary" onClick={() => navigate(`/profile/${connUser.id}`)}>
+                                                            {connUser.full_name?.split(' ')[0]}
+                                                        </p>
+                                                        <button
+                                                            onClick={() => handleStartChat(connUser.id)}
+                                                            className="mt-2 w-full py-1.5 rounded-lg bg-primary/10 text-primary text-[10px] font-bold hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-1"
+                                                        >
+                                                            <span className="material-symbols-outlined text-xs">chat</span>
+                                                            Chat
+                                                        </button>
                                                     </div>
                                                 ))}
                                             </div>
                                         </section>
                                     )}
 
-                                    {/* Active Projects Section */}
-                                    <section className="flex flex-col gap-5">
-                                        <div className="flex items-center justify-between">
-                                            <h2 className="text-xl font-bold text-text-dark flex items-center gap-2">
-                                                {isWriterMode ? 'Current Assignments' : 'Active Projects'}
-                                                <span className="bg-gray-100 text-text-muted text-xs font-bold px-2 py-1 rounded-full">{stats.activeCount}</span>
+                                    {/* Active Projects */}
+                                    <section className="bg-white p-5 md:p-6 rounded-2xl shadow-card border border-border-subtle">
+                                        <div className="flex items-center justify-between mb-5">
+                                            <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-orange-500">folder_open</span>
+                                                Active Projects
+                                                {stats.activeCount > 0 && (
+                                                    <span className="bg-orange-100 text-orange-600 text-xs font-bold px-2 py-0.5 rounded-full">{stats.activeCount}</span>
+                                                )}
                                             </h2>
-                                            <a href="#" className="text-sm font-bold text-primary hover:text-primary-hover transition-colors">View All</a>
+                                            <button className="text-sm font-bold text-primary">View All</button>
                                         </div>
 
                                         {loading ? (
-                                            <div className="space-y-6">
+                                            <div className="space-y-4">
                                                 {[1, 2].map((i) => (
-                                                    <div key={i} className="bg-white p-6 rounded-[1.5rem] border border-border-subtle shadow-card animate-pulse">
-                                                        <div className="flex justify-between items-center mb-5">
-                                                            <div className="flex gap-4">
-                                                                <div className="size-12 rounded-2xl bg-gray-200 shrink-0"></div>
-                                                                <div className="space-y-2">
-                                                                    <div className="h-4 w-48 bg-gray-200 rounded"></div>
-                                                                    <div className="h-3 w-32 bg-gray-200 rounded"></div>
-                                                                </div>
+                                                    <div key={i} className="p-4 rounded-xl bg-secondary-bg animate-pulse">
+                                                        <div className="flex gap-4">
+                                                            <div className="size-12 rounded-xl bg-gray-200"></div>
+                                                            <div className="flex-1 space-y-2">
+                                                                <div className="h-4 w-48 bg-gray-200 rounded"></div>
+                                                                <div className="h-3 w-32 bg-gray-200 rounded"></div>
                                                             </div>
-                                                            <div className="size-8 rounded-full bg-gray-200"></div>
                                                         </div>
                                                     </div>
                                                 ))}
                                             </div>
                                         ) : stats.activeOrders.length === 0 ? (
-                                            <div className="bg-white p-8 rounded-[1.5rem] border border-border-subtle text-center">
-                                                <div className="size-16 bg-orange-50 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                                                    <span className="material-symbols-outlined text-3xl">{isWriterMode ? 'work_off' : 'post_add'}</span>
+                                            <div className="text-center py-10">
+                                                <div className="size-20 bg-gradient-to-br from-orange-50 to-amber-50 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                                    <span className="material-symbols-outlined text-4xl">post_add</span>
                                                 </div>
-                                                <h3 className="text-lg font-bold text-text-dark mb-2">
-                                                    {isWriterMode ? 'No active assignments' : 'No active projects'}
-                                                </h3>
-                                                <p className="text-text-muted mb-6">
-                                                    {isWriterMode
-                                                        ? 'When students hire you for assignments, they will appear here.'
-                                                        : 'Post a new assignment to get started.'
-                                                    }
-                                                </p>
-                                                {!isWriterMode && (
-                                                    <button onClick={() => navigate('/writers')} className="bg-primary text-white px-6 py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all">
-                                                        Find a Writer
-                                                    </button>
-                                                )}
+                                                <h3 className="text-lg font-bold text-text-dark mb-2">No Active Projects Yet</h3>
+                                                <p className="text-text-muted mb-6 max-w-sm mx-auto">Find a writer to help you with your assignments and track your projects here.</p>
+                                                <button
+                                                    onClick={() => navigate('/writers')}
+                                                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+                                                >
+                                                    Find a Writer Now
+                                                </button>
                                             </div>
                                         ) : (
-                                            stats.activeOrders.map((order: any) => (
-                                                <div key={order.id} className="bg-white p-6 rounded-[1.5rem] border border-border-subtle shadow-card hover:shadow-soft transition-all duration-300">
-                                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
-                                                        <div className="flex gap-4">
-                                                            <div className="size-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                                            <div className="space-y-4">
+                                                {stats.activeOrders.map((order: any) => (
+                                                    <div key={order.id} className="p-4 rounded-xl bg-secondary-bg hover:bg-primary/5 transition-all">
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="size-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
                                                                 <span className="material-symbols-outlined">article</span>
                                                             </div>
-                                                            <div>
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <h3 className="text-lg font-bold text-text-dark">{order.title}</h3>
-                                                                    <span className="px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-700 text-[10px] font-bold uppercase tracking-wider border border-orange-100">Work In Progress</span>
-                                                                </div>
-                                                                <p className="text-sm text-text-muted">ID: #{order.id.substring(0, 6).toUpperCase()} • Due: {format(new Date(order.deadline), 'MMM d')}</p>
-                                                            </div>
-                                                        </div>
-                                                        <button className="size-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-text-muted transition-colors">
-                                                            <span className="material-symbols-outlined">more_horiz</span>
-                                                        </button>
-                                                    </div>
-
-                                                    <div className="bg-secondary-bg rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-border-subtle">
-                                                        <div className="flex items-center gap-3 w-full sm:w-auto">
-                                                            <div className="relative">
-                                                                <Avatar
-                                                                    src={order.writer_avatar}
-                                                                    alt={order.writer_handle}
-                                                                    className="size-10 rounded-full border border-white shadow-sm"
-                                                                    fallback={order.writer_handle?.charAt(0)}
-                                                                />
-                                                                {order.writer_verified && (
-                                                                    <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5" title="Verified Writer">
-                                                                        <span className="material-symbols-outlined text-blue-500 text-[14px] leading-none" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-bold text-text-dark">{order.writer_handle || 'Unknown Writer'}</p>
-                                                                <p className="text-xs text-text-muted">{order.writer_school || 'University'}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="w-full sm:w-48">
-                                                            <div className="flex justify-between text-[10px] font-bold text-text-muted mb-1.5 uppercase tracking-wide">
-                                                                <span>Completion</span>
-                                                                <span>{order.completion_percentage || 0}%</span>
-                                                            </div>
-                                                            <div className="w-full bg-white border border-gray-200 rounded-full h-2 overflow-hidden">
-                                                                <div className="bg-primary h-2 rounded-full" style={{ width: `${order.completion_percentage || 0}%` }}></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </section>
-                                </div>
-
-                                {/* Right Sidebar Column */}
-                                <div className="flex flex-col gap-8">
-                                    {/* Recent Messages */}
-                                    <section>
-                                        <div className="flex items-center justify-between mb-5">
-                                            <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
-                                                <span className="material-symbols-outlined text-primary text-xl">chat</span>
-                                                Recent Messages
-                                            </h2>
-                                            <button onClick={() => navigate('/chats')} className="text-sm font-bold text-primary hover:text-primary-hover transition-colors">View All</button>
-                                        </div>
-
-                                        {recentChats.length > 0 ? (
-                                            <div className="space-y-3">
-                                                {recentChats.map((chat: any) => (
-                                                    <div
-                                                        key={chat.id}
-                                                        onClick={() => navigate(`/chats/${chat.id}`)}
-                                                        className="bg-white p-4 rounded-xl border border-border-subtle shadow-card hover:shadow-soft transition-all cursor-pointer group"
-                                                    >
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="relative">
-                                                                <Avatar
-                                                                    src={chat.other_avatar}
-                                                                    alt={chat.other_handle}
-                                                                    className="size-10 rounded-full"
-                                                                    fallback={chat.other_handle?.charAt(0)}
-                                                                />
-                                                                {chat.unread_count > 0 && (
-                                                                    <div className="absolute -top-1 -right-1 size-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                                                                        {chat.unread_count}
-                                                                    </div>
-                                                                )}
-                                                            </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <div className="flex items-center justify-between">
-                                                                    <h4 className="font-bold text-text-dark text-sm truncate group-hover:text-primary transition-colors">{chat.other_handle}</h4>
-                                                                    <span className="text-[10px] text-text-muted">{format(new Date(chat.updated_at), 'MMM d')}</span>
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <h3 className="font-bold text-text-dark truncate">{order.title}</h3>
+                                                                    <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-bold shrink-0">In Progress</span>
                                                                 </div>
-                                                                <p className="text-xs text-text-muted truncate mt-0.5">{chat.last_message || 'No messages yet'}</p>
+                                                                <p className="text-xs text-text-muted mb-3">Due: {format(new Date(order.deadline), 'MMM d, yyyy')}</p>
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Avatar src={order.writer_avatar} alt={order.writer_handle} className="size-6 rounded-full" fallback={order.writer_handle?.charAt(0)} />
+                                                                        <span className="text-xs font-medium text-text-muted">{order.writer_handle}</span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="w-20 bg-gray-200 rounded-full h-1.5">
+                                                                            <div className="bg-primary h-1.5 rounded-full" style={{ width: `${order.completion_percentage || 0}%` }}></div>
+                                                                        </div>
+                                                                        <span className="text-xs font-bold text-primary">{order.completion_percentage || 0}%</span>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 ))}
                                             </div>
+                                        )}
+                                    </section>
+                                </div>
+
+                                {/* Right Sidebar */}
+                                <div className="flex flex-col gap-6">
+                                    {/* Recent Messages */}
+                                    <section className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h2 className="text-base font-bold text-text-dark flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-green-500 text-xl">chat</span>
+                                                Messages
+                                            </h2>
+                                            <button onClick={() => navigate('/chats')} className="text-sm font-bold text-primary">View All</button>
+                                        </div>
+
+                                        {recentChats.length > 0 ? (
+                                            <div className="space-y-2">
+                                                {recentChats.slice(0, 4).map((chat: any) => (
+                                                    <div
+                                                        key={chat.id}
+                                                        onClick={() => navigate(`/chats/${chat.id}`)}
+                                                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary-bg cursor-pointer transition-all"
+                                                    >
+                                                        <div className="relative">
+                                                            <Avatar src={chat.other_avatar} alt={chat.other_handle} className="size-10 rounded-full" fallback={chat.other_handle?.charAt(0)} />
+                                                            {chat.unread_count > 0 && (
+                                                                <div className="absolute -top-1 -right-1 size-4 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                                                                    {chat.unread_count}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-bold text-text-dark text-sm truncate">{chat.other_handle}</h4>
+                                                            <p className="text-xs text-text-muted truncate">{chat.last_message || 'Start chatting'}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         ) : (
-                                            <div className="bg-white p-6 rounded-xl border border-border-subtle text-center">
-                                                <div className="size-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <div className="text-center py-6">
+                                                <div className="size-10 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-2">
                                                     <span className="material-symbols-outlined">chat_bubble</span>
                                                 </div>
-                                                <p className="text-text-muted text-sm">No messages yet</p>
+                                                <p className="text-text-muted text-xs">No conversations yet</p>
                                             </div>
                                         )}
                                     </section>
 
-                                    {/* Writers Section (Student Mode) / Profile Stats (Writer Mode) */}
-                                    {isWriterMode ? (
-                                        <section>
-                                            <div className="flex items-center justify-between mb-5">
-                                                <h2 className="text-lg font-bold text-text-dark">Your Profile Stats</h2>
-                                            </div>
-                                            <div className="bg-white p-5 rounded-2xl border border-border-subtle shadow-card">
-                                                <div className="flex items-center gap-4 mb-4">
-                                                    <Avatar
-                                                        src={user?.avatar_url}
-                                                        alt={user?.full_name}
-                                                        className="size-14 rounded-xl"
-                                                        fallback={user?.full_name?.charAt(0)}
-                                                    />
-                                                    <div>
-                                                        <h3 className="font-bold text-text-dark">{user?.full_name}</h3>
-                                                        <p className="text-xs text-text-muted">{user?.school}</p>
-                                                        <div className="flex items-center gap-1 mt-1">
-                                                            <span className="material-symbols-outlined text-amber-400 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                                            <span className="text-xs font-bold text-text-dark">{user?.rating || '5.0'}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <div className="bg-secondary-bg p-3 rounded-xl text-center">
-                                                        <p className="text-lg font-bold text-text-dark">{connections.length}</p>
-                                                        <p className="text-[10px] text-text-muted uppercase tracking-wide">Connections</p>
-                                                    </div>
-                                                    <div className="bg-secondary-bg p-3 rounded-xl text-center">
-                                                        <p className="text-lg font-bold text-text-dark">{user?.portfolio?.length || 0}</p>
-                                                        <p className="text-[10px] text-text-muted uppercase tracking-wide">Portfolio</p>
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    onClick={() => navigate('/profile')}
-                                                    className="w-full mt-4 py-2.5 rounded-xl bg-primary/10 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all"
-                                                >
-                                                    Edit Profile
-                                                </button>
-                                            </div>
-                                        </section>
-                                    ) : (
-                                        <section>
-                                            <div className="flex items-center justify-between mb-5">
-                                                <h2 className="text-lg font-bold text-text-dark">Writers at {user?.school || 'Your University'}</h2>
-                                            </div>
-                                            {dashboardWriters.length > 0 ? (
-                                                <div className="space-y-4">
-                                                    {dashboardWriters.map((writer) => (
-                                                        <div key={writer.id} onClick={() => navigate(`/profile/${writer.id}`)} className="bg-white p-5 rounded-[1.5rem] border border-border-subtle shadow-card hover:shadow-soft transition-all duration-300 group cursor-pointer">
-                                                            <div className="flex justify-between items-start mb-3">
-                                                                <div className="flex gap-3">
-                                                                    <Avatar
-                                                                        src={writer.avatar_url}
-                                                                        alt={writer.handle}
-                                                                        className="size-12 rounded-xl shadow-sm"
-                                                                        fallback={writer.handle?.charAt(0)}
-                                                                    />
-                                                                    <div>
-                                                                        <div className="flex items-center gap-1">
-                                                                            <h3 className="font-bold text-text-dark">{writer.handle}</h3>
-                                                                            {writer.is_verified === 'verified' && (
-                                                                                <span className="material-symbols-outlined text-blue-500 text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                                                            )}
-                                                                        </div>
-                                                                        <p className="text-xs text-text-muted line-clamp-1">{writer.bio || writer.school}</p>
-                                                                        <div className="flex items-center gap-1 mt-1 text-xs font-bold text-text-dark">
-                                                                            <span className="material-symbols-outlined text-amber-400 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                                                            4.9 <span className="text-text-muted font-medium">({writer.reviews_count || 0})</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                {writer.total_earned > 1000 && (
-                                                                    <span className="bg-orange-50 text-orange-700 text-[10px] font-bold px-2 py-1 rounded-lg border border-orange-100">Top Rated</span>
-                                                                )}
-                                                            </div>
-                                                            {writer.tags && writer.tags.length > 0 && (
-                                                                <div className="flex gap-2 mt-4 flex-wrap">
-                                                                    {writer.tags.slice(0, 3).map((tag: string, i: number) => (
-                                                                        <span key={i} className="bg-gray-50 text-text-muted text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-gray-100">{tag}</span>
-                                                                    ))}
+                                    {/* Top Writers - Featured */}
+                                    <section className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h2 className="text-base font-bold text-text-dark flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-amber-400 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                                Top Writers
+                                            </h2>
+                                            <button onClick={() => navigate('/writers')} className="text-sm font-bold text-primary">See All</button>
+                                        </div>
+
+                                        {topWriters.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {topWriters.map((writer: any) => (
+                                                    <div
+                                                        key={writer.id}
+                                                        onClick={() => navigate(`/profile/${writer.id}`)}
+                                                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary-bg cursor-pointer transition-all group"
+                                                    >
+                                                        <div className="relative">
+                                                            <Avatar src={writer.avatar_url} alt={writer.full_name} className="size-11 rounded-full" fallback={writer.full_name?.charAt(0)} />
+                                                            {writer.is_verified === 'verified' && (
+                                                                <div className="absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5">
+                                                                    <span className="material-symbols-outlined text-blue-500 text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                                                 </div>
                                                             )}
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <div className="bg-white p-8 rounded-[1.5rem] border border-border-subtle text-center">
-                                                    <div className="bg-gray-50 size-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                                                        <span className="material-symbols-outlined text-gray-400">school</span>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-bold text-text-dark text-sm truncate group-hover:text-primary transition-colors">{writer.full_name}</h4>
+                                                            <p className="text-[11px] text-text-muted truncate">{writer.school || 'University'}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-0.5 shrink-0">
+                                                            <span className="material-symbols-outlined text-amber-400 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                                            <span className="text-xs font-bold">{writer.rating || '5.0'}</span>
+                                                        </div>
                                                     </div>
-                                                    <p className="text-text-dark font-bold text-sm">No writers yet</p>
-                                                    <p className="text-xs text-text-muted mt-1">Be the first writer at {user?.school || 'your university'}!</p>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-6">
+                                                <div className="size-10 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                    <span className="material-symbols-outlined">person_search</span>
                                                 </div>
-                                            )}
+                                                <p className="text-text-muted text-xs">Loading writers...</p>
+                                            </div>
+                                        )}
+                                    </section>
+
+                                    {/* College Writers */}
+                                    {dashboardWriters.length > 0 && (
+                                        <section className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h2 className="text-base font-bold text-text-dark flex items-center gap-2">
+                                                    <span className="material-symbols-outlined text-primary text-xl">school</span>
+                                                    Your College
+                                                </h2>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                {dashboardWriters.slice(0, 3).map((writer: any) => (
+                                                    <div
+                                                        key={writer.id}
+                                                        onClick={() => navigate(`/profile/${writer.id}`)}
+                                                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary-bg cursor-pointer transition-all group"
+                                                    >
+                                                        <Avatar src={writer.avatar_url} alt={writer.handle} className="size-10 rounded-full" fallback={writer.handle?.charAt(0)} />
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-bold text-text-dark text-sm truncate group-hover:text-primary">{writer.handle || writer.full_name}</h4>
+                                                            <p className="text-[11px] text-text-muted truncate">{writer.bio || 'Writer'}</p>
+                                                        </div>
+                                                        {writer.is_writer && (
+                                                            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-bold">WRITER</span>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
 
                                             <button
-                                                onClick={() => navigate('/writers')}
-                                                className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-primary/10 to-orange-500/10 text-primary font-bold text-sm hover:from-primary hover:to-orange-500 hover:text-white transition-all"
+                                                onClick={() => navigate(`/writers?search=${user?.school}`)}
+                                                className="w-full mt-4 py-2.5 rounded-xl bg-primary/10 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all"
                                             >
-                                                Browse All Writers
+                                                View All from {user?.school?.split(' ')[0] || 'College'}
                                             </button>
                                         </section>
                                     )}
