@@ -85,6 +85,21 @@ export const Projects = ({ user }: ProjectsProps) => {
         return 'help';
     };
 
+    const handleMarkComplete = async (orderId: string, orderTitle: string) => {
+        if (!confirm(`Mark "${orderTitle}" as completed?\n\nThis action will finalize the project.`)) {
+            return;
+        }
+
+        try {
+            await dbService.updateOrderStatus(orderId, 'completed');
+            // Reload projects to reflect the change
+            await loadProjects();
+        } catch (error) {
+            console.error('Error marking project as complete:', error);
+            alert('Failed to mark project as complete. Please try again.');
+        }
+    };
+
     return (
         <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />

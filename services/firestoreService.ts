@@ -986,6 +986,23 @@ export const dbService = {
         });
     },
 
+    updateOrderStatus: async (orderId: string, status: 'in_progress' | 'completed' | 'cancelled' | 'disputed', completionData?: { completion_percentage?: number }) => {
+        const orderRef = doc(getDb(), 'orders', orderId);
+        const updates: any = {
+            status,
+            updated_at: new Date().toISOString()
+        };
+
+        if (status === 'completed') {
+            updates.completion_percentage = 100;
+            updates.completed_at = new Date().toISOString();
+        } else if (completionData?.completion_percentage !== undefined) {
+            updates.completion_percentage = completionData.completion_percentage;
+        }
+
+        await updateDoc(orderRef, updates);
+    },
+
     getConnectionStatus: async (uid1: string, uid2: string) => {
         // Check Requests
         const requestsRef = collection(getDb(), 'requests');
