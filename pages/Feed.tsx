@@ -72,6 +72,23 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
         return 'Good Evening';
     };
 
+    const handleStartChat = async (targetUserId: string) => {
+        try {
+            const chat = await db.createChat(null, user!.id, targetUserId);
+            navigate(`/chats/${chat.id}`);
+        } catch (error) {
+            console.error("Failed to start chat", error);
+        }
+    };
+
+    // Extract connected users for display
+    const connectedUsers = connections.map(conn => {
+        if (Array.isArray(conn.participants)) {
+            return conn.participants.find((p: any) => p.id !== user?.id) || conn.participants[0];
+        }
+        return null;
+    }).filter(Boolean).slice(0, 6);
+
     return (
         <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />
@@ -88,8 +105,8 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                 <div>
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isWriterMode
-                                                ? 'bg-gradient-to-r from-primary/10 to-orange-500/10 text-primary border border-primary/20'
-                                                : 'bg-blue-50 text-blue-600 border border-blue-100'
+                                            ? 'bg-gradient-to-r from-primary/10 to-orange-500/10 text-primary border border-primary/20'
+                                            : 'bg-blue-50 text-blue-600 border border-blue-100'
                                             }`}>
                                             {isWriterMode ? (
                                                 <span className="flex items-center gap-1">
@@ -138,7 +155,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                 </div>
                             </div>
 
-                            {/* Stats Row */}
+                            {/* Stats Row - Now Clickable */}
                             <div className={`grid gap-4 md:gap-6 ${isWriterMode ? 'grid-cols-1 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'}`}>
                                 {isWriterMode ? (
                                     // Writer Stats
@@ -171,8 +188,11 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             </div>
                                         </div>
 
-                                        {/* Pending Requests */}
-                                        <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
+                                        {/* Pending Requests - CLICKABLE */}
+                                        <div
+                                            onClick={() => navigate('/connections')}
+                                            className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft hover:border-blue-200 transition-all duration-300 cursor-pointer"
+                                        >
                                             <div className="flex justify-between items-start mb-3 relative z-10">
                                                 <h3 className="text-text-muted font-bold text-sm">Pending Requests</h3>
                                                 <div className="size-10 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
@@ -181,7 +201,10 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             </div>
                                             <div className="relative z-10">
                                                 <span className="text-3xl font-extrabold text-text-dark tracking-tight">{incomingRequests.length}</span>
-                                                <p className="text-xs text-blue-600 font-medium mt-1">Awaiting response</p>
+                                                <p className="text-xs text-blue-600 font-medium mt-1 flex items-center gap-1">
+                                                    Tap to review
+                                                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                                                </p>
                                             </div>
                                         </div>
 
@@ -258,8 +281,11 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             </div>
                                         </div>
 
-                                        {/* Connections */}
-                                        <div className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft transition-all duration-300">
+                                        {/* Connections - CLICKABLE */}
+                                        <div
+                                            onClick={() => navigate('/connections')}
+                                            className="bg-white p-6 rounded-[2rem] shadow-card border border-border-subtle relative overflow-hidden group hover:shadow-soft hover:border-blue-200 transition-all duration-300 cursor-pointer"
+                                        >
                                             <div className="flex justify-between items-start mb-4 relative z-10">
                                                 <h3 className="text-text-muted font-bold text-sm">My Network</h3>
                                                 <div className="size-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
@@ -268,91 +294,140 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             </div>
                                             <div className="relative z-10">
                                                 <span className="text-4xl font-extrabold text-text-dark tracking-tight">{connections.length}</span>
-                                                <p className="text-xs text-text-muted mt-2">Connected writers & students</p>
+                                                <p className="text-xs text-blue-600 font-medium mt-2 flex items-center gap-1">
+                                                    View all connections
+                                                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                                                </p>
                                             </div>
                                         </div>
                                     </>
                                 )}
                             </div>
 
+                            {/* Connected People Section */}
+                            {connectedUsers.length > 0 && (
+                                <section className="bg-white p-6 rounded-2xl shadow-card border border-border-subtle">
+                                    <div className="flex items-center justify-between mb-5">
+                                        <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-blue-500">people</span>
+                                            Your Connections
+                                        </h2>
+                                        <button
+                                            onClick={() => navigate('/connections')}
+                                            className="text-sm font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1"
+                                        >
+                                            View All
+                                            <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                                        {connectedUsers.map((connUser: any) => (
+                                            <div
+                                                key={connUser.id}
+                                                className="flex flex-col items-center p-4 rounded-xl bg-secondary-bg hover:bg-primary/5 transition-all cursor-pointer group"
+                                            >
+                                                <div
+                                                    className="relative mb-3"
+                                                    onClick={() => navigate(`/profile/${connUser.id}`)}
+                                                >
+                                                    <Avatar
+                                                        src={connUser.avatar_url}
+                                                        alt={connUser.full_name}
+                                                        className="size-14 rounded-full border-2 border-white shadow-md group-hover:border-primary/30 transition-colors"
+                                                        fallback={connUser.full_name?.charAt(0)}
+                                                    />
+                                                    {connUser.is_online && (
+                                                        <div className="absolute bottom-0 right-0 size-4 bg-green-500 rounded-full border-2 border-white"></div>
+                                                    )}
+                                                    {connUser.is_verified === 'verified' && (
+                                                        <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
+                                                            <span className="material-symbols-outlined text-blue-500 text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <p
+                                                    onClick={() => navigate(`/profile/${connUser.id}`)}
+                                                    className="text-sm font-bold text-text-dark text-center truncate w-full group-hover:text-primary transition-colors"
+                                                >
+                                                    {connUser.full_name?.split(' ')[0]}
+                                                </p>
+                                                <p className="text-[10px] text-text-muted text-center truncate w-full">{connUser.school?.split(' ')[0] || 'Student'}</p>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleStartChat(connUser.id);
+                                                    }}
+                                                    className="mt-2 w-full py-1.5 rounded-lg bg-primary/10 text-primary text-[11px] font-bold hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-1"
+                                                >
+                                                    <span className="material-symbols-outlined text-sm">chat</span>
+                                                    Message
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
                             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                                 {/* Main Content Column */}
                                 <div className="xl:col-span-2 flex flex-col gap-8">
 
                                     {/* Incoming Requests (Writer Mode) */}
-                                    {isWriterMode && (
+                                    {isWriterMode && incomingRequests.length > 0 && (
                                         <section className="flex flex-col gap-5">
                                             <div className="flex items-center justify-between">
                                                 <h2 className="text-xl font-bold text-text-dark flex items-center gap-2">
                                                     <span className="material-symbols-outlined text-primary">person_add</span>
                                                     Connection Requests
-                                                    {incomingRequests.length > 0 && (
-                                                        <span className="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{incomingRequests.length}</span>
-                                                    )}
+                                                    <span className="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{incomingRequests.length}</span>
                                                 </h2>
                                                 <button onClick={() => navigate('/connections')} className="text-sm font-bold text-primary hover:text-primary-hover transition-colors">View All</button>
                                             </div>
 
-                                            {loading ? (
-                                                <div className="space-y-4">
-                                                    {[1, 2].map((i) => (
-                                                        <div key={i} className="bg-white p-5 rounded-2xl border border-border-subtle shadow-card animate-pulse">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="size-12 rounded-full bg-gray-200"></div>
-                                                                <div className="flex-1 space-y-2">
-                                                                    <div className="h-4 w-32 bg-gray-200 rounded"></div>
-                                                                    <div className="h-3 w-24 bg-gray-200 rounded"></div>
-                                                                </div>
-                                                                <div className="flex gap-2">
-                                                                    <div className="h-9 w-20 bg-gray-200 rounded-lg"></div>
-                                                                    <div className="h-9 w-20 bg-gray-200 rounded-lg"></div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : incomingRequests.length === 0 ? (
-                                                <div className="bg-white p-8 rounded-2xl border border-border-subtle text-center">
-                                                    <div className="size-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                        <span className="material-symbols-outlined text-3xl">inbox</span>
-                                                    </div>
-                                                    <h3 className="text-lg font-bold text-text-dark mb-2">No pending requests</h3>
-                                                    <p className="text-text-muted text-sm">When students want to connect with you, their requests will appear here.</p>
-                                                </div>
-                                            ) : (
-                                                <div className="space-y-4">
-                                                    {incomingRequests.slice(0, 5).map((request: any) => (
-                                                        <div key={request.id} className="bg-white p-5 rounded-2xl border border-border-subtle shadow-card hover:shadow-soft transition-all">
-                                                            <div className="flex items-center gap-4">
+                                            <div className="space-y-4">
+                                                {incomingRequests.slice(0, 3).map((request: any) => (
+                                                    <div
+                                                        key={request.id}
+                                                        className="bg-white p-5 rounded-2xl border border-border-subtle shadow-card hover:shadow-soft transition-all"
+                                                    >
+                                                        <div className="flex items-center gap-4">
+                                                            <div
+                                                                className="cursor-pointer"
+                                                                onClick={() => navigate(`/profile/${request.fromUser?.id}`)}
+                                                            >
                                                                 <Avatar
                                                                     src={request.fromUser?.avatar_url}
                                                                     alt={request.fromUser?.full_name}
                                                                     className="size-12 rounded-full"
                                                                     fallback={request.fromUser?.full_name?.charAt(0)}
                                                                 />
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h4 className="font-bold text-text-dark truncate">{request.fromUser?.full_name || 'Unknown'}</h4>
-                                                                    <p className="text-xs text-text-muted truncate">{request.fromUser?.school || 'University'}</p>
-                                                                </div>
-                                                                <div className="flex gap-2">
-                                                                    <button
-                                                                        onClick={() => db.respondToConnectionRequest(request.id, 'accepted').then(() => setIncomingRequests(prev => prev.filter(r => r.id !== request.id)))}
-                                                                        className="h-9 px-4 rounded-lg bg-primary text-white text-sm font-bold hover:brightness-105 transition-all"
-                                                                    >
-                                                                        Accept
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => db.respondToConnectionRequest(request.id, 'rejected').then(() => setIncomingRequests(prev => prev.filter(r => r.id !== request.id)))}
-                                                                        className="h-9 px-4 rounded-lg bg-gray-100 text-text-muted text-sm font-bold hover:bg-gray-200 transition-all"
-                                                                    >
-                                                                        Decline
-                                                                    </button>
-                                                                </div>
+                                                            </div>
+                                                            <div
+                                                                className="flex-1 min-w-0 cursor-pointer"
+                                                                onClick={() => navigate(`/profile/${request.fromUser?.id}`)}
+                                                            >
+                                                                <h4 className="font-bold text-text-dark truncate hover:text-primary transition-colors">{request.fromUser?.full_name || 'Unknown'}</h4>
+                                                                <p className="text-xs text-text-muted truncate">{request.fromUser?.school || 'University'}</p>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => db.respondToConnectionRequest(request.id, 'accepted').then(() => setIncomingRequests(prev => prev.filter(r => r.id !== request.id)))}
+                                                                    className="h-9 px-4 rounded-lg bg-primary text-white text-sm font-bold hover:brightness-105 transition-all"
+                                                                >
+                                                                    Accept
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => db.respondToConnectionRequest(request.id, 'rejected').then(() => setIncomingRequests(prev => prev.filter(r => r.id !== request.id)))}
+                                                                    className="h-9 px-4 rounded-lg bg-gray-100 text-text-muted text-sm font-bold hover:bg-gray-200 transition-all"
+                                                                >
+                                                                    Decline
+                                                                </button>
                                                             </div>
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </section>
                                     )}
 
@@ -379,22 +454,6 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                                 </div>
                                                             </div>
                                                             <div className="size-8 rounded-full bg-gray-200"></div>
-                                                        </div>
-                                                        <div className="bg-secondary-bg rounded-xl p-4 flex items-center justify-between gap-4 border border-border-subtle">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="size-10 rounded-full bg-gray-200"></div>
-                                                                <div className="space-y-2">
-                                                                    <div className="h-3 w-24 bg-gray-200 rounded"></div>
-                                                                    <div className="h-2 w-16 bg-gray-200 rounded"></div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="w-32 space-y-2">
-                                                                <div className="flex justify-between">
-                                                                    <div className="h-2 w-12 bg-gray-200 rounded"></div>
-                                                                    <div className="h-2 w-8 bg-gray-200 rounded"></div>
-                                                                </div>
-                                                                <div className="h-2 w-full bg-gray-200 rounded-full"></div>
-                                                            </div>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -440,7 +499,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                         </button>
                                                     </div>
 
-                                                    <div className="bg-secondary-bg rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-border-subtle mb-5">
+                                                    <div className="bg-secondary-bg rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-border-subtle">
                                                         <div className="flex items-center gap-3 w-full sm:w-auto">
                                                             <div className="relative">
                                                                 <Avatar
