@@ -50,7 +50,7 @@ export const MobileNav = () => {
             className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-border-subtle z-50 safe-area-bottom shadow-[0_-2px_20px_-8px_rgba(0,0,0,0.12)]"
             aria-label="Mobile navigation"
         >
-            <div className="flex items-end justify-around max-w-md mx-auto px-2 pb-2 pt-1">
+            <div className="flex items-center justify-around h-16 max-w-md mx-auto px-2 relative">
                 {navItems.map((item) => {
                     const active = isActive(item.path);
 
@@ -60,14 +60,15 @@ export const MobileNav = () => {
                                 key={item.path}
                                 onClick={() => navigate(item.path)}
                                 className={`
-                                    relative touch-target-lg
-                                    p-4 rounded-full shadow-xl -mb-4
+                                    absolute left-1/2 -translate-x-1/2 -translate-y-8
+                                    touch-target-lg
+                                    p-4 rounded-full shadow-xl
                                     transition-all duration-200 ease-out
                                     touch-feedback
                                     ring-4 ring-white dark:ring-slate-900
                                     ${isWriterMode
-                                        ? 'bg-gradient-to-r from-primary to-orange-500 text-white shadow-primary/40 hover:shadow-2xl active:shadow-primary/50'
-                                        : 'bg-primary text-white shadow-primary/40 hover:shadow-2xl active:shadow-primary/50'
+                                        ? 'bg-gradient-to-r from-primary to-orange-500 text-white shadow-primary/40 hover:shadow-2xl active:shadow-primary/50 hover:scale-105'
+                                        : 'bg-primary text-white shadow-primary/40 hover:shadow-2xl active:shadow-primary/50 hover:scale-105'
                                     }
                                 `}
                                 aria-label={item.label}
@@ -84,8 +85,8 @@ export const MobileNav = () => {
                             key={item.path}
                             onClick={() => navigate(item.path)}
                             className={`
-                                relative flex flex-col items-center gap-1 touch-target
-                                py-2 px-2 transition-all duration-200 ease-out min-w-[64px]
+                                flex flex-col items-center justify-center gap-1 touch-target
+                                px-3 transition-all duration-200 ease-out min-w-[68px]
                                 touch-feedback-subtle
                                 ${active
                                     ? 'text-primary'
