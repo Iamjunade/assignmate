@@ -959,21 +959,31 @@ export const dbService = {
     getWriterProjects: async (userId: string) => {
         const q = query(
             collection(getDb(), 'orders'),
-            where('writer_id', '==', userId),
-            orderBy('created_at', 'desc')
+            where('writer_id', '==', userId)
         );
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Sort client-side to avoid composite index requirement
+        return orders.sort((a: any, b: any) => {
+            const dateA = new Date(a.created_at || 0).getTime();
+            const dateB = new Date(b.created_at || 0).getTime();
+            return dateB - dateA; // newest first
+        });
     },
 
     getStudentProjects: async (userId: string) => {
         const q = query(
             collection(getDb(), 'orders'),
-            where('student_id', '==', userId),
-            orderBy('created_at', 'desc')
+            where('student_id', '==', userId)
         );
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Sort client-side to avoid composite index requirement
+        return orders.sort((a: any, b: any) => {
+            const dateA = new Date(a.created_at || 0).getTime();
+            const dateB = new Date(b.created_at || 0).getTime();
+            return dateB - dateA; // newest first
+        });
     },
 
     getConnectionStatus: async (uid1: string, uid2: string) => {
