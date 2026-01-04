@@ -32,6 +32,7 @@ const FindWriter = lazy(() => import('./pages/FindWriter').then(module => ({ def
 const AdminVerifications = lazy(() => import('./admin/pages/AdminVerifications').then(module => ({ default: module.AdminVerifications })));
 const PitchDeck = lazy(() => import('./pages/PitchDeck').then(module => ({ default: module.PitchDeck })));
 const Documentation = lazy(() => import('./pages/Documentation').then(module => ({ default: module.Documentation })));
+const TermsOfService = lazy(() => import('./pages/TermsOfService').then(module => ({ default: module.TermsOfService })));
 
 export default function AppWrapper() {
   return (
@@ -170,6 +171,9 @@ function AppContent() {
           {/* --- Documentation --- */}
           <Route path="/docs" element={<Documentation />} />
           <Route path="/docs/:section" element={<Documentation />} />
+
+          {/* --- Legal Pages --- */}
+          <Route path="/terms" element={<TermsOfService />} />
 
           {/* --- Public Routes (Glass Layout) --- */}
           <Route element={
