@@ -238,7 +238,7 @@
   }
 
   .touch-feedback-subtle {
-    @apply active:scale-98 transition-transform duration-75;
+    @apply active:scale-[0.98] transition-transform duration-75;
   }
 
   /* Mobile Grid Helpers */
