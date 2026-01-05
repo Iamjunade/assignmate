@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Avatar } from '../components/ui/Avatar';
 
 export const Landing = () => {
     const navigate = useNavigate();
@@ -50,10 +51,24 @@ export const Landing = () => {
                         <button onClick={handleSignup} className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">For Writers</button>
                     </nav>
                     <div className="flex items-center gap-4">
-                        <button onClick={handleLogin} className="text-sm font-bold hover:text-primary transition-colors">Login</button>
-                        <button onClick={handleSignup} className="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-primary text-[#1b140d] text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
-                            <span className="truncate">Join Now</span>
-                        </button>
+                        {user ? (
+                            <>
+                                <button onClick={() => navigate('/feed')} className="text-sm font-bold hover:text-primary transition-colors">Dashboard</button>
+                                <div
+                                    className="size-10 rounded-full overflow-hidden border-2 border-primary/20 cursor-pointer hover:border-primary transition-colors"
+                                    onClick={() => navigate('/profile')}
+                                >
+                                    <Avatar src={user.avatar_url} alt={user.full_name} className="w-full h-full" />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <button onClick={handleLogin} className="text-sm font-bold hover:text-primary transition-colors">Login</button>
+                                <button onClick={handleSignup} className="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-primary text-[#1b140d] text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
+                                    <span className="truncate">Join Now</span>
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
                 {/* Mobile Menu Icon */}
