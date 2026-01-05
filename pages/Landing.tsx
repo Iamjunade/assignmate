@@ -263,81 +263,84 @@ export const Landing = () => {
                 </div>
             </section>
 
-            {/* How It Works (Timeline) */}
+            {/* How It Works */}
             <section id="how-it-works" className="w-full px-6 py-16 md:px-10 lg:px-20 bg-background-light dark:bg-background-dark">
                 <div className="mx-auto max-w-7xl">
-                    <div className="flex flex-col md:flex-row gap-12">
+                    <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
                         {/* Left: Text */}
-                        <div className="md:w-1/3">
-                            <div className="sticky top-24">
+                        <div className="lg:w-1/3">
+                            <div className="lg:sticky lg:top-24">
                                 <h2 className="text-3xl font-black text-[#1b140d] dark:text-white mb-4">How it works</h2>
-                                <p className="text-gray-600 dark:text-gray-300 mb-8">Four simple steps to get your assignment done without the panic.</p>
-                                <button onClick={() => handleScrollTo('trust-safety')} className="hidden md:inline-flex items-center gap-2 font-bold text-primary hover:text-primary/80 transition-colors">
+                                <p className="text-gray-600 dark:text-gray-400 mb-8">Five simple steps to connect with talented writers from your college.</p>
+                                <button onClick={() => handleScrollTo('trust-safety')} className="inline-flex items-center gap-2 font-bold text-primary hover:text-primary/80 transition-colors">
                                     Learn more about safety <span className="material-symbols-outlined text-sm">arrow_forward</span>
                                 </button>
                             </div>
                         </div>
-                        {/* Right: Timeline Steps */}
-                        <div className="md:w-2/3">
-                            <div className="relative pl-8 md:pl-12 border-l-2 border-[#e7dbcf] dark:border-[#3a2e24] space-y-12">
-                                {/* Step 1 */}
-                                <div className="relative">
-                                    <span className="absolute -left-[39px] md:-left-[55px] top-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white font-bold ring-4 ring-background-light dark:ring-background-dark">1</span>
-                                    <div className="bg-white dark:bg-[#2c2219] p-6 rounded-2xl shadow-sm border border-[#e7dbcf] dark:border-[#3a2e24]">
-                                        <div className="flex items-start gap-4">
-                                            <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-xl text-primary">
-                                                <span className="material-symbols-outlined">edit_note</span>
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-bold text-[#1b140d] dark:text-white">Post your assignment</h3>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Describe what you need. Set your budget and deadline. It's free to post.</p>
-                                            </div>
-                                        </div>
+                        {/* Right: Steps */}
+                        <div className="lg:w-2/3 space-y-4">
+                            {/* Step 1 */}
+                            <div className="flex items-start gap-4">
+                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white text-sm font-bold">1</span>
+                                <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
+                                    <div className="shrink-0 w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-primary">portfolio</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-white mb-1">Writers showcase their work</h3>
+                                        <p className="text-sm text-gray-400">Talented writers create profiles with their skills, samples, and ratings from past work.</p>
                                     </div>
                                 </div>
-                                {/* Step 2 */}
-                                <div className="relative">
-                                    <span className="absolute -left-[39px] md:-left-[55px] top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#e7dbcf] dark:bg-[#3a2e24] text-gray-600 dark:text-gray-400 font-bold ring-4 ring-background-light dark:ring-background-dark">2</span>
-                                    <div className="bg-white dark:bg-[#2c2219] p-6 rounded-2xl shadow-sm border border-[#e7dbcf] dark:border-[#3a2e24]">
-                                        <div className="flex items-start gap-4">
-                                            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl text-blue-500">
-                                                <span className="material-symbols-outlined">person_search</span>
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-bold text-[#1b140d] dark:text-white">Match with a verified peer</h3>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Review bids from ID-verified students. check their college, ratings, and past work.</p>
-                                            </div>
-                                        </div>
+                            </div>
+                            {/* Step 2 */}
+                            <div className="flex items-start gap-4">
+                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#3a2e24] text-gray-400 text-sm font-bold">2</span>
+                                <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
+                                    <div className="shrink-0 w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-blue-400">location_on</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-white mb-1">Find writers from your college</h3>
+                                        <p className="text-sm text-gray-400">Search for verified writers from your college or nearby universities who understand your curriculum.</p>
                                     </div>
                                 </div>
-                                {/* Step 3 */}
-                                <div className="relative">
-                                    <span className="absolute -left-[39px] md:-left-[55px] top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#e7dbcf] dark:bg-[#3a2e24] text-gray-600 dark:text-gray-400 font-bold ring-4 ring-background-light dark:ring-background-dark">3</span>
-                                    <div className="bg-white dark:bg-[#2c2219] p-6 rounded-2xl shadow-sm border border-[#e7dbcf] dark:border-[#3a2e24]">
-                                        <div className="flex items-start gap-4">
-                                            <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-xl text-green-500">
-                                                <span className="material-symbols-outlined">lock</span>
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-bold text-[#1b140d] dark:text-white">Deposit funds securely</h3>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Pay upfront to show commitment. We hold the money. The writer doesn't get it yet.</p>
-                                            </div>
-                                        </div>
+                            </div>
+                            {/* Step 3 */}
+                            <div className="flex items-start gap-4">
+                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#3a2e24] text-gray-400 text-sm font-bold">3</span>
+                                <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
+                                    <div className="shrink-0 w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-purple-400">chat</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-white mb-1">Connect with them</h3>
+                                        <p className="text-sm text-gray-400">Chat directly with writers, discuss your requirements, and find the perfect match for your project.</p>
                                     </div>
                                 </div>
-                                {/* Step 4 */}
-                                <div className="relative">
-                                    <span className="absolute -left-[39px] md:-left-[55px] top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#e7dbcf] dark:bg-[#3a2e24] text-gray-600 dark:text-gray-400 font-bold ring-4 ring-background-light dark:ring-background-dark">4</span>
-                                    <div className="bg-white dark:bg-[#2c2219] p-6 rounded-2xl shadow-sm border border-[#e7dbcf] dark:border-[#3a2e24]">
-                                        <div className="flex items-start gap-4">
-                                            <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-xl text-purple-500">
-                                                <span className="material-symbols-outlined">check_circle</span>
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-bold text-[#1b140d] dark:text-white">Approve & Release</h3>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Review the final work. Once you're happy, release the payment to the writer.</p>
-                                            </div>
-                                        </div>
+                            </div>
+                            {/* Step 4 */}
+                            <div className="flex items-start gap-4">
+                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#3a2e24] text-gray-400 text-sm font-bold">4</span>
+                                <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
+                                    <div className="shrink-0 w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-green-400">handshake</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-white mb-1">Make a deal</h3>
+                                        <p className="text-sm text-gray-400">Agree on price, deadline, and terms. Your payment is held securely until you approve the work.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Step 5 */}
+                            <div className="flex items-start gap-4">
+                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#3a2e24] text-gray-400 text-sm font-bold">5</span>
+                                <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
+                                    <div className="shrink-0 w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-emerald-400">spa</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-white mb-1">Relax</h3>
+                                        <p className="text-sm text-gray-400">Sit back while your writer works. Get updates, review the final work, and release payment when satisfied.</p>
                                     </div>
                                 </div>
                             </div>
