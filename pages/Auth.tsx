@@ -22,20 +22,25 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     const [completionForm, setCompletionForm] = useState({ handle: '', school: '' });
     const [completionIsWriter, setCompletionIsWriter] = useState(false);
 
-    // ✅ FIX: Redirect to Onboarding if incomplete, otherwise Feed
+    // ✅ FIX: Redirect to Onboarding if incomplete, otherwise redirect param or Feed
     useEffect(() => {
         if (user) {
             if (user.is_incomplete) {
                 navigate('/onboarding');
             } else {
-                if (onComplete) {
+                // Check for redirect parameter in URL
+                const redirectUrl = searchParams.get('redirect');
+                if (redirectUrl) {
+                    // Decode and navigate to the redirect URL
+                    navigate(decodeURIComponent(redirectUrl));
+                } else if (onComplete) {
                     onComplete();
                 } else {
                     navigate('/feed');
                 }
             }
         }
-    }, [user, onComplete, navigate]);
+    }, [user, onComplete, navigate, searchParams]);
 
     // Handle email/password registration and login
     const handleSubmit = async (e: React.FormEvent) => {

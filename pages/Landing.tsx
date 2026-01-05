@@ -1,13 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export const Landing = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchSubject, setSearchSubject] = useState('');
+    const [searchUniversity, setSearchUniversity] = useState('');
 
     const handleLogin = () => navigate('/auth');
     const handleSignup = () => navigate('/auth?tab=signup');
-    const handleSearch = () => navigate('/feed'); // Mock search navigation
+
+    const handleSearch = (subject?: string, university?: string) => {
+        const searchTerm = subject || searchSubject || university || searchUniversity;
+        const searchQuery = searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : '';
+
+        if (user) {
+            // User is logged in - go directly to writers page with search
+            navigate(`/writers${searchQuery}`);
+        } else {
+            // User not logged in - redirect to auth with return URL
+            const returnUrl = `/writers${searchQuery}`;
+            navigate(`/auth?redirect=${encodeURIComponent(returnUrl)}`);
+        }
+    };
+
     const handleScrollTo = (id: string) => {
         const element = document.getElementById(id);
         if (element) {
@@ -194,28 +212,38 @@ export const Landing = () => {
                     <div className="bg-white dark:bg-[#221910] p-2 rounded-full shadow-lg flex flex-col md:flex-row items-center gap-2 max-w-3xl mx-auto border border-gray-100 dark:border-white/10">
                         <div className="flex-1 flex items-center px-4 h-12 w-full">
                             <span className="material-symbols-outlined text-gray-400 mr-2">search</span>
-                            <input className="bg-transparent border-none focus:ring-0 w-full text-sm text-[#1b140d] dark:text-white placeholder-gray-400 focus:outline-none" placeholder="Subject (e.g. Economics)" type="text" />
+                            <input
+                                className="bg-transparent border-none focus:ring-0 w-full text-sm text-[#1b140d] dark:text-white placeholder-gray-400 focus:outline-none"
+                                placeholder="Subject (e.g. Economics)"
+                                type="text"
+                                value={searchSubject}
+                                onChange={(e) => setSearchSubject(e.target.value)}
+                            />
                         </div>
                         <div className="w-px h-8 bg-gray-200 dark:bg-white/10 hidden md:block"></div>
                         <div className="flex-1 flex items-center px-4 h-12 w-full border-t md:border-t-0 border-gray-100 dark:border-white/5">
                             <span className="material-symbols-outlined text-gray-400 mr-2">school</span>
-                            <select className="bg-transparent border-none focus:ring-0 w-full text-sm text-[#1b140d] dark:text-white cursor-pointer focus:outline-none">
-                                <option>Select University</option>
-                                <option>Delhi University</option>
-                                <option>IIT Bombay</option>
-                                <option>Mumbai University</option>
-                                <option>BITS Pilani</option>
+                            <select
+                                className="bg-transparent border-none focus:ring-0 w-full text-sm text-[#1b140d] dark:text-white cursor-pointer focus:outline-none"
+                                value={searchUniversity}
+                                onChange={(e) => setSearchUniversity(e.target.value)}
+                            >
+                                <option value="">Select University</option>
+                                <option value="Delhi University">Delhi University</option>
+                                <option value="IIT Bombay">IIT Bombay</option>
+                                <option value="Mumbai University">Mumbai University</option>
+                                <option value="BITS Pilani">BITS Pilani</option>
                             </select>
                         </div>
-                        <button onClick={handleSearch} className="bg-primary hover:bg-primary/90 text-[#1b140d] font-bold rounded-full px-8 h-12 w-full md:w-auto shadow-md transition-all">
+                        <button onClick={() => handleSearch()} className="bg-primary hover:bg-primary/90 text-[#1b140d] font-bold rounded-full px-8 h-12 w-full md:w-auto shadow-md transition-all">
                             Search
                         </button>
                     </div>
                     <div className="flex flex-wrap justify-center gap-3 mt-6">
                         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Popular:</span>
-                        <button onClick={handleSearch} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">Economics @ DU</button>
-                        <button onClick={handleSearch} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">CS @ IIT</button>
-                        <button onClick={handleSearch} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">Law @ NLU</button>
+                        <button onClick={() => handleSearch('Economics')} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">Economics @ DU</button>
+                        <button onClick={() => handleSearch('Computer Science')} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">CS @ IIT</button>
+                        <button onClick={() => handleSearch('Law')} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">Law @ NLU</button>
                     </div>
                 </div>
             </section>
@@ -413,7 +441,7 @@ export const Landing = () => {
                     <div className="flex flex-col gap-4">
                         <h3 className="font-bold text-[#1b140d] dark:text-white">Platform</h3>
                         <button onClick={() => handleScrollTo('how-it-works')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">How it works</button>
-                        <button onClick={handleSearch} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Browse Writers</button>
+                        <button onClick={() => handleSearch()} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Browse Writers</button>
                         <button onClick={() => handleScrollTo('trust-safety')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Safety & Trust</button>
                         <button onClick={handleSignup} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Pricing</button>
                     </div>
