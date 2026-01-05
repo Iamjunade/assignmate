@@ -284,7 +284,7 @@ export const Landing = () => {
                                 <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white text-sm font-bold">1</span>
                                 <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
                                     <div className="shrink-0 w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-primary">portfolio</span>
+                                        <span className="material-symbols-outlined text-primary">work</span>
                                     </div>
                                     <div>
                                         <h3 className="text-base font-bold text-white mb-1">Writers showcase their work</h3>
