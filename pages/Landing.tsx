@@ -117,10 +117,10 @@ export const Landing = () => {
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-1">
-                                                <h3 className="font-bold text-[#1b140d] dark:text-white">Rahul K.</h3>
+                                                <h3 className="font-bold text-[#1b140d] dark:text-white">Sai Tej</h3>
                                                 <span className="material-symbols-outlined text-blue-500 text-[18px] fill-current" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                             </div>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">IIT Bombay • Computer Science</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">CMRIT Hyd</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
