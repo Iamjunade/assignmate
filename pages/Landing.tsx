@@ -105,7 +105,7 @@ export const Landing = () => {
                                     </div>
                                 </div>
                                 <div className="aspect-[4/3] w-full rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 relative mb-4">
-                                    <img alt="Group of diverse university students studying together outdoors" className="object-cover w-full h-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDM9ktUci-Kb5mEw_DOMEpJLr53J2wfANvRdkNqHaWwlo8jSp34PvO0-68ihzJG9YpzciRCxG0JAXYD1_pbv7rc5-N7SEKnIXYEmtO65-p9QTxkACIM5xzHVsPRs2UrA9mplTI73p5gUhUzGX7Zp_giSmCOI4OUcHlilXnpj08p839N-jDrrkhfajFVwNomaA1UH08CkQPGEP21fG7q_UqfqI_0hLMzyi_awkz50ZPxTnrbeFL82BJNxLhkcLMIIGa3xdOWlo1Nt_-N" />
+                                    <img alt="AssignMate Hero" className="object-cover w-full h-full" src="/home-hero.png" />
                                     <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-black/70 backdrop-blur px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Available Now
                                     </div>
