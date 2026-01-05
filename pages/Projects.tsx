@@ -29,11 +29,9 @@ export const Projects = ({ user }: ProjectsProps) => {
         try {
             setLoading(true);
             if (isWriterMode) {
-                // For writers: fetch orders where they are the writer
                 const writerOrders = await dbService.getWriterProjects(user!.id) as Order[];
                 setOrders(writerOrders);
             } else {
-                // For students: fetch orders where they are the student (hirer)
                 const studentOrders = await dbService.getStudentProjects(user!.id) as Order[];
                 setOrders(studentOrders);
             }
@@ -44,7 +42,6 @@ export const Projects = ({ user }: ProjectsProps) => {
         }
     };
 
-    // Calculate stats - unified for both modes using orders
     const stats = {
         total: orders.length,
         inProgress: orders.filter(o => o.status === 'in_progress').length,
@@ -54,45 +51,35 @@ export const Projects = ({ user }: ProjectsProps) => {
         pendingEarnings: orders.filter(o => o.status === 'in_progress').reduce((sum, o) => sum + (o.amount || 0), 0),
     };
 
-    // Filter items based on status
     const filteredItems = filterStatus === 'all'
         ? orders
         : orders.filter(o => o.status === filterStatus);
 
     const getStatusColor = (status: string) => {
-        if (status === 'in_progress') {
-            return 'bg-green-50 text-green-700 border-green-200';
-        } else if (status === 'completed') {
-            return 'bg-gray-50 text-gray-700 border-gray-200';
-        } else if (status === 'cancelled') {
-            return 'bg-red-50 text-red-700 border-red-200';
-        } else if (status === 'disputed') {
-            return 'bg-orange-50 text-orange-700 border-orange-200';
-        }
+        if (status === 'in_progress') return 'bg-green-50 text-green-700 border-green-200';
+        if (status === 'completed') return 'bg-gray-50 text-gray-700 border-gray-200';
+        if (status === 'cancelled') return 'bg-red-50 text-red-700 border-red-200';
+        if (status === 'disputed') return 'bg-orange-50 text-orange-700 border-orange-200';
         return 'bg-gray-50 text-gray-700 border-gray-200';
     };
 
     const getStatusIcon = (status: string) => {
-        if (status === 'in_progress') {
-            return 'pending';
-        } else if (status === 'completed') {
-            return 'check_circle';
-        } else if (status === 'cancelled') {
-            return 'cancel';
-        } else if (status === 'disputed') {
-            return 'warning';
-        }
+        if (status === 'in_progress') return 'pending';
+        if (status === 'completed') return 'check_circle';
+        if (status === 'cancelled') return 'cancel';
+        if (status === 'disputed') return 'warning';
         return 'help';
     };
 
-    const handleMarkComplete = async (orderId: string, orderTitle: string) => {
+    const handleMarkComplete = async (orderId: string, orderTitle: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+
         if (!confirm(`Mark "${orderTitle}" as completed?\n\nThis action will finalize the project.`)) {
             return;
         }
 
         try {
             await dbService.updateOrderStatus(orderId, 'completed');
-            // Reload projects to reflect the change
             await loadProjects();
         } catch (error) {
             console.error('Error marking project as complete:', error);
@@ -133,7 +120,7 @@ export const Projects = ({ user }: ProjectsProps) => {
                                 )}
                             </div>
 
-                            {/* Stats Cards - Unified for both modes */}
+                            {/* Stats Cards */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
                                     <div className="flex justify-between items-start mb-2">
@@ -180,7 +167,7 @@ export const Projects = ({ user }: ProjectsProps) => {
                                 </div>
                             </div>
 
-                            {/* Filter Tabs - Unified */}
+                            {/* Filter Tabs */}
                             <div className="bg-white p-2 rounded-2xl shadow-card border border-border-subtle inline-flex gap-2 w-fit">
                                 <button
                                     onClick={() => setFilterStatus('all')}
@@ -238,10 +225,7 @@ export const Projects = ({ user }: ProjectsProps) => {
                                 ) : (
                                     <div className="divide-y divide-border-subtle">
                                         {filteredItems.map((order: Order) => (
-                                            <div
-                                                key={order.id}
-                                                className="p-6 hover:bg-secondary-bg cursor-pointer transition-all group"
-                                            >
+                                            <div key={order.id} className="p-6 hover:bg-secondary-bg cursor-pointer transition-all group">
                                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-start gap-3 mb-2">
@@ -252,11 +236,9 @@ export const Projects = ({ user }: ProjectsProps) => {
                                                                 <h3 className="text-lg font-bold text-text-dark group-hover:text-primary transition-colors truncate">
                                                                     {order.title}
                                                                 </h3>
-                                                                {order.description && (
-                                                                    <p className="text-sm text-text-muted line-clamp-2 mt-1">
-                                                                        {order.description}
-                                                                    </p>
-                                                                )}
+                                                                <p className="text-sm text-text-muted line-clamp-2 mt-1">
+                                                                    {(order as any).description || 'No description available'}
+                                                                </p>
                                                             </div>
                                                         </div>
 
@@ -271,10 +253,10 @@ export const Projects = ({ user }: ProjectsProps) => {
                                                                     Due: {format(new Date(order.deadline), 'MMM d, yyyy')}
                                                                 </span>
                                                             )}
-                                                            {order.subject && (
+                                                            {(order as any).subject && (
                                                                 <span className="flex items-center gap-1">
                                                                     <span className="material-symbols-outlined text-sm">subject</span>
-                                                                    {order.subject}
+                                                                    {(order as any).subject}
                                                                 </span>
                                                             )}
                                                             {order.completion_percentage !== undefined && order.status === 'in_progress' && (
@@ -295,6 +277,15 @@ export const Projects = ({ user }: ProjectsProps) => {
                                                             <p className="text-2xl font-bold text-primary">₹{order.amount}</p>
                                                             <p className="text-xs text-text-muted">{isWriterMode ? 'Payment' : 'Budget'}</p>
                                                         </div>
+                                                        {order.status === 'in_progress' && (
+                                                            <button
+                                                                onClick={(e) => handleMarkComplete(order.id, order.title, e)}
+                                                                className="w-full mt-2 py-2 px-4 rounded-xl bg-green-500 text-white text-sm font-bold hover:bg-green-600 transition-all flex items-center justify-center gap-2"
+                                                            >
+                                                                <span className="material-symbols-outlined text-sm">check_circle</span>
+                                                                Mark Complete
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
