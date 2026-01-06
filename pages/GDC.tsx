@@ -44,43 +44,57 @@ export const GDC = () => {
         {
             id: 2,
             content: (
-                <div className="flex flex-col h-full p-16 text-left z-10 relative">
+                <div className="flex flex-col h-full p-8 md:p-16 text-left z-10 relative">
                     {/* Header Logo */}
-                    <div className="absolute top-8 left-8 flex items-center space-x-4">
+                    <div className="absolute top-8 left-8 flex items-center space-x-4 opacity-50 hover:opacity-100 transition-opacity">
                         <div className="flex items-center gap-1">
                             <span className="text-blue-500 font-bold text-xl">&lt;</span>
                             <span className="text-red-500 font-bold text-xl">GDG</span>
                             <span className="text-green-500 font-bold text-xl">/&gt;</span>
                         </div>
-                        <div className="border-l border-gray-300 pl-3">
+                        <div className="border-l border-gray-300 dark:border-white/20 pl-3">
                             <h2 className="text-lg font-medium text-gray-600 dark:text-gray-300 leading-tight font-display">Google Developer Group</h2>
                             <p className="text-xs text-gray-400 leading-tight font-sans">On Campus</p>
                         </div>
                     </div>
 
-                    <div className="mt-12 flex-1 flex flex-col justify-center">
-                        <h2 className="text-4xl md:text-5xl font-black text-[#1b140d] dark:text-white leading-tight mb-16 font-display">
-                            Brief about your solution and <br /> problem statement addressing
-                        </h2>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-                            <div className="space-y-6">
-                                <h3 className="text-3xl font-bold text-red-500 flex items-center gap-3 font-display">
-                                    <span className="w-1.5 h-10 bg-red-500 rounded-full"></span>
-                                    The Problem
-                                </h3>
-                                <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed font-sans text-justify">
-                                    Students often struggle with managing complex assignments, facing tight deadlines and a lack of reliable, unified platforms to find qualified assistance. The fragmentation of communication and payment channels leads to scams and poor quality work.
-                                </p>
+                    <div className="mt-16 flex-1 flex flex-col justify-center max-w-7xl mx-auto w-full">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-stretch">
+                            {/* Problem Card */}
+                            <div className="relative group">
+                                <div className="absolute -inset-1 bg-gradient-to-tr from-red-500 to-orange-500 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                                <div className="relative h-full bg-white/50 dark:bg-black/20 backdrop-blur-xl border border-red-100 dark:border-red-900/30 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all">
+                                    <div className="w-14 h-14 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center mb-6">
+                                        <span className="text-3xl">🧩</span>
+                                    </div>
+                                    <h3 className="text-3xl font-black text-[#1b140d] dark:text-white mb-4 font-display">
+                                        The Problem
+                                    </h3>
+                                    <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed font-sans font-medium">
+                                        Students are overwhelmed. <br /><span className="text-red-500/80 font-bold">Tight deadlines</span>, <span className="text-red-500/80 font-bold">complex assignments</span>, and no safe way to find help. The current market is fragmented, full of scams, and stressful.
+                                    </p>
+                                </div>
                             </div>
 
-                            <div className="space-y-6">
-                                <h3 className="text-3xl font-bold text-green-500 flex items-center gap-3 font-display">
-                                    <span className="w-1.5 h-10 bg-green-500 rounded-full"></span>
-                                    The Solution
-                                </h3>
-                                <div className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed font-sans text-justify">
-                                    <strong className="text-primary font-bold">AssignMate</strong> provides a secure, seamless ecosystem connecting students with verified writers. We offer real-time chat, milestone-based project tracking, and secure payments to ensure transparency, trust, and academic success for every user.
+                            {/* Solution Card */}
+                            <div className="relative group">
+                                <div className="absolute -inset-1 bg-gradient-to-bl from-green-500 to-emerald-500 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                                <div className="relative h-full bg-white/80 dark:bg-[#1b140d]/40 backdrop-blur-xl border border-green-100 dark:border-green-900/30 p-8 rounded-3xl shadow-2xl transform md:-translate-y-4 hover:-translate-y-6 transition-transform duration-500">
+                                    <div className="w-14 h-14 bg-green-100 dark:bg-green-900/20 rounded-2xl flex items-center justify-center mb-6">
+                                        <span className="text-3xl">🚀</span>
+                                    </div>
+                                    <h3 className="text-3xl font-black text-[#1b140d] dark:text-white mb-4 font-display">
+                                        The Solution
+                                    </h3>
+                                    <div className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed font-sans">
+                                        <strong className="text-green-600 dark:text-green-400 font-bold block mb-2 text-2xl">AssignMate Ecosystem</strong>
+                                        A secure, verified marketplace connecting students with top-tier peers. <br />
+                                        <ul className="mt-4 space-y-2 text-lg">
+                                            <li className="flex items-center gap-2"><span className="text-green-500 material-symbols-outlined">check_circle</span> <span>Bank-grade secure payments</span></li>
+                                            <li className="flex items-center gap-2"><span className="text-green-500 material-symbols-outlined">check_circle</span> <span>Verified campus seniors</span></li>
+                                            <li className="flex items-center gap-2"><span className="text-green-500 material-symbols-outlined">check_circle</span> <span>Milestone-based tracking</span></li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -149,7 +163,7 @@ export const GDC = () => {
                     disabled={currentSlide === slides.length - 1}
                     className={`p-3 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur shadow-sm hover:shadow border border-gray-200 dark:border-gray-700 transition-all ${currentSlide === slides.length - 1 ? 'opacity-30 cursor-not-allowed' : 'opacity-100 hover:scale-105'}`}
                 >
-                    <ChevronRight className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+                    <ChevronRight className="w-5 h-6 text-gray-700 dark:text-gray-200" />
                 </button>
             </div>
 
