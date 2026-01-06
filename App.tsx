@@ -33,6 +33,7 @@ const FindWriter = lazy(() => import('./pages/FindWriter').then(module => ({ def
 const Projects = lazy(() => import('./pages/Projects').then(module => ({ default: module.Projects })));
 const AdminVerifications = lazy(() => import('./admin/pages/AdminVerifications').then(module => ({ default: module.AdminVerifications })));
 const PitchDeck = lazy(() => import('./pages/PitchDeck').then(module => ({ default: module.PitchDeck })));
+const GDC = lazy(() => import('./pages/GDC').then(module => ({ default: module.GDC })));
 const Documentation = lazy(() => import('./pages/Documentation').then(module => ({ default: module.Documentation })));
 const TermsOfService = lazy(() => import('./pages/TermsOfService').then(module => ({ default: module.TermsOfService })));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
@@ -178,6 +179,9 @@ function AppContent() {
 
           {/* --- Pitch Deck --- */}
           <Route path="/pitch" element={<PitchDeck />} />
+
+          {/* --- GDC Presentation --- */}
+          <Route path="/gdc" element={<GDC />} />
 
           {/* --- Documentation --- */}
           <Route path="/docs" element={<Documentation />} />
