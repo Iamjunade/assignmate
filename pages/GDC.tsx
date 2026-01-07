@@ -390,6 +390,98 @@ export const GDC = () => {
                     </div>
                 </div>
             )
+        },
+        // Slide 6: Process Flow
+        {
+            id: 6,
+            content: (
+                <div className="flex flex-col h-full p-8 md:p-16 text-left z-10 relative">
+                    <div className="absolute top-8 left-8 flex items-center space-x-4 opacity-50 hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1">
+                            <span className="text-blue-500 font-bold text-xl">&lt;</span>
+                            <span className="text-red-500 font-bold text-xl">GDG</span>
+                            <span className="text-green-500 font-bold text-xl">/&gt;</span>
+                        </div>
+                        <div className="border-l border-gray-300 dark:border-white/20 pl-3">
+                            <h2 className="text-lg font-medium text-gray-600 dark:text-gray-300 leading-tight font-display">Google Developer Group</h2>
+                            <p className="text-xs text-gray-400 leading-tight font-sans">On Campus</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+                        <h2 className="text-3xl md:text-5xl font-black text-[#1b140d] dark:text-white leading-tight mb-16 font-display text-left">
+                            How it works
+                            <span className="block text-lg font-sans font-normal text-primary mt-2">Five simple steps to connect with talented writers from your college.</span>
+                        </h2>
+
+                        <div className="space-y-6 relative ml-6 md:ml-0">
+                            {/* Vertical Line Connector */}
+                            <div className="absolute left-[20px] top-6 bottom-6 w-0.5 bg-gradient-to-b from-orange-400 to-green-500/20 -z-10 hidden md:block"></div>
+
+                            {/* Step 1 */}
+                            <div className="flex items-center md:items-start group">
+                                <div className="shrink-0 w-12 h-12 rounded-full bg-orange-500 text-white font-bold text-xl flex items-center justify-center shadow-lg shadow-orange-500/30 z-10 mr-6">1</div>
+                                <div className="flex-1 bg-white/60 dark:bg-black/20 backdrop-blur-md border border-orange-100 dark:border-orange-900/30 p-6 rounded-2xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:translate-x-2 flex items-center gap-6">
+                                    <div className="shrink-0 w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center text-2xl">💼</div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-[#1b140d] dark:text-white mb-1 font-display">Writers showcase their work</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Talented writers create profiles with their skills, samples, and ratings from past work.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Step 2 */}
+                            <div className="flex items-center md:items-start group">
+                                <div className="shrink-0 w-12 h-12 rounded-full bg-gray-700 dark:bg-gray-800 text-white font-bold text-xl flex items-center justify-center shadow-lg z-10 mr-6 group-hover:bg-blue-600 transition-colors">2</div>
+                                <div className="flex-1 bg-white/60 dark:bg-black/20 backdrop-blur-md border border-blue-100 dark:border-blue-900/30 p-6 rounded-2xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:translate-x-2 flex items-center gap-6">
+                                    <div className="shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-2xl">📍</div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-[#1b140d] dark:text-white mb-1 font-display">Find writers from your college</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Search for verified writers from your college or nearby universities who understand your curriculum.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Step 3 */}
+                            <div className="flex items-center md:items-start group">
+                                <div className="shrink-0 w-12 h-12 rounded-full bg-gray-700 dark:bg-gray-800 text-white font-bold text-xl flex items-center justify-center shadow-lg z-10 mr-6 group-hover:bg-purple-600 transition-colors">3</div>
+                                <div className="flex-1 bg-white/60 dark:bg-black/20 backdrop-blur-md border border-purple-100 dark:border-purple-900/30 p-6 rounded-2xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:translate-x-2 flex items-center gap-6">
+                                    <div className="shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center text-2xl">💬</div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-[#1b140d] dark:text-white mb-1 font-display">Connect with them</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Chat directly with writers, discuss your requirements, and find the perfect match for your project.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Step 4 */}
+                            <div className="flex items-center md:items-start group">
+                                <div className="shrink-0 w-12 h-12 rounded-full bg-gray-700 dark:bg-gray-800 text-white font-bold text-xl flex items-center justify-center shadow-lg z-10 mr-6 group-hover:bg-green-600 transition-colors">4</div>
+                                <div className="flex-1 bg-white/60 dark:bg-black/20 backdrop-blur-md border border-green-100 dark:border-green-900/30 p-6 rounded-2xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:translate-x-2 flex items-center gap-6">
+                                    <div className="shrink-0 w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center text-2xl">🤝</div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-[#1b140d] dark:text-white mb-1 font-display">Make a deal</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Agree on price, deadline, and terms. Your payment is held securely until you approve the work.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Step 5 */}
+                            <div className="flex items-center md:items-start group">
+                                <div className="shrink-0 w-12 h-12 rounded-full bg-gray-700 dark:bg-gray-800 text-white font-bold text-xl flex items-center justify-center shadow-lg z-10 mr-6 group-hover:bg-teal-600 transition-colors">5</div>
+                                <div className="flex-1 bg-white/60 dark:bg-black/20 backdrop-blur-md border border-teal-100 dark:border-teal-900/30 p-6 rounded-2xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:translate-x-2 flex items-center gap-6">
+                                    <div className="shrink-0 w-12 h-12 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center text-2xl">🍃</div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-[#1b140d] dark:text-white mb-1 font-display">Relax</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Sit back while your writer works. Get updates, review the final work, and release payment when satisfied.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            )
         }
     ];
 
