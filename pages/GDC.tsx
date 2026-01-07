@@ -574,6 +574,91 @@ export const GDC = () => {
                     </div>
                 </div>
             )
+        },
+        // Slide 8: Future Roadmap
+        {
+            id: 8,
+            content: (
+                <div className="flex flex-col h-full p-8 md:p-16 text-left z-10 relative">
+                    <div className="absolute top-8 left-8 flex items-center space-x-4 opacity-50 hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1">
+                            <span className="text-blue-500 font-bold text-xl">&lt;</span>
+                            <span className="text-red-500 font-bold text-xl">GDG</span>
+                            <span className="text-green-500 font-bold text-xl">/&gt;</span>
+                        </div>
+                        <div className="border-l border-gray-300 dark:border-white/20 pl-3">
+                            <h2 className="text-lg font-medium text-gray-600 dark:text-gray-300 leading-tight font-display">Google Developer Group</h2>
+                            <p className="text-xs text-gray-400 leading-tight font-sans">On Campus</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 flex-1 flex flex-col justify-center max-w-7xl mx-auto w-full">
+                        <h2 className="text-3xl md:text-5xl font-black text-[#1b140d] dark:text-white leading-tight mb-16 font-display text-center">
+                            Additional Details / Future Development
+                        </h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+
+                            {/* Feature 1 (Mobile App) */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-gray-200 dark:border-gray-800 p-8 rounded-3xl hover:bg-white/90 dark:hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] shadow-sm hover:shadow-xl">
+                                <div className="flex items-start gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-3xl">
+                                        📱
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Mobile Application</h3>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">Native iOS and Android apps for on-the-go management, push notifications for bids, and quicker chats.</p>
+                                        <span className="text-xs border border-blue-200 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 px-3 py-1 rounded-full font-bold uppercase tracking-wider">Q3 2026</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Feature 2 (AI Tutor) */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-purple-200 dark:border-purple-800 p-8 rounded-3xl hover:bg-white/90 dark:hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] shadow-sm hover:shadow-xl">
+                                <div className="flex items-start gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center text-3xl">
+                                        🎓
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">AI Personal Tutor</h3>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">Evolving Gemini usage from support to active learning, reviewing drafts, and suggesting academic improvements.</p>
+                                        <span className="text-xs border border-purple-200 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300 px-3 py-1 rounded-full font-bold uppercase tracking-wider">Q4 2026</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Feature 3 (Voice/Video) */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-green-200 dark:border-green-800 p-8 rounded-3xl hover:bg-white/90 dark:hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] shadow-sm hover:shadow-xl">
+                                <div className="flex items-start gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center text-3xl">
+                                        📞
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Voice & Video Connect</h3>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">Secure, in-app voice and video calling to discuss complex project requirements without sharing phone numbers.</p>
+                                        <span className="text-xs border border-green-200 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-300 px-3 py-1 rounded-full font-bold uppercase tracking-wider">Q1 2027</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Feature 4 (Partnerships) */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-orange-200 dark:border-orange-800 p-8 rounded-3xl hover:bg-white/90 dark:hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] shadow-sm hover:shadow-xl">
+                                <div className="flex items-start gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center text-3xl">
+                                        🏛️
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">University Partnerships</h3>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">Official APIs with universities for instant student verification and course integration.</p>
+                                        <span className="text-xs border border-orange-200 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-300 px-3 py-1 rounded-full font-bold uppercase tracking-wider">Q2 2027</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            )
         }
     ];
 
