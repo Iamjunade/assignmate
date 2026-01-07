@@ -202,56 +202,82 @@ export const GDC = () => {
                             Core Features
                         </h2>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
 
                             {/* Feature 1 */}
-                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-orange-100 dark:border-orange-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
-                                <div className="flex items-start gap-6">
-                                    <div className="shrink-0 w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center">
-                                        <span className="text-3xl">🛡️</span>
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-orange-100 dark:border-orange-900/30 p-6 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-start gap-4">
+                                    <div className="shrink-0 w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-2xl">🛡️</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Secure Escrow</h3>
-                                        <p className="text-gray-600 dark:text-gray-400">Payments are held safely. Funds are only released to the writer when you are 100% satisfied with the work.</p>
+                                        <h3 className="text-xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Secure Escrow</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Payments are held safely. Funds are only released when you are 100% satisfied.</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Feature 2 */}
-                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-blue-100 dark:border-blue-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
-                                <div className="flex items-start gap-6">
-                                    <div className="shrink-0 w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center">
-                                        <span className="text-3xl">✅</span>
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-blue-100 dark:border-blue-900/30 p-6 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-start gap-4">
+                                    <div className="shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-2xl">✅</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Verified Profiles</h3>
-                                        <p className="text-gray-600 dark:text-gray-400">Strict college ID verification ensures you are dealing with real seniors, not bots or agencies.</p>
+                                        <h3 className="text-xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Verified Profiles</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Strict college ID verification ensures you are dealing with real seniors.</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Feature 3 */}
-                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-green-100 dark:border-green-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
-                                <div className="flex items-start gap-6">
-                                    <div className="shrink-0 w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center">
-                                        <span className="text-3xl">💬</span>
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-green-100 dark:border-green-900/30 p-6 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-start gap-4">
+                                    <div className="shrink-0 w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-2xl">💬</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Real-time Chat</h3>
-                                        <p className="text-gray-600 dark:text-gray-400">Negotiate terms, ask for updates, and give feedback instantly—without sharing personal phone numbers.</p>
+                                        <h3 className="text-xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Real-time Chat</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Negotiate terms and give feedback instantly without sharing details.</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Feature 4 */}
-                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-purple-100 dark:border-purple-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
-                                <div className="flex items-start gap-6">
-                                    <div className="shrink-0 w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center">
-                                        <span className="text-3xl">📍</span>
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-purple-100 dark:border-purple-900/30 p-6 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-start gap-4">
+                                    <div className="shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-2xl">📍</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Milestone Tracking</h3>
-                                        <p className="text-gray-600 dark:text-gray-400">Break large projects into chunks. Pay as you go, ensuring progress is tracked at every step.</p>
+                                        <h3 className="text-xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Milestone Tracking</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Break large projects into chunks. Pay as you go, tracking progress.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Feature 5 */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-red-100 dark:border-red-900/30 p-6 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-start gap-4">
+                                    <div className="shrink-0 w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-2xl">📝</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Plagiarism Checks</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Originality reports and strict guidelines ensure you never face academic issues.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Feature 6 */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-yellow-100 dark:border-yellow-900/30 p-6 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-start gap-4">
+                                    <div className="shrink-0 w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-2xl">⭐</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Community Ratings</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Merit-based system. Writers earn reputation scores from verified reviews.</p>
                                     </div>
                                 </div>
                             </div>
