@@ -179,6 +179,87 @@ export const GDC = () => {
                     </div>
                 </div>
             )
+        },
+        // Slide 4: Features
+        {
+            id: 4,
+            content: (
+                <div className="flex flex-col h-full p-8 md:p-16 text-left z-10 relative">
+                    <div className="absolute top-8 left-8 flex items-center space-x-4 opacity-50 hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1">
+                            <span className="text-blue-500 font-bold text-xl">&lt;</span>
+                            <span className="text-red-500 font-bold text-xl">GDG</span>
+                            <span className="text-green-500 font-bold text-xl">/&gt;</span>
+                        </div>
+                        <div className="border-l border-gray-300 dark:border-white/20 pl-3">
+                            <h2 className="text-lg font-medium text-gray-600 dark:text-gray-300 leading-tight font-display">Google Developer Group</h2>
+                            <p className="text-xs text-gray-400 leading-tight font-sans">On Campus</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 flex-1 flex flex-col justify-center max-w-7xl mx-auto w-full">
+                        <h2 className="text-3xl md:text-5xl font-black text-[#1b140d] dark:text-white leading-tight mb-16 font-display text-center">
+                            Core Features
+                        </h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+
+                            {/* Feature 1 */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-orange-100 dark:border-orange-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-start gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-3xl">🛡️</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Secure Escrow</h3>
+                                        <p className="text-gray-600 dark:text-gray-400">Payments are held safely. Funds are only released to the writer when you are 100% satisfied with the work.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Feature 2 */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-blue-100 dark:border-blue-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-start gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-3xl">✅</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Verified Profiles</h3>
+                                        <p className="text-gray-600 dark:text-gray-400">Strict college ID verification ensures you are dealing with real seniors, not bots or agencies.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Feature 3 */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-green-100 dark:border-green-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-start gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-3xl">💬</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Real-time Chat</h3>
+                                        <p className="text-gray-600 dark:text-gray-400">Negotiate terms, ask for updates, and give feedback instantly—without sharing personal phone numbers.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Feature 4 */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-purple-100 dark:border-purple-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-start gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-3xl">📍</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-2 font-display">Milestone Tracking</h3>
+                                        <p className="text-gray-600 dark:text-gray-400">Break large projects into chunks. Pay as you go, ensuring progress is tracked at every step.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            )
         }
     ];
 
