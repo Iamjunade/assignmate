@@ -482,6 +482,98 @@ export const GDC = () => {
                     </div>
                 </div>
             )
+        },
+        // Slide 7: Architecture Design
+        {
+            id: 7,
+            content: (
+                <div className="flex flex-col h-full p-8 md:p-16 text-left z-10 relative">
+                    <div className="absolute top-8 left-8 flex items-center space-x-4 opacity-50 hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1">
+                            <span className="text-blue-500 font-bold text-xl">&lt;</span>
+                            <span className="text-red-500 font-bold text-xl">GDG</span>
+                            <span className="text-green-500 font-bold text-xl">/&gt;</span>
+                        </div>
+                        <div className="border-l border-gray-300 dark:border-white/20 pl-3">
+                            <h2 className="text-lg font-medium text-gray-600 dark:text-gray-300 leading-tight font-display">Google Developer Group</h2>
+                            <p className="text-xs text-gray-400 leading-tight font-sans">On Campus</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 flex-1 flex flex-col justify-center max-w-7xl mx-auto w-full">
+                        <h2 className="text-3xl md:text-5xl font-black text-[#1b140d] dark:text-white leading-tight mb-16 font-display text-center">
+                            System Architecture
+                        </h2>
+
+                        <div className="relative">
+                            {/* Connecting Lines */}
+                            <div className="absolute top-1/2 left-0 w-full h-1 bg-gradient-to-r from-blue-200 via-purple-200 to-orange-200 -z-10 -translate-y-1/2 rounded-full"></div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+                                {/* Layer 1: Client */}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-40 h-40 bg-white/60 dark:bg-black/30 backdrop-blur-md rounded-full shadow-xl border-4 border-blue-100 dark:border-blue-900/50 flex flex-col items-center justify-center z-10 relative group hover:scale-105 transition-transform">
+                                        <span className="text-5xl mb-2">📱</span>
+                                        <span className="font-bold text-gray-700 dark:text-gray-200">Client</span>
+                                    </div>
+                                    <div className="mt-6 text-center">
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-lg inline-block text-blue-600 dark:text-blue-300 font-semibold text-sm">
+                                            Student / Writer
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">Web & Mobile Access</p>
+                                    </div>
+                                </div>
+
+                                {/* Layer 2: Frontend */}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-40 h-40 bg-white/60 dark:bg-black/30 backdrop-blur-md rounded-full shadow-xl border-4 border-cyan-100 dark:border-cyan-900/50 flex flex-col items-center justify-center z-10 relative group hover:scale-105 transition-transform">
+                                        <span className="text-5xl mb-2">⚛️</span>
+                                        <span className="font-bold text-gray-700 dark:text-gray-200">Frontend</span>
+                                    </div>
+                                    <div className="mt-6 text-center space-y-2">
+                                        <div className="bg-cyan-50 dark:bg-cyan-900/20 px-4 py-2 rounded-lg inline-block text-cyan-600 dark:text-cyan-300 font-semibold text-sm">
+                                            React + Vite
+                                        </div>
+                                        <p className="text-xs text-gray-500">Tailwind CSS for UI</p>
+                                    </div>
+                                </div>
+
+                                {/* Layer 3: Backend Services */}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-40 h-40 bg-white/60 dark:bg-black/30 backdrop-blur-md rounded-full shadow-xl border-4 border-orange-100 dark:border-orange-900/50 flex flex-col items-center justify-center z-10 relative group hover:scale-105 transition-transform">
+                                        <span className="text-5xl mb-2">🔥</span>
+                                        <span className="font-bold text-gray-700 dark:text-gray-200">Backend</span>
+                                    </div>
+                                    <div className="mt-6 text-center space-y-2">
+                                        <div className="flex flex-wrap justify-center gap-2 max-w-[150px]">
+                                            <span className="bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded text-orange-600 dark:text-orange-300 font-semibold text-xs">Auth</span>
+                                            <span className="bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded text-yellow-600 dark:text-yellow-300 font-semibold text-xs">Firestore</span>
+                                            <span className="bg-indigo-50 dark:bg-indigo-900/20 px-2 py-1 rounded text-indigo-600 dark:text-indigo-300 font-semibold text-xs">Storage</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Layer 4: AI Layer */}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-40 h-40 bg-white/60 dark:bg-black/30 backdrop-blur-md rounded-full shadow-xl border-4 border-purple-100 dark:border-purple-900/50 flex flex-col items-center justify-center z-10 relative group hover:scale-105 transition-transform">
+                                        <span className="text-5xl mb-2">✨</span>
+                                        <span className="font-bold text-gray-700 dark:text-gray-200">Intelligence</span>
+                                    </div>
+                                    <div className="mt-6 text-center">
+                                        <div className="bg-purple-50 dark:bg-purple-900/20 px-4 py-2 rounded-lg inline-block text-purple-600 dark:text-purple-300 font-semibold text-sm">
+                                            Gemini AI
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">Contextual Assistance</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            )
         }
     ];
 
