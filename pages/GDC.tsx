@@ -119,61 +119,56 @@ export const GDC = () => {
                         </div>
                     </div>
 
-                    <div className="mt-12 flex-1 flex flex-col justify-center max-w-7xl mx-auto w-full">
-                        <h2 className="text-4xl md:text-5xl font-black text-[#1b140d] dark:text-white leading-tight mb-16 font-display text-center">
+                    <div className="mt-8 flex-1 flex flex-col justify-center max-w-7xl mx-auto w-full">
+                        <h2 className="text-3xl md:text-5xl font-black text-[#1b140d] dark:text-white leading-tight mb-12 font-display text-center">
                             Market Opportunities & Edge
                         </h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
 
-                            {/* How is it different? */}
-                            <div className="relative group">
+                            {/* Differentiation */}
+                            <div className="relative group h-full">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-500"></div>
-                                <div className="relative h-full bg-white/60 dark:bg-black/20 backdrop-blur-xl border border-blue-100 dark:border-blue-900/30 p-8 rounded-3xl shadow-lg hover:transform hover:scale-[1.02] transition-all duration-300">
+                                <div className="relative h-full bg-white/60 dark:bg-black/20 backdrop-blur-xl border border-blue-100 dark:border-blue-900/30 p-8 rounded-3xl shadow-lg hover:transform hover:scale-[1.01] transition-all duration-300 flex flex-col">
                                     <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-6 font-display flex items-center gap-3">
                                         <span className="material-symbols-outlined text-3xl">difference</span>
                                         How are we different?
                                     </h3>
-                                    <ul className="space-y-6">
-                                        <li className="flex gap-4">
-                                            <div className="shrink-0 w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 font-bold">1</div>
-                                            <div>
-                                                <h4 className="font-bold text-[#1b140d] dark:text-white text-lg">Hyper-Local Trust</h4>
-                                                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Unlike generic platforms, we connect you with seniors from <span className="font-bold text-blue-500">your own college</span> who know the curriculum.</p>
-                                            </div>
-                                        </li>
-                                        <li className="flex gap-4">
-                                            <div className="shrink-0 w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 font-bold">2</div>
-                                            <div>
-                                                <h4 className="font-bold text-[#1b140d] dark:text-white text-lg">Identity Verification</h4>
-                                                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">No anonymous bots. Every writer is ID-verified with their college student status.</p>
-                                            </div>
-                                        </li>
-                                    </ul>
+                                    <div className="space-y-6 flex-1">
+                                        <div className="bg-white/50 dark:bg-black/20 p-4 rounded-xl border border-blue-50 dark:border-blue-900/20">
+                                            <h4 className="font-bold text-[#1b140d] dark:text-white text-lg mb-2">Vs. Global Freelancing Sites (Fiverr/Upwork)</h4>
+                                            <p className="text-gray-600 dark:text-gray-400 text-sm">Global sites are too generic. A freelancer in another country doesn't know your specific <span className="font-bold text-blue-600 dark:text-blue-400">college professor's requirements</span>. We connect you with seniors from <strong>your own campus</strong>.</p>
+                                        </div>
+
+                                        <div className="bg-white/50 dark:bg-black/20 p-4 rounded-xl border border-blue-50 dark:border-blue-900/20">
+                                            <h4 className="font-bold text-[#1b140d] dark:text-white text-lg mb-2">Vs. WhatsApp/Telegram Groups</h4>
+                                            <p className="text-gray-600 dark:text-gray-400 text-sm">Informal groups are rife with scams. If you pay upfront, there is <strong>zero guarantee</strong> of work. We replace this chaos with structured, verified trust.</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* How does it solve the problem? */}
-                            <div className="relative group">
+                            {/* Problem Solving */}
+                            <div className="relative group h-full">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-pink-500 rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-500"></div>
-                                <div className="relative h-full bg-white/60 dark:bg-black/20 backdrop-blur-xl border border-purple-100 dark:border-purple-900/30 p-8 rounded-3xl shadow-lg hover:transform hover:scale-[1.02] transition-all duration-300">
+                                <div className="relative h-full bg-white/60 dark:bg-black/20 backdrop-blur-xl border border-purple-100 dark:border-purple-900/30 p-8 rounded-3xl shadow-lg hover:transform hover:scale-[1.01] transition-all duration-300 flex flex-col">
                                     <h3 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-6 font-display flex items-center gap-3">
                                         <span className="material-symbols-outlined text-3xl">psychology</span>
-                                        Why it actually works?
+                                        How does it solve the problem?
                                     </h3>
-                                    <ul className="space-y-6">
+                                    <ul className="space-y-5 flex-1">
                                         <li className="flex gap-4">
-                                            <div className="shrink-0 w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 font-bold">1</div>
+                                            <div className="shrink-0 w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 font-bold text-xl">1</div>
                                             <div>
-                                                <h4 className="font-bold text-[#1b140d] dark:text-white text-lg">The "Escrow" Safety Net</h4>
-                                                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">We eliminate scams by holding payments securely. Money is only released when the student approves the work.</p>
+                                                <h4 className="font-bold text-[#1b140d] dark:text-white text-lg">Trust by Design (Escrow)</h4>
+                                                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">We solve the "Trust Deficit". Payments are held in neutral escrow. The writer knows the money is there, but the student only releases it when the work is done correctly.</p>
                                             </div>
                                         </li>
                                         <li className="flex gap-4">
-                                            <div className="shrink-0 w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 font-bold">2</div>
+                                            <div className="shrink-0 w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 font-bold text-xl">2</div>
                                             <div>
-                                                <h4 className="font-bold text-[#1b140d] dark:text-white text-lg">Quality Assurance</h4>
-                                                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">By matching with seniors who have taken the <em>same course</em>, the quality and relevance of help is guaranteed.</p>
+                                                <h4 className="font-bold text-[#1b140d] dark:text-white text-lg">Contextual Relevance</h4>
+                                                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">By matching juniors with seniors who have <span className="text-purple-600 dark:text-purple-400 font-bold">aced the same course</span>, we ensure the assignment isn't just "done", but done to the specific standards required.</p>
                                             </div>
                                         </li>
                                     </ul>
