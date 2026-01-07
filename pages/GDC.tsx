@@ -286,6 +286,110 @@ export const GDC = () => {
                     </div>
                 </div>
             )
+        },
+        // Slide 5: Google Technologies
+        {
+            id: 5,
+            content: (
+                <div className="flex flex-col h-full p-8 md:p-16 text-left z-10 relative">
+                    <div className="absolute top-8 left-8 flex items-center space-x-4 opacity-50 hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1">
+                            <span className="text-blue-500 font-bold text-xl">&lt;</span>
+                            <span className="text-red-500 font-bold text-xl">GDG</span>
+                            <span className="text-green-500 font-bold text-xl">/&gt;</span>
+                        </div>
+                        <div className="border-l border-gray-300 dark:border-white/20 pl-3">
+                            <h2 className="text-lg font-medium text-gray-600 dark:text-gray-300 leading-tight font-display">Google Developer Group</h2>
+                            <p className="text-xs text-gray-400 leading-tight font-sans">On Campus</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 flex-1 flex flex-col justify-center max-w-7xl mx-auto w-full">
+                        <h2 className="text-3xl md:text-5xl font-black text-[#1b140d] dark:text-white leading-tight mb-16 font-display text-center">
+                            Google Technologies Used
+                        </h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+
+                            {/* Tech 1 (Gemini) */}
+                            <div className="md:col-span-2 group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-sky-100 dark:border-sky-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2 relative overflow-hidden">
+                                <div className="absolute -right-10 -top-10 w-40 h-40 bg-sky-200/20 rounded-full blur-3xl"></div>
+                                <div className="flex flex-col md:flex-row items-center md:items-start gap-8 relative z-10">
+                                    <div className="shrink-0 w-24 h-24 bg-gradient-to-br from-blue-400 to-cyan-300 rounded-3xl flex items-center justify-center shadow-lg">
+                                        <span className="text-5xl">✨</span>
+                                    </div>
+                                    <div className="flex-1 text-center md:text-left">
+                                        <h3 className="text-3xl font-black text-[#1b140d] dark:text-white mb-2 font-display flex items-center justify-center md:justify-start gap-3">
+                                            Gemini AI <span className="text-xs bg-sky-100 text-sky-800 px-2 py-1 rounded-full border border-sky-200 uppercase tracking-wide">Star Feature</span>
+                                        </h3>
+                                        <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
+                                            The brain of our support system.
+                                        </p>
+                                        <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                                            <div className="px-4 py-2 bg-white/50 dark:bg-black/40 rounded-xl border border-sky-100 text-sm font-semibold text-gray-700 dark:text-gray-300">🤖 AI Chat Assistance for Students</div>
+                                            <div className="px-4 py-2 bg-white/50 dark:bg-black/40 rounded-xl border border-sky-100 text-sm font-semibold text-gray-700 dark:text-gray-300">🛠️ Automated Help Support</div>
+                                            <div className="px-4 py-2 bg-white/50 dark:bg-black/40 rounded-xl border border-sky-100 text-sm font-semibold text-gray-700 dark:text-gray-300">🎫 Smart Ticket Raising</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Tech 2 (Firebase Auth) */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-orange-100 dark:border-orange-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-center gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-3xl">🔐</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-1 font-display">Firebase Authentication</h3>
+                                        <p className="text-gray-600 dark:text-gray-400">Secure, seamless identity management across google accounts.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Tech 3 (Firestore) */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-yellow-100 dark:border-yellow-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-center gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-3xl">🔥</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-1 font-display">Cloud Firestore</h3>
+                                        <p className="text-gray-600 dark:text-gray-400">Real-time, scalable NoSQL database syncing data instantly.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Tech 4 (Storage) */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-indigo-100 dark:border-indigo-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-center gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-3xl">💾</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-1 font-display">Firebase Storage</h3>
+                                        <p className="text-gray-600 dark:text-gray-400">Robust storage for student assignments and resources.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Tech 5 (Google Fonts) */}
+                            <div className="group bg-white/60 dark:bg-black/20 backdrop-blur-md border border-red-100 dark:border-red-900/30 p-8 rounded-3xl hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 hover:-translate-y-2">
+                                <div className="flex items-center gap-6">
+                                    <div className="shrink-0 w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center">
+                                        <span className="text-3xl">🎨</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#1b140d] dark:text-white mb-1 font-display">Google Fonts</h3>
+                                        <p className="text-gray-600 dark:text-gray-400">Beautiful typography using Inter & Manrope for optimal readability.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            )
         }
     ];
 
