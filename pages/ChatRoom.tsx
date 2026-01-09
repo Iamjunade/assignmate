@@ -760,7 +760,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                     onClick={() => navigate('/writers')}
                                     className="mt-3 text-sm text-primary font-bold hover:underline"
                                 >
-                                    Find Writers
+                                    Find Peers
                                 </button>
                             </div>
                         )}

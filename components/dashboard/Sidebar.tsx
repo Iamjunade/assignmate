@@ -73,10 +73,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     <div>
                         <p className={`text-xs font-bold uppercase tracking-wider ${isWriterMode ? 'text-primary' : 'text-blue-600'
                             }`}>
-                            {isWriterMode ? 'Writer Mode' : 'Student Mode'}
+                            {isWriterMode ? 'Mentor Mode' : 'Student Mode'}
                         </p>
                         <p className="text-[11px] text-text-muted">
-                            {isWriterMode ? 'Ready to help others' : 'Looking for help'}
+                            {isWriterMode ? 'Sharing Knowledge' : 'Learning & Networking'}
                         </p>
                     </div>
                 </div>
@@ -136,7 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/writers') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
                         >
                             <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">person_search</span>
-                            <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Find Writers</span>
+                            <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Find Peers</span>
                         </a>
                     </>
                 )}

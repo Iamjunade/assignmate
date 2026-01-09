@@ -177,7 +177,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         if (checked) {
             const hasPortfolio = profileUser.portfolio && profileUser.portfolio.length > 0;
             if (!hasPortfolio) {
-                error("Please upload at least one work sample to become a writer.");
+                error("Please upload at least one work sample to become a mentor.");
                 setActiveTab('portfolio');
                 return;
             }
@@ -187,7 +187,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         try {
             await db.updateProfile(profileUser.id, { is_writer: checked });
             setProfileUser({ ...profileUser, is_writer: checked });
-            success(checked ? "You are now listed as a writer" : "You are no longer listed as a writer");
+            success(checked ? "You are now listed as a mentor" : "You are no longer listed as a mentor");
         } catch (e) {
             setIsWriter(!checked);
             error("Failed to update status");
@@ -468,7 +468,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         <div className="flex items-center gap-2">
                                             <div className={`size-2.5 rounded-full ${isWriter ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
                                             <span className="text-sm font-medium text-secondary">
-                                                {isWriter ? 'Writer Mode On' : 'Writer Mode Off'}
+                                                {isWriter ? 'Mentor Mode On' : 'Mentor Mode Off'}
                                             </span>
                                         </div>
                                         {isOwnProfile ? (
@@ -814,64 +814,66 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div >
 
                 {/* Delete Account Modal */}
                 <AnimatePresence>
-                    {showDeleteModal && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
-                            >
-                                <div className="text-center mb-6">
-                                    <div className="size-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <AlertTriangle size={32} className="text-red-600" />
-                                    </div>
-                                    <h2 className="text-2xl font-bold text-text-main mb-2">Delete Account?</h2>
-                                    <p className="text-secondary text-sm">
-                                        This action is permanent and cannot be undone. All your data, chats, and earnings will be wiped.
-                                    </p>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-secondary uppercase mb-2">
-                                            Type "DELETE" to confirm
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={deleteConfirmInput}
-                                            onChange={(e) => setDeleteConfirmInput(e.target.value)}
-                                            className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 font-bold text-center tracking-widest focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all"
-                                            placeholder="DELETE"
-                                        />
+                    {
+                        showDeleteModal && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+                                >
+                                    <div className="text-center mb-6">
+                                        <div className="size-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <AlertTriangle size={32} className="text-red-600" />
+                                        </div>
+                                        <h2 className="text-2xl font-bold text-text-main mb-2">Delete Account?</h2>
+                                        <p className="text-secondary text-sm">
+                                            This action is permanent and cannot be undone. All your data, chats, and earnings will be wiped.
+                                        </p>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button
-                                            onClick={() => setShowDeleteModal(false)}
-                                            className="py-3 rounded-xl font-bold text-secondary hover:bg-gray-50 transition-colors"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            onClick={handleFinalDelete}
-                                            disabled={deleteConfirmInput !== 'DELETE'}
-                                            className="py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-red-500/30"
-                                        >
-                                            Delete Forever
-                                        </button>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-secondary uppercase mb-2">
+                                                Type "DELETE" to confirm
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={deleteConfirmInput}
+                                                onChange={(e) => setDeleteConfirmInput(e.target.value)}
+                                                className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 font-bold text-center tracking-widest focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all"
+                                                placeholder="DELETE"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button
+                                                onClick={() => setShowDeleteModal(false)}
+                                                className="py-3 rounded-xl font-bold text-secondary hover:bg-gray-50 transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={handleFinalDelete}
+                                                disabled={deleteConfirmInput !== 'DELETE'}
+                                                className="py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-red-500/30"
+                                            >
+                                                Delete Forever
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
-                </AnimatePresence>
-            </main>
+                                </motion.div>
+                            </div>
+                        )
+                    }
+                </AnimatePresence >
+            </main >
             <MobileNav />
-        </div>
+        </div >
     );
 };

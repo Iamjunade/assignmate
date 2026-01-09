@@ -193,7 +193,7 @@ export const FindWriter = () => {
                     </div>
                     <nav className="hidden lg:flex items-center gap-8">
                         <button onClick={() => navigate('/feed')} className="text-text-main text-sm font-medium hover:text-primary transition-colors">Home</button>
-                        <button className="text-primary text-sm font-bold">Find Writers</button>
+                        <button className="text-primary text-sm font-bold">Find Peers</button>
                         <button onClick={() => navigate('/feed')} className="text-text-main text-sm font-medium hover:text-primary transition-colors">My Assignments</button>
                     </nav>
                     <div className="flex items-center gap-3">
@@ -280,12 +280,12 @@ export const FindWriter = () => {
                                                     onClick={() => handleSuggestionSelect(suggestion.value)}
                                                 >
                                                     <div className={`size-10 rounded-xl flex items-center justify-center shrink-0 ${suggestion.type === 'college'
-                                                            ? 'bg-primary/10'
-                                                            : 'bg-green-500/10'
+                                                        ? 'bg-primary/10'
+                                                        : 'bg-green-500/10'
                                                         }`}>
                                                         <span className={`material-symbols-outlined text-lg ${suggestion.type === 'college'
-                                                                ? 'text-primary'
-                                                                : 'text-green-600'
+                                                            ? 'text-primary'
+                                                            : 'text-green-600'
                                                             }`}>
                                                             {suggestion.type === 'college' ? 'school' : 'location_on'}
                                                         </span>
@@ -328,8 +328,8 @@ export const FindWriter = () => {
                             <button
                                 onClick={clearAllFilters}
                                 className={`shrink-0 h-9 px-4 rounded-full text-sm font-medium flex items-center gap-2 shadow-sm transition-all ${activeFiltersCount > 0
-                                        ? 'bg-primary text-white'
-                                        : 'bg-text-main text-background'
+                                    ? 'bg-primary text-white'
+                                    : 'bg-text-main text-background'
                                     }`}
                             >
                                 <span className="material-symbols-outlined text-[18px]">tune</span>
@@ -345,7 +345,7 @@ export const FindWriter = () => {
                                     }`}
                             >
                                 <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>edit_note</span>
-                                Writers Only
+                                Mentors Only
                             </button>
 
                             <button
@@ -470,7 +470,7 @@ export const FindWriter = () => {
                                                         <span className="text-xs font-bold text-text-main">{writer.rating || '5.0'}</span>
                                                     </div>
                                                     {writer.is_writer && (
-                                                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">WRITER</span>
+                                                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">MENTOR</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -541,7 +541,7 @@ export const FindWriter = () => {
                                 <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
                             </div>
                             <span className="font-bold text-text-main">AssignMate</span>
-                            <span className="hidden sm:inline">• India's #1 student marketplace</span>
+                            <span className="hidden sm:inline">• India's #1 student community</span>
                         </div>
                         <div className="flex items-center gap-4">
                             <a href="#" className="hover:text-primary transition-colors">Privacy</a>
