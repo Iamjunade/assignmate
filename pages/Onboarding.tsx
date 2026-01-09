@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
-import { Search, PenTool } from 'lucide-react';
 
 // Helper to check if profile is complete
 const isProfileComplete = (user: any): boolean => {
@@ -21,7 +20,6 @@ export const Onboarding = () => {
 
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({ fullName: '', handle: '', school: '', bio: '' });
-    const [isWriter, setIsWriter] = useState(false);
 
     // Pre-fill form with existing user data
     useEffect(() => {
@@ -32,7 +30,6 @@ export const Onboarding = () => {
                 school: (user.school && user.school !== 'Not Specified') ? user.school : '',
                 bio: user.bio || ''
             });
-            setIsWriter(user.is_writer || false);
         }
     }, [user]);
 
@@ -63,7 +60,7 @@ export const Onboarding = () => {
 
         setLoading(true);
         try {
-            await completeGoogleSignup(form.handle, form.school, isWriter, form.bio, form.fullName);
+            await completeGoogleSignup(form.handle, form.school, false, form.bio, form.fullName);
             success("Profile setup complete! Welcome.");
             // Navigation handled by useEffect when user state updates
         } catch (err: any) {
@@ -144,38 +141,6 @@ export const Onboarding = () => {
                                 value={form.bio}
                                 onChange={e => setForm({ ...form, bio: e.target.value })}
                             />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2 pt-2">
-                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">
-                            What is your goal?
-                        </label>
-                        <div className="grid grid-cols-2 gap-3">
-                            <div
-                                onClick={() => setIsWriter(false)}
-                                className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!isWriter
-                                    ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
-                                    : 'bg-white border-slate-200 hover:bg-slate-50'
-                                    }`}
-                            >
-                                <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-600' : 'text-slate-500'}`}>
-                                    Find Help
-                                </span>
-                            </div>
-                            <div
-                                onClick={() => setIsWriter(true)}
-                                className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${isWriter
-                                    ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
-                                    : 'bg-white border-slate-200 hover:bg-slate-50'
-                                    }`}
-                            >
-                                <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
-                                <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>
-                                    Share Knowledge
-                                </span>
-                            </div>
                         </div>
                     </div>
 
