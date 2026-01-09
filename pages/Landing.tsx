@@ -40,9 +40,9 @@ export const Landing = () => {
         const searchQuery = searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : '';
 
         if (user) {
-            navigate(`/writers${searchQuery}`);
+            navigate(`/mentors${searchQuery}`);
         } else {
-            const returnUrl = `/writers${searchQuery}`;
+            const returnUrl = `/mentors${searchQuery}`;
             navigate(`/auth?redirect=${encodeURIComponent(returnUrl)}`);
         }
     };
@@ -302,67 +302,72 @@ export const Landing = () => {
                             <div className="flex items-start gap-4">
                                 <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white text-sm font-bold">1</span>
                                 <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
-                                    <div className="shrink-0 w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-primary">work</span>
+                                    <div className="w-12 h-12 bg-orange-900/20 rounded-xl flex items-center justify-center shrink-0">
+                                        <span className="material-symbols-outlined text-orange-500">work_outline</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-white mb-1">Peers showcase their work</h3>
-                                        <p className="text-sm text-gray-400">Talented students create profiles with their skills, samples, and ratings from past collaborations.</p>
+                                        <h3 className="text-base font-bold text-white mb-1">Peers showcase their profiles</h3>
+                                        <p className="text-sm text-gray-400">Talented peers create profiles with their skills, samples, and ratings from past projects.</p>
                                     </div>
                                 </div>
                             </div>
+
                             {/* Step 2 */}
                             <div className="flex items-start gap-4">
-                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#3a2e24] text-gray-400 text-sm font-bold">2</span>
-                                <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
-                                    <div className="shrink-0 w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-blue-400">location_on</span>
+                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">2</span>
+                                <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
+                                    <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center shrink-0">
+                                        <span className="material-symbols-outlined text-blue-500">search</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-white mb-1">Find peers from your college</h3>
-                                        <p className="text-sm text-gray-400">Search for verified peers from your college or nearby universities who understand your curriculum.</p>
+                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Find your perfect mentor</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Search by subject, college, or specific skills to find the right peer for your needs.</p>
                                     </div>
                                 </div>
                             </div>
+
                             {/* Step 3 */}
                             <div className="flex items-start gap-4">
-                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#3a2e24] text-gray-400 text-sm font-bold">3</span>
-                                <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
-                                    <div className="shrink-0 w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-purple-400">chat</span>
+                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">3</span>
+                                <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
+                                    <div className="w-12 h-12 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center shrink-0">
+                                        <span className="material-symbols-outlined text-green-500">chat</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-white mb-1">Connect with them</h3>
-                                        <p className="text-sm text-gray-400">Chat directly with peers, discuss your doubts, and find the perfect match for your needs.</p>
+                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Chat and discuss details</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Connect directly via secure chat to discuss project requirements, timeline, and budget.</p>
                                     </div>
                                 </div>
                             </div>
+
                             {/* Step 4 */}
                             <div className="flex items-start gap-4">
-                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#3a2e24] text-gray-400 text-sm font-bold">4</span>
-                                <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
-                                    <div className="shrink-0 w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-green-400">handshake</span>
+                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">4</span>
+                                <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
+                                    <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/20 rounded-xl flex items-center justify-center shrink-0">
+                                        <span className="material-symbols-outlined text-purple-500">verified_user</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-white mb-1">Collaborate</h3>
-                                        <p className="text-sm text-gray-400">Agree on terms and scope. Your collaboration is backed by our secure platform.</p>
+                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Secure collaboration</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Payments are held safely until the collaboration is completed to your satisfaction.</p>
                                     </div>
                                 </div>
                             </div>
+
                             {/* Step 5 */}
                             <div className="flex items-start gap-4">
-                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#3a2e24] text-gray-400 text-sm font-bold">5</span>
-                                <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
-                                    <div className="shrink-0 w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-emerald-400">spa</span>
+                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">5</span>
+                                <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
+                                    <div className="w-12 h-12 bg-pink-50 dark:bg-pink-900/20 rounded-xl flex items-center justify-center shrink-0">
+                                        <span className="material-symbols-outlined text-pink-500">school</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-white mb-1">Relax & Learn</h3>
-                                        <p className="text-sm text-gray-400">Get updates, review the output, and gain insights from your peer to improve your own understanding.</p>
+                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Learn and grow together</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Complete the project, leave a review, and build your academic network.</p>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>

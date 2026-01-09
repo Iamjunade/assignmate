@@ -757,7 +757,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 </div>
                                 <p className="text-sm text-text-muted">No connections yet</p>
                                 <button
-                                    onClick={() => navigate('/writers')}
+                                    onClick={() => navigate('/mentors')}
                                     className="mt-3 text-sm text-primary font-bold hover:underline"
                                 >
                                     Find Peers

@@ -17,7 +17,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [incomingRequestsCount, setIncomingRequestsCount] = useState(0);
 
-    const isWriterMode = user?.is_writer === true;
+    const isMentorMode = user?.is_mentor === true;
 
     useEffect(() => {
         if (user?.id) {
@@ -25,8 +25,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 setUnreadCount(count);
             });
 
-            // Fetch incoming requests count for writers
-            if (isWriterMode) {
+            // Fetch incoming requests count for mentors
+            if (isMentorMode) {
                 dbService.getIncomingRequests(user.id).then(requests => {
                     setIncomingRequestsCount(requests.length);
                 });
@@ -34,7 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
             return () => unsubscribe();
         }
-    }, [user?.id, isWriterMode]);
+    }, [user?.id, isMentorMode]);
 
     const isActive = (path: string) => location.pathname === path;
 
@@ -60,23 +60,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
             {/* Mode Indicator */}
             <div className="px-6 py-4">
-                <div className={`p-3 rounded-xl flex items-center gap-3 ${isWriterMode
+                <div className={`p-3 rounded-xl flex items-center gap-3 ${isMentorMode
                     ? 'bg-gradient-to-r from-primary/10 to-orange-500/10 border border-primary/20'
                     : 'bg-blue-50 border border-blue-100'
                     }`}>
-                    <div className={`size-10 rounded-lg flex items-center justify-center ${isWriterMode ? 'bg-primary text-white' : 'bg-blue-500 text-white'
+                    <div className={`size-10 rounded-lg flex items-center justify-center ${isMentorMode ? 'bg-primary text-white' : 'bg-blue-500 text-white'
                         }`}>
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                            {isWriterMode ? 'edit_note' : 'school'}
+                            {isMentorMode ? 'edit_note' : 'school'}
                         </span>
                     </div>
                     <div>
-                        <p className={`text-xs font-bold uppercase tracking-wider ${isWriterMode ? 'text-primary' : 'text-blue-600'
+                        <p className={`text-xs font-bold uppercase tracking-wider ${isMentorMode ? 'text-primary' : 'text-blue-600'
                             }`}>
-                            {isWriterMode ? 'Mentor Mode' : 'Student Mode'}
+                            {isMentorMode ? 'Mentor Mode' : 'Student Mode'}
                         </p>
                         <p className="text-[11px] text-text-muted">
-                            {isWriterMode ? 'Sharing Knowledge' : 'Learning & Networking'}
+                            {isMentorMode ? 'Sharing Knowledge' : 'Learning & Networking'}
                         </p>
                     </div>
                 </div>
@@ -93,8 +93,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     <span className="text-sm font-bold">Dashboard</span>
                 </a>
 
-                {isWriterMode ? (
-                    // Writer-specific menu items
+                {isMentorMode ? (
+                    // Mentor-specific menu items
                     <>
                         <a
                             onClick={() => navigate('/connections')}
@@ -111,7 +111,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group cursor-pointer ${isActive('/projects') ? 'bg-gradient-to-r from-primary/10 to-orange-500/5 text-primary ring-2 ring-primary/20 shadow-sm' : 'hover:bg-gray-100 hover:shadow-sm text-text-muted hover:text-text-dark'}`}
                         >
                             <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">assignment</span>
-                            <span className="text-sm font-medium group-hover:text-text-dark transition-colors">My Assignments</span>
+                            <span className="text-sm font-medium group-hover:text-text-dark transition-colors">My Collaborations</span>
                         </a>
                         <a
                             onClick={() => navigate('/earnings')}
@@ -132,8 +132,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                             <span className="text-sm font-medium group-hover:text-text-dark transition-colors">My Projects</span>
                         </a>
                         <a
-                            onClick={() => navigate('/writers')}
-                            className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/writers') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
+                            onClick={() => navigate('/mentors')}
+                            className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/mentors') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
                         >
                             <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">person_search</span>
                             <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Find Peers</span>

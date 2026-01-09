@@ -10,25 +10,25 @@ export const MobileNav = () => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [requestsCount, setRequestsCount] = useState(0);
 
-    const isWriterMode = user?.is_writer === true;
+    const isMentorMode = user?.is_mentor === true;
 
     useEffect(() => {
         if (user?.id) {
             const unsubscribe = dbService.listenToUnreadCount(user.id, (count) => {
                 setUnreadCount(count);
             });
-            if (isWriterMode) {
+            if (isMentorMode) {
                 dbService.getIncomingRequests(user.id).then(requests => {
                     setRequestsCount(requests.length);
                 });
             }
             return () => unsubscribe();
         }
-    }, [user?.id, isWriterMode]);
+    }, [user?.id, isMentorMode]);
 
     const isActive = (path: string) => location.pathname === path;
 
-    const navItems = isWriterMode ? [
+    const navItems = isMentorMode ? [
         { icon: 'dashboard', label: 'Home', path: '/feed' },
         { icon: 'person_add', label: 'Requests', path: '/connections', badge: requestsCount },
         { icon: 'payments', label: '', path: '/earnings', isPrimary: true }, // Empty label for primary
@@ -37,7 +37,7 @@ export const MobileNav = () => {
     ] : [
         { icon: 'dashboard', label: 'Home', path: '/feed' },
         { icon: 'assignment', label: 'Projects', path: '/projects' },
-        { icon: 'search', label: 'Search', path: '/writers', isPrimary: true },
+        { icon: 'search', label: 'Search', path: '/mentors', isPrimary: true },
         { icon: 'chat_bubble', label: 'Chat', path: '/chats', badge: unreadCount },
         { icon: 'person', label: 'Profile', path: '/profile' },
     ];

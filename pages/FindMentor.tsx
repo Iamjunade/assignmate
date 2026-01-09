@@ -5,7 +5,7 @@ import { dbService } from '../services/firestoreService';
 import { useAuth } from '../contexts/AuthContext';
 import { Avatar } from '../components/ui/Avatar';
 
-export const FindWriter = () => {
+export const FindMentor = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -16,12 +16,12 @@ export const FindWriter = () => {
 
     // Filter States
     const [verifiedOnly, setVerifiedOnly] = useState(false);
-    const [writersOnly, setWritersOnly] = useState(false);
+    const [mentorsOnly, setMentorsOnly] = useState(false);
     const [availableOnly, setAvailableOnly] = useState(false);
     const [sortBy, setSortBy] = useState('relevance');
 
     // Data States
-    const [writers, setWriters] = useState<any[]>([]);
+    const [mentors, setMentors] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [suggestions, setSuggestions] = useState<{ type: 'college' | 'place', value: string, subtext?: string }[]>([]);
 
@@ -89,7 +89,7 @@ export const FindWriter = () => {
 
     // Fetch and Filter Users
     useEffect(() => {
-        const loadWriters = async () => {
+        const loadMentors = async () => {
             setLoading(true);
             try {
                 const allUsers = await dbService.getAllUsers();
@@ -106,8 +106,8 @@ export const FindWriter = () => {
                             u.bio?.toLowerCase().includes(searchQuery.toLowerCase()))
                         : true;
 
-                    // Writer Mode Filter
-                    const matchesWriter = writersOnly ? u.is_writer === true : true;
+                    // Mentor Mode Filter
+                    const matchesMentor = mentorsOnly ? u.is_writer === true : true;
 
                     // Verified Filter
                     const matchesVerified = verifiedOnly ? u.is_verified === 'verified' : true;
@@ -115,7 +115,7 @@ export const FindWriter = () => {
                     // Availability Filter
                     const matchesAvailability = availableOnly ? u.is_online : true;
 
-                    return isNotMe && isComplete && matchesSearch && matchesWriter && matchesVerified && matchesAvailability;
+                    return isNotMe && isComplete && matchesSearch && matchesMentor && matchesVerified && matchesAvailability;
                 });
 
                 // Sorting
@@ -128,9 +128,9 @@ export const FindWriter = () => {
                     sortedUsers.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
                 }
 
-                setWriters(sortedUsers);
+                setMentors(sortedUsers);
             } catch (err) {
-                console.error("Failed to load writers", err);
+                console.error("Failed to load mentors", err);
             } finally {
                 setLoading(false);
             }
@@ -139,12 +139,12 @@ export const FindWriter = () => {
         // Debounce search slightly to avoid too many reads
         const timeoutId = setTimeout(() => {
             if (user) {
-                loadWriters();
+                loadMentors();
             }
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [user, searchQuery, verifiedOnly, writersOnly, availableOnly, sortBy]);
+    }, [user, searchQuery, verifiedOnly, mentorsOnly, availableOnly, sortBy]);
 
     const handleSuggestionSelect = (suggestion: string) => {
         setSearchQuery(suggestion);
@@ -172,13 +172,13 @@ export const FindWriter = () => {
     const clearAllFilters = () => {
         setSearchQuery('');
         setVerifiedOnly(false);
-        setWritersOnly(false);
+        setMentorsOnly(false);
         setAvailableOnly(false);
         setSortBy('relevance');
         setSearchParams({});
     };
 
-    const activeFiltersCount = [verifiedOnly, writersOnly, availableOnly, searchQuery].filter(Boolean).length;
+    const activeFiltersCount = [verifiedOnly, mentorsOnly, availableOnly, searchQuery].filter(Boolean).length;
 
     return (
         <div className="bg-background text-text-main font-display antialiased selection:bg-primary/30 min-h-screen flex flex-col">
@@ -338,13 +338,13 @@ export const FindWriter = () => {
                             <div className="w-px h-6 bg-border-subtle mx-1 shrink-0"></div>
 
                             <button
-                                onClick={() => setWritersOnly(!writersOnly)}
-                                className={`shrink-0 h-9 px-4 rounded-full border text-sm font-medium flex items-center gap-2 transition-all ${writersOnly
+                                onClick={() => setMentorsOnly(!mentorsOnly)}
+                                className={`shrink-0 h-9 px-4 rounded-full border text-sm font-medium flex items-center gap-2 transition-all ${mentorsOnly
                                     ? 'bg-gradient-to-r from-primary/10 to-orange-500/10 border-primary text-primary shadow-sm'
                                     : 'bg-card border-border-subtle text-text-main hover:border-primary'
                                     }`}
                             >
-                                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>edit_note</span>
+                                <span className="material-symbols-outlined text--[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>edit_note</span>
                                 Mentors Only
                             </button>
 
@@ -406,7 +406,7 @@ export const FindWriter = () => {
                                             Searching...
                                         </span>
                                     ) : (
-                                        `${writers.length} ${writers.length === 1 ? 'student' : 'students'} found`
+                                        `${mentors.length} ${mentors.length === 1 ? 'student' : 'students'} found`
                                     )}
                                 </p>
                             </div>
@@ -432,8 +432,8 @@ export const FindWriter = () => {
                                         <div className="h-11 w-full bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
                                     </div>
                                 ))
-                            ) : writers.length > 0 ? (
-                                writers.map((writer) => (
+                            ) : mentors.length > 0 ? (
+                                mentors.map((writer) => (
                                     <div
                                         key={writer.id}
                                         className="bg-card p-5 rounded-2xl border border-border-subtle shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 group cursor-pointer"

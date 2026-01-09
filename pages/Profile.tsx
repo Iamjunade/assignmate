@@ -50,7 +50,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     const [fullName, setFullName] = useState('');
 
     const [visibility, setVisibility] = useState('global');
-    const [isWriter, setIsWriter] = useState(false);
+    const [isMentor, setIsMentor] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const idInputRef = useRef<HTMLInputElement>(null);
@@ -91,7 +91,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
             setSchool(profileUser.school || '');
             setFullName(profileUser.full_name || '');
             setVisibility(profileUser.visibility || 'global');
-            setIsWriter(profileUser.is_writer || false);
+            setIsMentor(profileUser.is_mentor || false);
         }
     }, [profileUser]);
 
@@ -172,8 +172,8 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         }
     };
 
-    const handleWriterToggle = async (checked: boolean) => {
-        // Enforce portfolio requirement when enabling writer mode
+    const handleMentorToggle = async (checked: boolean) => {
+        // Enforce portfolio requirement when enabling mentor mode
         if (checked) {
             const hasPortfolio = profileUser.portfolio && profileUser.portfolio.length > 0;
             if (!hasPortfolio) {
@@ -183,13 +183,13 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
             }
         }
 
-        setIsWriter(checked);
+        setIsMentor(checked);
         try {
-            await db.updateProfile(profileUser.id, { is_writer: checked });
-            setProfileUser({ ...profileUser, is_writer: checked });
+            await db.updateProfile(profileUser.id, { is_mentor: checked });
+            setProfileUser({ ...profileUser, is_mentor: checked });
             success(checked ? "You are now listed as a mentor" : "You are no longer listed as a mentor");
         } catch (e) {
-            setIsWriter(!checked);
+            setIsMentor(!checked);
             error("Failed to update status");
         }
     };
@@ -201,7 +201,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                 school,
                 visibility,
                 full_name: fullName,
-                is_writer: isWriter
+                is_mentor: isMentor
             });
             setEditingProfile(false);
             if (isOwnProfile) await refreshProfile();
@@ -466,24 +466,24 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                     {/* Availability Status */}
                                     <div className="mt-6 pt-6 border-t border-border-light w-full flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className={`size-2.5 rounded-full ${isWriter ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
+                                            <div className={`size-2.5 rounded-full ${isMentor ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
                                             <span className="text-sm font-medium text-secondary">
-                                                {isWriter ? 'Mentor Mode On' : 'Mentor Mode Off'}
+                                                {isMentor ? 'Mentor Mode On' : 'Mentor Mode Off'}
                                             </span>
                                         </div>
                                         {isOwnProfile ? (
                                             <label className="relative inline-flex items-center cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    checked={isWriter}
-                                                    onChange={(e) => handleWriterToggle(e.target.checked)}
+                                                    checked={isMentor}
+                                                    onChange={(e) => handleMentorToggle(e.target.checked)}
                                                     className="sr-only peer"
                                                 />
                                                 <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
                                             </label>
                                         ) : (
                                             <label className="relative inline-flex items-center cursor-default">
-                                                <input type="checkbox" checked={isWriter} className="sr-only peer" readOnly />
+                                                <input type="checkbox" checked={isMentor} className="sr-only peer" readOnly />
                                                 <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
                                             </label>
                                         )}
@@ -555,12 +555,12 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                             <div className="lg:col-span-8 xl:col-span-9 space-y-8">
 
                                 {/* Stats Grid - Show different stats based on profile ownership */}
-                                <div className={`grid ${isOwnProfile || profileUser.is_writer ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'} gap-4`}>
+                                <div className={`grid ${isOwnProfile || profileUser.is_mentor ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'} gap-4`}>
                                     {[
                                         // Private stats - only show on own profile
                                         ...(isOwnProfile ? [{ label: 'Total Earned', value: `₹${profileUser.total_earned || 0}`, icon: 'payments', color: 'text-green-600', bg: 'bg-green-50' }] : []),
                                         // Show assignments only for writers or own profile
-                                        ...(isOwnProfile || profileUser.is_writer ? [{ label: 'Assignments', value: projectsCompleted, icon: 'assignment', color: 'text-blue-600', bg: 'bg-blue-50' }] : []),
+                                        ...(isOwnProfile || profileUser.is_mentor ? [{ label: 'Assignments', value: projectsCompleted, icon: 'assignment', color: 'text-blue-600', bg: 'bg-blue-50' }] : []),
                                         // Public stats - always show
                                         { label: 'Rating', value: rating.toFixed(1), icon: 'star', color: 'text-yellow-600', bg: 'bg-yellow-50' },
                                         { label: 'On-Time Rate', value: `${profileUser.on_time_rate || 100}%`, icon: 'schedule', color: 'text-purple-600', bg: 'bg-purple-50' },

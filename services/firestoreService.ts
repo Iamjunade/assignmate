@@ -84,11 +84,12 @@ export const userApi = {
             is_verified: 'pending',
             xp: 0,
             tags: ['Student'],
-            is_writer: metadata.is_writer || false,
+            // Map new 'is_mentor' to legacy DB field 'is_writer'
+            is_writer: metadata.is_mentor || false,
             role: 'user' as 'user' | 'admin' | 'moderator',
             visibility: 'global' as 'global' | 'college', // Default to global visibility
             portfolio: [],
-            saved_writers: [],
+            saved_writers: [], // Keep legacy field name in DB init
             total_earned: 0,
             on_time_rate: 100,
             response_time: 60, // 60 minutes default
@@ -147,14 +148,32 @@ export const dbService = {
     getUser: async (userId: string) => {
         const docRef = doc(getDb(), 'users', userId);
         const docSnap = await getDoc(docRef);
-        return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+        if (docSnap.exists()) {
+            const data = docSnap.data() as any;
+            return {
+                id: docSnap.id,
+                ...data,
+                // Map legacy field to new type
+                is_mentor: data.is_writer,
+                saved_mentors: data.saved_writers
+            };
+        }
+        return null;
     },
 
     getUserProfile: async (userId: string) => {
         try {
             const docRef = doc(getDb(), 'users', userId);
             const docSnap = await getDoc(docRef);
-            return docSnap.exists() ? docSnap.data() : null;
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                return {
+                    ...data,
+                    is_mentor: data.is_writer,
+                    saved_mentors: data.saved_writers
+                };
+            }
+            return null;
         } catch (error) {
             console.error("Error fetching user profile:", error);
             return null;
@@ -174,16 +193,23 @@ export const dbService = {
         await Promise.all(chunks.map(async (chunk) => {
             const q = query(collection(getDb(), 'users'), where('id', 'in', chunk));
             const snap = await getDocs(q);
-            snap.forEach(d => userMap.set(d.id, d.data()));
+            snap.forEach(d => {
+                const data = d.data();
+                userMap.set(d.id, {
+                    ...data,
+                    is_mentor: data.is_writer, // Map legacy
+                    saved_mentors: data.saved_writers
+                });
+            });
         }));
 
         return userMap;
     },
 
-    getWriters: async (currentUser: User | null, filters: { college?: string, searchQuery?: string, tag?: string } = {}) => {
+    getMentors: async (currentUser: User | null, filters: { college?: string, searchQuery?: string, tag?: string } = {}) => {
         const { college, searchQuery, tag } = filters;
         const usersRef = collection(getDb(), 'users');
-        let writers: any[] = [];
+        let mentors: any[] = [];
 
         if (searchQuery && searchQuery.length >= 2) {
             // Perform Server-Side Search
@@ -191,7 +217,7 @@ export const dbService = {
             const endQuery = lowerQuery + '\uf8ff';
 
             // We need to search across multiple fields. Firestore requires separate queries.
-            // All must filter by is_writer == true.
+            // All must filter by is_writer == true (Legacy DB field).
 
             const queries = [];
 
@@ -224,10 +250,16 @@ export const dbService = {
             const snapshots = await Promise.all(queries.map(q => getDocs(q)));
             const resultMap = new Map();
             snapshots.forEach(snap => {
-                snap.docs.forEach(doc => resultMap.set(doc.id, doc.data()));
+                snap.docs.forEach(doc => {
+                    const data = doc.data() as any;
+                    resultMap.set(doc.id, {
+                        ...data,
+                        is_mentor: data.is_writer // Map
+                    });
+                });
             });
 
-            writers = Array.from(resultMap.values());
+            mentors = Array.from(resultMap.values());
 
         } else {
             // Default: Fetch recent writers (existing logic)
@@ -243,22 +275,25 @@ export const dbService = {
 
             const q = query(usersRef, ...constraints);
             const snap = await getDocs(q);
-            writers = snap.docs.map(d => d.data());
+            mentors = snap.docs.map(d => {
+                const data = d.data();
+                return { ...data, is_mentor: data.is_writer };
+            });
         }
 
         // Client-side filtering for remaining fields (Tags, College if search was used)
         if (college && searchQuery) {
-            writers = writers.filter((w: any) => w.search_school === college.toLowerCase());
+            mentors = mentors.filter((w: any) => w.search_school === college.toLowerCase());
         }
 
         if (tag && tag !== 'All') {
-            writers = writers.filter((w: any) => w.tags && w.tags.includes(tag));
+            mentors = mentors.filter((w: any) => w.tags && w.tags.includes(tag));
         }
 
-        return writers;
+        return mentors;
     },
 
-    getDashboardWriters: async (college?: string, limitCount: number = 5, currentUserId?: string) => {
+    getDashboardMentors: async (college?: string, limitCount: number = 5, currentUserId?: string) => {
         const usersRef = collection(getDb(), 'users');
         const constraints: any[] = [
             where('is_writer', '==', true),
@@ -273,13 +308,16 @@ export const dbService = {
         const q = query(usersRef, ...constraints);
         const snap = await getDocs(q);
 
-        let writers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        let mentors = snap.docs.map(d => {
+            const data = d.data();
+            return { id: d.id, ...data, is_mentor: data.is_writer };
+        });
 
         if (currentUserId) {
-            writers = writers.filter((w: any) => w.id !== currentUserId);
+            mentors = mentors.filter((w: any) => w.id !== currentUserId);
         }
 
-        return writers.slice(0, limitCount);
+        return mentors.slice(0, limitCount);
     },
 
     updateProfile: async (userId: string, updates: any) => {
@@ -290,6 +328,12 @@ export const dbService = {
         if (updates.school) updates.search_school = updates.school.toLowerCase();
         if (updates.handle) updates.search_handle = updates.handle.toLowerCase();
         if (updates.bio) updates.search_bio = updates.bio.toLowerCase();
+
+        // Map new 'is_mentor' back to legacy DB field 'is_writer'
+        if (updates.is_mentor !== undefined) {
+            updates.is_writer = updates.is_mentor;
+            delete updates.is_mentor;
+        }
 
         // Use setDoc with merge to safely update specific fields like fcm_token
         await setDoc(docRef, {
@@ -323,16 +367,17 @@ export const dbService = {
         });
     },
 
-    toggleSaveWriter: async (userId: string, writerId: string) => {
+    toggleSaveMentor: async (userId: string, mentorId: string) => {
         const docRef = doc(getDb(), 'users', userId);
         const docSnap = await getDoc(docRef);
         if (!docSnap.exists()) return;
 
+        // Legacy field 'saved_writers'
         const currentSaved = docSnap.data().saved_writers || [];
-        if (currentSaved.includes(writerId)) {
-            await updateDoc(docRef, { saved_writers: arrayRemove(writerId) });
+        if (currentSaved.includes(mentorId)) {
+            await updateDoc(docRef, { saved_writers: arrayRemove(mentorId) });
         } else {
-            await updateDoc(docRef, { saved_writers: arrayUnion(writerId) });
+            await updateDoc(docRef, { saved_writers: arrayUnion(mentorId) });
         }
     },
 
@@ -487,6 +532,7 @@ export const dbService = {
 
                 return {
                     ...c,
+                    mentor_id: c.writer_id, // Map legacy
                     gig_title: 'Direct Chat',
                     other_handle: other?.handle || 'User',
                     other_avatar: other?.avatar_url,
@@ -523,7 +569,7 @@ export const dbService = {
                 id: chatId,
                 ...data,
                 poster_id: data.poster_id,
-                writer_id: data.writer_id,
+                mentor_id: data.writer_id, // Map legacy 'writer_id' to 'mentor_id'
                 other_handle: other?.handle || 'Unknown',
                 other_avatar: other?.avatar_url,
                 other_verified: other?.is_verified || 'none'
@@ -534,13 +580,13 @@ export const dbService = {
         }
     },
 
-    createChat: async (gigId: string | null, posterId: string, writerId: string) => {
+    createChat: async (gigId: string | null, posterId: string, mentorId: string) => {
         // 1. Query for existing chat with these exact participants
         const q = query(collection(getDb(), 'chats'), where('participants', 'array-contains', posterId));
         const snaps = await getDocs(q);
         const existing = snaps.docs.find(doc => {
             const data = doc.data();
-            return data.participants && data.participants.includes(writerId);
+            return data.participants && data.participants.includes(mentorId);
         });
 
         if (existing) return { id: existing.id, ...existing.data() };
@@ -548,9 +594,9 @@ export const dbService = {
         // 2. If none, create new
         const newChatRef = doc(collection(getDb(), 'chats'));
         const newChat = {
-            participants: [posterId, writerId],
+            participants: [posterId, mentorId],
             poster_id: posterId, // Keep for backward compatibility if needed
-            writer_id: writerId, // Keep for backward compatibility if needed
+            writer_id: mentorId, // Keep legacy field 'writer_id' in DB
             createdAt: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             last_message: '',
@@ -716,6 +762,7 @@ export const dbService = {
 
                     return {
                         ...c,
+                        mentor_id: c.writer_id, // Map
                         gig_title: 'Direct Chat',
                         other_handle: other?.handle || 'User',
                         other_avatar: other?.avatar_url,
@@ -749,7 +796,41 @@ export const dbService = {
         });
     },
 
-    // --- ADMIN METHODS ---
+    // --- ORDER METHODS ---
+    createOrder: async (studentId: string, mentorId: string, offerDetails: any) => {
+        const orderData = {
+            student_id: studentId,
+            writer_id: mentorId, // Legacy DB Field
+            title: offerDetails.title,
+            description: offerDetails.description,
+            amount: offerDetails.budget,
+            deadline: offerDetails.deadline,
+            status: 'in_progress',
+            created_at: new Date().toISOString(),
+            subject: offerDetails.subject || 'General'
+        };
+
+        const res = await addDoc(collection(getDb(), 'orders'), orderData);
+        return { id: res.id, ...orderData, mentor_id: mentorId };
+    },
+
+    getStudentProjects: async (studentId: string) => {
+        const q = query(collection(getDb(), 'orders'), where('student_id', '==', studentId), orderBy('created_at', 'desc'));
+        const snap = await getDocs(q);
+        return snap.docs.map(d => {
+            const data = d.data();
+            return { id: d.id, ...data, mentor_id: data.writer_id };
+        });
+    },
+
+    getMentorProjects: async (mentorId: string) => {
+        const q = query(collection(getDb(), 'orders'), where('writer_id', '==', mentorId), orderBy('created_at', 'desc'));
+        const snap = await getDocs(q);
+        return snap.docs.map(d => {
+            const data = d.data();
+            return { id: d.id, ...data, mentor_id: data.writer_id };
+        });
+    },
     getPendingVerifications: async () => {
         const q = query(collection(getDb(), 'users'), where('is_verified', '==', 'pending'));
         const snap = await getDocs(q);
@@ -773,21 +854,27 @@ export const dbService = {
             where('status', '==', 'in_progress')
         );
 
-        const writerOrdersQuery = query(
+        const mentorOrdersQuery = query(
             collection(getDb(), 'orders'),
             where('writer_id', '==', userId),
             where('status', '==', 'in_progress')
         );
 
-        const [studentSnap, writerSnap] = await Promise.all([
+        const [studentSnap, mentorSnap] = await Promise.all([
             getDocs(studentOrdersQuery),
-            getDocs(writerOrdersQuery)
+            getDocs(mentorOrdersQuery)
         ]);
 
         // Merge and deduplicate
         const orderMap = new Map();
-        studentSnap.docs.forEach(d => orderMap.set(d.id, { id: d.id, ...d.data() }));
-        writerSnap.docs.forEach(d => orderMap.set(d.id, { id: d.id, ...d.data() }));
+        studentSnap.docs.forEach(d => {
+            const data = d.data() as any;
+            orderMap.set(d.id, { id: d.id, ...data, mentor_id: data.writer_id }); // Map
+        });
+        mentorSnap.docs.forEach(d => {
+            const data = d.data() as any;
+            orderMap.set(d.id, { id: d.id, ...data, mentor_id: data.writer_id }); // Map
+        });
 
         // Sort by deadline
         const activeOrders = Array.from(orderMap.values()).sort((a: any, b: any) => {
@@ -956,35 +1043,7 @@ export const dbService = {
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
 
-    getWriterProjects: async (userId: string) => {
-        const q = query(
-            collection(getDb(), 'orders'),
-            where('writer_id', '==', userId)
-        );
-        const snapshot = await getDocs(q);
-        const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // Sort client-side to avoid composite index requirement
-        return orders.sort((a: any, b: any) => {
-            const dateA = new Date(a.created_at || 0).getTime();
-            const dateB = new Date(b.created_at || 0).getTime();
-            return dateB - dateA; // newest first
-        });
-    },
 
-    getStudentProjects: async (userId: string) => {
-        const q = query(
-            collection(getDb(), 'orders'),
-            where('student_id', '==', userId)
-        );
-        const snapshot = await getDocs(q);
-        const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // Sort client-side to avoid composite index requirement
-        return orders.sort((a: any, b: any) => {
-            const dateA = new Date(a.created_at || 0).getTime();
-            const dateB = new Date(b.created_at || 0).getTime();
-            return dateB - dateA; // newest first
-        });
-    },
 
     updateOrderStatus: async (orderId: string, status: 'in_progress' | 'completed' | 'cancelled' | 'disputed', completionData?: { completion_percentage?: number }) => {
         const orderRef = doc(getDb(), 'orders', orderId);

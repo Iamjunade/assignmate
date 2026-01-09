@@ -17,20 +17,20 @@ export const Projects = ({ user }: ProjectsProps) => {
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState<'all' | string>('all');
 
-    const isWriterMode = user?.is_writer === true;
+    const isMentorMode = user?.is_mentor === true;
 
     useEffect(() => {
         if (user?.id) {
             loadProjects();
         }
-    }, [user?.id, isWriterMode]);
+    }, [user?.id, isMentorMode]);
 
     const loadProjects = async () => {
         try {
             setLoading(true);
-            if (isWriterMode) {
-                // For writers: fetch orders where they are the writer
-                const writerOrders = await dbService.getWriterProjects(user!.id) as Order[];
+            if (isMentorMode) {
+                // For mentors: fetch orders where they are the mentor
+                const writerOrders = await dbService.getMentorProjects(user!.id) as Order[];
                 setOrders(writerOrders);
             } else {
                 // For students: fetch orders where they are the student (hirer)
@@ -119,12 +119,12 @@ export const Projects = ({ user }: ProjectsProps) => {
                                         My Projects
                                     </h1>
                                     <p className="text-text-muted mt-1">
-                                        {isWriterMode ? 'Track all projects you\'re working on' : 'Track and manage all your active projects'}
+                                        {isMentorMode ? 'Track all projects you\'re working on' : 'Track and manage all your active projects'}
                                     </p>
                                 </div>
-                                {!isWriterMode && (
+                                {!isMentorMode && (
                                     <button
-                                        onClick={() => navigate('/writers')}
+                                        onClick={() => navigate('/mentors')}
                                         className="h-12 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-lg"
                                     >
                                         <span className="material-symbols-outlined">add</span>
@@ -170,13 +170,13 @@ export const Projects = ({ user }: ProjectsProps) => {
 
                                 <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                                     <div className="flex justify-between items-start mb-2">
-                                        <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">{isWriterMode ? 'Earnings' : 'Spending'}</h3>
+                                        <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">{isMentorMode ? 'Earnings' : 'Spending'}</h3>
                                         <div className="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                                             <span className="material-symbols-outlined text-xl">payments</span>
                                         </div>
                                     </div>
                                     <span className="text-3xl font-extrabold text-primary">₹{stats.totalEarnings}</span>
-                                    <p className="text-xs text-text-muted mt-1">{isWriterMode ? 'Total earned' : 'Total spent'}</p>
+                                    <p className="text-xs text-text-muted mt-1">{isMentorMode ? 'Total earned' : 'Total spent'}</p>
                                 </div>
                             </div>
 
@@ -222,12 +222,12 @@ export const Projects = ({ user }: ProjectsProps) => {
                                         <h3 className="text-lg font-bold text-text-dark mb-2">No projects found</h3>
                                         <p className="text-text-muted mb-6">
                                             {filterStatus === 'all'
-                                                ? (isWriterMode ? "You haven't accepted any projects yet." : "You haven't started any projects yet.")
+                                                ? (isMentorMode ? "You haven't accepted any projects yet." : "You haven't started any projects yet.")
                                                 : `No projects with status: ${filterStatus.replace('_', ' ')}`}
                                         </p>
-                                        {!isWriterMode && (
+                                        {!isMentorMode && (
                                             <button
-                                                onClick={() => navigate('/writers')}
+                                                onClick={() => navigate('/mentors')}
                                                 className="h-10 px-6 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-all inline-flex items-center gap-2"
                                             >
                                                 <span className="material-symbols-outlined">add</span>
@@ -293,7 +293,7 @@ export const Projects = ({ user }: ProjectsProps) => {
                                                         </div>
                                                         <div className="text-right">
                                                             <p className="text-2xl font-bold text-primary">₹{order.amount}</p>
-                                                            <p className="text-xs text-text-muted">{isWriterMode ? 'Payment' : 'Budget'}</p>
+                                                            <p className="text-xs text-text-muted">{isMentorMode ? 'Payment' : 'Budget'}</p>
                                                         </div>
                                                     </div>
                                                 </div>

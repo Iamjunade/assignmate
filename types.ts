@@ -12,10 +12,10 @@ export interface User {
   projects_completed?: number;
   portfolio?: string[]; // Array of image URLs (Handwriting samples)
   rate_per_page?: number; // Optional: For future expansion
-  is_writer?: boolean; // Toggle: Is the user open to work?
+  is_mentor?: boolean; // Toggle: Is the user open to work/mentor?
   bio?: string; // Short pitch: "I have neat handwriting"
   tags?: string[]; // e.g., ['Math', 'CS', 'English']
-  saved_writers?: string[]; // IDs of writers this user has bookmarked
+  saved_mentors?: string[]; // IDs of mentors this user has bookmarked
   is_incomplete?: boolean; // Flag for Google users who haven't set handle/school
   fcm_token?: string; // Firebase Cloud Messaging Token for Push Notifications
   visibility?: 'global' | 'college'; // Visibility setting for the profile
@@ -35,7 +35,7 @@ export interface Chat {
   id: string;
   gig_id?: string; // Kept for legacy compatibility
   poster_id: string;
-  writer_id: string;
+  mentor_id: string;
   gig_title?: string;
   other_handle?: string;
   last_message?: string;
@@ -92,7 +92,7 @@ export type OrderStatus = 'in_progress' | 'completed' | 'cancelled' | 'disputed'
 export interface Order {
   id: string;
   student_id: string;
-  writer_id: string;
+  mentor_id: string;
   title: string;
   status: OrderStatus;
   amount: number; // Escrow amount
@@ -105,10 +105,10 @@ export interface Order {
 
 
   // UI Helpers (Hydrated)
-  writer_handle?: string;
-  writer_avatar?: string;
-  writer_school?: string;
-  writer_verified?: boolean;
+  mentor_handle?: string;
+  mentor_avatar?: string;
+  mentor_school?: string;
+  mentor_verified?: boolean;
 }
 
 export interface Notification {
