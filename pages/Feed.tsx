@@ -7,6 +7,7 @@ import { dbService as db } from '../services/firestoreService';
 import { format } from 'date-fns';
 import { Avatar } from '../components/ui/Avatar';
 import { MobileNav } from '../components/dashboard/MobileNav';
+import { SpotlightCard } from '../components/ui/SpotlightCard';
 
 interface FeedProps {
     user: User | null;
@@ -160,7 +161,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
 
                                 {/* Writer Stats */}
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
-                                    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                                    <SpotlightCard className="p-6 h-full flex flex-col justify-between group" spotlightColor="rgba(34, 197, 94, 0.1)">
                                         <div className="flex justify-between items-start mb-3">
                                             <h3 className="text-text-muted font-bold text-sm">Total Earned</h3>
                                             <div className="size-11 rounded-xl bg-gradient-to-br from-green-50 to-emerald-100 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -169,9 +170,9 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         </div>
                                         <span className="text-3xl font-extrabold text-text-dark">{formatCurrency(user?.total_earned || 0)}</span>
                                         <p className="text-xs text-green-600 font-medium mt-1">Lifetime earnings</p>
-                                    </div>
+                                    </SpotlightCard>
 
-                                    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                                    <SpotlightCard className="p-6 h-full flex flex-col justify-between group" spotlightColor="rgba(249, 115, 22, 0.1)">
                                         <div className="flex justify-between items-start mb-3">
                                             <h3 className="text-text-muted font-bold text-sm">Active Orders</h3>
                                             <div className="size-11 rounded-xl bg-gradient-to-br from-orange-50 to-amber-100 text-primary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -180,9 +181,13 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         </div>
                                         <span className="text-3xl font-extrabold text-text-dark">{stats.activeCount}</span>
                                         <p className="text-xs text-text-muted font-medium mt-1">In progress</p>
-                                    </div>
+                                    </SpotlightCard>
 
-                                    <div onClick={() => navigate('/connections')} className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 hover:border-blue-300 transition-all duration-300 cursor-pointer group">
+                                    <SpotlightCard
+                                        className="p-6 h-full flex flex-col justify-between cursor-pointer group hover:border-blue-300"
+                                        spotlightColor="rgba(59, 130, 246, 0.1)"
+                                        onClick={() => navigate('/connections')}
+                                    >
                                         <div className="flex justify-between items-start mb-3">
                                             <h3 className="text-text-muted font-bold text-sm">Pending Requests</h3>
                                             <div className="size-11 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -191,9 +196,9 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         </div>
                                         <span className="text-3xl font-extrabold text-text-dark">{incomingRequests.length}</span>
                                         <p className="text-xs text-blue-600 font-medium mt-1 flex items-center gap-1">Tap to review <span className="material-symbols-outlined text-sm">arrow_forward</span></p>
-                                    </div>
+                                    </SpotlightCard>
 
-                                    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                                    <SpotlightCard className="p-6 h-full flex flex-col justify-between group" spotlightColor="rgba(168, 85, 247, 0.1)">
                                         <div className="flex justify-between items-start mb-3">
                                             <h3 className="text-text-muted font-bold text-sm">On-Time Rate</h3>
                                             <div className="size-11 rounded-xl bg-gradient-to-br from-purple-50 to-violet-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -204,12 +209,12 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         <div className="w-full bg-gray-100 rounded-full h-1.5 mt-2">
                                             <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${user?.on_time_rate || 100}%` }}></div>
                                         </div>
-                                    </div>
+                                    </SpotlightCard>
                                 </div>
 
                                 {/* Incoming Requests */}
                                 {incomingRequests.length > 0 && (
-                                    <section className="bg-white p-6 rounded-2xl shadow-card border border-border-subtle">
+                                    <SpotlightCard className="p-6 mb-6" spotlightColor="rgba(34, 197, 94, 0.1)">
                                         <div className="flex items-center justify-between mb-5">
                                             <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
                                                 <span className="material-symbols-outlined text-primary">person_add</span>
@@ -233,7 +238,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                 </div>
                                             ))}
                                         </div>
-                                    </section>
+                                    </SpotlightCard>
                                 )}
 
                                 {/* Recent Messages & Profile Stats */}
@@ -298,9 +303,9 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                             </div>
                         </div>
                     </div>
-                </main>
+                </main >
                 <MobileNav />
-            </div>
+            </div >
         );
     }
 
@@ -348,14 +353,14 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     <div className="flex flex-col sm:flex-row gap-3">
                                         <button
                                             onClick={() => navigate('/writers')}
-                                            className="h-12 px-6 rounded-xl bg-white text-primary font-bold shadow-lg hover:shadow-xl btn-hover-lift hover:scale-[1.02] transition-all flex items-center justify-center gap-2 group"
+                                            className="h-12 px-6 rounded-xl bg-white text-primary font-bold shadow-lg hover:shadow-xl btn-hover-lift hover:scale-[1.02] transition-all flex items-center justify-center gap-2 group btn-ripple"
                                         >
                                             <span className="material-symbols-outlined group-hover:rotate-12 transition-transform">person_search</span>
                                             Find Writers
                                         </button>
                                         <button
                                             onClick={() => navigate('/connections')}
-                                            className="h-12 px-6 rounded-xl bg-white/20 backdrop-blur-sm text-white font-bold hover:bg-white/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 group"
+                                            className="h-12 px-6 rounded-xl bg-white/20 backdrop-blur-sm text-white font-bold hover:bg-white/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 group btn-ripple"
                                         >
                                             <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">group</span>
                                             My Network
@@ -366,8 +371,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
 
                             {/* Stats Row */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {/* Active Projects */}
-                                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                                <SpotlightCard className="p-6 h-full flex flex-col justify-between group" spotlightColor="rgba(249, 115, 22, 0.1)">
                                     <div className="flex justify-between items-start mb-3">
                                         <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">Active Projects</h3>
                                         <div className="size-10 rounded-xl bg-gradient-to-br from-orange-50 to-amber-100 text-primary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -376,12 +380,12 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     </div>
                                     <span className="text-3xl font-extrabold text-text-dark">{stats.activeCount}</span>
                                     <p className="text-xs text-text-muted mt-1">In progress</p>
-                                </div>
+                                </SpotlightCard>
 
-                                {/* My Network - Clickable */}
-                                <div
+                                <SpotlightCard
+                                    className="p-6 h-full flex flex-col justify-between cursor-pointer group hover:border-blue-300"
+                                    spotlightColor="rgba(59, 130, 246, 0.1)"
                                     onClick={() => navigate('/connections')}
-                                    className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 hover:border-blue-300 transition-all duration-300 cursor-pointer group"
                                 >
                                     <div className="flex justify-between items-start mb-3">
                                         <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">My Network</h3>
@@ -393,12 +397,12 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     <p className="text-xs text-blue-600 font-medium mt-1 flex items-center gap-1">
                                         View all <span className="material-symbols-outlined text-xs">arrow_forward</span>
                                     </p>
-                                </div>
+                                </SpotlightCard>
 
-                                {/* Messages */}
-                                <div
+                                <SpotlightCard
+                                    className="p-6 h-full flex flex-col justify-between cursor-pointer group hover:border-green-300"
+                                    spotlightColor="rgba(34, 197, 94, 0.1)"
                                     onClick={() => navigate('/chats')}
-                                    className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 hover:border-green-300 transition-all duration-300 cursor-pointer group"
                                 >
                                     <div className="flex justify-between items-start mb-3">
                                         <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">Messages</h3>
@@ -410,7 +414,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     <p className="text-xs text-green-600 font-medium mt-1 flex items-center gap-1">
                                         Open chats <span className="material-symbols-outlined text-xs">arrow_forward</span>
                                     </p>
-                                </div>
+                                </SpotlightCard>
                             </div>
 
                             {/* Main Content Grid */}
