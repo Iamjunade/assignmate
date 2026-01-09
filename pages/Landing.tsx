@@ -118,9 +118,9 @@ export const Landing = () => {
                             </div>
                             <div className="flex items-center gap-4 pt-4 text-sm text-gray-500 dark:text-gray-400">
                                 <div className="flex -space-x-2">
-                                    <img alt="Student portrait" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#221910]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJY7INpqcQQsp-lWIu_rci1_QHqrnpb0EAo-biaiC6wl7kwVrHi2tXL_SgRPHg3B6QlVAZZoHglXZskrcdpi-4n0Wm7YynjXmZeHxKcAzdh9QhdLZDKtKGCFBQ_8jhcoZp6hIGw-BNWHmAWYFBhwdLJZWAcY9VNbEsSDoZcF0aT3Gy3KBUkqodRXB9gYJIcLKPrhwPmgHdZ3Xo_ZGylB9o72htjvtUMgJYyCJBru4khkMPJ4xswsqbk07QogKRO4RAWmdaPtl7TJNG" />
-                                    <img alt="Student portrait" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#221910]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-jY8uTRSj0jzNyAuK_fVtGOW52ewKIMCiXqrcikERLZ79kKUShUiJAzBUueFpHXKY8BsbTwYHwJsbsFw8Y5_sAIEhr1JW_H8QD_P3vKfmqDhbyHBFLiUHMkw122s6BTIW5wjzOQi-_8uaZh6rsFpTz82HukK8qK3hn81qi2exs7i6x6ooZOS9j_GDxBQYrXJTXpkzlwybdYQBuD1TffZrHwsYzSU12gIDYjpZSj23CnOzqdl_F7-SnUljmP6WgPODuDrKCHXCTYhN" />
-                                    <img alt="Student portrait" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#221910]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5nDla7pl3lCAa5jCjVuqd40bQpArguK2JAqCAQOuNaDNBCT7pKwx3g6h9UnJMnS4TaobXA7DPbLtM0VDmJqFx_HqmR8FQ8gsKv-B1Lcd-LoLkz5mw67CZHFX9diJD-esSIC5GenqziHoXkErE-hAWtawuEWfEpL1GmOneW47CKR0HsjnpB_99Nr7zeYkgXSZzh_Day9X3zSd6D8lqCQ3lu6tj2WqBKJLX631ffiPRwMVcVtCvW5FTBlfgF9VXYuEEM5VggzTa6Fm7" />
+                                    <img loading="lazy" decoding="async" alt="Student portrait" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#221910]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJY7INpqcQQsp-lWIu_rci1_QHqrnpb0EAo-biaiC6wl7kwVrHi2tXL_SgRPHg3B6QlVAZZoHglXZskrcdpi-4n0Wm7YynjXmZeHxKcAzdh9QhdLZDKtKGCFBQ_8jhcoZp6hIGw-BNWHmAWYFBhwdLJZWAcY9VNbEsSDoZcF0aT3Gy3KBUkqodRXB9gYJIcLKPrhwPmgHdZ3Xo_ZGylB9o72htjvtUMgJYyCJBru4khkMPJ4xswsqbk07QogKRO4RAWmdaPtl7TJNG" />
+                                    <img loading="lazy" decoding="async" alt="Student portrait" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#221910]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-jY8uTRSj0jzNyAuK_fVtGOW52ewKIMCiXqrcikERLZ79kKUShUiJAzBUueFpHXKY8BsbTwYHwJsbsFw8Y5_sAIEhr1JW_H8QD_P3vKfmqDhbyHBFLiUHMkw122s6BTIW5wjzOQi-_8uaZh6rsFpTz82HukK8qK3hn81qi2exs7i6x6ooZOS9j_GDxBQYrXJTXpkzlwybdYQBuD1TffZrHwsYzSU12gIDYjpZSj23CnOzqdl_F7-SnUljmP6WgPODuDrKCHXCTYhN" />
+                                    <img loading="lazy" decoding="async" alt="Student portrait" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#221910]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5nDla7pl3lCAa5jCjVuqd40bQpArguK2JAqCAQOuNaDNBCT7pKwx3g6h9UnJMnS4TaobXA7DPbLtM0VDmJqFx_HqmR8FQ8gsKv-B1Lcd-LoLkz5mw67CZHFX9diJD-esSIC5GenqziHoXkErE-hAWtawuEWfEpL1GmOneW47CKR0HsjnpB_99Nr7zeYkgXSZzh_Day9X3zSd6D8lqCQ3lu6tj2WqBKJLX631ffiPRwMVcVtCvW5FTBlfgF9VXYuEEM5VggzTa6Fm7" />
                                 </div>
                                 <p>Trusted by <span className="font-bold text-[#1b140d] dark:text-white">10,000+ students</span> across IITs & DU</p>
                             </div>
@@ -146,7 +146,7 @@ export const Landing = () => {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden">
-                                            <img alt="Writer Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzzbdotfsSDrT80cZ5DBSQsRJv4cYg4iaxSLeaX0Ql1XpW8_dezsSpeiVCrz0KZ7S4k7AUHzO3oA_1Ik28xuK7HGUoAHi_SXZxwTzPQvq8VKj_56nWwj0JMpQYmlMnKbOJZ9SiA_5BB4_bQMyxqJhzmKHB1zDUdW-3cTKaIpTKigS8bMV55-ZEm04uCTT_wLnH3cJ4NUB-fFFaiost9VaJS1KWL0k-P-NwAgAQRE8KaEh8ci5nJBI_SNRxm2alNDXvbLmMcMtskh8s" />
+                                            <img loading="lazy" decoding="async" alt="Writer Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzzbdotfsSDrT80cZ5DBSQsRJv4cYg4iaxSLeaX0Ql1XpW8_dezsSpeiVCrz0KZ7S4k7AUHzO3oA_1Ik28xuK7HGUoAHi_SXZxwTzPQvq8VKj_56nWwj0JMpQYmlMnKbOJZ9SiA_5BB4_bQMyxqJhzmKHB1zDUdW-3cTKaIpTKigS8bMV55-ZEm04uCTT_wLnH3cJ4NUB-fFFaiost9VaJS1KWL0k-P-NwAgAQRE8KaEh8ci5nJBI_SNRxm2alNDXvbLmMcMtskh8s" />
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-1">
@@ -367,7 +367,7 @@ export const Landing = () => {
                                 </div>
                                 <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"The 'Last-Minute Panic' is real. AssignMate saved my semester. Found a senior from my own college who knew exactly how the professor grades."</p>
                                 <div className="flex items-center gap-3">
-                                    <img alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVTtiaoX3kyC_tqnin6dPXXfN_q5ipqsqE0VM66zxwfnjfNOlGhht3h2N03bgvLnPhnUKmVeRhhAIIrfz0TOKf_unmFbRD3rBDVUkCqdf8L6uxQWm4MKsPvHvKyp_XtK60QNmTZPpXbB8UvG0OsFcpb2zjuYDRVuJ-WYpiCjkDG7GFKz7GQqERF2wxk9FxPL7UQoQ6zQf5e8JPOH-EGajMN2iIa2Fa_dxlNZk2x8RYNQ3xUOrHDMA4jdHcJy0PsOF2ER44z4VP7w8s" />
+                                    <img loading="lazy" decoding="async" alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVTtiaoX3kyC_tqnin6dPXXfN_q5ipqsqE0VM66zxwfnjfNOlGhht3h2N03bgvLnPhnUKmVeRhhAIIrfz0TOKf_unmFbRD3rBDVUkCqdf8L6uxQWm4MKsPvHvKyp_XtK60QNmTZPpXbB8UvG0OsFcpb2zjuYDRVuJ-WYpiCjkDG7GFKz7GQqERF2wxk9FxPL7UQoQ6zQf5e8JPOH-EGajMN2iIa2Fa_dxlNZk2x8RYNQ3xUOrHDMA4jdHcJy0PsOF2ER44z4VP7w8s" />
                                     <div>
                                         <p className="text-sm font-bold text-[#1b140d] dark:text-white">Priya S.</p>
                                         <p className="text-xs text-gray-500">Delhi University</p>
@@ -388,7 +388,7 @@ export const Landing = () => {
                                 </div>
                                 <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"Security was my main concern. Seeing the verified tick and knowing my money was safe made me feel safe trying this out."</p>
                                 <div className="flex items-center gap-3">
-                                    <img alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2yNIYgHyb_Jn7XF-GDsKJvdtb6FVytPUB4W8FydVYGvhJC70cfuEXL6vHEtdiG3Gy-UtnvjyxUaTTw3Cn-SXPXdPf9SWf_aFOGP2ei0MYyRb-ENiUlJP-aze9BjRzHsVqV3ezMbDY0LpbVqnMCer8qVDMyATODoJELtAoIEPPnEUTeiTtDoCQLrc-mTuqP6eAweXl7QDTduNxEmccBqlUlcWOtXG4Y0RrgRujypk64PbzW2R_-YUL-Drnw_Lg5G8fAb37b9HQZ4s0" />
+                                    <img loading="lazy" decoding="async" alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2yNIYgHyb_Jn7XF-GDsKJvdtb6FVytPUB4W8FydVYGvhJC70cfuEXL6vHEtdiG3Gy-UtnvjyxUaTTw3Cn-SXPXdPf9SWf_aFOGP2ei0MYyRb-ENiUlJP-aze9BjRzHsVqV3ezMbDY0LpbVqnMCer8qVDMyATODoJELtAoIEPPnEUTeiTtDoCQLrc-mTuqP6eAweXl7QDTduNxEmccBqlUlcWOtXG4Y0RrgRujypk64PbzW2R_-YUL-Drnw_Lg5G8fAb37b9HQZ4s0" />
                                     <div>
                                         <p className="text-sm font-bold text-[#1b140d] dark:text-white">Arjun M.</p>
                                         <p className="text-xs text-gray-500">BITS Pilani</p>
@@ -409,7 +409,7 @@ export const Landing = () => {
                                 </div>
                                 <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"As a writer, I love earning extra pocket money here. The payment system is reliable and I only take projects I'm good at."</p>
                                 <div className="flex items-center gap-3">
-                                    <img alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDT0PtwXpp3_rbAL1YpVWceMA4OiLGByXEbDrPs6sBUl3CNet35GyW4d8cXG1Rilcruu8bf3IEoOzWoeRfnWSRx3Uq6FPcJ2n2Ti3slBL5ZyZHslyuLXuYp7ONyR3GCK6FYxsziiPJ9bJ-Nsn1wIucE9egEurKemN7MFPrXKDOx4KeAnuYKmBCQXgSCM8f47_K90La_l-3IhTYUptJkEYE5zUdp_BZKYn7BHnBQlalcFDkvbvxjVrTpNnB_dUj-uZcGHtHptTsDiqHW" />
+                                    <img loading="lazy" decoding="async" alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDT0PtwXpp3_rbAL1YpVWceMA4OiLGByXEbDrPs6sBUl3CNet35GyW4d8cXG1Rilcruu8bf3IEoOzWoeRfnWSRx3Uq6FPcJ2n2Ti3slBL5ZyZHslyuLXuYp7ONyR3GCK6FYxsziiPJ9bJ-Nsn1wIucE9egEurKemN7MFPrXKDOx4KeAnuYKmBCQXgSCM8f47_K90La_l-3IhTYUptJkEYE5zUdp_BZKYn7BHnBQlalcFDkvbvxjVrTpNnB_dUj-uZcGHtHptTsDiqHW" />
                                     <div>
                                         <p className="text-sm font-bold text-[#1b140d] dark:text-white">Vikram R.</p>
                                         <p className="text-xs text-gray-500">IIT Madras</p>
@@ -448,7 +448,7 @@ export const Landing = () => {
                     <div className="col-span-2 lg:col-span-2 flex flex-col gap-4 pr-8">
                         <div className="flex items-center gap-2 text-[#1b140d] dark:text-white mb-2">
                             <div className="size-8 rounded-lg overflow-hidden">
-                                <img src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
+                                <img loading="lazy" decoding="async" src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
                             </div>
                             <h2 className="text-lg font-bold">AssignMate</h2>
                         </div>

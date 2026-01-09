@@ -23,7 +23,8 @@ import {
     serverTimestamp,
     doc,
     setDoc,
-    getDoc
+    getDoc,
+    enableIndexedDbPersistence
 } from 'firebase/firestore';
 import {
     getMessaging,
@@ -47,6 +48,13 @@ const firebaseConfig = {
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const authInstance = getAuth(app);
 const dbInstance = getFirestore(app);
+enableIndexedDbPersistence(dbInstance).catch((err) => {
+    if (err.code == 'failed-precondition') {
+        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a a time.');
+    } else if (err.code == 'unimplemented') {
+        console.warn('The current browser does not support all of the features required to enable persistence');
+    }
+});
 const storageInstance = getStorage(app);
 
 let messagingInstance: any;
