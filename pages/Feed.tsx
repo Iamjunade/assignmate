@@ -30,9 +30,6 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
     const [recentChats, setRecentChats] = useState<any[]>([]);
     const [connections, setConnections] = useState<any[]>([]);
 
-    // Determine if user is in Mentor Mode
-    const isMentorMode = user?.is_mentor === true;
-
     useEffect(() => {
         if (user) {
             // Load common data
@@ -64,25 +61,20 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
             // Load connections
             db.getMyConnections(user.id).then(setConnections);
 
-            if (isMentorMode) {
-                // Mentor-specific data: incoming requests
-                db.getIncomingRequests(user.id).then(setIncomingRequests);
-            } else {
-                // Student-specific data: available mentors
-                db.getDashboardMentors(user.school, 8, user.id).then(setDashboardMentors);
-                // Also get top mentors globally
-                db.getAllUsers().then(users => {
-                    const mentors = users.filter((u: any) => u.is_mentor === true && u.id !== user.id);
-                    setTopMentors(mentors.slice(0, 4));
-                });
-            }
+            // Load available peers from same college
+            db.getDashboardMentors(user.school, 8, user.id).then(setDashboardMentors);
+            // Also get top users globally
+            db.getAllUsers().then(users => {
+                const peers = users.filter((u: any) => u.id !== user.id);
+                setTopMentors(peers.slice(0, 4));
+            });
 
             // Cleanup listener
             return () => {
                 unsubOrders();
             };
         }
-    }, [user, isMentorMode]);
+    }, [user]);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-IN', {
@@ -126,191 +118,8 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
         { icon: 'trending_up', label: 'Business', color: 'bg-cyan-500' },
     ];
 
-    // If Mentor Mode, show mentor dashboard
-    if (isMentorMode) {
-        return (
-            <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
-                <Sidebar user={user} />
-                <main className="flex-1 flex flex-col h-full overflow-hidden relative">
-                    <DashboardHeader />
-                    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
-                        <div className="max-w-7xl mx-auto">
-                            <div className="w-full flex flex-col gap-8">
-                                {/* Writer Welcome Section */}
-                                <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <div className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-primary/10 to-orange-500/10 text-primary border border-primary/20">
-                                                <span className="flex items-center gap-1">
-                                                    <span className="material-symbols-outlined text-sm">edit_note</span>
-                                                    Contributor Dashboard
-                                                </span>
-                                            </div>
-                                            <span className="text-sm text-text-muted">• {format(new Date(), 'MMM d, yyyy')}</span>
-                                        </div>
-                                        <h1 className="text-3xl md:text-4xl font-extrabold text-text-dark tracking-tight leading-tight">
-                                            {getGreeting()}, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-600">{user?.full_name?.split(' ')[0] || 'Mentor'}</span>.
-                                        </h1>
-                                        <p className="text-text-muted mt-2 text-lg">Ready to help fellow students understand concepts.</p>
-                                    </div>
-                                    <button onClick={() => navigate('/profile')} className="btn-ripple h-11 px-6 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2 group">
-                                        <span className="material-symbols-outlined text-lg group-hover:rotate-12 transition-transform">visibility</span>
-                                        View My Profile
-                                    </button>
-                                </div>
-
-                                {/* Writer Stats */}
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
-                                    <SpotlightCard className="p-6 h-full flex flex-col justify-between group" spotlightColor="rgba(34, 197, 94, 0.1)">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <h3 className="text-text-muted font-bold text-sm">Contributions</h3>
-                                            <div className="size-11 rounded-xl bg-gradient-to-br from-green-50 to-emerald-100 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                                <span className="material-symbols-outlined">volunteer_activism</span>
-                                            </div>
-                                        </div>
-                                        <span className="text-3xl font-extrabold text-text-dark">{user?.projects_completed || 0}</span>
-                                        <p className="text-xs text-green-600 font-medium mt-1">Explanations given</p>
-                                    </SpotlightCard>
-
-                                    <SpotlightCard className="p-6 h-full flex flex-col justify-between group" spotlightColor="rgba(249, 115, 22, 0.1)">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <h3 className="text-text-muted font-bold text-sm">Active Orders</h3>
-                                            <div className="size-11 rounded-xl bg-gradient-to-br from-orange-50 to-amber-100 text-primary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                                <span className="material-symbols-outlined">assignment</span>
-                                            </div>
-                                        </div>
-                                        <span className="text-3xl font-extrabold text-text-dark">{stats.activeCount}</span>
-                                        <p className="text-xs text-text-muted font-medium mt-1">In progress</p>
-                                    </SpotlightCard>
-
-                                    <SpotlightCard
-                                        className="p-6 h-full flex flex-col justify-between cursor-pointer group hover:border-blue-300"
-                                        spotlightColor="rgba(59, 130, 246, 0.1)"
-                                        onClick={() => navigate('/connections')}
-                                    >
-                                        <div className="flex justify-between items-start mb-3">
-                                            <h3 className="text-text-muted font-bold text-sm">Pending Requests</h3>
-                                            <div className="size-11 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                                <span className="material-symbols-outlined">person_add</span>
-                                            </div>
-                                        </div>
-                                        <span className="text-3xl font-extrabold text-text-dark">{incomingRequests.length}</span>
-                                        <p className="text-xs text-blue-600 font-medium mt-1 flex items-center gap-1">Tap to review <span className="material-symbols-outlined text-sm">arrow_forward</span></p>
-                                    </SpotlightCard>
-
-                                    <SpotlightCard className="p-6 h-full flex flex-col justify-between group" spotlightColor="rgba(168, 85, 247, 0.1)">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <h3 className="text-text-muted font-bold text-sm">On-Time Rate</h3>
-                                            <div className="size-11 rounded-xl bg-gradient-to-br from-purple-50 to-violet-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                                <span className="material-symbols-outlined">timer</span>
-                                            </div>
-                                        </div>
-                                        <span className="text-3xl font-extrabold text-text-dark">{user?.on_time_rate || 100}%</span>
-                                        <div className="w-full bg-gray-100 rounded-full h-1.5 mt-2">
-                                            <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${user?.on_time_rate || 100}%` }}></div>
-                                        </div>
-                                    </SpotlightCard>
-                                </div>
-
-                                {/* Incoming Requests */}
-                                {incomingRequests.length > 0 && (
-                                    <SpotlightCard className="p-6 mb-6" spotlightColor="rgba(34, 197, 94, 0.1)">
-                                        <div className="flex items-center justify-between mb-5">
-                                            <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
-                                                <span className="material-symbols-outlined text-primary">person_add</span>
-                                                Connection Requests
-                                                <span className="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{incomingRequests.length}</span>
-                                            </h2>
-                                            <button onClick={() => navigate('/connections')} className="text-sm font-bold text-primary">View All</button>
-                                        </div>
-                                        <div className="space-y-3">
-                                            {incomingRequests.slice(0, 3).map((request: any) => (
-                                                <div key={request.id} className="flex items-center gap-4 p-4 rounded-xl bg-secondary-bg hover:bg-primary/5 transition-all">
-                                                    <Avatar src={request.fromUser?.avatar_url} alt={request.fromUser?.full_name} className="size-12 rounded-full" fallback={request.fromUser?.full_name?.charAt(0)} />
-                                                    <div className="flex-1 cursor-pointer" onClick={() => navigate(`/profile/${request.fromUser?.id}`)}>
-                                                        <h4 className="font-bold text-text-dark hover:text-primary transition-colors">{request.fromUser?.full_name}</h4>
-                                                        <p className="text-xs text-text-muted">{request.fromUser?.school}</p>
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        <button onClick={() => db.respondToConnectionRequest(request.id, 'accepted').then(() => setIncomingRequests(prev => prev.filter(r => r.id !== request.id)))} className="h-9 px-4 rounded-lg bg-primary text-white text-sm font-bold">Accept</button>
-                                                        <button onClick={() => db.respondToConnectionRequest(request.id, 'rejected').then(() => setIncomingRequests(prev => prev.filter(r => r.id !== request.id)))} className="h-9 px-4 rounded-lg bg-gray-200 text-text-muted text-sm font-bold">Decline</button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </SpotlightCard>
-                                )}
-
-                                {/* Recent Messages & Profile Stats */}
-                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                                    <section className="bg-white p-6 rounded-2xl shadow-card border border-border-subtle">
-                                        <div className="flex items-center justify-between mb-5">
-                                            <h2 className="text-lg font-bold text-text-dark flex items-center gap-2">
-                                                <span className="material-symbols-outlined text-primary">chat</span>
-                                                Recent Messages
-                                            </h2>
-                                            <button onClick={() => navigate('/chats')} className="text-sm font-bold text-primary">View All</button>
-                                        </div>
-                                        {recentChats.length > 0 ? (
-                                            <div className="space-y-3">
-                                                {recentChats.slice(0, 4).map((chat: any) => (
-                                                    <div key={chat.id} onClick={() => navigate(`/chats/${chat.id}`)} className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary-bg cursor-pointer transition-all">
-                                                        <Avatar src={chat.other_avatar} alt={chat.other_handle} className="size-10 rounded-full" fallback={chat.other_handle?.charAt(0)} />
-                                                        <div className="flex-1 min-w-0">
-                                                            <h4 className="font-bold text-text-dark text-sm truncate">{chat.other_handle}</h4>
-                                                            <p className="text-xs text-text-muted truncate">{chat.last_message || 'No messages'}</p>
-                                                        </div>
-                                                        {chat.unread_count > 0 && <span className="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{chat.unread_count}</span>}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="text-center py-8">
-                                                <div className="size-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
-                                                    <span className="material-symbols-outlined">chat_bubble</span>
-                                                </div>
-                                                <p className="text-text-muted text-sm">No messages yet</p>
-                                            </div>
-                                        )}
-                                    </section>
-
-                                    <section className="bg-white p-6 rounded-2xl shadow-card border border-border-subtle">
-                                        <h2 className="text-lg font-bold text-text-dark mb-5">Your Profile Stats</h2>
-                                        <div className="flex items-center gap-4 mb-5">
-                                            <Avatar src={user?.avatar_url} alt={user?.full_name} className="size-16 rounded-xl" fallback={user?.full_name?.charAt(0)} />
-                                            <div>
-                                                <h3 className="font-bold text-text-dark text-lg">{user?.full_name}</h3>
-                                                <p className="text-sm text-text-muted">{user?.school}</p>
-                                                <div className="flex items-center gap-1 mt-1">
-                                                    <span className="material-symbols-outlined text-amber-400 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                                    <span className="text-sm font-bold text-text-dark">{user?.rating || '5.0'}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3 mb-4">
-                                            <div className="bg-secondary-bg p-4 rounded-xl text-center">
-                                                <p className="text-2xl font-bold text-text-dark">{connections.length}</p>
-                                                <p className="text-xs text-text-muted">Connections</p>
-                                            </div>
-                                            <div className="bg-secondary-bg p-4 rounded-xl text-center">
-                                                <p className="text-2xl font-bold text-text-dark">{user?.portfolio?.length || 0}</p>
-                                                <p className="text-xs text-text-muted">Portfolio Items</p>
-                                            </div>
-                                        </div>
-                                        <button onClick={() => navigate('/profile')} className="w-full py-3 rounded-xl bg-primary/10 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all">Edit Profile</button>
-                                    </section>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main >
-                <MobileNav />
-            </div >
-        );
-    }
-
     // ==========================================
-    // STUDENT DASHBOARD (Looking for Help)
+    // UNIFIED DASHBOARD
     // ==========================================
     return (
         <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
@@ -337,7 +146,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             <div className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm">
                                                 <span className="flex items-center gap-1">
                                                     <span className="material-symbols-outlined text-sm">school</span>
-                                                    Student Dashboard
+                                                    Dashboard
                                                 </span>
                                             </div>
                                             <span className="text-sm text-white/80">• {format(new Date(), 'EEEE, MMM d')}</span>
@@ -346,7 +155,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             {getGreeting()}, {user?.full_name?.split(' ')[0] || 'Student'}! 👋
                                         </h1>
                                         <p className="text-white/90 text-base md:text-lg max-w-xl">
-                                            Need help understanding concepts? Connect with verified contributors from top universities across India.
+                                            Connect with verified peers from top universities across India.
                                         </p>
                                     </div>
 

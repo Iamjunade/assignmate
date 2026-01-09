@@ -8,33 +8,19 @@ export const MobileNav = () => {
     const location = useLocation();
     const { user } = useAuth();
     const [unreadCount, setUnreadCount] = useState(0);
-    const [requestsCount, setRequestsCount] = useState(0);
-
-    const isMentorMode = user?.is_mentor === true;
 
     useEffect(() => {
         if (user?.id) {
             const unsubscribe = dbService.listenToUnreadCount(user.id, (count) => {
                 setUnreadCount(count);
             });
-            if (isMentorMode) {
-                dbService.getIncomingRequests(user.id).then(requests => {
-                    setRequestsCount(requests.length);
-                });
-            }
             return () => unsubscribe();
         }
-    }, [user?.id, isMentorMode]);
+    }, [user?.id]);
 
     const isActive = (path: string) => location.pathname === path;
 
-    const navItems = isMentorMode ? [
-        { icon: 'dashboard', label: 'Home', path: '/feed' },
-        { icon: 'person_add', label: 'Requests', path: '/connections', badge: requestsCount },
-        { icon: 'payments', label: '', path: '/earnings', isPrimary: true }, // Empty label for primary
-        { icon: 'chat_bubble', label: 'Chat', path: '/chats', badge: unreadCount },
-        { icon: 'person', label: 'Profile', path: '/profile' },
-    ] : [
+    const navItems = [
         { icon: 'dashboard', label: 'Home', path: '/feed' },
         { icon: 'assignment', label: 'Projects', path: '/projects' },
         { icon: 'search', label: 'Search', path: '/mentors', isPrimary: true },
