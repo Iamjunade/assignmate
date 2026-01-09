@@ -160,10 +160,10 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
 
                                 {/* Writer Stats */}
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
-                                    <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                                         <div className="flex justify-between items-start mb-3">
                                             <h3 className="text-text-muted font-bold text-sm">Total Earned</h3>
-                                            <div className="size-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
+                                            <div className="size-11 rounded-xl bg-gradient-to-br from-green-50 to-emerald-100 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                                 <span className="material-symbols-outlined">payments</span>
                                             </div>
                                         </div>
@@ -171,10 +171,10 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         <p className="text-xs text-green-600 font-medium mt-1">Lifetime earnings</p>
                                     </div>
 
-                                    <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                                         <div className="flex justify-between items-start mb-3">
                                             <h3 className="text-text-muted font-bold text-sm">Active Orders</h3>
-                                            <div className="size-10 rounded-xl bg-orange-50 text-primary flex items-center justify-center">
+                                            <div className="size-11 rounded-xl bg-gradient-to-br from-orange-50 to-amber-100 text-primary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                                 <span className="material-symbols-outlined">assignment</span>
                                             </div>
                                         </div>
@@ -182,10 +182,10 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         <p className="text-xs text-text-muted font-medium mt-1">In progress</p>
                                     </div>
 
-                                    <div onClick={() => navigate('/connections')} className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle cursor-pointer hover:border-blue-200 transition-all">
+                                    <div onClick={() => navigate('/connections')} className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 hover:border-blue-300 transition-all duration-300 cursor-pointer group">
                                         <div className="flex justify-between items-start mb-3">
                                             <h3 className="text-text-muted font-bold text-sm">Pending Requests</h3>
-                                            <div className="size-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                            <div className="size-11 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                                 <span className="material-symbols-outlined">person_add</span>
                                             </div>
                                         </div>
@@ -193,10 +193,10 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         <p className="text-xs text-blue-600 font-medium mt-1 flex items-center gap-1">Tap to review <span className="material-symbols-outlined text-sm">arrow_forward</span></p>
                                     </div>
 
-                                    <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                                         <div className="flex justify-between items-start mb-3">
                                             <h3 className="text-text-muted font-bold text-sm">On-Time Rate</h3>
-                                            <div className="size-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                                            <div className="size-11 rounded-xl bg-gradient-to-br from-purple-50 to-violet-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                                 <span className="material-symbols-outlined">timer</span>
                                             </div>
                                         </div>
@@ -367,10 +367,10 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                             {/* Stats Row */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {/* Active Projects */}
-                                <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle group hover:shadow-soft transition-all">
+                                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                                     <div className="flex justify-between items-start mb-3">
                                         <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">Active Projects</h3>
-                                        <div className="size-9 rounded-xl bg-orange-50 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <div className="size-10 rounded-xl bg-gradient-to-br from-orange-50 to-amber-100 text-primary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                             <span className="material-symbols-outlined text-xl">assignment</span>
                                         </div>
                                     </div>
@@ -381,11 +381,11 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                 {/* My Network - Clickable */}
                                 <div
                                     onClick={() => navigate('/connections')}
-                                    className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle group hover:shadow-soft hover:border-blue-200 transition-all cursor-pointer"
+                                    className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 hover:border-blue-300 transition-all duration-300 cursor-pointer group"
                                 >
                                     <div className="flex justify-between items-start mb-3">
                                         <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">My Network</h3>
-                                        <div className="size-9 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <div className="size-10 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 text-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                             <span className="material-symbols-outlined text-xl">group</span>
                                         </div>
                                     </div>
@@ -398,11 +398,11 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                 {/* Messages */}
                                 <div
                                     onClick={() => navigate('/chats')}
-                                    className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle group hover:shadow-soft hover:border-green-200 transition-all cursor-pointer"
+                                    className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 hover:border-green-300 transition-all duration-300 cursor-pointer group"
                                 >
                                     <div className="flex justify-between items-start mb-3">
                                         <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">Messages</h3>
-                                        <div className="size-9 rounded-xl bg-green-50 text-green-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <div className="size-10 rounded-xl bg-gradient-to-br from-green-50 to-emerald-100 text-green-500 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                             <span className="material-symbols-outlined text-xl">chat</span>
                                         </div>
                                     </div>
