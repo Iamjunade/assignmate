@@ -630,7 +630,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                 <div className="size-10 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-2">
                                                     <span className="material-symbols-outlined">person_search</span>
                                                 </div>
-                                                <p className="text-text-muted text-xs">Loading mentors...</p>
+                                                <p className="text-text-muted text-xs">Loading contributors...</p>
                                             </div>
                                         )}
                                     </section>
@@ -655,7 +655,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                         <Avatar src={mentor.avatar_url} alt={mentor.handle} className="size-10 rounded-full" fallback={mentor.handle?.charAt(0)} />
                                                         <div className="flex-1 min-w-0">
                                                             <h4 className="font-bold text-text-dark text-sm truncate group-hover:text-primary">{mentor.handle || mentor.full_name}</h4>
-                                                            <p className="text-[11px] text-text-muted truncate">{mentor.bio || 'Mentor'}</p>
+                                                            <p className="text-[11px] text-text-muted truncate">{mentor.bio || 'Student'}</p>
                                                         </div>
                                                         {mentor.is_mentor && (
                                                             <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-bold">CONTRIBUTOR</span>
