@@ -114,7 +114,7 @@ export const DashboardHeader: React.FC = () => {
                             ? 'bg-white border-primary/30 ring-4 ring-primary/10 shadow-lg'
                             : 'bg-gray-50/80 border-transparent hover:bg-white hover:border-gray-200 hover:shadow-md'
                             } text-text-dark placeholder-text-muted`}
-                        placeholder="Find assignments, mentors, or subjects..."
+                        placeholder="Find assignments, peers, or subjects..."
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
