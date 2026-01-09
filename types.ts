@@ -110,3 +110,14 @@ export interface Order {
   writer_school?: string;
   writer_verified?: boolean;
 }
+
+export interface Notification {
+  id: string;
+  receiverId: string;
+  senderName: string;
+  content: string;
+  chatId?: string;
+  type: 'chat' | 'connection' | 'system';
+  read: boolean;
+  timestamp: any; // Firestore Timestamp
+}

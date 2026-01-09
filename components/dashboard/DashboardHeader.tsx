@@ -1,28 +1,53 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-
 import { dbService } from '../../services/firestoreService';
+import { notifications as notifService } from '../../services/firebase';
+import { useAuth } from '../../contexts/AuthContext';
+import { NotificationDropdown } from './NotificationDropdown';
 
 export const DashboardHeader: React.FC = () => {
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [isFocused, setIsFocused] = useState(false);
+
+    // Notification State
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const notifRef = useRef<HTMLDivElement>(null);
+
     // Use a state to hold the loaded colleges
     const [colleges, setColleges] = useState<any[]>([]);
     const [results, setResults] = useState<{ colleges: any[], students: any[] }>({ colleges: [], students: [] });
     const searchRef = useRef<HTMLDivElement>(null);
 
-    // Handle click outside to close dropdown
+    // Handle click outside to close dropdowns
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
                 setIsFocused(false);
             }
+            if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+                setShowNotifications(false);
+            }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Subscribe to notifications
+    useEffect(() => {
+        if (!user) return;
+        const unsubscribe = notifService.subscribeToHistory(user.id, (data) => {
+            setNotifications(data);
+        });
+        return () => unsubscribe();
+    }, [user]);
+
+    // ... (rest of search logic same as before) ...
+    // Note: I will need to retain the existing logic, just showing the header part edit here.
+    // I will replace only the relevant parts or I should check line numbers carefully.
+    // Actually, I am replacing lines 7 to ...
 
     // Load colleges data dynamically
     useEffect(() => {
@@ -49,16 +74,12 @@ export const DashboardHeader: React.FC = () => {
         }
 
         const query = searchQuery.toLowerCase();
-
-        // Filter colleges (limit to 20 for performance)
-        // Now using the 'colleges' state instead of the direct import
         const filteredColleges = colleges.filter(c =>
             c.name.toLowerCase().includes(query) ||
             c.state.toLowerCase().includes(query) ||
             c.district.toLowerCase().includes(query)
         ).slice(0, 20);
 
-        // Search students from DB
         if (searchQuery.length > 2) {
             dbService.searchStudents(searchQuery).then(students => {
                 setResults(prev => ({ ...prev, students }));
@@ -69,6 +90,9 @@ export const DashboardHeader: React.FC = () => {
 
         setResults(prev => ({ ...prev, colleges: filteredColleges }));
     }, [searchQuery, colleges]);
+
+    // Calculate unread count
+    const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
         <header className="h-16 md:h-24 flex items-center justify-between px-4 py-4 bg-white/80 backdrop-blur-xl border-b border-gray-100 z-30 transition-all duration-300 sticky top-0 md:relative">
@@ -165,10 +189,21 @@ export const DashboardHeader: React.FC = () => {
                 </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 ml-auto">
-                <button className="relative p-2 md:p-2.5 bg-white text-text-dark hover:bg-primary-light rounded-full transition-colors border border-border-subtle shadow-sm group">
-                    <span className="material-symbols-outlined group-hover:text-primary transition-colors text-[20px] md:text-[24px]">notifications</span>
-                    <span className="absolute top-2 right-2.5 size-2 bg-red-500 rounded-full border-2 border-white"></span>
-                </button>
+                <div className="relative" ref={notifRef}>
+                    <button
+                        onClick={() => setShowNotifications(!showNotifications)}
+                        className={`relative p-2 md:p-2.5 rounded-full transition-colors border shadow-sm group ${showNotifications ? 'bg-primary text-white border-primary border-opacity-50' : 'bg-white text-text-dark hover:bg-primary-light border-border-subtle'}`}
+                    >
+                        <span className="material-symbols-outlined group-hover:text-primary transition-colors text-[20px] md:text-[24px]">notifications</span>
+                        {unreadCount > 0 && (
+                            <span className="absolute top-2 right-2.5 size-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                        )}
+                    </button>
+                    {showNotifications && (
+                        <NotificationDropdown notifications={notifications} onClose={() => setShowNotifications(false)} />
+                    )}
+                </div>
+
                 <button
                     onClick={() => navigate('/writers')}
                     className="hidden lg:flex items-center justify-center rounded-full h-11 px-6 bg-white border border-border-subtle text-text-dark text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm"

@@ -125,6 +125,27 @@ export const notifications = {
         });
     },
 
+    subscribeToHistory: (userId: string, onUpdate: (notifications: any[]) => void) => {
+        if (!dbInstance || !userId) return () => { };
+
+        const q = query(
+            collection(dbInstance, 'notifications'),
+            where('receiverId', '==', userId),
+            orderBy('timestamp', 'desc'),
+            limit(20) // Show last 20 notifications
+        );
+
+        return onSnapshot(q, (snapshot) => {
+            const notifs = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            onUpdate(notifs);
+        }, (error) => {
+            console.error("Notification History Error:", error);
+        });
+    },
+
     markAsRead: async (notificationId: string) => {
         if (!dbInstance) return;
         try {
