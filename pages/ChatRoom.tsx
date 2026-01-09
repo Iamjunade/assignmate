@@ -89,7 +89,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
     // 3. Typing Indicators - depends on chatDetails
     useEffect(() => {
-        if (!chatDetails) return;
+        if (!chatDetails || !chatId || chatId.includes('[object')) return;
 
         const otherId = user.id === chatDetails.poster_id ? chatDetails.writer_id : chatDetails.poster_id;
         const unsubTyping = presence.listenToTypingStatus(chatId, otherId, (typing) => {
@@ -106,7 +106,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
     // Handle Typing Status
     useEffect(() => {
-        if (!chatDetails) return;
+        if (!chatDetails || !chatId || chatId.includes('[object')) return;
         const timeout = setTimeout(() => {
             if (isTyping) {
                 setIsTyping(false);
@@ -115,11 +115,11 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
         }, 3000);
 
         return () => clearTimeout(timeout);
-    }, [text, isTyping, chatId, user.id]);
+    }, [text, isTyping, chatId, user.id, chatDetails]);
 
     const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setText(e.target.value);
-        if (!isTyping) {
+        if (!isTyping && chatId && !chatId.includes('[object')) {
             setIsTyping(true);
             presence.setTypingStatus(chatId, user.id, true);
         }
@@ -132,7 +132,9 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
         const contentToSend = text;
         setText('');
         setIsTyping(false);
-        presence.setTypingStatus(chatId, user.id, false);
+        if (chatId && !chatId.includes('[object')) {
+            presence.setTypingStatus(chatId, user.id, false);
+        }
 
         if (textareaRef.current) textareaRef.current.style.height = 'auto';
 

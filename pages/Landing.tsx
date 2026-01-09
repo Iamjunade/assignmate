@@ -223,7 +223,7 @@ export const Landing = () => {
             {/* Interactive Search Mockup */}
             <section className="w-full px-6 py-12 md:px-10 lg:px-20 bg-white dark:bg-[#2c2219]">
                 <div className="mx-auto max-w-5xl bg-primary/5 dark:bg-white/5 rounded-3xl p-8 md:p-12 text-center">
-                    <h2 className="text-2xl md:text-3xl font-bold text-[#1b140d] dark:text-white mb-8">Find a verified senior from your college</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold text-[#1b140d] dark:text-white mb-8">Search your campus now</h2>
                     <div className="bg-white dark:bg-[#221910] p-2 rounded-full shadow-lg flex flex-col md:flex-row items-center gap-2 max-w-3xl mx-auto border border-gray-100 dark:border-white/10">
                         <div className="flex-1 flex items-center px-4 h-12 w-full">
                             <span className="material-symbols-outlined text-gray-400 mr-2">search</span>
@@ -244,10 +244,10 @@ export const Landing = () => {
                                 onChange={(e) => setSearchUniversity(e.target.value)}
                             >
                                 <option value="">Select University</option>
-                                <option value="Delhi University">Delhi University</option>
-                                <option value="IIT Bombay">IIT Bombay</option>
-                                <option value="Mumbai University">Mumbai University</option>
-                                <option value="BITS Pilani">BITS Pilani</option>
+                                <option value="JNTUH">JNTUH</option>
+                                <option value="CMRIT">CMRIT</option>
+                                <option value="BVRIT">BVRIT</option>
+                                <option value="CBIT">CBIT</option>
                             </select>
                         </div>
                         <button onClick={() => handleSearch()} className="bg-primary hover:bg-primary/90 text-[#1b140d] font-bold rounded-full px-8 h-12 w-full md:w-auto shadow-md transition-all">

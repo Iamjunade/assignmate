@@ -19,7 +19,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ noti
         }
 
         // Navigate based on type
-        if (notification.type === 'chat' && notification.chatId) {
+        if (notification.type === 'chat' && notification.chatId && typeof notification.chatId === 'string' && !notification.chatId.includes('[object')) {
             navigate(`/chats/${notification.chatId}`);
         } else if (notification.type === 'connection') {
             navigate('/connections');
@@ -56,8 +56,8 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ noti
                         className={`p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer flex gap-3 ${!notification.read ? 'bg-orange-50/50' : ''}`}
                     >
                         <div className={`size-10 rounded-full flex items-center justify-center flex-shrink-0 ${notification.type === 'chat' ? 'bg-blue-100 text-blue-600' :
-                                notification.type === 'connection' ? 'bg-purple-100 text-purple-600' :
-                                    'bg-orange-100 text-orange-600'
+                            notification.type === 'connection' ? 'bg-purple-100 text-purple-600' :
+                                'bg-orange-100 text-orange-600'
                             }`}>
                             <span className="material-symbols-outlined text-xl">
                                 {notification.type === 'chat' ? 'chat' :
