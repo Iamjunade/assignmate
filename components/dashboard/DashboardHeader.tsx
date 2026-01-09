@@ -114,7 +114,7 @@ export const DashboardHeader: React.FC = () => {
                             ? 'bg-white border-primary/30 ring-4 ring-primary/10 shadow-lg'
                             : 'bg-gray-50/80 border-transparent hover:bg-white hover:border-gray-200 hover:shadow-md'
                             } text-text-dark placeholder-text-muted`}
-                        placeholder="Find assignments, writers, or subjects..."
+                        placeholder="Find assignments, mentors, or subjects..."
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -133,7 +133,7 @@ export const DashboardHeader: React.FC = () => {
                                             key={college.id}
                                             className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors"
                                             onClick={() => {
-                                                navigate(`/writers?college=${encodeURIComponent(college.name)}`);
+                                                navigate(`/mentors?college=${encodeURIComponent(college.name)}`);
                                                 setIsFocused(false);
                                                 setSearchQuery('');
                                             }}
@@ -205,10 +205,10 @@ export const DashboardHeader: React.FC = () => {
                 </div>
 
                 <button
-                    onClick={() => navigate('/writers')}
+                    onClick={() => navigate('/mentors')}
                     className="hidden lg:flex items-center justify-center rounded-full h-11 px-6 bg-white border border-border-subtle text-text-dark text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm"
                 >
-                    Find a Writer
+                    Find Peers
                 </button>
 
             </div>
