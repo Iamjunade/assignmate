@@ -345,7 +345,7 @@ export const FindMentor = () => {
                                     }`}
                             >
                                 <span className="material-symbols-outlined text--[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>edit_note</span>
-                                Mentors Only
+                                Contributors Only
                             </button>
 
                             <button
@@ -470,7 +470,7 @@ export const FindMentor = () => {
                                                         <span className="text-xs font-bold text-text-main">{writer.rating || '5.0'}</span>
                                                     </div>
                                                     {writer.is_writer && (
-                                                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">MENTOR</span>
+                                                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">CONTRIBUTOR</span>
                                                     )}
                                                 </div>
                                             </div>

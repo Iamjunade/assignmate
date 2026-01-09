@@ -177,7 +177,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         if (checked) {
             const hasPortfolio = profileUser.portfolio && profileUser.portfolio.length > 0;
             if (!hasPortfolio) {
-                error("Please upload at least one work sample to become a mentor.");
+                error("Please upload at least one work sample to become a contributor.");
                 setActiveTab('portfolio');
                 return;
             }
@@ -187,7 +187,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         try {
             await db.updateProfile(profileUser.id, { is_mentor: checked });
             setProfileUser({ ...profileUser, is_mentor: checked });
-            success(checked ? "You are now listed as a mentor" : "You are no longer listed as a mentor");
+            success(checked ? "You are now listed as a contributor" : "You are no longer listed as a contributor");
         } catch (e) {
             setIsMentor(!checked);
             error("Failed to update status");
@@ -468,7 +468,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         <div className="flex items-center gap-2">
                                             <div className={`size-2.5 rounded-full ${isMentor ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
                                             <span className="text-sm font-medium text-secondary">
-                                                {isMentor ? 'Mentor Mode On' : 'Mentor Mode Off'}
+                                                {isMentor ? 'Contributor Mode On' : 'Contributor Mode Off'}
                                             </span>
                                         </div>
                                         {isOwnProfile ? (
@@ -558,11 +558,11 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                 <div className={`grid ${isOwnProfile || profileUser.is_mentor ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'} gap-4`}>
                                     {[
                                         // Private stats - only show on own profile
-                                        ...(isOwnProfile ? [{ label: 'Total Earned', value: `₹${profileUser.total_earned || 0}`, icon: 'payments', color: 'text-green-600', bg: 'bg-green-50' }] : []),
+                                        ...(isOwnProfile ? [{ label: 'Contributions', value: `${profileUser.projects_completed || 0}`, icon: 'volunteer_activism', color: 'text-green-600', bg: 'bg-green-50' }] : []),
                                         // Show assignments only for writers or own profile
-                                        ...(isOwnProfile || profileUser.is_mentor ? [{ label: 'Assignments', value: projectsCompleted, icon: 'assignment', color: 'text-blue-600', bg: 'bg-blue-50' }] : []),
+                                        ...(isOwnProfile || profileUser.is_mentor ? [{ label: 'Explanations', value: projectsCompleted, icon: 'lightbulb', color: 'text-blue-600', bg: 'bg-blue-50' }] : []),
                                         // Public stats - always show
-                                        { label: 'Rating', value: rating.toFixed(1), icon: 'star', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+                                        { label: 'Contribution Score', value: rating.toFixed(1), icon: 'volunteer_activism', color: 'text-yellow-600', bg: 'bg-yellow-50' },
                                         { label: 'On-Time Rate', value: `${profileUser.on_time_rate || 100}%`, icon: 'schedule', color: 'text-purple-600', bg: 'bg-purple-50' },
                                         // Show connections count for others
                                         ...(!isOwnProfile ? [{ label: 'Connections', value: connections.length, icon: 'group', color: 'text-indigo-600', bg: 'bg-indigo-50' }] : []),

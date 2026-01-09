@@ -87,8 +87,8 @@ const WriterCard: React.FC<WriterCardProps> = ({ writer, onChat, index, onToggle
               <h3 className="font-bold text-slate-800 flex items-center gap-1.5">
                 {writer.handle}
                 {writer.is_writer && (
-                  <span className="bg-orange-100 text-orange-600 text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 border border-orange-200" title="Available for Assignments">
-                    <Zap size={8} className="fill-orange-500" /> PRO
+                  <span className="bg-orange-100 text-orange-600 text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 border border-orange-200" title="Active Contributor">
+                    <Zap size={8} className="fill-orange-500" /> CONTRIBUTOR
                   </span>
                 )}
               </h3>

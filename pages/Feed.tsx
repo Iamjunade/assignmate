@@ -143,7 +143,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             <div className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-primary/10 to-orange-500/10 text-primary border border-primary/20">
                                                 <span className="flex items-center gap-1">
                                                     <span className="material-symbols-outlined text-sm">edit_note</span>
-                                                    Mentor Dashboard
+                                                    Contributor Dashboard
                                                 </span>
                                             </div>
                                             <span className="text-sm text-text-muted">• {format(new Date(), 'MMM d, yyyy')}</span>
@@ -151,7 +151,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         <h1 className="text-3xl md:text-4xl font-extrabold text-text-dark tracking-tight leading-tight">
                                             {getGreeting()}, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-600">{user?.full_name?.split(' ')[0] || 'Mentor'}</span>.
                                         </h1>
-                                        <p className="text-text-muted mt-2 text-lg">Ready to help fellow students with their assignments.</p>
+                                        <p className="text-text-muted mt-2 text-lg">Ready to help fellow students understand concepts.</p>
                                     </div>
                                     <button onClick={() => navigate('/profile')} className="btn-ripple h-11 px-6 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2 group">
                                         <span className="material-symbols-outlined text-lg group-hover:rotate-12 transition-transform">visibility</span>
@@ -163,13 +163,13 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
                                     <SpotlightCard className="p-6 h-full flex flex-col justify-between group" spotlightColor="rgba(34, 197, 94, 0.1)">
                                         <div className="flex justify-between items-start mb-3">
-                                            <h3 className="text-text-muted font-bold text-sm">Total Earned</h3>
+                                            <h3 className="text-text-muted font-bold text-sm">Contributions</h3>
                                             <div className="size-11 rounded-xl bg-gradient-to-br from-green-50 to-emerald-100 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                                <span className="material-symbols-outlined">payments</span>
+                                                <span className="material-symbols-outlined">volunteer_activism</span>
                                             </div>
                                         </div>
-                                        <span className="text-3xl font-extrabold text-text-dark">{formatCurrency(user?.total_earned || 0)}</span>
-                                        <p className="text-xs text-green-600 font-medium mt-1">Lifetime earnings</p>
+                                        <span className="text-3xl font-extrabold text-text-dark">{user?.projects_completed || 0}</span>
+                                        <p className="text-xs text-green-600 font-medium mt-1">Explanations given</p>
                                     </SpotlightCard>
 
                                     <SpotlightCard className="p-6 h-full flex flex-col justify-between group" spotlightColor="rgba(249, 115, 22, 0.1)">
@@ -346,7 +346,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             {getGreeting()}, {user?.full_name?.split(' ')[0] || 'Student'}! 👋
                                         </h1>
                                         <p className="text-white/90 text-base md:text-lg max-w-xl">
-                                            Need help with your assignments? Connect with verified peers and mentors from top universities across India.
+                                            Need help understanding concepts? Connect with verified contributors from top universities across India.
                                         </p>
                                     </div>
 
@@ -505,7 +505,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                     onClick={() => navigate('/mentors')}
                                                     className="px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
                                                 >
-                                                    Find a Mentor Now
+                                                    Find a Contributor
                                                 </button>
                                             </div>
                                         ) : (
@@ -592,8 +592,8 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     <section className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                                         <div className="flex items-center justify-between mb-4">
                                             <h2 className="text-base font-bold text-text-dark flex items-center gap-2">
-                                                <span className="material-symbols-outlined text-amber-400 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                                Top Mentors
+                                                <span className="material-symbols-outlined text-amber-400 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>volunteer_activism</span>
+                                                Top Contributors
                                             </h2>
                                             <button onClick={() => navigate('/mentors')} className="text-sm font-bold text-primary">See All</button>
                                         </div>
@@ -658,7 +658,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                             <p className="text-[11px] text-text-muted truncate">{mentor.bio || 'Mentor'}</p>
                                                         </div>
                                                         {mentor.is_mentor && (
-                                                            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-bold">MENTOR</span>
+                                                            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-bold">CONTRIBUTOR</span>
                                                         )}
                                                     </div>
                                                 ))}

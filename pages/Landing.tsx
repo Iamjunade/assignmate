@@ -81,7 +81,7 @@ export const Landing = () => {
                     <nav className="flex items-center gap-8">
                         <button onClick={() => handleScrollTo('how-it-works')} className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">How it Works</button>
                         <button onClick={() => handleScrollTo('trust-safety')} className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">Trust & Safety</button>
-                        <button onClick={handleSignup} className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">For Mentors</button>
+                        <button onClick={handleSignup} className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">For Contributors</button>
                     </nav>
                     <div className="flex items-center gap-4">
                         {user ? (
@@ -118,7 +118,7 @@ export const Landing = () => {
                     </button>
                     <button onClick={() => { handleScrollTo('how-it-works'); setMobileMenuOpen(false); }} className="text-xl font-bold">How it Works</button>
                     <button onClick={() => { handleScrollTo('trust-safety'); setMobileMenuOpen(false); }} className="text-xl font-bold">Trust & Safety</button>
-                    <button onClick={() => { handleSignup(); setMobileMenuOpen(false); }} className="text-xl font-bold">For Mentors</button>
+                    <button onClick={() => { handleSignup(); setMobileMenuOpen(false); }} className="text-xl font-bold">For Contributors</button>
                     <button onClick={() => { handleLogin(); setMobileMenuOpen(false); }} className="text-xl font-bold text-primary">Login</button>
                     <button onClick={() => { handleSignup(); setMobileMenuOpen(false); }} className="px-8 py-3 bg-primary text-[#1b140d] font-bold rounded-full">Join Now</button>
                 </div>
@@ -132,21 +132,21 @@ export const Landing = () => {
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="flex flex-col gap-8">
                             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 w-fit">
-                                <span className="material-symbols-outlined text-primary text-sm">security</span>
-                                <span className="text-xs font-bold text-primary tracking-wide uppercase">100% Secure & Verified</span>
+                                <span className="material-symbols-outlined text-primary text-sm">school</span>
+                                <span className="text-xs font-bold text-primary tracking-wide uppercase">100% Free & Campus Verified</span>
                             </div>
                             <h1 className="text-5xl font-black leading-tight tracking-tight md:text-6xl lg:text-7xl text-[#1b140d] dark:text-white">
-                                Grow Your <span className="text-primary relative inline-block">Network<svg className="absolute w-full h-3 -bottom-1 left-0 text-primary opacity-40" preserveAspectRatio="none" viewBox="0 0 100 10"><path d="M0 5 Q 50 10 100 5" fill="none" stroke="currentColor" strokeWidth="8"></path></svg></span>. Ace Your Goals.
+                                Learn Together. <span className="text-primary relative inline-block">Grow Together<svg className="absolute w-full h-3 -bottom-1 left-0 text-primary opacity-40" preserveAspectRatio="none" viewBox="0 0 100 10"><path d="M0 5 Q 50 10 100 5" fill="none" stroke="currentColor" strokeWidth="8"></path></svg></span>.
                             </h1>
                             <p className="text-lg text-gray-600 dark:text-gray-300 md:text-xl leading-relaxed max-w-lg">
-                                Connect with verified top-tier peers from your own college. Clarify doubts, collaborate on projects, and learn together.
+                                Join a free, campus-verified community where students explain concepts, share knowledge, and build understanding together.
                             </p>
                             <div className="flex flex-wrap gap-4">
                                 <button onClick={handleLogin} className="flex items-center justify-center rounded-full h-14 px-8 bg-primary text-[#1b140d] text-base font-bold shadow-xl shadow-primary/25 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-                                    Find a Peer
+                                    Explore Topics
                                 </button>
                                 <button onClick={handleSignup} className="flex items-center justify-center rounded-full h-14 px-8 bg-white dark:bg-white/10 border border-[#e7dbcf] dark:border-white/10 text-[#1b140d] dark:text-white text-base font-bold hover:bg-gray-50 dark:hover:bg-white/5 transition-all">
-                                    Become a Mentor
+                                    Become a Contributor
                                 </button>
                             </div>
                             <div className="flex items-center gap-4 pt-4 text-sm text-gray-500 dark:text-gray-400">
@@ -190,9 +190,9 @@ export const Landing = () => {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Rating</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Contribution Score</p>
                                         <div className="flex items-center text-primary text-sm font-bold">
-                                            <span className="material-symbols-outlined text-sm">star</span> 4.9
+                                            <span className="material-symbols-outlined text-sm">volunteer_activism</span> 4.9
                                         </div>
                                     </div>
                                 </div>
@@ -207,12 +207,12 @@ export const Landing = () => {
             {/* Trust Logos Strip */}
             <div className="bg-white dark:bg-[#2c2219] py-8 border-y border-[#f3ede7] dark:border-[#3a2e24] w-full">
                 <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-20">
-                    <p className="text-center text-sm font-semibold text-gray-400 mb-6 uppercase tracking-wider">Secure payments & Verified by</p>
+                    <p className="text-center text-sm font-semibold text-gray-400 mb-6 uppercase tracking-wider">Campus-Verified & Trusted By</p>
                     <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                        <span className="text-xl font-black text-gray-600 dark:text-gray-400 flex items-center gap-2"><span className="material-symbols-outlined">lock</span> SafePay</span>
                         <span className="text-xl font-black text-gray-600 dark:text-gray-400 flex items-center gap-2"><span className="material-symbols-outlined">school</span> UniVerify</span>
-                        <span className="text-xl font-black text-gray-600 dark:text-gray-400 flex items-center gap-2"><span className="material-symbols-outlined">shield</span> BankGuard</span>
                         <span className="text-xl font-black text-gray-600 dark:text-gray-400 flex items-center gap-2"><span className="material-symbols-outlined">verified_user</span> ID Check</span>
+                        <span className="text-xl font-black text-gray-600 dark:text-gray-400 flex items-center gap-2"><span className="material-symbols-outlined">diversity_3</span> Open Learning</span>
+                        <span className="text-xl font-black text-gray-600 dark:text-gray-400 flex items-center gap-2"><span className="material-symbols-outlined">psychology</span> Peer Support</span>
                     </div>
                 </div>
             </div>
@@ -290,7 +290,7 @@ export const Landing = () => {
                         <div className="lg:w-1/3">
                             <div className="lg:sticky lg:top-24">
                                 <h2 className="text-3xl font-black text-[#1b140d] dark:text-white mb-4">How it works</h2>
-                                <p className="text-gray-600 dark:text-gray-400 mb-8">Five simple steps to connect with talented peers from your college.</p>
+                                <p className="text-gray-600 dark:text-gray-400 mb-8">Five steps to collaborative learning with your campus community.</p>
                                 <button onClick={() => handleScrollTo('trust-safety')} className="inline-flex items-center gap-2 font-bold text-primary hover:text-primary/80 transition-colors">
                                     Learn more about safety <span className="material-symbols-outlined text-sm">arrow_forward</span>
                                 </button>
@@ -303,11 +303,11 @@ export const Landing = () => {
                                 <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white text-sm font-bold">1</span>
                                 <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
                                     <div className="w-12 h-12 bg-orange-900/20 rounded-xl flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-orange-500">work_outline</span>
+                                        <span className="material-symbols-outlined text-orange-500">help_outline</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-white mb-1">Peers showcase their profiles</h3>
-                                        <p className="text-sm text-gray-400">Talented peers create profiles with their skills, samples, and ratings from past projects.</p>
+                                        <h3 className="text-base font-bold text-white mb-1">Ask or explore questions</h3>
+                                        <p className="text-sm text-gray-400">Post your doubts or browse existing discussions on topics you're studying.</p>
                                     </div>
                                 </div>
                             </div>
@@ -317,11 +317,11 @@ export const Landing = () => {
                                 <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">2</span>
                                 <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
                                     <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-blue-500">search</span>
+                                        <span className="material-symbols-outlined text-blue-500">person_search</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Find your perfect mentor</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">Search by subject, college, or specific skills to find the right peer for your needs.</p>
+                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Find contributors in your area</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Connect with peers who excel in subjects you need help understanding.</p>
                                     </div>
                                 </div>
                             </div>
@@ -331,11 +331,11 @@ export const Landing = () => {
                                 <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">3</span>
                                 <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
                                     <div className="w-12 h-12 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-green-500">chat</span>
+                                        <span className="material-symbols-outlined text-green-500">forum</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Chat and discuss details</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">Connect directly via secure chat to discuss project requirements, timeline, and budget.</p>
+                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Collaborate openly</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Discuss concepts, share explanations, and work through problems together.</p>
                                     </div>
                                 </div>
                             </div>
@@ -345,11 +345,11 @@ export const Landing = () => {
                                 <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">4</span>
                                 <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
                                     <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/20 rounded-xl flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-purple-500">verified_user</span>
+                                        <span className="material-symbols-outlined text-purple-500">lightbulb</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Secure collaboration</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">Payments are held safely until the collaboration is completed to your satisfaction.</p>
+                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Build understanding</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Improve explanations together until clarity is achieved. Quality matters.</p>
                                     </div>
                                 </div>
                             </div>
@@ -359,11 +359,11 @@ export const Landing = () => {
                                 <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">5</span>
                                 <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
                                     <div className="w-12 h-12 bg-pink-50 dark:bg-pink-900/20 rounded-xl flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-pink-500">school</span>
+                                        <span className="material-symbols-outlined text-pink-500">trending_up</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Learn and grow together</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">Complete the project, leave a review, and build your academic network.</p>
+                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Earn contribution credibility</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Build your reputation as a helpful contributor and strengthen your campus network.</p>
                                     </div>
                                 </div>
                             </div>
@@ -410,7 +410,7 @@ export const Landing = () => {
                                     <span className="material-symbols-outlined text-sm fill-current">star</span>
                                     <span className="material-symbols-outlined text-sm fill-current">star</span>
                                 </div>
-                                <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"Security was my main concern. Seeing the verified tick and knowing my money was safe made me feel safe trying this out."</p>
+                                <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"Finding verified peers from my own college was a game-changer. The explanations I got helped me truly understand the concepts."</p>
                                 <div className="flex items-center gap-3">
                                     <img loading="lazy" decoding="async" alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2yNIYgHyb_Jn7XF-GDsKJvdtb6FVytPUB4W8FydVYGvhJC70cfuEXL6vHEtdiG3Gy-UtnvjyxUaTTw3Cn-SXPXdPf9SWf_aFOGP2ei0MYyRb-ENiUlJP-aze9BjRzHsVqV3ezMbDY0LpbVqnMCer8qVDMyATODoJELtAoIEPPnEUTeiTtDoCQLrc-mTuqP6eAweXl7QDTduNxEmccBqlUlcWOtXG4Y0RrgRujypk64PbzW2R_-YUL-Drnw_Lg5G8fAb37b9HQZ4s0" />
                                     <div>
@@ -431,7 +431,7 @@ export const Landing = () => {
                                     <span className="material-symbols-outlined text-sm fill-current">star</span>
                                     <span className="material-symbols-outlined text-sm fill-current">star_half</span>
                                 </div>
-                                <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"As a mentor, I love helping juniors while earning some extra pocket money. The platform is reliable and I only take on topics I'm confident in."</p>
+                                <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"As a contributor, I love helping juniors understand complex topics. Teaching others has deepened my own understanding."</p>
                                 <div className="flex items-center gap-3">
                                     <img loading="lazy" decoding="async" alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDT0PtwXpp3_rbAL1YpVWceMA4OiLGByXEbDrPs6sBUl3CNet35GyW4d8cXG1Rilcruu8bf3IEoOzWoeRfnWSRx3Uq6FPcJ2n2Ti3slBL5ZyZHslyuLXuYp7ONyR3GCK6FYxsziiPJ9bJ-Nsn1wIucE9egEurKemN7MFPrXKDOx4KeAnuYKmBCQXgSCM8f47_K90La_l-3IhTYUptJkEYE5zUdp_BZKYn7BHnBQlalcFDkvbvxjVrTpNnB_dUj-uZcGHtHptTsDiqHW" />
                                     <div>
@@ -452,14 +452,14 @@ export const Landing = () => {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px]"></div>
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/20 rounded-full blur-[80px]"></div>
                     <div className="relative z-10 flex flex-col items-center">
-                        <h2 className="text-3xl md:text-5xl font-black text-white mb-6">Ready to ace your goals?</h2>
-                        <p className="text-gray-400 text-lg mb-10 max-w-xl">Join India's most secure student community today. Whether you need help or want to earn, start with trust.</p>
+                        <h2 className="text-3xl md:text-5xl font-black text-white mb-6">Ready to learn together?</h2>
+                        <p className="text-gray-400 text-lg mb-10 max-w-xl">Join India's free student learning community. Share knowledge, build understanding, and grow together.</p>
                         <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
                             <button onClick={handleLogin} className="flex items-center justify-center rounded-full h-14 px-10 bg-primary text-[#1b140d] text-base font-bold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:-translate-y-1 transition-all">
-                                Start Collaborating
+                                Join Your Campus
                             </button>
                             <button onClick={handleSignup} className="flex items-center justify-center rounded-full h-14 px-10 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-base font-bold hover:bg-white/20 transition-all">
-                                Become a Mentor
+                                Start Contributing
                             </button>
                         </div>
                     </div>
@@ -477,7 +477,7 @@ export const Landing = () => {
                             <h2 className="text-lg font-bold">AssignMate</h2>
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-xs">
-                            India's #1 Secure Student Community. We connect students with verified peers for academic help, safely and securely.
+                            India's free, open student learning network. We connect students with verified peers for collaborative understanding.
                         </p>
                     </div>
                     <div className="flex flex-col gap-4">
@@ -485,7 +485,7 @@ export const Landing = () => {
                         <button onClick={() => handleScrollTo('how-it-works')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">How it works</button>
                         <button onClick={() => handleSearch()} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Browse Peers</button>
                         <button onClick={() => handleScrollTo('trust-safety')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Safety & Trust</button>
-                        <button onClick={handleSignup} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Pricing</button>
+                        <button onClick={() => handleScrollTo('how-it-works')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Community</button>
                     </div>
                     <div className="flex flex-col gap-4">
                         <h3 className="font-bold text-[#1b140d] dark:text-white">Support</h3>

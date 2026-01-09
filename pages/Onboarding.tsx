@@ -173,7 +173,7 @@ export const Onboarding = () => {
                             >
                                 <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
                                 <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>
-                                    Earn Money
+                                    Share Knowledge
                                 </span>
                             </div>
                         </div>
