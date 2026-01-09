@@ -71,7 +71,7 @@ export const DashboardHeader: React.FC = () => {
     }, [searchQuery, colleges]);
 
     return (
-        <header className="h-16 md:h-24 flex items-center justify-between px-4 py-4 bg-[#faf9f7]/90 backdrop-blur-md sticky top-0 z-30 transition-all duration-300">
+        <header className="h-16 md:h-24 flex items-center justify-between px-4 py-4 bg-white/80 backdrop-blur-xl border-b border-gray-100 z-30 transition-all duration-300 sticky top-0 md:relative">
             {/* Mobile Logo */}
             <div className="lg:hidden flex items-center gap-2 text-text-dark mr-4">
                 <div className="size-8 rounded-lg flex items-center justify-center overflow-hidden">
@@ -86,7 +86,10 @@ export const DashboardHeader: React.FC = () => {
                         <span className="material-symbols-outlined text-text-muted text-[20px]">search</span>
                     </div>
                     <input
-                        className="block w-full pl-11 pr-4 py-3 border border-transparent hover:border-border-subtle hover:bg-white focus:bg-white rounded-full leading-5 bg-white/60 text-text-dark placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 sm:text-sm shadow-sm transition-all"
+                        className={`block w-full pl-11 pr-4 py-3.5 border transition-all duration-300 rounded-full leading-5 sm:text-sm shadow-sm outline-none ${isFocused
+                            ? 'bg-white border-primary/30 ring-4 ring-primary/10 shadow-lg'
+                            : 'bg-gray-50/80 border-transparent hover:bg-white hover:border-gray-200 hover:shadow-md'
+                            } text-text-dark placeholder-text-muted`}
                         placeholder="Find assignments, writers, or subjects..."
                         type="text"
                         value={searchQuery}
@@ -96,7 +99,7 @@ export const DashboardHeader: React.FC = () => {
 
                     {/* Search Results Dropdown */}
                     {isFocused && searchQuery && (results.colleges.length > 0 || results.students.length > 0) && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-border-subtle overflow-hidden max-h-[400px] overflow-y-auto z-[100]">
+                        <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden max-h-[400px] overflow-y-auto z-[100] animate-fade-in-up origin-top">
                             {/* Colleges Section */}
                             {results.colleges.length > 0 && (
                                 <div className="p-2">
