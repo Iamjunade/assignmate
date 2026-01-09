@@ -175,12 +175,7 @@ export const DashboardHeader: React.FC = () => {
                 >
                     Find a Writer
                 </button>
-                <button
-                    onClick={() => navigate('/post-project')}
-                    className="flex items-center justify-center gap-2 rounded-full h-10 md:h-11 px-4 md:px-6 bg-text-dark text-white text-sm font-bold shadow-lg shadow-gray-200 hover:shadow-xl hover:scale-105 transition-all"
-                >
-                    <span className="material-symbols-outlined text-lg">add</span> <span className="hidden sm:inline">Post Project</span><span className="sm:hidden">Post</span>
-                </button>
+
             </div>
         </header>
     );
