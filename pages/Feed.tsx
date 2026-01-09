@@ -24,14 +24,14 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
         activeOrders: []
     });
     const [loading, setLoading] = useState(true);
-    const [dashboardWriters, setDashboardWriters] = useState<any[]>([]);
-    const [topWriters, setTopWriters] = useState<any[]>([]);
+    const [dashboardMentors, setDashboardMentors] = useState<any[]>([]);
+    const [topMentors, setTopMentors] = useState<any[]>([]);
     const [incomingRequests, setIncomingRequests] = useState<any[]>([]);
     const [recentChats, setRecentChats] = useState<any[]>([]);
     const [connections, setConnections] = useState<any[]>([]);
 
-    // Determine if user is in Writer Mode
-    const isWriterMode = user?.is_writer === true;
+    // Determine if user is in Mentor Mode
+    const isMentorMode = user?.is_mentor === true;
 
     useEffect(() => {
         if (user) {
@@ -64,16 +64,16 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
             // Load connections
             db.getMyConnections(user.id).then(setConnections);
 
-            if (isWriterMode) {
-                // Writer-specific data: incoming requests
+            if (isMentorMode) {
+                // Mentor-specific data: incoming requests
                 db.getIncomingRequests(user.id).then(setIncomingRequests);
             } else {
-                // Student-specific data: available writers
-                db.getDashboardWriters(user.school, 8, user.id).then(setDashboardWriters);
-                // Also get top writers globally
+                // Student-specific data: available mentors
+                db.getDashboardMentors(user.school, 8, user.id).then(setDashboardMentors);
+                // Also get top mentors globally
                 db.getAllUsers().then(users => {
-                    const writers = users.filter((u: any) => u.is_writer === true && u.id !== user.id);
-                    setTopWriters(writers.slice(0, 4));
+                    const mentors = users.filter((u: any) => u.is_mentor === true && u.id !== user.id);
+                    setTopMentors(mentors.slice(0, 4));
                 });
             }
 
@@ -82,7 +82,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                 unsubOrders();
             };
         }
-    }, [user, isWriterMode]);
+    }, [user, isMentorMode]);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-IN', {
@@ -126,8 +126,8 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
         { icon: 'trending_up', label: 'Business', color: 'bg-cyan-500' },
     ];
 
-    // If Writer Mode, show writer dashboard
-    if (isWriterMode) {
+    // If Mentor Mode, show mentor dashboard
+    if (isMentorMode) {
         return (
             <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
                 <Sidebar user={user} />
@@ -143,13 +143,13 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             <div className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-primary/10 to-orange-500/10 text-primary border border-primary/20">
                                                 <span className="flex items-center gap-1">
                                                     <span className="material-symbols-outlined text-sm">edit_note</span>
-                                                    Writer Dashboard
+                                                    Mentor Dashboard
                                                 </span>
                                             </div>
                                             <span className="text-sm text-text-muted">• {format(new Date(), 'MMM d, yyyy')}</span>
                                         </div>
                                         <h1 className="text-3xl md:text-4xl font-extrabold text-text-dark tracking-tight leading-tight">
-                                            {getGreeting()}, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-600">{user?.full_name?.split(' ')[0] || 'Writer'}</span>.
+                                            {getGreeting()}, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-600">{user?.full_name?.split(' ')[0] || 'Mentor'}</span>.
                                         </h1>
                                         <p className="text-text-muted mt-2 text-lg">Ready to help fellow students with their assignments.</p>
                                     </div>
@@ -346,17 +346,17 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             {getGreeting()}, {user?.full_name?.split(' ')[0] || 'Student'}! 👋
                                         </h1>
                                         <p className="text-white/90 text-base md:text-lg max-w-xl">
-                                            Need help with your assignments? Connect with verified writers from top universities across India.
+                                            Need help with your assignments? Connect with verified peers and mentors from top universities across India.
                                         </p>
                                     </div>
 
                                     <div className="flex flex-col sm:flex-row gap-3">
                                         <button
-                                            onClick={() => navigate('/writers')}
+                                            onClick={() => navigate('/mentors')}
                                             className="h-12 px-6 rounded-xl bg-white text-primary font-bold shadow-lg hover:shadow-xl btn-hover-lift hover:scale-[1.02] transition-all flex items-center justify-center gap-2 group btn-ripple"
                                         >
                                             <span className="material-symbols-outlined group-hover:rotate-12 transition-transform">person_search</span>
-                                            Find Writers
+                                            Find Peers
                                         </button>
                                         <button
                                             onClick={() => navigate('/connections')}
@@ -500,12 +500,12 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                     <span className="material-symbols-outlined text-4xl">post_add</span>
                                                 </div>
                                                 <h3 className="text-lg font-bold text-text-dark mb-2">No Active Projects Yet</h3>
-                                                <p className="text-text-muted mb-6 max-w-sm mx-auto">Find a writer to help you with your assignments and track your projects here.</p>
+                                                <p className="text-text-muted mb-6 max-w-sm mx-auto">Find a mentor to help you with your assignments and track your projects here.</p>
                                                 <button
-                                                    onClick={() => navigate('/writers')}
+                                                    onClick={() => navigate('/mentors')}
                                                     className="px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
                                                 >
-                                                    Find a Writer Now
+                                                    Find a Mentor Now
                                                 </button>
                                             </div>
                                         ) : (
@@ -588,39 +588,39 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         )}
                                     </section>
 
-                                    {/* Top Writers - Featured */}
+                                    {/* Top Mentors - Featured */}
                                     <section className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                                         <div className="flex items-center justify-between mb-4">
                                             <h2 className="text-base font-bold text-text-dark flex items-center gap-2">
                                                 <span className="material-symbols-outlined text-amber-400 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                                Top Writers
+                                                Top Mentors
                                             </h2>
-                                            <button onClick={() => navigate('/writers')} className="text-sm font-bold text-primary">See All</button>
+                                            <button onClick={() => navigate('/mentors')} className="text-sm font-bold text-primary">See All</button>
                                         </div>
 
-                                        {topWriters.length > 0 ? (
+                                        {topMentors.length > 0 ? (
                                             <div className="space-y-3">
-                                                {topWriters.map((writer: any) => (
+                                                {topMentors.map((mentor: any) => (
                                                     <div
-                                                        key={writer.id}
-                                                        onClick={() => navigate(`/profile/${writer.id}`)}
+                                                        key={mentor.id}
+                                                        onClick={() => navigate(`/profile/${mentor.id}`)}
                                                         className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary-bg cursor-pointer transition-all group"
                                                     >
                                                         <div className="relative">
-                                                            <Avatar src={writer.avatar_url} alt={writer.full_name} className="size-11 rounded-full" fallback={writer.full_name?.charAt(0)} />
-                                                            {writer.is_verified === 'verified' && (
+                                                            <Avatar src={mentor.avatar_url} alt={mentor.full_name} className="size-11 rounded-full" fallback={mentor.full_name?.charAt(0)} />
+                                                            {mentor.is_verified === 'verified' && (
                                                                 <div className="absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5">
                                                                     <span className="material-symbols-outlined text-blue-500 text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                                                 </div>
                                                             )}
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <h4 className="font-bold text-text-dark text-sm truncate group-hover:text-primary transition-colors">{writer.full_name}</h4>
-                                                            <p className="text-[11px] text-text-muted truncate">{writer.school || 'University'}</p>
+                                                            <h4 className="font-bold text-text-dark text-sm truncate group-hover:text-primary transition-colors">{mentor.full_name}</h4>
+                                                            <p className="text-[11px] text-text-muted truncate">{mentor.school || 'University'}</p>
                                                         </div>
                                                         <div className="flex items-center gap-0.5 shrink-0">
                                                             <span className="material-symbols-outlined text-amber-400 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                                            <span className="text-xs font-bold">{writer.rating || '5.0'}</span>
+                                                            <span className="text-xs font-bold">{mentor.rating || '5.0'}</span>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -630,13 +630,13 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                 <div className="size-10 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-2">
                                                     <span className="material-symbols-outlined">person_search</span>
                                                 </div>
-                                                <p className="text-text-muted text-xs">Loading writers...</p>
+                                                <p className="text-text-muted text-xs">Loading mentors...</p>
                                             </div>
                                         )}
                                     </section>
 
-                                    {/* College Writers */}
-                                    {dashboardWriters.length > 0 && (
+                                    {/* College Mentors */}
+                                    {dashboardMentors.length > 0 && (
                                         <section className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                                             <div className="flex items-center justify-between mb-4">
                                                 <h2 className="text-base font-bold text-text-dark flex items-center gap-2">
@@ -646,26 +646,26 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             </div>
 
                                             <div className="space-y-3">
-                                                {dashboardWriters.slice(0, 3).map((writer: any) => (
+                                                {dashboardMentors.slice(0, 3).map((mentor: any) => (
                                                     <div
-                                                        key={writer.id}
-                                                        onClick={() => navigate(`/profile/${writer.id}`)}
+                                                        key={mentor.id}
+                                                        onClick={() => navigate(`/profile/${mentor.id}`)}
                                                         className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary-bg cursor-pointer transition-all group"
                                                     >
-                                                        <Avatar src={writer.avatar_url} alt={writer.handle} className="size-10 rounded-full" fallback={writer.handle?.charAt(0)} />
+                                                        <Avatar src={mentor.avatar_url} alt={mentor.handle} className="size-10 rounded-full" fallback={mentor.handle?.charAt(0)} />
                                                         <div className="flex-1 min-w-0">
-                                                            <h4 className="font-bold text-text-dark text-sm truncate group-hover:text-primary">{writer.handle || writer.full_name}</h4>
-                                                            <p className="text-[11px] text-text-muted truncate">{writer.bio || 'Writer'}</p>
+                                                            <h4 className="font-bold text-text-dark text-sm truncate group-hover:text-primary">{mentor.handle || mentor.full_name}</h4>
+                                                            <p className="text-[11px] text-text-muted truncate">{mentor.bio || 'Mentor'}</p>
                                                         </div>
-                                                        {writer.is_writer && (
-                                                            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-bold">WRITER</span>
+                                                        {mentor.is_mentor && (
+                                                            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-bold">MENTOR</span>
                                                         )}
                                                     </div>
                                                 ))}
                                             </div>
 
                                             <button
-                                                onClick={() => navigate(`/writers?search=${user?.school}`)}
+                                                onClick={() => navigate(`/mentors?search=${user?.school}`)}
                                                 className="w-full mt-4 py-2.5 rounded-xl bg-primary/10 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all"
                                             >
                                                 View All from {user?.school?.split(' ')[0] || 'College'}
