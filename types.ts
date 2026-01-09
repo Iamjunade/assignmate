@@ -98,7 +98,11 @@ export interface Order {
   amount: number; // Escrow amount
   deadline: string; // ISO Date
   created_at: string;
-  completion_percentage: number; // 0-100
+  description?: string;
+  subject?: string;
+  completion_percentage?: number;
+  completed_at?: string;
+
 
   // UI Helpers (Hydrated)
   writer_handle?: string;

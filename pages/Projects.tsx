@@ -135,7 +135,7 @@ export const Projects = ({ user }: ProjectsProps) => {
 
                             {/* Stats Cards - Unified for both modes */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">Total</h3>
                                         <div className="size-9 rounded-xl bg-gray-50 text-gray-600 flex items-center justify-center">
@@ -146,7 +146,7 @@ export const Projects = ({ user }: ProjectsProps) => {
                                     <p className="text-xs text-text-muted mt-1">All projects</p>
                                 </div>
 
-                                <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">Active</h3>
                                         <div className="size-9 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
@@ -157,7 +157,7 @@ export const Projects = ({ user }: ProjectsProps) => {
                                     <p className="text-xs text-green-600 font-medium mt-1">In progress</p>
                                 </div>
 
-                                <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">Completed</h3>
                                         <div className="size-9 rounded-xl bg-gray-50 text-gray-600 flex items-center justify-center">
@@ -168,7 +168,7 @@ export const Projects = ({ user }: ProjectsProps) => {
                                     <p className="text-xs text-text-muted mt-1">Finished</p>
                                 </div>
 
-                                <div className="bg-white p-5 rounded-2xl shadow-card border border-border-subtle">
+                                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 className="text-text-muted font-bold text-xs uppercase tracking-wide">{isWriterMode ? 'Earnings' : 'Spending'}</h3>
                                         <div className="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
@@ -181,7 +181,7 @@ export const Projects = ({ user }: ProjectsProps) => {
                             </div>
 
                             {/* Filter Tabs - Unified */}
-                            <div className="bg-white p-2 rounded-2xl shadow-card border border-border-subtle inline-flex gap-2 w-fit">
+                            <div className="bg-white p-2 rounded-2xl shadow-lg border border-gray-100 inline-flex gap-2 w-fit">
                                 <button
                                     onClick={() => setFilterStatus('all')}
                                     className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${filterStatus === 'all' ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:bg-secondary-bg'}`}
@@ -209,7 +209,7 @@ export const Projects = ({ user }: ProjectsProps) => {
                             </div>
 
                             {/* Projects List */}
-                            <div className="bg-white rounded-2xl shadow-card border border-border-subtle overflow-hidden">
+                            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                                 {loading ? (
                                     <div className="flex items-center justify-center py-20">
                                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -240,7 +240,7 @@ export const Projects = ({ user }: ProjectsProps) => {
                                         {filteredItems.map((order: Order) => (
                                             <div
                                                 key={order.id}
-                                                className="p-6 hover:bg-secondary-bg cursor-pointer transition-all group"
+                                                className="p-6 hover:bg-gray-50/50 cursor-pointer transition-all duration-300 group border-b border-gray-100 last:border-0 hover:shadow-[inset_0_0_20px_-10px_rgba(0,0,0,0.05)]"
                                             >
                                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                                     <div className="flex-1 min-w-0">

@@ -336,7 +336,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         >
                                             <MessageSquare size={16} /> Message
                                         </button>
-                                    ) : connectionStatus !== 'pending_sent' && connectionStatus !== 'pending' && (
+                                    ) : connectionStatus !== 'pending_sent' && (
                                         <button
                                             onClick={handleConnect}
                                             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white font-bold text-sm hover:opacity-90 transition-colors shadow-sm"
@@ -354,7 +354,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                             <aside className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-4 space-y-6">
 
                                 {/* Profile Card */}
-                                <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light flex flex-col items-center text-center relative overflow-hidden group">
+                                <div className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 flex flex-col items-center text-center relative overflow-hidden group transition-all hover:shadow-2xl">
                                     {/* Verification Banner */}
                                     {profileUser.is_verified === 'verified' && (
                                         <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-400 to-blue-600"></div>
@@ -434,7 +434,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                             >
                                                 <MessageSquare size={16} /> Message
                                             </button>
-                                        ) : connectionStatus === 'pending_sent' || connectionStatus === 'pending' ? (
+                                        ) : connectionStatus === 'pending_sent' ? (
                                             <button disabled className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-200 text-gray-500 font-bold text-sm">
                                                 <Clock size={16} /> Pending
                                             </button>
@@ -491,7 +491,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                 </div>
 
                                 {/* Trust & Verification */}
-                                <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light">
+                                <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 transition-all hover:shadow-xl">
                                     <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
                                         <Shield size={20} className="text-primary" />
                                         Trust Score
@@ -567,7 +567,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         // Show connections count for others
                                         ...(!isOwnProfile ? [{ label: 'Connections', value: connections.length, icon: 'group', color: 'text-indigo-600', bg: 'bg-indigo-50' }] : []),
                                     ].map((stat, i) => (
-                                        <div key={i} className="bg-white p-5 rounded-2xl shadow-sm border border-border-light flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                                        <div key={i} className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center justify-center text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                                             <div className={`p-3 rounded-full ${stat.bg} mb-3`}>
                                                 <span className={`material-symbols-outlined ${stat.color} text-2xl`}>{stat.icon}</span>
                                             </div>
@@ -578,7 +578,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                 </div>
 
                                 {/* Tabs Navigation */}
-                                <div className="bg-white rounded-2xl p-1.5 shadow-sm border border-border-light inline-flex w-full md:w-auto overflow-x-auto">
+                                <div className="bg-white rounded-2xl p-1.5 shadow-lg border border-gray-100 inline-flex w-full md:w-auto overflow-x-auto">
                                     {['portfolio', 'about', 'reviews', 'network'].map((tab) => (
                                         <button
                                             key={tab}

@@ -69,7 +69,7 @@ const WriterCard: React.FC<WriterCardProps> = ({ writer, onChat, index, onToggle
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       whileHover={{ y: -8, scale: 1.02 }}
-      className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-orange-100/50 hover:border-orange-300 transition-all duration-300 group"
+      className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
     >
       <div className="p-5">
         <div className="flex justify-between items-start mb-3">
