@@ -31,6 +31,15 @@ export class GlobalErrorBoundary extends Component<Props, State> {
             const now = Date.now();
 
             if (!lastReload || now - parseInt(lastReload) > 10000) {
+                // Clear Service Worker to ensure fresh assets
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then((registrations) => {
+                        for (const registration of registrations) {
+                            registration.unregister();
+                        }
+                    });
+                }
+
                 sessionStorage.setItem('last_chunk_reload', now.toString());
                 window.location.reload();
             }
