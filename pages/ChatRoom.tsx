@@ -7,7 +7,7 @@ import { UserPresence } from '../components/UserPresence';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
-import { OfferModal, OfferData } from '../components/chat/OfferModal';
+import { OfferModal, CollabData } from '../components/chat/OfferModal';
 import { OfferCard } from '../components/chat/OfferCard';
 import { Avatar } from '../components/ui/Avatar';
 import { format, isToday, isYesterday } from 'date-fns';
@@ -199,21 +199,20 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
         setShowActions(false);
     };
 
-    const handleSubmitOffer = async (offerData: OfferData) => {
+    const handleSubmitOffer = async (collabData: CollabData) => {
         try {
             const sentOffer = await db.sendOffer(chatId, user.id, user.full_name || user.handle, {
-                subject: offerData.subject,
-                title: offerData.title,
-                description: offerData.description,
-                pages: offerData.pages,
-                deadline: offerData.deadline,
-                budget: offerData.budget
+                title: collabData.title,
+                description: collabData.description,
+                deadline: collabData.deadline,
+                isPaid: collabData.isPaid,
+                budget: collabData.budget
             });
             setMessages(prev => [...prev, sentOffer]);
-            toastSuccess("Offer sent successfully!");
+            toastSuccess("Collab request sent!");
         } catch (error: any) {
-            console.error("Failed to send offer", error);
-            toastError(error.message || "Failed to send offer");
+            console.error("Failed to send collab request", error);
+            toastError(error.message || "Failed to send collab request");
             throw error;
         }
     };
