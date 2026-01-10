@@ -48,8 +48,15 @@ export const ProfileBuilder = () => {
                         },
                         body: JSON.stringify({ history: [] })
                     });
-                    const data = await response.json();
-                    if (data.reply) {
+                    const text = await response.text();
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        console.error("Failed to parse init chat:", text);
+                        return;
+                    }
+                    if (data?.reply) {
                         setMessages([{ role: 'ai', text: data.reply }]);
                     }
                 } catch (error) {
@@ -97,10 +104,17 @@ export const ProfileBuilder = () => {
                 })
             });
 
-            const result = await response.json();
+            const text = await response.text();
+            let result;
+            try {
+                result = JSON.parse(text);
+            } catch (e) {
+                console.error("Failed to parse JSON response:", text.substring(0, 200));
+                throw new Error(`Server Error: ${text.substring(0, 100)}...`);
+            }
 
             if (!response.ok) {
-                throw new Error(result.error || 'Failed to fetch response');
+                throw new Error(result.error || `Server Error: ${response.statusText}`);
             }
 
             const { reply, isComplete: done, profileData: data } = result;
