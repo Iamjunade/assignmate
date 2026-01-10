@@ -5,6 +5,7 @@ import { useToast } from '../contexts/ToastContext';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
 import { GlassButton } from '../components/ui/GlassButton';
 import { GraduationCap, Search, PenTool, ArrowRight } from 'lucide-react';
+import { isProfileComplete } from '../utils/profileValidation';
 
 export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     const navigate = useNavigate();
@@ -22,12 +23,14 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     const [completionForm, setCompletionForm] = useState({ handle: '', school: '' });
     const [completionIsWriter, setCompletionIsWriter] = useState(false);
 
-    // ✅ FIX: Redirect to Onboarding if incomplete, otherwise Feed
+    // ✅ FIX: Use unified isProfileComplete helper - single source of truth
     useEffect(() => {
         if (user) {
-            if (user.is_incomplete) {
+            if (!isProfileComplete(user)) {
+                // Profile incomplete - redirect to onboarding
                 navigate('/onboarding');
             } else {
+                // Profile complete - proceed to feed or call onComplete
                 if (onComplete) {
                     onComplete();
                 } else {
@@ -45,6 +48,12 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
         try {
             // Validation
             if (isReg) {
+                // ✅ ISSUE 8 FIX: Add fullName validation
+                if (!form.fullName || form.fullName.trim().length < 2) {
+                    error("Full name must be at least 2 characters.");
+                    setLoading(false);
+                    return;
+                }
                 if (!form.handle || form.handle.length < 3) {
                     error("Handle must be at least 3 characters.");
                     setLoading(false);

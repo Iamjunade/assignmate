@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
 import { Search, PenTool } from 'lucide-react';
+import { isProfileComplete } from '../utils/profileValidation';
 
 export const Onboarding = () => {
     const navigate = useNavigate();
@@ -11,14 +12,28 @@ export const Onboarding = () => {
     const { error, success } = useToast();
 
     const [loading, setLoading] = useState(false);
-    const [form, setForm] = useState({ handle: '', school: '', bio: '' });
+    // ✅ ISSUE 5 FIX: Added fullName to form state with default from user's existing full_name
+    const [form, setForm] = useState({ fullName: '', handle: '', school: '', bio: '' });
     const [isWriter, setIsWriter] = useState(false);
 
+    // Initialize form with user's existing data (e.g., from Google displayName)
+    useEffect(() => {
+        if (user) {
+            setForm(prev => ({
+                ...prev,
+                fullName: user.full_name || '',
+                handle: prev.handle || user.handle || ''
+            }));
+        }
+    }, [user]);
+
+    // ✅ FIX: Use unified validation helper - single source of truth
     // Redirect if user is already complete or not logged in
     useEffect(() => {
         if (!user) {
             navigate('/auth');
-        } else if (!user.is_incomplete) {
+        } else if (isProfileComplete(user)) {
+            // Profile is already complete - go to feed
             navigate('/feed');
         }
     }, [user, navigate]);
@@ -26,6 +41,10 @@ export const Onboarding = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (!form.fullName || form.fullName.trim().length < 2) {
+            error("Full name must be at least 2 characters.");
+            return;
+        }
         if (!form.school) {
             error("Please select your college.");
             return;
@@ -37,7 +56,8 @@ export const Onboarding = () => {
 
         setLoading(true);
         try {
-            await completeGoogleSignup(form.handle, form.school, isWriter, form.bio);
+            // ✅ ISSUE 5 FIX: Pass fullName to completeGoogleSignup
+            await completeGoogleSignup(form.handle, form.school, isWriter, form.bio, form.fullName);
             success("Profile setup complete! Welcome.");
             // Navigation handled by useEffect when user state updates
         } catch (err: any) {
@@ -61,6 +81,22 @@ export const Onboarding = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* ✅ ISSUE 5 FIX: Added Full Name field */}
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Full Name</label>
+                        <div className="relative group">
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">person</span>
+                            <input
+                                className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-medium text-[#1b140d] dark:text-white placeholder-gray-400 transition-all outline-none"
+                                placeholder="John Doe"
+                                type="text"
+                                value={form.fullName}
+                                onChange={e => setForm({ ...form, fullName: e.target.value })}
+                                required
+                            />
+                        </div>
+                    </div>
+
                     <div className="space-y-2">
                         <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Choose a Handle</label>
                         <div className="relative group">

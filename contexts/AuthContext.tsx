@@ -26,17 +26,24 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const syncingRef = useRef<string | null>(null);
   const skipNextSyncRef = useRef<boolean>(false); // Flag to prevent race condition after registration
+  const userJustSetRef = useRef<boolean>(false); // Flag to track if user was just set by register/completeSignup
 
 
   // Sync user profile from Firestore
   const syncUser = async (fbUser: any) => {
     const userId = fbUser.uid;
 
-    // Skip sync if register() just set the user (prevents race condition)
+    // Skip sync if register() or completeGoogleSignup() just set the user
+    // This prevents the race condition where onAuthStateChanged fires after we've already set the user
     if (skipNextSyncRef.current) {
       skipNextSyncRef.current = false;
-      setLoading(false);
-      return;
+      // User was already set synchronously by register/completeSignup
+      // Just ensure loading is false and exit
+      if (userJustSetRef.current) {
+        userJustSetRef.current = false;
+        setLoading(false);
+        return;
+      }
     }
 
     if (syncingRef.current === userId) return;
@@ -46,26 +53,29 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       const profile = await userApi.getProfile(userId);
 
       if (profile) {
+        // Cast profile to User type for proper property access
+        const typedProfile = profile as User;
         setUser({
-          ...profile,
-          email: fbUser.email || profile.email,
+          ...typedProfile,
+          email: fbUser.email || typedProfile.email || '',
           // Use the actual value from Firestore, don't override!
-          is_incomplete: profile.is_incomplete ?? false
+          is_incomplete: typedProfile.is_incomplete ?? false
         } as User);
         presence.init(userId);
       } else {
-        // ✅ FIXED: Use 'null' for avatar (Firestore crashes on undefined)
-        // ✅ FIXED: Use 'true' for is_incomplete to force Onboarding
-        const newProfile = {
+        // ✅ ISSUE 3 FIX: Don't use invalid defaults like 'Student' or 'Not Specified'
+        // Use empty strings which will correctly trigger the onboarding flow
+        // The isProfileComplete() helper will properly detect these as incomplete
+        const newProfile: Partial<User> = {
           id: userId,
           email: fbUser.email || '',
           handle: fbUser.displayName?.replace(/\s+/g, '_').toLowerCase() || 'user_' + userId.substring(0, 6),
-          school: 'Not Specified',
-          avatar_url: fbUser.photoURL || null, // <--- CRITICAL FIX
-          full_name: fbUser.displayName || 'Student',
+          school: '', // Empty string - will be set in onboarding
+          avatar_url: fbUser.photoURL || null,
+          full_name: fbUser.displayName || '', // Empty string instead of 'Student'
           xp: 0,
           is_writer: false,
-          is_incomplete: true
+          is_incomplete: true // This forces onboarding
         };
 
         // Create the partial profile so we don't get 404s
@@ -116,16 +126,32 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           avatar_url: null
         });
 
-        // Set flag to skip next syncUser call (prevents race condition with onAuthStateChanged)
+        // CRITICAL: Set user state FIRST, then set skip flags
+        // This prevents race condition where onAuthStateChanged fires between flag set and user set
+        const completeProfile = { ...profile, email: res.data.user.email || email, is_incomplete: false } as User;
+        setUser(completeProfile);
+
+        // Now set flags to prevent syncUser from overwriting our freshly set user
+        userJustSetRef.current = true;
         skipNextSyncRef.current = true;
-        setUser({ ...profile, email: res.data.user.email || email, is_incomplete: false } as User);
+
         presence.init(res.data.user.uid);
         notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
 
         return { data: { ...res.data, session: true } };
       } catch (error: any) {
-        console.error("Registration Error:", error);
-        return { error: { message: "Account created but profile setup failed." } };
+        console.error("Registration Error - Profile creation failed:", error);
+
+        // ✅ ISSUE 7 FIX: Rollback - Delete the Firebase Auth user to prevent orphaned accounts
+        // This ensures consistency between Auth and Firestore
+        try {
+          await firebaseAuth.deleteUser();
+          console.log("Rollback: Firebase Auth user deleted after profile creation failure");
+        } catch (deleteError) {
+          console.error("Rollback failed - orphaned Auth user may exist:", deleteError);
+        }
+
+        return { error: { message: "Registration failed. Please try again." } };
       }
     }
     return res;
@@ -183,7 +209,13 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     <AuthContext.Provider value={{
       user, loading, login, loginWithGoogle, register, completeGoogleSignup,
       loginAnonymously, logout, deleteAccount, resetPassword,
-      refreshProfile: async () => { if (user) await syncUser({ uid: user.id, email: user.email }); }
+      // ✅ ISSUE 13 FIX: Improved refreshProfile with force refresh option
+      refreshProfile: async () => {
+        if (!user) return;
+        // Reset sync lock to force a refresh (useful when user data is stale)
+        syncingRef.current = null;
+        await syncUser({ uid: user.id, email: user.email });
+      }
     }}>
       {children}
     </AuthContext.Provider>

@@ -48,11 +48,31 @@ export const userApi = {
     },
 
     createProfile: async (id: string, metadata: any) => {
+        // ✅ ISSUE 4 FIX: Validate required fields before creating profile
+        // This prevents corrupted/incomplete profiles from being saved
+        if (!id) {
+            throw new Error('User ID is required to create a profile');
+        }
+
+        // Email is critical for auth flow - must be present
+        if (!metadata.email && metadata.email !== '') {
+            throw new Error('Email is required to create a profile');
+        }
+
         const randomCollege = await collegeService.getRandomCollege();
 
-        // Clean handle
-        let baseHandle = metadata.handle || metadata.full_name || 'Student';
+        // Clean handle - generate one if not provided
+        let baseHandle = metadata.handle || metadata.full_name || '';
+        if (!baseHandle) {
+            // Generate a default handle from user ID if nothing else is available
+            baseHandle = 'user_' + id.substring(0, 8);
+        }
         baseHandle = baseHandle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+
+        // Ensure handle has minimum length
+        if (baseHandle.length < 3) {
+            baseHandle = baseHandle + '_' + Math.random().toString(36).substring(2, 6);
+        }
 
         // Check availability
         const q = query(collection(getDb(), 'users'), where('handle', '==', baseHandle));
