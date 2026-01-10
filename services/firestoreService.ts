@@ -509,6 +509,7 @@ export const dbService = {
                 return {
                     ...c,
                     gig_title: 'Direct Chat',
+                    other_id: otherId,
                     other_handle: other?.handle || 'User',
                     other_avatar: other?.avatar_url,
                     unread_count: isPoster ? (c.unread_count_poster || 0) : (c.unread_count_writer || 0)

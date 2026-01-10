@@ -48,7 +48,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                     setStats({
                         ...statsData,
                         connectionsCount: connectionsData.length,
-                        unreadMessages: chatsData.filter((c: any) => c.unreadCount > 0).length || 0
+                        unreadMessages: chatsData.filter((c: any) => (c.unread_count || 0) > 0).length || 0
                     });
                     setConnections(connectionsData);
                     setRecentChats(chatsData);
@@ -198,7 +198,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             {connections.map((conn) => (
                                                 <div key={conn.id} className="min-w-[160px] bg-gray-50 rounded-xl p-4 flex flex-col items-center text-center border border-gray-100 hover:border-blue-200 transition-all">
                                                     <div className="relative mb-2">
-                                                        <Avatar src={conn.avatar_url} name={conn.full_name || conn.handle} size="md" className="ring-2 ring-white" />
+                                                        <Avatar src={conn.avatar_url} alt={conn.full_name || conn.handle} className="size-12 rounded-full ring-2 ring-white" />
                                                         <span className="absolute bottom-0 right-0 size-3 bg-green-500 border-2 border-white rounded-full"></span>
                                                     </div>
                                                     <h3 className="font-bold text-sm text-[#111827] truncate w-full mb-1">{conn.full_name?.split(' ')[0] || conn.handle}</h3>
@@ -245,7 +245,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                     </div>
                                                     <div className="flex items-center gap-4">
                                                         <div className="flex items-center gap-2 text-right">
-                                                            <Avatar src={order.writer_avatar} name={order.writer_handle} size="sm" />
+                                                            <Avatar src={order.writer_avatar} alt={order.writer_handle} className="size-8 rounded-full" />
                                                             <div className="hidden sm:block">
                                                                 <p className="text-xs font-bold text-[#111827]">{order.writer_handle}</p>
                                                             </div>
@@ -282,18 +282,18 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     {recentChats.length > 0 ? (
                                         <div className="space-y-4">
                                             {recentChats.slice(0, 4).map((chat) => (
-                                                <div key={chat.id} onClick={() => navigate(`/messages?chat=${chat.otherUser.id}`)} className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 p-2 rounded-xl transition-colors -mx-2">
+                                                <div key={chat.id} onClick={() => navigate(`/messages?chat=${chat.other_id || ''}`)} className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 p-2 rounded-xl transition-colors -mx-2">
                                                     <div className="relative">
-                                                        <Avatar src={chat.otherUser.avatar_url} name={chat.otherUser.name} size="md" />
-                                                        {chat.unreadCount > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold size-4 flex items-center justify-center rounded-full border border-white">{chat.unreadCount}</span>}
+                                                        <Avatar src={chat.other_avatar} alt={chat.other_handle} className="size-10 rounded-full" />
+                                                        {(chat.unread_count || 0) > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold size-4 flex items-center justify-center rounded-full border border-white">{chat.unread_count}</span>}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex justify-between items-center mb-0.5">
-                                                            <h4 className="font-bold text-sm text-[#111827] truncate">{chat.otherUser.name}</h4>
-                                                            <span className="text-[10px] text-gray-400">{chat.lastMessageDate ? format(new Date(chat.lastMessageDate), 'h:mm a') : ''}</span>
+                                                            <h4 className="font-bold text-sm text-[#111827] truncate">{chat.other_handle || 'User'}</h4>
+                                                            <span className="text-[10px] text-gray-400">{chat.updated_at ? format(new Date(chat.updated_at), 'h:mm a') : ''}</span>
                                                         </div>
-                                                        <p className={`text-xs truncate ${chat.unreadCount > 0 ? 'text-[#111827] font-semibold' : 'text-gray-500'}`}>
-                                                            {chat.lastMessage?.text || 'Sent an attachment'}
+                                                        <p className={`text-xs truncate ${chat.unread_count > 0 ? 'text-[#111827] font-semibold' : 'text-gray-500'}`}>
+                                                            {chat.last_message || 'Start a conversation'}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -318,7 +318,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         {topWriters.map((writer) => (
                                             <div key={writer.id} className="flex items-center justify-between group cursor-pointer" onClick={() => navigate(`/profile/${writer.id}`)}>
                                                 <div className="flex items-center gap-3">
-                                                    <Avatar src={writer.avatar_url} name={writer.handle} size="md" />
+                                                    <Avatar src={writer.avatar_url} alt={writer.handle} className="size-10 rounded-full" />
                                                     <div>
                                                         <h4 className="font-bold text-sm text-[#111827] group-hover:text-orange-500 transition-colors">{writer.handle}</h4>
                                                         <p className="text-[10px] text-gray-500">{writer.school}</p>
@@ -346,7 +346,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         {peersAtCollege.slice(0, 3).map((peer) => (
                                             <div key={peer.id} className="flex items-center justify-between group cursor-pointer" onClick={() => navigate(`/profile/${peer.id}`)}>
                                                 <div className="flex items-center gap-3">
-                                                    <Avatar src={peer.avatar_url} name={peer.handle} size="md" />
+                                                    <Avatar src={peer.avatar_url} alt={peer.handle} className="size-10 rounded-full" />
                                                     <div>
                                                         <h4 className="font-bold text-sm text-[#111827]">{peer.handle}</h4>
                                                         <p className="text-[10px] text-gray-500">Student</p>
