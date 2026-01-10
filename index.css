@@ -17,19 +17,19 @@
 @layer base {
   body {
     @apply bg-[#faf9f7] text-slate-900 antialiased;
-    /* Premium Noise Texture */
+    /* Premium Noise Texture & Subtle Gradient */
     background-image:
       url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"),
-      radial-gradient(circle at 50% 0%, rgba(255, 122, 0, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 100% 0%, rgba(255, 122, 0, 0.05) 0%, transparent 30%);
+      radial-gradient(at 0% 0%, rgba(255, 122, 0, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(255, 158, 64, 0.05) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
   .dark body {
-    @apply bg-[#1b140d] text-slate-50;
+    @apply bg-[#0f172a] text-slate-50;
     background-image:
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E"),
-      radial-gradient(circle at 50% 0%, rgba(255, 122, 0, 0.15) 0%, transparent 50%);
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E"),
+      radial-gradient(circle at 50% 0%, rgba(255, 122, 0, 0.1) 0%, transparent 60%);
   }
 }
 
@@ -37,16 +37,20 @@
 
   /* Premium Card Utility */
   .card-clean {
-    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-800 rounded-2xl shadow-card transition-all duration-300 relative;
+    @apply bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 relative;
   }
 
   .card-hover {
-    @apply hover:shadow-card-hover hover:-translate-y-1 hover:border-orange-500/20 dark:hover:border-orange-500/20;
+    @apply hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 hover:border-orange-500/30 dark:hover:border-orange-500/30;
   }
 
   /* Glass Utilities (Refined) */
   .glass {
-    @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/40 dark:border-slate-700/40 shadow-sm;
+    @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-white/30 dark:border-slate-700/30 shadow-sm;
+  }
+  
+  .glass-strong {
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/40 dark:border-slate-700/40 shadow-md;
   }
 
   /* Input Utility */
@@ -60,19 +64,8 @@
   }
 
   .btn-primary {
-    @apply btn text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 relative overflow-hidden;
+    @apply btn text-white shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 relative overflow-hidden;
     background: linear-gradient(135deg, #FF7A00 0%, #FF9E40 100%);
-  }
-
-  .btn-primary::after {
-    content: '';
-    @apply absolute inset-0 bg-white/20 translate-y-full transition-transform duration-300;
-    transform: skewY(10deg) translateY(100%);
-  }
-
-  .btn-primary:hover::after {
-    transform: skewY(10deg) translateY(-100%);
-    transition: transform 0.5s;
   }
 
   .btn-secondary {
@@ -80,13 +73,12 @@
   }
 
   .btn-ghost {
-    @apply btn text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50;
+    @apply btn text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white;
   }
-
 
   /* Text Utilities */
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-500 via-orange-400 to-amber-500;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500;
   }
 
   /* ===================================

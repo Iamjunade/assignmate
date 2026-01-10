@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Avatar } from '../components/ui/Avatar';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, ArrowRight, Shield, MapPin, Users, Lightbulb, TrendingUp, Menu, X, CheckCircle } from 'lucide-react';
 
 export const Landing = () => {
     const navigate = useNavigate();
@@ -12,15 +14,9 @@ export const Landing = () => {
 
     // College list for animation
     const colleges = [
-        "CMR Institute of Technology",
-        "BV Raju Institute of Technology",
-        "IIT Bombay",
-        "Delhi University",
-        "BITS Pilani",
-        "NIT Trichy",
-        "Anna University",
-        "VIT Vellore",
-        "SRM University"
+        "CMR Institute of Technology", "BV Raju Institute of Technology", "IIT Bombay",
+        "Delhi University", "BITS Pilani", "NIT Trichy", "Anna University",
+        "VIT Vellore", "SRM University"
     ];
 
     useEffect(() => {
@@ -34,481 +30,253 @@ export const Landing = () => {
 
     const handleLogin = () => navigate('/auth');
     const handleSignup = () => navigate('/auth?tab=signup');
-
     const handleSearch = (subject?: string) => {
         const searchTerm = subject || searchSubject;
         const searchQuery = searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : '';
-
-        if (user) {
-            navigate(`/mentors${searchQuery}`);
-        } else {
-            const returnUrl = `/mentors${searchQuery}`;
-            navigate(`/auth?redirect=${encodeURIComponent(returnUrl)}`);
-        }
+        user ? navigate(`/mentors${searchQuery}`) : navigate(`/auth?redirect=${encodeURIComponent(`/mentors${searchQuery}`)}`);
     };
-    // ... (skip down to the input)
-    // ...
-    <div className="flex-1 flex items-center px-4 h-12 w-full">
-        <span className="material-symbols-outlined text-gray-400 mr-2">search</span>
-        <input
-            className="bg-transparent border-none focus:ring-0 w-full text-sm text-[#1b140d] dark:text-white placeholder-gray-400 focus:outline-none transition-all duration-500"
-            placeholder={placeholderText}
-            type="text"
-            value={searchSubject}
-            onChange={(e) => setSearchSubject(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        />
-    </div>
 
     const handleScrollTo = (id: string) => {
         const element = document.getElementById(id);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
     };
 
     return (
-        <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden font-display bg-background-light dark:bg-background-dark text-[#1b140d] dark:text-white transition-colors duration-200">
+        <div className="relative min-h-screen w-full font-display bg-background dark:bg-background-dark text-slate-900 dark:text-white transition-colors duration-300">
             {/* Navbar */}
-            <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[#f3ede7] dark:border-[#3a2e24] bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md px-4 py-4 w-full">
-                <div className="flex items-center gap-2 text-[#1b140d] dark:text-white cursor-pointer" onClick={() => navigate('/')}>
-                    <div className="size-10 rounded-xl overflow-hidden">
-                        <img src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
+            <header className="fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-white/20 dark:border-slate-800">
+                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
+                        <div className="size-10 rounded-xl overflow-hidden shadow-lg shadow-orange-500/20 transition-transform group-hover:scale-105">
+                            <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
+                        </div>
+                        <h2 className="text-xl font-bold tracking-tight">AssignMate</h2>
                     </div>
-                    <h2 className="text-xl font-bold leading-tight tracking-tight">AssignMate</h2>
-                </div>
-                <div className="hidden lg:flex flex-1 justify-end gap-8 items-center">
-                    <nav className="flex items-center gap-8">
-                        <button onClick={() => handleScrollTo('how-it-works')} className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">How it Works</button>
-                        <button onClick={() => handleScrollTo('trust-safety')} className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">Trust & Safety</button>
-                        <button onClick={handleSignup} className="text-sm font-semibold hover:text-primary transition-colors cursor-pointer">For Contributors</button>
+
+                    {/* Desktop Nav */}
+                    <nav className="hidden lg:flex items-center gap-8">
+                        {['How it Works', 'Trust & Safety'].map((item) => (
+                            <button
+                                key={item}
+                                onClick={() => handleScrollTo(item.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-'))}
+                                className="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors"
+                            >
+                                {item}
+                            </button>
+                        ))}
+                        <button onClick={handleSignup} className="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+                            For Contributors
+                        </button>
                     </nav>
-                    <div className="flex items-center gap-4">
+
+                    <div className="hidden lg:flex items-center gap-4">
                         {user ? (
                             <>
                                 <button onClick={() => navigate('/feed')} className="text-sm font-bold hover:text-primary transition-colors">Dashboard</button>
-                                <div
-                                    className="size-10 rounded-full overflow-hidden border-2 border-primary/20 cursor-pointer hover:border-primary transition-colors"
-                                    onClick={() => navigate('/profile')}
-                                >
+                                <div onClick={() => navigate('/profile')} className="size-10 rounded-full cursor-pointer ring-2 ring-transparent hover:ring-primary/50 transition-all">
                                     <Avatar src={user.avatar_url} alt={user.full_name} className="w-full h-full" />
                                 </div>
                             </>
                         ) : (
                             <>
-                                <button onClick={handleLogin} className="text-sm font-bold hover:text-primary transition-colors">Login</button>
-                                <button onClick={handleSignup} className="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-primary text-[#1b140d] text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
-                                    <span className="truncate">Join Now</span>
-                                </button>
+                                <button onClick={handleLogin} className="text-sm font-bold hover:text-primary transition-colors px-4">Login</button>
+                                <button onClick={handleSignup} className="btn-primary px-6 h-10 text-sm">Join Now</button>
                             </>
                         )}
                     </div>
+
+                    {/* Mobile Menu Toggle */}
+                    <button className="lg:hidden p-2 text-slate-600 dark:text-slate-300" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
                 </div>
-                {/* Mobile Menu Icon */}
-                <button className="lg:hidden text-[#1b140d] dark:text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                    <span className="material-symbols-outlined">menu</span>
-                </button>
             </header>
 
-            {/* Mobile Menu Overlay */}
-            {mobileMenuOpen && (
-                <div className="fixed inset-0 z-40 bg-background-light dark:bg-background-dark flex flex-col items-center justify-center gap-8 lg:hidden">
-                    <button className="absolute top-6 right-6" onClick={() => setMobileMenuOpen(false)}>
-                        <span className="material-symbols-outlined text-3xl">close</span>
-                    </button>
-                    <button onClick={() => { handleScrollTo('how-it-works'); setMobileMenuOpen(false); }} className="text-xl font-bold">How it Works</button>
-                    <button onClick={() => { handleScrollTo('trust-safety'); setMobileMenuOpen(false); }} className="text-xl font-bold">Trust & Safety</button>
-                    <button onClick={() => { handleSignup(); setMobileMenuOpen(false); }} className="text-xl font-bold">For Contributors</button>
-                    <button onClick={() => { handleLogin(); setMobileMenuOpen(false); }} className="text-xl font-bold text-primary">Login</button>
-                    <button onClick={() => { handleSignup(); setMobileMenuOpen(false); }} className="px-8 py-3 bg-primary text-[#1b140d] font-bold rounded-full">Join Now</button>
-                </div>
-            )}
+            {/* Mobile Menu */}
+            <AnimatePresence>
+                {mobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="fixed inset-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl lg:hidden pt-24 px-6 flex flex-col items-center gap-8"
+                    >
+                        {['How it Works', 'Trust & Safety'].map((item) => (
+                            <button
+                                key={item}
+                                onClick={() => { handleScrollTo(item.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')); setMobileMenuOpen(false); }}
+                                className="text-xl font-bold text-slate-800 dark:text-white"
+                            >
+                                {item}
+                            </button>
+                        ))}
+                        <button onClick={() => { handleSignup(); setMobileMenuOpen(false); }} className="text-xl font-bold text-primary">Join Now</button>
+                        <button onClick={() => { handleLogin(); setMobileMenuOpen(false); }} className="text-lg font-medium text-slate-500">Login</button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-            {/* Hero Section - Full Screen Height */}
-            <section className="relative w-full min-h-[calc(100vh-80px)] flex items-center justify-center px-6 py-12 md:px-10 lg:px-20 overflow-hidden">
-                {/* Abstract Background Blob */}
-                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl -z-10"></div>
-                <div className="w-full max-w-[1400px] mx-auto">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <div className="flex flex-col gap-8">
-                            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 w-fit">
-                                <span className="material-symbols-outlined text-primary text-sm">school</span>
-                                <span className="text-xs font-bold text-primary tracking-wide uppercase">100% Free & Campus Verified</span>
-                            </div>
-                            <h1 className="text-5xl font-black leading-tight tracking-tight md:text-6xl lg:text-7xl text-[#1b140d] dark:text-white">
-                                Learn Together. <span className="text-primary relative inline-block">Grow Together<svg className="absolute w-full h-3 -bottom-1 left-0 text-primary opacity-40" preserveAspectRatio="none" viewBox="0 0 100 10"><path d="M0 5 Q 50 10 100 5" fill="none" stroke="currentColor" strokeWidth="8"></path></svg></span>.
-                            </h1>
-                            <p className="text-lg text-gray-600 dark:text-gray-300 md:text-xl leading-relaxed max-w-lg">
-                                Join a free, campus-verified community where students explain concepts, share knowledge, and build understanding together.
-                            </p>
-                            <div className="flex flex-wrap gap-4">
-                                <button onClick={handleLogin} className="flex items-center justify-center rounded-full h-14 px-8 bg-primary text-[#1b140d] text-base font-bold shadow-xl shadow-primary/25 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-                                    Explore Topics
-                                </button>
-                                <button onClick={handleSignup} className="flex items-center justify-center rounded-full h-14 px-8 bg-white dark:bg-white/10 border border-[#e7dbcf] dark:border-white/10 text-[#1b140d] dark:text-white text-base font-bold hover:bg-gray-50 dark:hover:bg-white/5 transition-all">
-                                    Become a Contributor
-                                </button>
-                            </div>
-                            <div className="flex items-center gap-4 pt-4 text-sm text-gray-500 dark:text-gray-400">
-                                <div className="flex -space-x-2">
-                                    <img loading="lazy" decoding="async" alt="Student portrait" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#221910]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJY7INpqcQQsp-lWIu_rci1_QHqrnpb0EAo-biaiC6wl7kwVrHi2tXL_SgRPHg3B6QlVAZZoHglXZskrcdpi-4n0Wm7YynjXmZeHxKcAzdh9QhdLZDKtKGCFBQ_8jhcoZp6hIGw-BNWHmAWYFBhwdLJZWAcY9VNbEsSDoZcF0aT3Gy3KBUkqodRXB9gYJIcLKPrhwPmgHdZ3Xo_ZGylB9o72htjvtUMgJYyCJBru4khkMPJ4xswsqbk07QogKRO4RAWmdaPtl7TJNG" />
-                                    <img loading="lazy" decoding="async" alt="Student portrait" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#221910]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-jY8uTRSj0jzNyAuK_fVtGOW52ewKIMCiXqrcikERLZ79kKUShUiJAzBUueFpHXKY8BsbTwYHwJsbsFw8Y5_sAIEhr1JW_H8QD_P3vKfmqDhbyHBFLiUHMkw122s6BTIW5wjzOQi-_8uaZh6rsFpTz82HukK8qK3hn81qi2exs7i6x6ooZOS9j_GDxBQYrXJTXpkzlwybdYQBuD1TffZrHwsYzSU12gIDYjpZSj23CnOzqdl_F7-SnUljmP6WgPODuDrKCHXCTYhN" />
-                                    <img loading="lazy" decoding="async" alt="Student portrait" className="w-8 h-8 rounded-full border-2 border-white dark:border-[#221910]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5nDla7pl3lCAa5jCjVuqd40bQpArguK2JAqCAQOuNaDNBCT7pKwx3g6h9UnJMnS4TaobXA7DPbLtM0VDmJqFx_HqmR8FQ8gsKv-B1Lcd-LoLkz5mw67CZHFX9diJD-esSIC5GenqziHoXkErE-hAWtawuEWfEpL1GmOneW47CKR0HsjnpB_99Nr7zeYkgXSZzh_Day9X3zSd6D8lqCQ3lu6tj2WqBKJLX631ffiPRwMVcVtCvW5FTBlfgF9VXYuEEM5VggzTa6Fm7" />
-                                </div>
-                                <p>Trusted by <span className="font-bold text-[#1b140d] dark:text-white">10,000+ students</span> across IITs & DU</p>
-                            </div>
-                        </div>
-                        <div className="relative">
-                            {/* Hero Image Card */}
-                            <div className="relative z-10 bg-white dark:bg-[#2c2219] p-6 rounded-2xl shadow-2xl border border-gray-100 dark:border-white/5 transform rotate-2 lg:rotate-3 hover:rotate-0 transition-transform duration-500">
-                                <div className="absolute -top-6 -right-6 bg-white dark:bg-[#3a2e24] p-4 rounded-xl shadow-lg border border-gray-100 dark:border-white/10 animate-bounce" style={{ animationDuration: '3s' }}>
-                                    <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-green-500">check_circle</span>
-                                        <div>
-                                            <p className="text-xs font-bold text-gray-500 dark:text-gray-400">Status</p>
-                                            <p className="text-sm font-bold text-[#1b140d] dark:text-white">Concept Clarified!</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="aspect-[4/3] w-full rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 relative mb-4">
-                                    <img alt="AssignMate Hero" className="object-cover w-full h-full" src="/home-hero.png" />
-                                    <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-black/70 backdrop-blur px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Available Now
-                                    </div>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden">
-                                            <img loading="lazy" decoding="async" alt="Mentor Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzzbdotfsSDrT80cZ5DBSQsRJv4cYg4iaxSLeaX0Ql1XpW8_dezsSpeiVCrz0KZ7S4k7AUHzO3oA_1Ik28xuK7HGUoAHi_SXZxwTzPQvq8VKj_56nWwj0JMpQYmlMnKbOJZ9SiA_5BB4_bQMyxqJhzmKHB1zDUdW-3cTKaIpTKigS8bMV55-ZEm04uCTT_wLnH3cJ4NUB-fFFaiost9VaJS1KWL0k-P-NwAgAQRE8KaEh8ci5nJBI_SNRxm2alNDXvbLmMcMtskh8s" />
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-1">
-                                                <h3 className="font-bold text-[#1b140d] dark:text-white">Sai Tej</h3>
-                                                <span className="material-symbols-outlined text-blue-500 text-[18px] fill-current" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                                            </div>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">CMRIT Hyd</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Contribution Score</p>
-                                        <div className="flex items-center text-primary text-sm font-bold">
-                                            <span className="material-symbols-outlined text-sm">volunteer_activism</span> 4.9
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Background Decorative Elements */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[110%] border border-dashed border-gray-300 dark:border-gray-700 rounded-full -z-10 animate-[spin_60s_linear_infinite]"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            {/* Hero Section */}
+            <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 overflow-hidden">
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] -z-10" />
+                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[100px] -z-10" />
 
-            {/* Trust Logos Strip */}
-            <div className="bg-white dark:bg-[#2c2219] py-8 border-y border-[#f3ede7] dark:border-[#3a2e24] w-full">
-                <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-20">
-                    <p className="text-center text-sm font-semibold text-gray-400 mb-6 uppercase tracking-wider">Campus-Verified & Trusted By</p>
-                    <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                        <span className="text-xl font-black text-gray-600 dark:text-gray-400 flex items-center gap-2"><span className="material-symbols-outlined">school</span> UniVerify</span>
-                        <span className="text-xl font-black text-gray-600 dark:text-gray-400 flex items-center gap-2"><span className="material-symbols-outlined">verified_user</span> ID Check</span>
-                        <span className="text-xl font-black text-gray-600 dark:text-gray-400 flex items-center gap-2"><span className="material-symbols-outlined">diversity_3</span> Open Learning</span>
-                        <span className="text-xl font-black text-gray-600 dark:text-gray-400 flex items-center gap-2"><span className="material-symbols-outlined">psychology</span> Peer Support</span>
-                    </div>
-                </div>
-            </div>
+                <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+                    <motion.div
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="flex flex-col gap-8 text-center lg:text-left"
+                    >
+                        <div className="inline-flex items-center gap-2 self-center lg:self-start rounded-full bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 px-4 py-1.5 backdrop-blur-sm">
+                            <span className="text-xs font-bold text-primary tracking-wider uppercase">🎉 100% Free & Campus Verified</span>
+                        </div>
 
-            {/* Features / Value Props */}
-            <section id="trust-safety" className="w-full px-6 py-16 md:px-10 lg:px-20 bg-background-light dark:bg-background-dark">
-                <div className="mx-auto max-w-7xl">
-                    <div className="text-center max-w-2xl mx-auto mb-16">
-                        <h2 className="text-3xl md:text-4xl font-black text-[#1b140d] dark:text-white mb-4">Why AssignMate is a Community</h2>
-                        <p className="text-gray-600 dark:text-gray-300">We solve the isolation problem with campus-verified networking and support.</p>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {/* Feature 1 */}
-                        <div className="bg-white dark:bg-[#2c2219] p-8 rounded-2xl border border-[#e7dbcf] dark:border-[#3a2e24] hover:shadow-lg transition-shadow group">
-                            <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                <span className="material-symbols-outlined text-blue-500 text-3xl">verified</span>
-                            </div>
-                            <h3 className="text-xl font-bold mb-3 text-[#1b140d] dark:text-white">Community Trust</h3>
-                            <p className="text-gray-600 dark:text-gray-400">Every peer is ID-verified. Look for the Blue Tick before you connect. No fake profiles, just real students.</p>
+                        <h1 className="text-5xl md:text-7xl font-black leading-[1.1] tracking-tight">
+                            Learn Together.<br />
+                            <span className="text-gradient relative">Grow Together.</span>
+                        </h1>
+
+                        <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                            Join India's largest campus-verified community. Connect with seniors, share knowledge, and ace your exams together.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                            <button onClick={handleLogin} className="btn-primary h-14 px-8 text-lg hover:-translate-y-1">
+                                Explore Topics
+                            </button>
+                            <button onClick={handleSignup} className="btn-secondary h-14 px-8 text-lg hover:-translate-y-1">
+                                Become a Contributor
+                            </button>
                         </div>
-                        {/* Feature 2 */}
-                        <div className="bg-white dark:bg-[#2c2219] p-8 rounded-2xl border border-[#e7dbcf] dark:border-[#3a2e24] hover:shadow-lg transition-shadow group">
-                            <div className="w-14 h-14 bg-orange-50 dark:bg-orange-900/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                <span className="material-symbols-outlined text-primary text-3xl">location_on</span>
+
+                        <div className="flex items-center justify-center lg:justify-start gap-4 pt-4">
+                            <div className="flex -space-x-3">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 bg-slate-200 overflow-hidden">
+                                        <img src={`https://i.pravatar.cc/150?img=${i + 10}`} alt="User" />
+                                    </div>
+                                ))}
                             </div>
-                            <h3 className="text-xl font-bold mb-3 text-[#1b140d] dark:text-white">Campus Matching</h3>
-                            <p className="text-gray-600 dark:text-gray-400">Find seniors from your specific university (e.g., DU, IIT) who know exactly what your curriculum demands.</p>
+                            <p className="text-sm font-medium text-slate-500">Trusted by <span className="text-slate-900 dark:text-white font-bold">10,000+ students</span></p>
                         </div>
-                        {/* Feature 3 */}
-                        <div className="bg-white dark:bg-[#2c2219] p-8 rounded-2xl border border-[#e7dbcf] dark:border-[#3a2e24] hover:shadow-lg transition-shadow group">
-                            <div className="w-14 h-14 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                <span className="material-symbols-outlined text-green-500 text-3xl">diversity_3</span>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, rotate: 5 }}
+                        animate={{ opacity: 1, scale: 1, rotate: 3 }}
+                        transition={{ duration: 1, delay: 0.2 }}
+                        className="relative hidden lg:block"
+                    >
+                        <div className="relative z-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-2xl p-6 rounded-3xl shadow-2xl border border-white/40 dark:border-slate-700/40 transform hover:rotate-0 transition-all duration-500">
+                            {/* Floating Status Badge */}
+                            <motion.div
+                                animate={{ y: [0, -10, 0] }}
+                                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                                className="absolute -top-8 -right-8 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center gap-3"
+                            >
+                                <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full">
+                                    <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold text-slate-500">Status</p>
+                                    <p className="text-sm font-bold text-slate-900 dark:text-white">Concept Clarified!</p>
+                                </div>
+                            </motion.div>
+
+                            <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 relative mb-6">
+                                <img src="/home-hero.png" alt="Dashboard Preview" className="object-cover w-full h-full" />
                             </div>
-                            <h3 className="text-xl font-bold mb-3 text-[#1b140d] dark:text-white">Collaborative Learning</h3>
-                            <p className="text-gray-600 dark:text-gray-400">It's not just about the work—it's about learning. Connect, discuss, and grow your network together.</p>
+
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="size-12 rounded-full bg-slate-200 overflow-hidden">
+                                        <img src="/logo.png" className="w-full h-full object-cover" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-slate-900 dark:text-white">Sai Tej</h3>
+                                        <p className="text-xs text-slate-500">CMRIT Hyd</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xs text-slate-500">Contribution Score</p>
+                                    <div className="flex items-center gap-1 text-primary font-bold">
+                                        <Users size={16} /> 4.9
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
-            {/* Interactive Search Mockup */}
-            <section className="w-full px-6 py-12 md:px-10 lg:px-20 bg-white dark:bg-[#2c2219]">
-                <div className="mx-auto max-w-5xl bg-primary/5 dark:bg-white/5 rounded-3xl p-8 md:p-12 text-center">
-                    <h2 className="text-2xl md:text-3xl font-bold text-[#1b140d] dark:text-white mb-8">Search your campus now</h2>
-                    <div className="bg-white dark:bg-[#221910] p-2 rounded-full shadow-lg flex items-center gap-2 max-w-2xl mx-auto border border-gray-100 dark:border-white/10">
-                        <div className="flex-1 flex items-center px-4 h-12 w-full">
-                            <span className="material-symbols-outlined text-gray-400 mr-2">search</span>
+            {/* Search Section */}
+            <section className="px-6 pb-20">
+                <div className="max-w-4xl mx-auto -mt-10 lg:-mt-20 relative z-20">
+                    <div className="glass-strong rounded-3xl p-3 shadow-2xl shadow-orange-500/10 flex flex-col md:flex-row items-center gap-2">
+                        <div className="flex-1 flex items-center px-4 h-14 w-full">
+                            <Search className="text-slate-400 mr-3" size={24} />
                             <input
-                                className="bg-transparent border-none focus:ring-0 w-full text-sm text-[#1b140d] dark:text-white placeholder-gray-400 focus:outline-none"
-                                placeholder="Search for subjects (e.g. Economics, CS)"
+                                className="bg-transparent border-none w-full text-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-0 focus:outline-none"
+                                placeholder={placeholderText}
                                 type="text"
                                 value={searchSubject}
                                 onChange={(e) => setSearchSubject(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             />
                         </div>
-                        <button onClick={() => handleSearch()} className="bg-primary hover:bg-primary/90 text-[#1b140d] font-bold rounded-full px-8 h-12 shadow-md transition-all shrink-0">
+                        <button onClick={() => handleSearch()} className="w-full md:w-auto btn-primary h-14 px-10 rounded-2xl text-lg hover:scale-105">
                             Search
                         </button>
-                    </div>
-                    <div className="flex flex-wrap justify-center gap-3 mt-6">
-                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Popular:</span>
-                        <button onClick={() => handleSearch('Economics')} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">Economics @ DU</button>
-                        <button onClick={() => handleSearch('Computer Science')} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">CS @ IIT</button>
-                        <button onClick={() => handleSearch('Law')} className="bg-white dark:bg-[#3a2e24] px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 cursor-pointer hover:border-primary transition-colors">Law @ NLU</button>
                     </div>
                 </div>
             </section>
 
             {/* How It Works */}
-            <section id="how-it-works" className="w-full px-6 py-16 md:px-10 lg:px-20 bg-background-light dark:bg-background-dark">
-                <div className="mx-auto max-w-7xl">
-                    <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
-                        {/* Left: Text */}
-                        <div className="lg:w-1/3">
-                            <div className="lg:sticky lg:top-24">
-                                <h2 className="text-3xl font-black text-[#1b140d] dark:text-white mb-4">How it works</h2>
-                                <p className="text-gray-600 dark:text-gray-400 mb-8">Five steps to collaborative learning with your campus community.</p>
-                                <button onClick={() => handleScrollTo('trust-safety')} className="inline-flex items-center gap-2 font-bold text-primary hover:text-primary/80 transition-colors">
-                                    Learn more about safety <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                                </button>
-                            </div>
-                        </div>
-                        {/* Right: Steps */}
-                        <div className="lg:w-2/3 space-y-4">
-                            {/* Step 1 */}
-                            <div className="flex items-start gap-4">
-                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white text-sm font-bold">1</span>
-                                <div className="flex-1 bg-[#2c2219] dark:bg-[#2c2219] p-5 rounded-2xl flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-orange-900/20 rounded-xl flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-orange-500">help_outline</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-base font-bold text-white mb-1">Ask or explore questions</h3>
-                                        <p className="text-sm text-gray-400">Post your doubts or browse existing discussions on topics you're studying.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Step 2 */}
-                            <div className="flex items-start gap-4">
-                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">2</span>
-                                <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-blue-500">person_search</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Find contributors in your area</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">Connect with peers who excel in subjects you need help understanding.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Step 3 */}
-                            <div className="flex items-start gap-4">
-                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">3</span>
-                                <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-green-500">forum</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Collaborate openly</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">Discuss concepts, share explanations, and work through problems together.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Step 4 */}
-                            <div className="flex items-start gap-4">
-                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">4</span>
-                                <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/20 rounded-xl flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-purple-500">lightbulb</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Build understanding</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">Improve explanations together until clarity is achieved. Quality matters.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Step 5 */}
-                            <div className="flex items-start gap-4">
-                                <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-secondary-bg text-text-muted text-sm font-bold border border-border-subtle">5</span>
-                                <div className="flex-1 bg-white dark:bg-[#221910] p-5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-pink-50 dark:bg-pink-900/20 rounded-xl flex items-center justify-center shrink-0">
-                                        <span className="material-symbols-outlined text-pink-500">trending_up</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-base font-bold text-[#1b140d] dark:text-white mb-1">Earn contribution credibility</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">Build your reputation as a helpful contributor and strengthen your campus network.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
+            <section id="how-it-works" className="py-24 px-6 bg-white dark:bg-slate-900/50">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-5xl font-black mb-6">How it works</h2>
+                        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Five simple steps to collaborative learning with your campus community.</p>
                     </div>
-                </div>
-            </section>
 
-            {/* Testimonials */}
-            <section className="w-full px-6 py-16 md:px-10 lg:px-20 bg-white dark:bg-[#2c2219] border-t border-[#f3ede7] dark:border-[#3a2e24]">
-                <div className="mx-auto max-w-7xl">
-                    <h2 className="text-3xl font-black text-center text-[#1b140d] dark:text-white mb-12">Success Stories from Students</h2>
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {/* Card 1 */}
-                        <div className="bg-background-light dark:bg-[#221910] p-6 rounded-2xl relative">
-                            <span className="material-symbols-outlined absolute top-6 right-6 text-gray-200 dark:text-gray-700 text-5xl z-0">format_quote</span>
-                            <div className="relative z-10">
-                                <div className="flex items-center gap-1 text-primary mb-4">
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {[
+                            { icon: <MapPin className="text-orange-500" size={32} />, title: "Find Contributors", desc: "Locate peers in your area." },
+                            { icon: <Users className="text-blue-500" size={32} />, title: "Collaborate Openly", desc: "Work through problems together." },
+                            { icon: <Lightbulb className="text-purple-500" size={32} />, title: "Build Understanding", desc: "Master concepts with peer help." }
+                        ].map((feature, idx) => (
+                            <motion.div
+                                key={idx}
+                                whileHover={{ y: -5 }}
+                                className="card-clean p-8 group"
+                            >
+                                <div className="size-16 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    {feature.icon}
                                 </div>
-                                <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"The pressure is real, but AssignMate helped me tackle it. Found a senior from my own college who guided me through the complex topics."</p>
-                                <div className="flex items-center gap-3">
-                                    <img loading="lazy" decoding="async" alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVTtiaoX3kyC_tqnin6dPXXfN_q5ipqsqE0VM66zxwfnjfNOlGhht3h2N03bgvLnPhnUKmVeRhhAIIrfz0TOKf_unmFbRD3rBDVUkCqdf8L6uxQWm4MKsPvHvKyp_XtK60QNmTZPpXbB8UvG0OsFcpb2zjuYDRVuJ-WYpiCjkDG7GFKz7GQqERF2wxk9FxPL7UQoQ6zQf5e8JPOH-EGajMN2iIa2Fa_dxlNZk2x8RYNQ3xUOrHDMA4jdHcJy0PsOF2ER44z4VP7w8s" />
-                                    <div>
-                                        <p className="text-sm font-bold text-[#1b140d] dark:text-white">Priya S.</p>
-                                        <p className="text-xs text-gray-500">Delhi University</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {/* Card 2 */}
-                        <div className="bg-background-light dark:bg-[#221910] p-6 rounded-2xl relative">
-                            <span className="material-symbols-outlined absolute top-6 right-6 text-gray-200 dark:text-gray-700 text-5xl z-0">format_quote</span>
-                            <div className="relative z-10">
-                                <div className="flex items-center gap-1 text-primary mb-4">
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                </div>
-                                <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"Finding verified peers from my own college was a game-changer. The explanations I got helped me truly understand the concepts."</p>
-                                <div className="flex items-center gap-3">
-                                    <img loading="lazy" decoding="async" alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2yNIYgHyb_Jn7XF-GDsKJvdtb6FVytPUB4W8FydVYGvhJC70cfuEXL6vHEtdiG3Gy-UtnvjyxUaTTw3Cn-SXPXdPf9SWf_aFOGP2ei0MYyRb-ENiUlJP-aze9BjRzHsVqV3ezMbDY0LpbVqnMCer8qVDMyATODoJELtAoIEPPnEUTeiTtDoCQLrc-mTuqP6eAweXl7QDTduNxEmccBqlUlcWOtXG4Y0RrgRujypk64PbzW2R_-YUL-Drnw_Lg5G8fAb37b9HQZ4s0" />
-                                    <div>
-                                        <p className="text-sm font-bold text-[#1b140d] dark:text-white">Arjun M.</p>
-                                        <p className="text-xs text-gray-500">BITS Pilani</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {/* Card 3 */}
-                        <div className="bg-background-light dark:bg-[#221910] p-6 rounded-2xl relative">
-                            <span className="material-symbols-outlined absolute top-6 right-6 text-gray-200 dark:text-gray-700 text-5xl z-0">format_quote</span>
-                            <div className="relative z-10">
-                                <div className="flex items-center gap-1 text-primary mb-4">
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star</span>
-                                    <span className="material-symbols-outlined text-sm fill-current">star_half</span>
-                                </div>
-                                <p className="text-gray-700 dark:text-gray-300 mb-6 text-sm leading-relaxed">"As a contributor, I love helping juniors understand complex topics. Teaching others has deepened my own understanding."</p>
-                                <div className="flex items-center gap-3">
-                                    <img loading="lazy" decoding="async" alt="Student Portrait" className="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDT0PtwXpp3_rbAL1YpVWceMA4OiLGByXEbDrPs6sBUl3CNet35GyW4d8cXG1Rilcruu8bf3IEoOzWoeRfnWSRx3Uq6FPcJ2n2Ti3slBL5ZyZHslyuLXuYp7ONyR3GCK6FYxsziiPJ9bJ-Nsn1wIucE9egEurKemN7MFPrXKDOx4KeAnuYKmBCQXgSCM8f47_K90La_l-3IhTYUptJkEYE5zUdp_BZKYn7BHnBQlalcFDkvbvxjVrTpNnB_dUj-uZcGHtHptTsDiqHW" />
-                                    <div>
-                                        <p className="text-sm font-bold text-[#1b140d] dark:text-white">Vikram R.</p>
-                                        <p className="text-xs text-gray-500">IIT Madras</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                                <p className="text-slate-500 dark:text-slate-400">{feature.desc}</p>
+                            </motion.div>
+                        ))}
                     </div>
                 </div>
             </section>
 
             {/* CTA Section */}
-            <section className="w-full px-6 py-20 md:px-10 lg:px-20 bg-background-light dark:bg-background-dark">
-                <div className="mx-auto max-w-6xl bg-[#1b140d] dark:bg-white/5 rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden">
-                    {/* Decorative Circle */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px]"></div>
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/20 rounded-full blur-[80px]"></div>
-                    <div className="relative z-10 flex flex-col items-center">
-                        <h2 className="text-3xl md:text-5xl font-black text-white mb-6">Ready to learn together?</h2>
-                        <p className="text-gray-400 text-lg mb-10 max-w-xl">Join India's free student learning community. Share knowledge, build understanding, and grow together.</p>
-                        <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-                            <button onClick={handleLogin} className="flex items-center justify-center rounded-full h-14 px-10 bg-primary text-[#1b140d] text-base font-bold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:-translate-y-1 transition-all">
-                                Join Your Campus
-                            </button>
-                            <button onClick={handleSignup} className="flex items-center justify-center rounded-full h-14 px-10 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-base font-bold hover:bg-white/20 transition-all">
-                                Start Contributing
-                            </button>
+            <section className="py-24 px-6">
+                <div className="max-w-6xl mx-auto rounded-[3rem] bg-slate-900 dark:bg-slate-800 p-12 md:p-24 text-center relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px]" />
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px]" />
+
+                    <div className="relative z-10">
+                        <h2 className="text-4xl md:text-6xl font-black text-white mb-8">Ready to start?</h2>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <button onClick={handleLogin} className="btn-primary h-14 px-10 text-lg">Join Your Campus</button>
+                            <button onClick={handleSignup} className="h-14 px-10 rounded-xl font-bold text-white border border-white/20 hover:bg-white/10 transition-all">Start Contributing</button>
                         </div>
                     </div>
                 </div>
             </section>
-
-            {/* Footer */}
-            <footer className="w-full bg-background-light dark:bg-[#221910] border-t border-[#f3ede7] dark:border-[#3a2e24] px-6 py-12 md:px-10 lg:px-20">
-                <div className="mx-auto max-w-7xl grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
-                    <div className="col-span-2 lg:col-span-2 flex flex-col gap-4 pr-8">
-                        <div className="flex items-center gap-2 text-[#1b140d] dark:text-white mb-2">
-                            <div className="size-8 rounded-lg overflow-hidden">
-                                <img loading="lazy" decoding="async" src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
-                            </div>
-                            <h2 className="text-lg font-bold">AssignMate</h2>
-                        </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-xs">
-                            India's free, open student learning network. We connect students with verified peers for collaborative understanding.
-                        </p>
-                    </div>
-                    <div className="flex flex-col gap-4">
-                        <h3 className="font-bold text-[#1b140d] dark:text-white">Platform</h3>
-                        <button onClick={() => handleScrollTo('how-it-works')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">How it works</button>
-                        <button onClick={() => handleSearch()} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Browse Peers</button>
-                        <button onClick={() => handleScrollTo('trust-safety')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Safety & Trust</button>
-                        <button onClick={() => handleScrollTo('how-it-works')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Community</button>
-                    </div>
-                    <div className="flex flex-col gap-4">
-                        <h3 className="font-bold text-[#1b140d] dark:text-white">Support</h3>
-                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Help Center</button>
-                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Contact Us</button>
-                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Dispute Resolution</button>
-                    </div>
-                    <div className="flex flex-col gap-4">
-                        <h3 className="font-bold text-[#1b140d] dark:text-white">Legal</h3>
-                        <button onClick={() => navigate('/terms')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Terms of Service</button>
-                        <button onClick={() => navigate('/privacy')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Privacy Policy</button>
-                        <button onClick={() => navigate('/community-guidelines')} className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Community Guidelines</button>
-                        <button className="text-sm text-left text-gray-500 hover:text-primary transition-colors cursor-pointer">Academic Integrity</button>
-                    </div>
-                </div>
-                <div className="mx-auto max-w-7xl pt-8 border-t border-gray-200 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-gray-400">© 2024 AssignMate. All rights reserved.</p>
-                    <div className="flex gap-4">
-                        <button className="text-gray-400 hover:text-primary transition-colors cursor-pointer"><span className="material-symbols-outlined">public</span></button>
-                        <button className="text-gray-400 hover:text-primary transition-colors cursor-pointer"><span className="material-symbols-outlined">chat_bubble</span></button>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 };

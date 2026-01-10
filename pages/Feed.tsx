@@ -346,7 +346,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                                     <h3 className="font-bold text-text-dark truncate">{order.title}</h3>
                                                                     <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-bold shrink-0">In Progress</span>
                                                                 </div>
-                                                                <p className="text-xs text-text-muted mb-3">Due: {format(new Date(order.deadline), 'MMM d, yyyy')}</p>
+                                                                <p className="text-xs text-text-muted mb-3">Due: {order.deadline ? format(new Date(order.deadline), 'MMM d, yyyy') : 'No deadline set'}</p>
                                                                 <div className="flex items-center justify-between">
                                                                     <div className="flex items-center gap-2">
                                                                         <Avatar src={order.writer_avatar} alt={order.writer_handle} className="size-6 rounded-full" fallback={order.writer_handle?.charAt(0)} />
