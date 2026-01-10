@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { dbService as db } from '../services/firestoreService'; // Assuming dbService is the named export
+import { getAuth } from 'firebase/auth'; // Import getAuth directly
 import { useAuth } from '../contexts/AuthContext';
 import { GlassCard } from './ui/GlassCard';
 import { GlassButton } from './ui/GlassButton';
@@ -39,7 +40,8 @@ export const ProfileBuilder = () => {
             if (messages.length === 0) {
                 setLoading(true);
                 try {
-                    const token = await user?.getIdToken?.() || '';
+                    const auth = getAuth();
+                    const token = await auth.currentUser?.getIdToken() || '';
                     const response = await fetch('/api/onboarding', {
                         method: 'POST',
                         headers: {
@@ -91,7 +93,8 @@ export const ProfileBuilder = () => {
                 text: m.text
             }));
 
-            const token = await user.getIdToken?.() || '';
+            const auth = getAuth();
+            const token = await auth.currentUser?.getIdToken() || '';
             const response = await fetch('/api/onboarding', {
                 method: 'POST',
                 headers: {
