@@ -117,11 +117,11 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     Need help with your assignments? Connect with verified peers from top universities across India.
                                 </p>
                                 <div className="flex flex-wrap gap-4">
-                                    <button onClick={() => navigate('/writers')} className="bg-white text-[#FF6B4A] px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                                    <button onClick={() => navigate('/peers')} className="bg-white text-[#FF6B4A] px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 transition-all">
                                         <span className="material-symbols-outlined">person_search</span>
                                         Find Peers
                                     </button>
-                                    <button onClick={() => navigate('/writers?tab=network')} className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-white/30 transition-all">
+                                    <button onClick={() => navigate('/peers?tab=network')} className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-white/30 transition-all">
                                         <span className="material-symbols-outlined">group</span>
                                         My Network
                                     </button>

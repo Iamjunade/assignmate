@@ -23,7 +23,7 @@ export const MobileNav = () => {
     const navItems = [
         { icon: 'dashboard', label: 'Home', path: '/feed' },
         { icon: 'forum', label: 'Community', path: '/community' },
-        { icon: 'search', label: 'Search', path: '/mentors', isPrimary: true },
+        { icon: 'search', label: 'Search', path: '/peers', isPrimary: true },
         { icon: 'chat_bubble', label: 'Chat', path: '/chats', badge: unreadCount },
         { icon: 'person', label: 'Profile', path: '/profile' },
     ];

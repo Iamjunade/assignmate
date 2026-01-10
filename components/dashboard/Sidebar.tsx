@@ -67,8 +67,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 </a>
 
                 <a
-                    onClick={() => navigate('/mentors')}
-                    className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/mentors') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
+                    onClick={() => navigate('/peers')}
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/peers') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
                 >
                     <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">person_search</span>
                     <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Find Peers</span>

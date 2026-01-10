@@ -184,7 +184,7 @@ function AppContent() {
             </ProtectedRoute>
           } />
 
-          <Route path="/writers" element={
+          <Route path="/peers" element={
             <ProtectedRoute>
               <FindWriter />
             </ProtectedRoute>
