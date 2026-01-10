@@ -38,8 +38,9 @@ export const DashboardHeader: React.FC = () => {
     // Subscribe to notifications
     useEffect(() => {
         if (!user) return;
-        const unsubscribe = notifService.subscribeToHistory(user.id, (data) => {
-            setNotifications(data);
+        // Fix: Use 'listen' instead of 'subscribeToHistory' - that's the actual method name
+        const unsubscribe = notifService.listen(user.id, (data) => {
+            setNotifications(prev => [...prev, data]);
         });
         return () => unsubscribe();
     }, [user]);
