@@ -1,10 +1,11 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import * as admin from 'firebase-admin';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Helper to init Firebase safely
 const initFirebase = () => {
-    if (admin.apps.length) return;
+    if (getApps().length) return;
 
     try {
         const privateKey = process.env.FIREBASE_PRIVATE_KEY
@@ -13,8 +14,8 @@ const initFirebase = () => {
 
         if (!privateKey) throw new Error("Missing FIREBASE_PRIVATE_KEY");
 
-        admin.initializeApp({
-            credential: admin.credential.cert({
+        initializeApp({
+            credential: cert({
                 projectId: process.env.FIREBASE_PROJECT_ID,
                 clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
                 privateKey: privateKey,
@@ -84,7 +85,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const idToken = authHeader.split('Bearer ')[1];
     try {
-        await admin.auth().verifyIdToken(idToken);
+        // Use verified Auth instance
+        await getAuth().verifyIdToken(idToken);
     } catch (error) {
         console.error("Token verification failed:", error);
         return res.status(401).json({ error: 'Unauthorized: Invalid token' });
