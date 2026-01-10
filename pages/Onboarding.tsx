@@ -1,302 +1,149 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { dbService as db } from '../services/firestoreService';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { Loader2, GraduationCap, User, AtSign, BookOpen, Sparkles, ArrowRight } from 'lucide-react';
-
-// Common tags for students
-const SUGGESTED_TAGS = [
-    'Programming', 'Mathematics', 'Physics', 'Chemistry', 'Biology',
-    'Computer Science', 'Engineering', 'Business', 'Economics', 'Psychology',
-    'Data Science', 'Machine Learning', 'Web Development', 'Mobile Apps',
-    'Design', 'Writing', 'Research', 'Statistics', 'Finance', 'Marketing'
-];
+import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
+import { Search, PenTool } from 'lucide-react';
 
 export const Onboarding = () => {
-    const { user, refreshProfile, loading: authLoading } = useAuth();
     const navigate = useNavigate();
-    const { success, error: toastError } = useToast();
+    const { user, completeGoogleSignup } = useAuth();
+    const { error, success } = useToast();
 
-    const [formData, setFormData] = useState({
-        full_name: '',
-        handle: '',
-        school: '',
-        bio: '',
-        tags: [] as string[]
-    });
     const [loading, setLoading] = useState(false);
-    const [step, setStep] = useState(1);
+    const [form, setForm] = useState({ handle: '', school: '', bio: '' });
+    const [isWriter, setIsWriter] = useState(false);
 
-    // Redirect to auth if not authenticated
+    // Redirect if user is already complete or not logged in
     useEffect(() => {
-        if (!authLoading && !user) {
-            navigate('/auth', { replace: true });
-        }
-    }, [user, authLoading, navigate]);
-
-    // Pre-fill form with existing user data
-    useEffect(() => {
-        if (user) {
-            setFormData({
-                full_name: user.full_name || '',
-                handle: user.handle || '',
-                school: user.school || '',
-                bio: user.bio || '',
-                tags: user.tags || []
-            });
-        }
-    }, [user]);
-
-    // Redirect if profile is already complete
-    useEffect(() => {
-        if (user && !user.is_incomplete) {
-            navigate('/feed', { replace: true });
+        if (!user) {
+            navigate('/auth');
+        } else if (!user.is_incomplete) {
+            navigate('/feed');
         }
     }, [user, navigate]);
-
-    const handleTagToggle = (tag: string) => {
-        setFormData(prev => ({
-            ...prev,
-            tags: prev.tags.includes(tag)
-                ? prev.tags.filter(t => t !== tag)
-                : prev.tags.length < 5 ? [...prev.tags, tag] : prev.tags
-        }));
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validation
-        if (!formData.full_name.trim() || formData.full_name.trim().length < 2) {
-            toastError("Please enter your full name (at least 2 characters)");
+        if (!form.school) {
+            error("Please select your college.");
             return;
         }
-        if (!formData.handle.trim() || formData.handle.trim().length < 3) {
-            toastError("Please enter a username (at least 3 characters)");
-            return;
-        }
-        if (!formData.school.trim()) {
-            toastError("Please enter your school/university");
+        if (!form.handle || form.handle.length < 3) {
+            error("Handle must be at least 3 characters.");
             return;
         }
 
         setLoading(true);
         try {
-            // Save profile data
-            await db.updateProfile(user!.id, {
-                full_name: formData.full_name.trim(),
-                handle: formData.handle.trim().toLowerCase().replace(/\s+/g, '_'),
-                school: formData.school.trim(),
-                bio: formData.bio.trim(),
-                tags: formData.tags,
-                is_incomplete: false,
-                onboarded_at: new Date().toISOString()
-            });
-
-            success("Profile completed! Welcome to AssignMate 🎉");
-
-            // Refresh profile and navigate
-            if (refreshProfile) await refreshProfile();
-            navigate('/feed', { replace: true });
-
+            await completeGoogleSignup(form.handle, form.school, isWriter, form.bio);
+            success("Profile setup complete! Welcome.");
+            // Navigation handled by useEffect when user state updates
         } catch (err: any) {
-            console.error("Onboarding error:", err);
-            toastError(err.message || "Failed to save profile. Please try again.");
+            console.error("Profile completion error:", err);
+            error(err.message || "Failed to complete profile setup.");
             setLoading(false);
         }
     };
 
-    // Show loading while auth is loading
-    if (authLoading || !user) {
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="size-8 text-primary animate-spin" />
-                    <p className="text-text-muted text-sm">Loading...</p>
-                </div>
-            </div>
-        );
-    }
+    if (!user) return null;
 
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-            <div className="max-w-xl w-full">
-                {/* Header */}
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background-light dark:bg-[#1a120b] p-6 font-display">
+            <div className="w-full max-w-md bg-white dark:bg-white/5 rounded-3xl shadow-2xl border border-gray-200 dark:border-white/10 p-8 md:p-10">
                 <div className="text-center mb-8">
-                    <div className="size-16 bg-gradient-to-br from-primary to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
-                        <Sparkles className="size-8 text-white" />
+                    <div className="size-16 rounded-2xl overflow-hidden mx-auto mb-4 shadow-lg">
+                        <img src="/logo.png" alt="AssignMate Logo" className="w-full h-full object-cover" />
                     </div>
-                    <h1 className="text-3xl font-black text-text-dark mb-2">Complete Your Profile</h1>
-                    <p className="text-text-muted">Let's set up your profile to connect with peers</p>
+                    <h1 className="text-3xl font-black text-[#1b140d] dark:text-white mb-2">Welcome!</h1>
+                    <p className="text-gray-500 dark:text-gray-400">Let's finish setting up your profile.</p>
                 </div>
 
-                {/* Progress Steps */}
-                <div className="flex justify-center gap-2 mb-8">
-                    {[1, 2].map((s) => (
-                        <div
-                            key={s}
-                            className={`h-2 rounded-full transition-all ${s <= step ? 'w-12 bg-primary' : 'w-8 bg-gray-200'
-                                }`}
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Choose a Handle</label>
+                        <div className="relative group">
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">alternate_email</span>
+                            <input
+                                className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-medium text-[#1b140d] dark:text-white placeholder-gray-400 transition-all outline-none"
+                                placeholder="username"
+                                type="text"
+                                value={form.handle}
+                                onChange={e => {
+                                    const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                                    setForm({ ...form, handle: val });
+                                }}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2 relative z-50">
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">University</label>
+                        <CollegeAutocomplete
+                            value={form.school}
+                            onChange={(val) => setForm({ ...form, school: val })}
+                            placeholder="Select your college"
+                            className="w-full"
+                            inputClassName="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-medium text-[#1b140d] dark:text-white placeholder-gray-400 transition-all outline-none"
+                            icon={<span className="material-symbols-outlined absolute left-4 top-3.5 text-gray-400">school</span>}
                         />
-                    ))}
-                </div>
+                    </div>
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8 space-y-6">
-                    {step === 1 && (
-                        <>
-                            {/* Full Name */}
-                            <div>
-                                <label className="block text-sm font-bold text-text-dark mb-2 flex items-center gap-2">
-                                    <User className="size-4 text-primary" />
-                                    Full Name <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.full_name}
-                                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                                    placeholder="e.g., Rahul Kumar"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-text-dark font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                                    required
-                                />
-                            </div>
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide ml-1">Bio (Optional)</label>
+                        <div className="relative group">
+                            <span className="material-symbols-outlined absolute left-4 top-4 text-gray-400 group-focus-within:text-primary transition-colors">edit_note</span>
+                            <textarea
+                                className="w-full h-24 pl-12 pr-4 py-3 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-medium text-[#1b140d] dark:text-white placeholder-gray-400 transition-all outline-none resize-none"
+                                placeholder="Tell us a bit about yourself..."
+                                value={form.bio}
+                                onChange={e => setForm({ ...form, bio: e.target.value })}
+                            />
+                        </div>
+                    </div>
 
-                            {/* Username */}
-                            <div>
-                                <label className="block text-sm font-bold text-text-dark mb-2 flex items-center gap-2">
-                                    <AtSign className="size-4 text-primary" />
-                                    Username <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.handle}
-                                    onChange={(e) => setFormData({ ...formData, handle: e.target.value.replace(/\s+/g, '_') })}
-                                    placeholder="e.g., rahul_kumar"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-text-dark font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                                    required
-                                />
-                                <p className="text-xs text-text-muted mt-1">This will be your unique identifier on AssignMate</p>
-                            </div>
-
-                            {/* School */}
-                            <div>
-                                <label className="block text-sm font-bold text-text-dark mb-2 flex items-center gap-2">
-                                    <GraduationCap className="size-4 text-primary" />
-                                    School / University <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.school}
-                                    onChange={(e) => setFormData({ ...formData, school: e.target.value })}
-                                    placeholder="e.g., IIT Bombay, Delhi University"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-text-dark font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                                    required
-                                />
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={() => setStep(2)}
-                                disabled={!formData.full_name.trim() || !formData.handle.trim() || !formData.school.trim()}
-                                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                    <div className="space-y-2 pt-2">
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1 uppercase tracking-wide">
+                            What is your goal?
+                        </label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div
+                                onClick={() => setIsWriter(false)}
+                                className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${!isWriter
+                                    ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
+                                    : 'bg-white border-slate-200 hover:bg-slate-50'
+                                    }`}
                             >
-                                Continue
-                                <ArrowRight className="size-5" />
-                            </button>
-                        </>
-                    )}
-
-                    {step === 2 && (
-                        <>
-                            {/* Bio */}
-                            <div>
-                                <label className="block text-sm font-bold text-text-dark mb-2 flex items-center gap-2">
-                                    <BookOpen className="size-4 text-primary" />
-                                    Bio (Optional)
-                                </label>
-                                <textarea
-                                    value={formData.bio}
-                                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                                    placeholder="Tell others about yourself, your interests, what you're studying..."
-                                    rows={3}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-text-dark font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
-                                />
+                                <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-600' : 'text-slate-500'}`}>
+                                    Find Help
+                                </span>
                             </div>
-
-                            {/* Tags */}
-                            <div>
-                                <label className="block text-sm font-bold text-text-dark mb-2">
-                                    Your Interests (Select up to 5)
-                                </label>
-                                <div className="flex flex-wrap gap-2">
-                                    {SUGGESTED_TAGS.map((tag) => (
-                                        <button
-                                            key={tag}
-                                            type="button"
-                                            onClick={() => handleTagToggle(tag)}
-                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${formData.tags.includes(tag)
-                                                ? 'bg-primary text-white shadow-md'
-                                                : 'bg-gray-100 text-text-muted hover:bg-gray-200'
-                                                }`}
-                                        >
-                                            {tag}
-                                        </button>
-                                    ))}
-                                </div>
-                                {formData.tags.length > 0 && (
-                                    <p className="text-xs text-text-muted mt-2">
-                                        Selected: {formData.tags.join(', ')}
-                                    </p>
-                                )}
+                            <div
+                                onClick={() => setIsWriter(true)}
+                                className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center text-center transition-all duration-200 ${isWriter
+                                    ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-500/20'
+                                    : 'bg-white border-slate-200 hover:bg-slate-50'
+                                    }`}
+                            >
+                                <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>
+                                    Earn Money
+                                </span>
                             </div>
+                        </div>
+                    </div>
 
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setStep(1)}
-                                    className="flex-1 py-3.5 rounded-xl bg-gray-100 text-text-muted font-bold hover:bg-gray-200 transition-all"
-                                >
-                                    Back
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <Loader2 className="size-5 animate-spin" />
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        <>
-                                            Complete Setup
-                                            <Sparkles className="size-5" />
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </>
-                    )}
-                </form>
-
-                {/* Skip Option */}
-                <p className="text-center text-sm text-text-muted mt-6">
-                    Want to skip for now?{' '}
                     <button
-                        onClick={async () => {
-                            if (!user) return;
-                            setLoading(true);
-                            await db.updateProfile(user.id, { is_incomplete: false });
-                            if (refreshProfile) await refreshProfile();
-                            navigate('/feed', { replace: true });
-                        }}
-                        className="text-primary font-bold hover:underline"
+                        type="submit"
+                        disabled={loading}
+                        className="w-full h-14 bg-primary hover:bg-primary/90 text-[#1b140d] text-base font-bold rounded-2xl shadow-xl shadow-primary/20 hover:shadow-2xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
                     >
-                        Continue to Dashboard
+                        {loading ? 'Setting up...' : 'Complete Profile'} <span className="material-symbols-outlined text-lg font-bold">arrow_forward</span>
                     </button>
-                </p>
+                </form>
             </div>
         </div>
     );

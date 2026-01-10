@@ -15,7 +15,6 @@ import { GlassButton } from '../components/ui/GlassButton';
 import { GlassInput } from '../components/ui/GlassInput';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
-import { MobileNav } from '../components/dashboard/MobileNav';
 import { Avatar } from '../components/ui/Avatar';
 
 export const Profile = ({ user: currentUser }: { user: any }) => {
@@ -50,7 +49,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     const [fullName, setFullName] = useState('');
 
     const [visibility, setVisibility] = useState('global');
-    const [isMentor, setIsMentor] = useState(false);
+    const [isWriter, setIsWriter] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const idInputRef = useRef<HTMLInputElement>(null);
@@ -91,7 +90,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
             setSchool(profileUser.school || '');
             setFullName(profileUser.full_name || '');
             setVisibility(profileUser.visibility || 'global');
-            setIsMentor(profileUser.is_mentor || false);
+            setIsWriter(profileUser.is_writer || false);
         }
     }, [profileUser]);
 
@@ -172,24 +171,24 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         }
     };
 
-    const handleMentorToggle = async (checked: boolean) => {
-        // Enforce portfolio requirement when enabling mentor mode
+    const handleWriterToggle = async (checked: boolean) => {
+        // Enforce portfolio requirement when enabling writer mode
         if (checked) {
             const hasPortfolio = profileUser.portfolio && profileUser.portfolio.length > 0;
             if (!hasPortfolio) {
-                error("Please upload at least one work sample to become a contributor.");
+                error("Please upload at least one work sample to become a writer.");
                 setActiveTab('portfolio');
                 return;
             }
         }
 
-        setIsMentor(checked);
+        setIsWriter(checked);
         try {
-            await db.updateProfile(profileUser.id, { is_mentor: checked });
-            setProfileUser({ ...profileUser, is_mentor: checked });
-            success(checked ? "You are now listed as a contributor" : "You are no longer listed as a contributor");
+            await db.updateProfile(profileUser.id, { is_writer: checked });
+            setProfileUser({ ...profileUser, is_writer: checked });
+            success(checked ? "You are now listed as a writer" : "You are no longer listed as a writer");
         } catch (e) {
-            setIsMentor(!checked);
+            setIsWriter(!checked);
             error("Failed to update status");
         }
     };
@@ -201,7 +200,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                 school,
                 visibility,
                 full_name: fullName,
-                is_mentor: isMentor
+                is_writer: isWriter
             });
             setEditingProfile(false);
             if (isOwnProfile) await refreshProfile();
@@ -312,49 +311,13 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
 
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
                     <div className="max-w-7xl mx-auto">
-                        {/* Viewing Other's Profile Banner */}
-                        {!isOwnProfile && (
-                            <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl px-6 py-4 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="bg-blue-100 p-2 rounded-full">
-                                        <Users size={20} className="text-blue-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-blue-900">Viewing @{profileUser.handle}'s profile</p>
-                                        <p className="text-xs text-blue-600">
-                                            {connectionStatus === 'connected' ? '✓ Connected' :
-                                                connectionStatus === 'pending_sent' ? '⏳ Request Pending' :
-                                                    'Not connected yet'}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    {connectionStatus === 'connected' ? (
-                                        <button
-                                            onClick={handleMessage}
-                                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm"
-                                        >
-                                            <MessageSquare size={16} /> Message
-                                        </button>
-                                    ) : connectionStatus !== 'pending_sent' && (
-                                        <button
-                                            onClick={handleConnect}
-                                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white font-bold text-sm hover:opacity-90 transition-colors shadow-sm"
-                                        >
-                                            <UserPlus size={16} /> Connect
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                             {/* Left Sidebar: Identity & Status */}
                             <aside className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-4 space-y-6">
 
                                 {/* Profile Card */}
-                                <div className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 flex flex-col items-center text-center relative overflow-hidden group transition-all hover:shadow-2xl">
+                                <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light flex flex-col items-center text-center relative overflow-hidden group">
                                     {/* Verification Banner */}
                                     {profileUser.is_verified === 'verified' && (
                                         <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-400 to-blue-600"></div>
@@ -434,7 +397,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                             >
                                                 <MessageSquare size={16} /> Message
                                             </button>
-                                        ) : connectionStatus === 'pending_sent' ? (
+                                        ) : connectionStatus === 'pending_sent' || connectionStatus === 'pending' ? (
                                             <button disabled className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-200 text-gray-500 font-bold text-sm">
                                                 <Clock size={16} /> Pending
                                             </button>
@@ -466,24 +429,24 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                     {/* Availability Status */}
                                     <div className="mt-6 pt-6 border-t border-border-light w-full flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className={`size-2.5 rounded-full ${isMentor ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
+                                            <div className={`size-2.5 rounded-full ${isWriter ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
                                             <span className="text-sm font-medium text-secondary">
-                                                {isMentor ? 'Contributor Mode On' : 'Contributor Mode Off'}
+                                                {isWriter ? 'Writer Mode On' : 'Writer Mode Off'}
                                             </span>
                                         </div>
                                         {isOwnProfile ? (
                                             <label className="relative inline-flex items-center cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    checked={isMentor}
-                                                    onChange={(e) => handleMentorToggle(e.target.checked)}
+                                                    checked={isWriter}
+                                                    onChange={(e) => handleWriterToggle(e.target.checked)}
                                                     className="sr-only peer"
                                                 />
                                                 <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
                                             </label>
                                         ) : (
                                             <label className="relative inline-flex items-center cursor-default">
-                                                <input type="checkbox" checked={isMentor} className="sr-only peer" readOnly />
+                                                <input type="checkbox" checked={isWriter} className="sr-only peer" readOnly />
                                                 <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
                                             </label>
                                         )}
@@ -491,7 +454,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                 </div>
 
                                 {/* Trust & Verification */}
-                                <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 transition-all hover:shadow-xl">
+                                <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light">
                                     <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
                                         <Shield size={20} className="text-primary" />
                                         Trust Score
@@ -554,20 +517,15 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                             {/* Right Column: Stats & Content */}
                             <div className="lg:col-span-8 xl:col-span-9 space-y-8">
 
-                                {/* Stats Grid - Show different stats based on profile ownership */}
-                                <div className={`grid ${isOwnProfile || profileUser.is_mentor ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'} gap-4`}>
+                                {/* Stats Grid */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {[
-                                        // Private stats - only show on own profile
-                                        ...(isOwnProfile ? [{ label: 'Contributions', value: `${profileUser.projects_completed || 0}`, icon: 'volunteer_activism', color: 'text-green-600', bg: 'bg-green-50' }] : []),
-                                        // Show assignments only for writers or own profile
-                                        ...(isOwnProfile || profileUser.is_mentor ? [{ label: 'Explanations', value: projectsCompleted, icon: 'lightbulb', color: 'text-blue-600', bg: 'bg-blue-50' }] : []),
-                                        // Public stats - always show
-                                        { label: 'Contribution Score', value: rating.toFixed(1), icon: 'volunteer_activism', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+                                        { label: 'Total Earned', value: `₹${profileUser.total_earned || 0}`, icon: 'payments', color: 'text-green-600', bg: 'bg-green-50' },
+                                        { label: 'Assignments', value: projectsCompleted, icon: 'assignment', color: 'text-blue-600', bg: 'bg-blue-50' },
+                                        { label: 'Rating', value: rating.toFixed(1), icon: 'star', color: 'text-yellow-600', bg: 'bg-yellow-50' },
                                         { label: 'On-Time Rate', value: `${profileUser.on_time_rate || 100}%`, icon: 'schedule', color: 'text-purple-600', bg: 'bg-purple-50' },
-                                        // Show connections count for others
-                                        ...(!isOwnProfile ? [{ label: 'Connections', value: connections.length, icon: 'group', color: 'text-indigo-600', bg: 'bg-indigo-50' }] : []),
                                     ].map((stat, i) => (
-                                        <div key={i} className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center justify-center text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                                        <div key={i} className="bg-white p-5 rounded-2xl shadow-sm border border-border-light flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
                                             <div className={`p-3 rounded-full ${stat.bg} mb-3`}>
                                                 <span className={`material-symbols-outlined ${stat.color} text-2xl`}>{stat.icon}</span>
                                             </div>
@@ -578,7 +536,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                 </div>
 
                                 {/* Tabs Navigation */}
-                                <div className="bg-white rounded-2xl p-1.5 shadow-lg border border-gray-100 inline-flex w-full md:w-auto overflow-x-auto">
+                                <div className="bg-white rounded-2xl p-1.5 shadow-sm border border-border-light inline-flex w-full md:w-auto overflow-x-auto">
                                     {['portfolio', 'about', 'reviews', 'network'].map((tab) => (
                                         <button
                                             key={tab}
@@ -814,66 +772,63 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                             </div>
                         </div>
                     </div>
-                </div >
+                </div>
 
                 {/* Delete Account Modal */}
                 <AnimatePresence>
-                    {
-                        showDeleteModal && (
-                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
-                                >
-                                    <div className="text-center mb-6">
-                                        <div className="size-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <AlertTriangle size={32} className="text-red-600" />
-                                        </div>
-                                        <h2 className="text-2xl font-bold text-text-main mb-2">Delete Account?</h2>
-                                        <p className="text-secondary text-sm">
-                                            This action is permanent and cannot be undone. All your data, chats, and earnings will be wiped.
-                                        </p>
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+                            >
+                                <div className="text-center mb-6">
+                                    <div className="size-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <AlertTriangle size={32} className="text-red-600" />
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-text-main mb-2">Delete Account?</h2>
+                                    <p className="text-secondary text-sm">
+                                        This action is permanent and cannot be undone. All your data, chats, and earnings will be wiped.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-secondary uppercase mb-2">
+                                            Type "DELETE" to confirm
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={deleteConfirmInput}
+                                            onChange={(e) => setDeleteConfirmInput(e.target.value)}
+                                            className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 font-bold text-center tracking-widest focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all"
+                                            placeholder="DELETE"
+                                        />
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-secondary uppercase mb-2">
-                                                Type "DELETE" to confirm
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={deleteConfirmInput}
-                                                onChange={(e) => setDeleteConfirmInput(e.target.value)}
-                                                className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 font-bold text-center tracking-widest focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all"
-                                                placeholder="DELETE"
-                                            />
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <button
-                                                onClick={() => setShowDeleteModal(false)}
-                                                className="py-3 rounded-xl font-bold text-secondary hover:bg-gray-50 transition-colors"
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                onClick={handleFinalDelete}
-                                                disabled={deleteConfirmInput !== 'DELETE'}
-                                                className="py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-red-500/30"
-                                            >
-                                                Delete Forever
-                                            </button>
-                                        </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => setShowDeleteModal(false)}
+                                            className="py-3 rounded-xl font-bold text-secondary hover:bg-gray-50 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleFinalDelete}
+                                            disabled={deleteConfirmInput !== 'DELETE'}
+                                            className="py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-red-500/30"
+                                        >
+                                            Delete Forever
+                                        </button>
                                     </div>
-                                </motion.div>
-                            </div>
-                        )
-                    }
-                </AnimatePresence >
-            </main >
-            <MobileNav />
-        </div >
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+            </main>
+        </div>
     );
 };

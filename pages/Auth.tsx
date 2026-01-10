@@ -22,24 +22,20 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     const [completionForm, setCompletionForm] = useState({ handle: '', school: '' });
     const [completionIsWriter, setCompletionIsWriter] = useState(false);
 
-    // ✅ FIX: Redirect to Onboarding if incomplete, otherwise redirect param or Feed
+    // ✅ FIX: Redirect to Onboarding if incomplete, otherwise Feed
     useEffect(() => {
         if (user) {
-            // Removed forced onboarding redirect
-            if (true) {
-                // Check for redirect parameter in URL
-                const redirectUrl = searchParams.get('redirect');
-                if (redirectUrl) {
-                    // Decode and navigate to the redirect URL
-                    navigate(decodeURIComponent(redirectUrl));
-                } else if (onComplete) {
+            if (user.is_incomplete) {
+                navigate('/onboarding');
+            } else {
+                if (onComplete) {
                     onComplete();
                 } else {
                     navigate('/feed');
                 }
             }
         }
-    }, [user, onComplete, navigate, searchParams]);
+    }, [user, onComplete, navigate]);
 
     // Handle email/password registration and login
     const handleSubmit = async (e: React.FormEvent) => {
@@ -49,11 +45,6 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
         try {
             // Validation
             if (isReg) {
-                if (!form.fullName || form.fullName.length < 2) {
-                    error("Please enter your full name.");
-                    setLoading(false);
-                    return;
-                }
                 if (!form.handle || form.handle.length < 3) {
                     error("Handle must be at least 3 characters.");
                     setLoading(false);

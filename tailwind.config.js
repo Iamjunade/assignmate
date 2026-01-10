@@ -10,66 +10,78 @@ export default {
     ],
     theme: {
         extend: {
-            screens: {
-                'xs': '360px',   // Small phones (iPhone SE)
-                'sm': '430px',   // Standard phones (iPhone 14 Pro Max)
-                'md': '768px',   // Tablets
-                'lg': '1024px',  // Desktop
-                'xl': '1280px',  // Large desktop
-            },
             colors: {
-                "primary": "#f97316", // Orange 500
-                "primary-hover": "#ea580c", // Orange 600
+                "primary": "#f97316", // Vibrant Orange
+                "primary-hover": "#ea580c",
+                "primary-soft": "#fff7ed", // Very light orange for backgrounds
                 "secondary": "#64748b", // Slate 500
-                "background": "#faf9f7", 
-                "background-dark": "#0f172a", // Slate 900
-                "surface": "#ffffff",
-                "surface-dark": "#1e293b", // Slate 800
-                
+                "background": "#fcfaf8", // Warm light gray/beige
+                "background-light": "#ffffff",
+                "background-dark": "#1e1e1e", // Dark mode background
+                "card": "#ffffff",
+                "card-light": "#ffffff", // Keep for compatibility
+                "card-dark": "#2a221b", // Keep for compatibility
+                "border": "#e2e8f0", // Slate 200
+                "border-light": "#e7dbcf", // Keep for compatibility
+                "border-dark": "#44392f", // Keep for compatibility
+                "text-main": "#0f172a", // Slate 900 - High contrast text
+                "text-muted": "#64748b", // Slate 500
+                "success-bg": "#ecfdf5",
+                "success-text": "#059669",
+                // Dashboard specific colors (Keep for backward compatibility)
+                "secondary-bg": "#fcfaf8",
+                "border-subtle": "#efece8",
+                "accent-orange": "#FFF0E0",
+                "dashboard-muted": "#8c8075",
+                "primary-light": "#fbdcb8",
+                "text-dark": "#1b140d",
+                "border-color": "#f3ede7",
                 orange: {
                     50: '#fff7ed',
                     100: '#ffedd5',
                     200: '#fed7aa',
                     300: '#fdba74',
                     400: '#fb923c',
-                    500: '#f97316',
+                    500: '#f97316', // Updated Primary Brand Color
                     600: '#ea580c',
                     700: '#c2410c',
                     800: '#9a3412',
                     900: '#7c2d12',
                     950: '#431407',
                 },
+                slate: {
+                    50: '#f8fafc',
+                    100: '#f1f5f9',
+                    200: '#e2e8f0',
+                    300: '#cbd5e1',
+                    400: '#94a3b8',
+                    500: '#64748b',
+                    600: '#475569',
+                    700: '#334155',
+                    800: '#1e293b',
+                    900: '#0f172a',
+                    950: '#020617',
+                }
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
-                display: ['Manrope', 'sans-serif'],
+                display: ['Manrope', 'sans-serif'], // Updated to Manrope
                 body: ['Noto Sans', 'sans-serif'],
             },
-            fontSize: {
-                'xs': ['0.75rem', { lineHeight: '1rem' }],
-                'sm': ['0.875rem', { lineHeight: '1.25rem' }],
-                'base': ['1rem', { lineHeight: '1.5rem' }],
-                'lg': ['1.125rem', { lineHeight: '1.75rem' }],
-                'xl': ['1.25rem', { lineHeight: '1.75rem' }],
-                '2xl': ['1.5rem', { lineHeight: '2rem' }],
-                '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
-                '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
-            },
             borderRadius: {
-                "lg": "0.6rem",
-                "xl": "1rem",
-                "2xl": "1.5rem",
-                "3xl": "2rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "2xl": "1rem",
+                "3xl": "1.5rem",
+                "4xl": "2.5rem",
                 "full": "9999px"
             },
             boxShadow: {
-                'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-                'DEFAULT': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-                'md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                'lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-                'xl': '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-                '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-                'glow': '0 0 20px -5px rgba(249, 115, 22, 0.4)',
+                'soft': '0 10px 40px -10px rgba(0,0,0,0.05)',
+                'card': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
+                'card-hover': '0 0 0 1px rgba(0,0,0,0.03), 0 8px 16px rgba(0,0,0,0.08)',
+                'glow': '0 0 20px -5px rgba(249, 115, 22, 0.3)',
+                'neon': '0 0 20px rgba(255, 122, 0, 0.4), 0 0 40px rgba(255, 122, 0, 0.2)',
             },
             animation: {
                 'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
@@ -77,10 +89,6 @@ export default {
                 'shimmer': 'shimmer 2s linear infinite',
                 'spotlight': 'spotlight 2s ease .75s 1 forwards',
                 'float': 'float 6s ease-in-out infinite',
-                'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                'bounce-subtle': 'bounceSubtle 1s infinite',
-                'slide-in-right': 'slideInRight 0.3s ease-out',
-                'slide-in-left': 'slideInLeft 0.3s ease-out',
             },
             keyframes: {
                 fadeInUp: {
@@ -102,28 +110,8 @@ export default {
                 float: {
                     '0%, 100%': { transform: 'translateY(0)' },
                     '50%': { transform: 'translateY(-10px)' },
-                },
-                bounceSubtle: {
-                    '0%, 100%': { transform: 'translateY(-5%)' },
-                    '50%': { transform: 'translateY(0)' },
-                },
-                slideInRight: {
-                    '0%': { opacity: '0', transform: 'translateX(20px)' },
-                    '100%': { opacity: '1', transform: 'translateX(0)' },
-                },
-                slideInLeft: {
-                    '0%': { opacity: '0', transform: 'translateX(-20px)' },
-                    '100%': { opacity: '1', transform: 'translateX(0)' },
                 }
-            },
-            spacing: {
-                // Mobile-friendly spacing extensions
-                '18': '4.5rem',   // 72px - good for touch targets
-                '22': '5.5rem',   // 88px
-                '88': '22rem',    // 352px
-                '100': '25rem',   // 400px
-                'safe': 'env(safe-area-inset-bottom)',
-            },
+            }
         },
     },
     plugins: [],

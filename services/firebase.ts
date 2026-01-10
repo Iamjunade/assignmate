@@ -23,8 +23,7 @@ import {
     serverTimestamp,
     doc,
     setDoc,
-    getDoc,
-    enableIndexedDbPersistence
+    getDoc
 } from 'firebase/firestore';
 import {
     getMessaging,
@@ -45,16 +44,9 @@ const firebaseConfig = {
     databaseURL: (import.meta as any).env.VITE_FIREBASE_DATABASE_URL
 };
 
-export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const authInstance = getAuth(app);
 const dbInstance = getFirestore(app);
-enableIndexedDbPersistence(dbInstance).catch((err) => {
-    if (err.code == 'failed-precondition') {
-        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a a time.');
-    } else if (err.code == 'unimplemented') {
-        console.warn('The current browser does not support all of the features required to enable persistence');
-    }
-});
 const storageInstance = getStorage(app);
 
 let messagingInstance: any;
@@ -125,27 +117,6 @@ export const notifications = {
         });
     },
 
-    subscribeToHistory: (userId: string, onUpdate: (notifications: any[]) => void) => {
-        if (!dbInstance || !userId) return () => { };
-
-        const q = query(
-            collection(dbInstance, 'notifications'),
-            where('receiverId', '==', userId),
-            orderBy('timestamp', 'desc'),
-            limit(20) // Show last 20 notifications
-        );
-
-        return onSnapshot(q, (snapshot) => {
-            const notifs = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            onUpdate(notifs);
-        }, (error) => {
-            console.error("Notification History Error:", error);
-        });
-    },
-
     markAsRead: async (notificationId: string) => {
         if (!dbInstance) return;
         try {
@@ -165,7 +136,7 @@ export const fcm = {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
                 const currentToken = await getToken(messagingInstance, {
-                    vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY
+                    vapidKey: "BBlG6uz8HQjkYoEfJxxcBhcUC8HFb3uWH2z4zEclEk7KUBG_zTQaFHyAFwzAmzmUKPRK7xxUveJNVCI3pV9yZNo"
                 });
 
                 if (currentToken) {

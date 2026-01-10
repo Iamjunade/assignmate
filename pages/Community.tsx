@@ -1,77 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import { dbService as db } from '../services/firestoreService';
-import { Post } from '../types';
+import { CommunityPost } from '../types';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { MobileNav } from '../components/dashboard/MobileNav';
 import { Avatar } from '../components/ui/Avatar';
 import { formatDistanceToNow } from 'date-fns';
-import { Heart, Trash2, Globe, Building2, Send, Loader2 } from 'lucide-react';
-
-type FilterType = 'all' | 'campus' | 'global';
+import { Heart, MessageSquare, Send, Loader2, Image as ImageIcon } from 'lucide-react';
 
 export const Community: React.FC = () => {
     const { user } = useAuth();
-    const [posts, setPosts] = useState<Post[]>([]);
+    const { toast } = useToast();
+    const [posts, setPosts] = useState<CommunityPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [posting, setPosting] = useState(false);
-    const [filter, setFilter] = useState<FilterType>('all');
+    const [newPost, setNewPost] = useState('');
 
-    // New post form
-    const [newContent, setNewContent] = useState('');
-    const [newVisibility, setNewVisibility] = useState<'campus' | 'global'>('global');
-
-    // Load posts
     useEffect(() => {
-        if (!user) return;
-        setLoading(true);
-        db.getPosts(user.id, user.school || '', filter)
-            .then(setPosts)
-            .catch(console.error)
-            .finally(() => setLoading(false));
-    }, [user, filter]);
+        fetchPosts();
+    }, []);
 
-    const handleCreatePost = async () => {
-        if (!user || !newContent.trim()) return;
+    const fetchPosts = async () => {
+        try {
+            const data = await db.getCommunityPosts();
+            setPosts(data as CommunityPost[]);
+        } catch (error) {
+            console.error("Error fetching posts:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCreatePost = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user || !newPost.trim() || posting) return;
+
         setPosting(true);
         try {
-            const newPost = await db.createPost(user, newContent.trim(), newVisibility);
-            setPosts(prev => [newPost as Post, ...prev]);
-            setNewContent('');
+            const postData = {
+                user_id: user.id,
+                user_handle: user.handle || user.full_name || 'Anonymous',
+                user_avatar: user.avatar_url,
+                user_school: user.school || 'Unknown University',
+                content: newPost.trim(),
+            };
+
+            await db.createCommunityPost(postData);
+            setNewPost('');
+            toast('Post shared successfully!', 'success');
+            fetchPosts();
         } catch (error) {
-            console.error('Failed to create post:', error);
+            toast('Failed to share post. Please try again.', 'error');
         } finally {
             setPosting(false);
         }
     };
 
-    const handleLike = async (postId: string, isLiked: boolean) => {
+    const handleToggleLike = async (postId: string) => {
         if (!user) return;
         try {
-            if (isLiked) {
-                await db.unlikePost(postId, user.id);
-                setPosts(prev => prev.map(p =>
-                    p.id === postId ? { ...p, likes: p.likes.filter(id => id !== user.id) } : p
-                ));
-            } else {
-                await db.likePost(postId, user.id);
-                setPosts(prev => prev.map(p =>
-                    p.id === postId ? { ...p, likes: [...p.likes, user.id] } : p
-                ));
-            }
+            await db.toggleLikePost(postId, user.id);
+            // Optimistic update
+            setPosts(prev => prev.map(p => {
+                if (p.id === postId) {
+                    const likes = p.likes || [];
+                    const newLikes = likes.includes(user.id) 
+                        ? likes.filter(id => id !== user.id)
+                        : [...likes, user.id];
+                    return { ...p, likes: newLikes };
+                }
+                return p;
+            }));
         } catch (error) {
-            console.error('Like action failed:', error);
-        }
-    };
-
-    const handleDelete = async (postId: string) => {
-        if (!user) return;
-        try {
-            await db.deletePost(postId, user.id);
-            setPosts(prev => prev.filter(p => p.id !== postId));
-        } catch (error) {
-            console.error('Delete failed:', error);
+            console.error("Error toggling like:", error);
         }
     };
 
@@ -83,164 +86,102 @@ export const Community: React.FC = () => {
                 <DashboardHeader />
 
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
-                    <div className="max-w-3xl mx-auto space-y-6">
-
-                        {/* Header */}
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h1 className="text-2xl font-bold text-text-dark">Community</h1>
-                                <p className="text-text-muted text-sm">Share thoughts, ask for help, connect with peers</p>
-                            </div>
+                    <div className="max-w-2xl mx-auto">
+                        <div className="mb-8">
+                            <h1 className="text-2xl font-extrabold text-text-dark tracking-tight">Community Feed</h1>
+                            <p className="text-text-muted text-sm mt-1">Share thoughts and connect with peers at {user?.school}.</p>
                         </div>
 
-                        {/* Create Post Card */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                            <div className="flex gap-4">
-                                <Avatar
-                                    src={user?.avatar_url}
-                                    alt={user?.full_name}
-                                    className="size-10 rounded-full shrink-0"
-                                    fallback={user?.full_name?.charAt(0)}
-                                />
-                                <div className="flex-1 space-y-4">
-                                    <textarea
-                                        value={newContent}
-                                        onChange={(e) => setNewContent(e.target.value)}
-                                        placeholder="What's on your mind? Ask for help, share tips..."
-                                        className="w-full resize-none border-0 bg-transparent text-text-dark placeholder:text-text-muted focus:outline-none text-sm min-h-[80px]"
-                                        rows={3}
+                        {/* Post Creation Form */}
+                        <div className="bg-white p-4 rounded-[1.5rem] border border-border-subtle shadow-card mb-8">
+                            <form onSubmit={handleCreatePost}>
+                                <div className="flex gap-3">
+                                    <Avatar
+                                        src={user?.avatar_url}
+                                        alt={user?.handle}
+                                        className="size-10 rounded-full"
+                                        fallback={user?.handle?.charAt(0)}
                                     />
-
-                                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                                        {/* Visibility Toggle */}
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs text-text-muted">Visible to:</span>
-                                            <div className="flex rounded-lg overflow-hidden border border-gray-200">
-                                                <button
-                                                    onClick={() => setNewVisibility('campus')}
-                                                    className={`px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 transition-colors ${newVisibility === 'campus'
-                                                            ? 'bg-primary text-white'
-                                                            : 'bg-gray-50 text-text-muted hover:bg-gray-100'
-                                                        }`}
-                                                >
-                                                    <Building2 className="size-3" />
-                                                    Campus
-                                                </button>
-                                                <button
-                                                    onClick={() => setNewVisibility('global')}
-                                                    className={`px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 transition-colors ${newVisibility === 'global'
-                                                            ? 'bg-primary text-white'
-                                                            : 'bg-gray-50 text-text-muted hover:bg-gray-100'
-                                                        }`}
-                                                >
-                                                    <Globe className="size-3" />
-                                                    Global
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <button
-                                            onClick={handleCreatePost}
-                                            disabled={posting || !newContent.trim()}
-                                            className="px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold text-sm flex items-center gap-2 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                        >
-                                            {posting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-                                            Post
-                                        </button>
-                                    </div>
+                                    <textarea
+                                        value={newPost}
+                                        onChange={(e) => setNewPost(e.target.value)}
+                                        placeholder="What's on your mind?"
+                                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm resize-none min-h-[80px] pt-2"
+                                    />
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* Filter Tabs */}
-                        <div className="flex gap-2">
-                            {(['all', 'campus', 'global'] as FilterType[]).map((f) => (
-                                <button
-                                    key={f}
-                                    onClick={() => setFilter(f)}
-                                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${filter === f
-                                            ? 'bg-primary text-white shadow-md'
-                                            : 'bg-white text-text-muted hover:bg-gray-50 border border-gray-200'
-                                        }`}
-                                >
-                                    {f === 'all' ? '🌐 All' : f === 'campus' ? '🏫 My Campus' : '🌍 Global'}
-                                </button>
-                            ))}
+                                <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
+                                    <button type="button" className="text-text-muted hover:text-primary transition-colors flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-gray-50">
+                                        <ImageIcon size={18} />
+                                        <span className="text-xs font-bold">Photo</span>
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={!newPost.trim() || posting}
+                                        className="bg-primary text-white px-5 py-2 rounded-full font-bold text-sm shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:shadow-none flex items-center gap-2"
+                                    >
+                                        {posting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                                        Post
+                                    </button>
+                                </div>
+                            </form>
                         </div>
 
                         {/* Posts Feed */}
                         {loading ? (
-                            <div className="flex items-center justify-center py-12">
-                                <Loader2 className="size-8 animate-spin text-primary" />
+                            <div className="flex justify-center py-12">
+                                <Loader2 className="animate-spin text-primary" />
                             </div>
                         ) : posts.length === 0 ? (
-                            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
-                                <div className="size-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <span className="text-3xl">📝</span>
+                            <div className="text-center py-12 bg-white rounded-[1.5rem] border border-border-subtle">
+                                <div className="size-16 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <MessageSquare size={32} />
                                 </div>
-                                <h3 className="text-lg font-bold text-text-dark mb-2">No posts yet</h3>
-                                <p className="text-text-muted text-sm">Be the first to share something with the community!</p>
+                                <h3 className="text-lg font-bold text-text-dark">No posts yet</h3>
+                                <p className="text-text-muted text-sm mt-1">Be the first to share something with the community!</p>
                             </div>
                         ) : (
-                            <div className="space-y-4">
-                                {posts.map((post) => {
-                                    const isLiked = post.likes?.includes(user?.id || '');
-                                    const isOwn = post.author_id === user?.id;
-
-                                    return (
-                                        <div key={post.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
-                                            <div className="flex gap-4">
-                                                <Avatar
-                                                    src={post.author_avatar}
-                                                    alt={post.author_handle}
-                                                    className="size-10 rounded-full shrink-0"
-                                                    fallback={post.author_handle?.charAt(0)}
-                                                />
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className="font-bold text-text-dark">{post.author_handle}</span>
-                                                        <span className="text-xs text-text-muted">•</span>
-                                                        <span className="text-xs text-text-muted">{post.author_school}</span>
-                                                        <span className="text-xs text-text-muted">•</span>
-                                                        <span className="text-xs text-text-muted">
-                                                            {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                                                        </span>
-                                                        {post.visibility === 'campus' && (
-                                                            <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 text-[10px] font-bold">
-                                                                Campus
-                                                            </span>
-                                                        )}
-                                                    </div>
-
-                                                    <p className="text-text-dark text-sm leading-relaxed whitespace-pre-wrap mb-4">
-                                                        {post.content}
-                                                    </p>
-
-                                                    <div className="flex items-center gap-4">
-                                                        <button
-                                                            onClick={() => handleLike(post.id, isLiked)}
-                                                            className={`flex items-center gap-1.5 text-sm ${isLiked ? 'text-red-500' : 'text-text-muted hover:text-red-500'
-                                                                } transition-colors`}
-                                                        >
-                                                            <Heart className={`size-4 ${isLiked ? 'fill-red-500' : ''}`} />
-                                                            <span>{post.likes?.length || 0}</span>
-                                                        </button>
-
-                                                        {isOwn && (
-                                                            <button
-                                                                onClick={() => handleDelete(post.id)}
-                                                                className="flex items-center gap-1.5 text-sm text-text-muted hover:text-red-500 transition-colors"
-                                                            >
-                                                                <Trash2 className="size-4" />
-                                                                <span>Delete</span>
-                                                            </button>
-                                                        )}
-                                                    </div>
+                            <div className="space-y-6">
+                                {posts.map((post) => (
+                                    <div key={post.id} className="bg-white p-6 rounded-[1.5rem] border border-border-subtle shadow-card hover:shadow-soft transition-all duration-300">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <Avatar
+                                                src={post.user_avatar}
+                                                alt={post.user_handle}
+                                                className="size-10 rounded-full"
+                                                fallback={post.user_handle?.charAt(0)}
+                                            />
+                                            <div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <h3 className="text-sm font-bold text-text-dark">{post.user_handle}</h3>
+                                                    <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider bg-gray-100 px-1.5 py-0.5 rounded">
+                                                        {post.user_school.split(' ')[0]}
+                                                    </span>
                                                 </div>
+                                                <p className="text-[11px] text-text-muted">
+                                                    {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                                                </p>
                                             </div>
                                         </div>
-                                    );
-                                })}
+
+                                        <p className="text-sm text-text-dark leading-relaxed whitespace-pre-wrap">
+                                            {post.content}
+                                        </p>
+
+                                        <div className="mt-4 flex items-center gap-6 pt-4 border-t border-gray-50">
+                                            <button 
+                                                onClick={() => handleToggleLike(post.id)}
+                                                className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${post.likes?.includes(user?.id || '') ? 'text-red-500' : 'text-text-muted hover:text-red-500'}`}
+                                            >
+                                                <Heart size={18} fill={post.likes?.includes(user?.id || '') ? 'currentColor' : 'none'} />
+                                                {post.likes?.length || 0}
+                                            </button>
+                                            <button className="flex items-center gap-1.5 text-xs font-bold text-text-muted hover:text-primary transition-colors">
+                                                <MessageSquare size={18} />
+                                                {post.comments_count || 0}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>

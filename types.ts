@@ -1,23 +1,21 @@
 export interface User {
   id: string;
-  getIdToken?: () => Promise<string>; // Added for Auth compatibility
   handle: string;
-  email?: string; // Made optional for partial profiles
+  email: string;
   full_name?: string;
-  school?: string; // Made optional for partial profiles
+  school: string;
   avatar_url?: string;
   cover_url?: string; // Custom profile cover image
 
-  xp?: number; // Made optional
+  xp: number;
   rating?: number;
   projects_completed?: number;
   portfolio?: string[]; // Array of image URLs (Handwriting samples)
   rate_per_page?: number; // Optional: For future expansion
-  is_mentor?: boolean; // Toggle: Is the user open to work/mentor?
-  is_writer?: boolean; // Alias for is_mentor for backward compatibility
+  is_writer?: boolean; // Toggle: Is the user open to work?
   bio?: string; // Short pitch: "I have neat handwriting"
   tags?: string[]; // e.g., ['Math', 'CS', 'English']
-  saved_mentors?: string[]; // IDs of mentors this user has bookmarked
+  saved_writers?: string[]; // IDs of writers this user has bookmarked
   is_incomplete?: boolean; // Flag for Google users who haven't set handle/school
   fcm_token?: string; // Firebase Cloud Messaging Token for Push Notifications
   visibility?: 'global' | 'college'; // Visibility setting for the profile
@@ -29,27 +27,15 @@ export interface User {
   response_time?: number; // in minutes
   languages?: string[];
   is_online?: boolean;
-  is_verified?: 'pending' | 'verified' | 'rejected' | 'none' | string;
+  is_verified?: 'pending' | 'verified' | 'rejected' | 'none';
   id_card_url?: string;
-
-  // AI Profile Fields
-  strengths?: string[];
-  weaknesses?: string[];
-  interests?: string[]; // Academic interests
-  collaboration_styles?: string[];
-  project_experience?: {
-    title: string;
-    domain: string;
-    role: string;
-  }[];
-  experience_level?: 'Beginner' | 'Intermediate' | 'Advanced';
 }
 
 export interface Chat {
   id: string;
   gig_id?: string; // Kept for legacy compatibility
   poster_id: string;
-  mentor_id: string;
+  writer_id: string;
   gig_title?: string;
   other_handle?: string;
   last_message?: string;
@@ -106,46 +92,29 @@ export type OrderStatus = 'in_progress' | 'completed' | 'cancelled' | 'disputed'
 export interface Order {
   id: string;
   student_id: string;
-  mentor_id: string;
+  writer_id: string;
   title: string;
   status: OrderStatus;
   amount: number; // Escrow amount
   deadline: string; // ISO Date
   created_at: string;
-  description?: string;
-  subject?: string;
-  completion_percentage?: number;
-  completed_at?: string;
-
+  completion_percentage: number; // 0-100
 
   // UI Helpers (Hydrated)
-  mentor_handle?: string;
-  mentor_avatar?: string;
-  mentor_school?: string;
-  mentor_verified?: boolean;
+  writer_handle?: string;
+  writer_avatar?: string;
+  writer_school?: string;
+  writer_verified?: boolean;
 }
 
-export interface Notification {
+export interface CommunityPost {
   id: string;
-  receiverId: string;
-  senderName: string;
+  user_id: string;
+  user_handle: string;
+  user_avatar?: string;
+  user_school: string;
   content: string;
-  chatId?: string;
-  type: 'chat' | 'connection' | 'system';
-  read: boolean;
-  timestamp: any; // Firestore Timestamp
-}
-
-// Community Module
-export interface Post {
-  id: string;
-  author_id: string;
-  author_handle: string;
-  author_avatar?: string;
-  author_school: string;
-  content: string;
-  visibility: 'campus' | 'global';
-  likes: string[];  // Array of user IDs who liked
   created_at: string;
-  tags?: string[];  // Optional hashtags like #help, #discussion
+  likes?: string[]; // User IDs
+  comments_count?: number;
 }
