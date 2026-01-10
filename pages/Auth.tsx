@@ -25,9 +25,8 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     // ✅ FIX: Redirect to Onboarding if incomplete, otherwise redirect param or Feed
     useEffect(() => {
         if (user) {
-            if (user.is_incomplete) {
-                navigate('/onboarding');
-            } else {
+            // Removed forced onboarding redirect
+            if (true) {
                 // Check for redirect parameter in URL
                 const redirectUrl = searchParams.get('redirect');
                 if (redirectUrl) {
