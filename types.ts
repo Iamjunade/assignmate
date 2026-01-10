@@ -1,5 +1,6 @@
 export interface User {
   id: string;
+  getIdToken?: () => Promise<string>; // Added for Auth compatibility
   handle: string;
   email: string;
   full_name?: string;
@@ -29,6 +30,18 @@ export interface User {
   is_online?: boolean;
   is_verified?: 'pending' | 'verified' | 'rejected' | 'none';
   id_card_url?: string;
+
+  // AI Profile Fields
+  strengths?: string[];
+  weaknesses?: string[];
+  interests?: string[]; // Academic interests
+  collaboration_styles?: string[];
+  project_experience?: {
+    title: string;
+    domain: string;
+    role: string;
+  }[];
+  experience_level?: 'Beginner' | 'Intermediate' | 'Advanced';
 }
 
 export interface Chat {

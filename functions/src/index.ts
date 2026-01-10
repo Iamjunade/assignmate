@@ -88,3 +88,5 @@ export const sendChatNotification = functions.firestore
             });
         }
     });
+
+export * from "./onboarding";
