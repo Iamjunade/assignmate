@@ -39,6 +39,11 @@ const TermsOfService = lazy(() => import('./pages/TermsOfService').then(module =
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
 const CommunityGuidelines = lazy(() => import('./pages/CommunityGuidelines').then(module => ({ default: module.CommunityGuidelines })));
 const Community = lazy(() => import('./pages/Community').then(module => ({ default: module.Community })));
+const HirerDashboard = lazy(() => import('./pages/HirerDashboard'));
+const WriterDashboard = lazy(() => import('./pages/WriterDashboard'));
+const TalentFeed = lazy(() => import('./pages/TalentFeed'));
+const JobDetails = lazy(() => import('./pages/JobDetails'));
+const Workroom = lazy(() => import('./pages/Workroom'));
 
 export default function AppWrapper() {
   return (
@@ -140,9 +145,39 @@ function AppContent() {
                 <Community />
               </ProtectedRoute>
             } />
-  
-            <Route path="/mentors" element={<FindWriter />} />
-  
+
+            <Route path="/talent" element={
+              <ProtectedRoute>
+                <TalentFeed />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/mentors" element={<Navigate to="/talent" replace />} />
+
+            <Route path="/dashboard/hirer" element={
+              <ProtectedRoute>
+                <HirerDashboard />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/dashboard/writer" element={
+              <ProtectedRoute>
+                <WriterDashboard />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/projects/:jobId" element={
+              <ProtectedRoute>
+                <JobDetails />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/workroom/:jobId" element={
+              <ProtectedRoute>
+                <Workroom />
+              </ProtectedRoute>
+            } />
+
             <Route path="/projects" element={
 
             <ProtectedRoute>
@@ -178,12 +213,16 @@ function AppContent() {
           } />
 
           {/* --- Admin Routes --- */}
-          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="verifications" element={<AdminVerifications />} />
-          </Route>
+            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="verifications" element={<AdminVerifications />} />
+              <Route path="chats" element={<AdminChats />} />
+              <Route path="connections" element={<AdminConnections />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
+
 
           {/* --- Pitch Deck --- */}
           <Route path="/pitch" element={<PitchDeck />} />

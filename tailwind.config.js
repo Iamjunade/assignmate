@@ -61,7 +61,13 @@ export default {
                     800: '#1e293b',
                     900: '#0f172a',
                     950: '#020617',
-                }
+                },
+                // Precise Landing Page Theme Colors
+                "landing-bg": "#121212",
+                "landing-card": "#1E1E1E",
+                "landing-border": "#323232",
+                "landing-text": "#E1E1E1",
+                "landing-pill": "#2A2A2A",
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
