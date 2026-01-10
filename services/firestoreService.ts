@@ -1209,5 +1209,91 @@ export const dbService = {
         );
         const snap = await getDocs(q);
         return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    },
+
+    // ==========================================
+    // COMMUNITY MODULE
+    // ==========================================
+
+    createPost: async (user: any, content: string, visibility: 'campus' | 'global', tags?: string[]) => {
+        const postData = {
+            author_id: user.id,
+            author_handle: user.handle || user.full_name || 'Anonymous',
+            author_avatar: user.avatar_url || null,
+            author_school: user.school || 'Unknown',
+            content,
+            visibility,
+            likes: [],
+            tags: tags || [],
+            created_at: new Date().toISOString()
+        };
+        const res = await addDoc(collection(getDb(), 'posts'), postData);
+        return { id: res.id, ...postData };
+    },
+
+    getPosts: async (userId: string, userSchool: string, filter: 'campus' | 'global' | 'all' = 'all') => {
+        let posts: any[] = [];
+
+        if (filter === 'campus' || filter === 'all') {
+            // Campus posts: visibility='campus' AND author_school matches
+            const campusQ = query(
+                collection(getDb(), 'posts'),
+                where('visibility', '==', 'campus'),
+                where('author_school', '==', userSchool),
+                orderBy('created_at', 'desc'),
+                limit(50)
+            );
+            const campusSnap = await getDocs(campusQ);
+            posts = [...posts, ...campusSnap.docs.map(d => ({ id: d.id, ...d.data() }))];
+        }
+
+        if (filter === 'global' || filter === 'all') {
+            // Global posts: visibility='global'
+            const globalQ = query(
+                collection(getDb(), 'posts'),
+                where('visibility', '==', 'global'),
+                orderBy('created_at', 'desc'),
+                limit(50)
+            );
+            const globalSnap = await getDocs(globalQ);
+            posts = [...posts, ...globalSnap.docs.map(d => ({ id: d.id, ...d.data() }))];
+        }
+
+        // Deduplicate and sort by created_at
+        const postMap = new Map();
+        posts.forEach(p => postMap.set(p.id, p));
+        return Array.from(postMap.values()).sort((a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+    },
+
+    likePost: async (postId: string, userId: string) => {
+        const postRef = doc(getDb(), 'posts', postId);
+        await updateDoc(postRef, {
+            likes: arrayUnion(userId)
+        });
+    },
+
+    unlikePost: async (postId: string, userId: string) => {
+        const postRef = doc(getDb(), 'posts', postId);
+        await updateDoc(postRef, {
+            likes: arrayRemove(userId)
+        });
+    },
+
+    deletePost: async (postId: string, userId: string) => {
+        const postRef = doc(getDb(), 'posts', postId);
+        const postSnap = await getDoc(postRef);
+
+        if (!postSnap.exists()) {
+            throw new Error('Post not found');
+        }
+
+        const postData = postSnap.data();
+        if (postData.author_id !== userId) {
+            throw new Error('You can only delete your own posts');
+        }
+
+        await deleteDoc(postRef);
     }
 };

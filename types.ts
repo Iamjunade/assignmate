@@ -134,3 +134,17 @@ export interface Notification {
   read: boolean;
   timestamp: any; // Firestore Timestamp
 }
+
+// Community Module
+export interface Post {
+  id: string;
+  author_id: string;
+  author_handle: string;
+  author_avatar?: string;
+  author_school: string;
+  content: string;
+  visibility: 'campus' | 'global';
+  likes: string[];  // Array of user IDs who liked
+  created_at: string;
+  tags?: string[];  // Optional hashtags like #help, #discussion
+}

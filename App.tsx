@@ -38,6 +38,7 @@ const Documentation = lazy(() => import('./pages/Documentation').then(module => 
 const TermsOfService = lazy(() => import('./pages/TermsOfService').then(module => ({ default: module.TermsOfService })));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
 const CommunityGuidelines = lazy(() => import('./pages/CommunityGuidelines').then(module => ({ default: module.CommunityGuidelines })));
+const Community = lazy(() => import('./pages/Community').then(module => ({ default: module.Community })));
 
 export default function AppWrapper() {
   return (
@@ -131,6 +132,12 @@ function AppContent() {
           <Route path="/feed" element={
             <ProtectedRoute>
               <Feed user={user} onChat={startChatFromWriter} />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/community" element={
+            <ProtectedRoute>
+              <Community />
             </ProtectedRoute>
           } />
 

@@ -85,6 +85,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     )}
                 </a>
 
+                <a
+                    onClick={() => navigate('/community')}
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/community') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
+                >
+                    <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">forum</span>
+                    <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Community</span>
+                </a>
+
                 <div className="mt-6 mb-2 px-4 text-xs font-bold text-text-muted uppercase tracking-wider">Settings</div>
                 <a
                     onClick={() => navigate('/profile')}
