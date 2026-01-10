@@ -2,29 +2,29 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import * as admin from 'firebase-admin';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-    // Check if we are in production (Vercel) or local
-    // In Vercel, we need to use environment variables for service account
-    // For simplicity in this migration, we'll try to use the default creds or env vars
+// Helper to init Firebase safely
+const initFirebase = () => {
+    if (admin.apps.length) return;
+
     try {
+        const privateKey = process.env.FIREBASE_PRIVATE_KEY
+            ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+            : undefined;
+
+        if (!privateKey) throw new Error("Missing FIREBASE_PRIVATE_KEY");
+
         admin.initializeApp({
             credential: admin.credential.cert({
                 projectId: process.env.FIREBASE_PROJECT_ID,
                 clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                // Handle private key line breaks for Vercel
-                // Handle private key line breaks for Vercel (both escaped and unescaped variants)
-                privateKey: process.env.FIREBASE_PRIVATE_KEY
-                    ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-                    : undefined,
+                privateKey: privateKey,
             }),
         });
     } catch (e) {
-        console.warn("Failed to init admin with cert, trying default:", e);
-        // Fallback or re-throw depending on env
-        if (!admin.apps.length) admin.initializeApp();
+        console.error("Firebase Init Error:", e);
+        throw e; // Re-throw to be caught in handler
     }
-}
+};
 
 if (!process.env.GEMINI_API_KEY) {
     console.error("Missing GEMINI_API_KEY");
@@ -65,6 +65,13 @@ WHEN TO FINISH:
 `;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+    // 0. Init Firebase
+    try {
+        initFirebase();
+    } catch (error: any) {
+        return res.status(500).json({ error: `Server Init Failed: ${error.message}` });
+    }
+
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
