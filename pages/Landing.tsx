@@ -16,8 +16,8 @@ export const Landing = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
                         <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,107,0,0.15)]">
-                                <span className="material-symbols-outlined text-xl">school</span>
+                            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-[0_0_20px_rgba(255,107,0,0.15)]">
+                                <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
                             </div>
                             <span className="font-display font-bold text-xl tracking-tight text-white">AssignMate</span>
                         </div>
@@ -309,9 +309,9 @@ export const Landing = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-20">
                         <div className="col-span-2 lg:col-span-2">
-                            <div className="flex items-center gap-2 mb-8">
-                                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg">
-                                    <span className="material-symbols-outlined text-2xl">school</span>
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg">
+                                    <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
                                 </div>
                                 <span className="font-bold text-2xl tracking-tight text-white">AssignMate</span>
                             </div>
