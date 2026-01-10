@@ -31,7 +31,7 @@ if (!process.env.GEMINI_API_KEY) {
     console.error("Missing GEMINI_API_KEY");
 }
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const MODEL_NAME = "gemini-1.5-flash";
+const MODEL_NAME = "gemini-1.5-flash-001";
 
 const SYSTEM_INSTRUCTION = `
 You are a friendly, student-like onboarding assistant for "AssignMate".
