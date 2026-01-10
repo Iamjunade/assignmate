@@ -140,48 +140,53 @@ function AppContent() {
             </ProtectedRoute>
           } />
 
-            <Route path="/community" element={
-              <ProtectedRoute>
-                <Community />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/talent" element={
-              <ProtectedRoute>
-                <TalentFeed />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/mentors" element={<Navigate to="/talent" replace />} />
-
-            <Route path="/dashboard/hirer" element={
-              <ProtectedRoute>
-                <HirerDashboard />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/dashboard/writer" element={
-              <ProtectedRoute>
-                <WriterDashboard />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/projects/:jobId" element={
-              <ProtectedRoute>
-                <JobDetails />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/workroom/:jobId" element={
-              <ProtectedRoute>
-                <Workroom />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/projects" element={
-
+          <Route path="/community" element={
             <ProtectedRoute>
-              {user && <Projects user={user} />}
+              <Community />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/talent" element={
+            <ProtectedRoute>
+              <TalentFeed />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/mentors" element={<Navigate to="/talent" replace />} />
+
+          <Route path="/dashboard/hirer" element={
+            <ProtectedRoute>
+              <HirerDashboard />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/dashboard/writer" element={
+            <ProtectedRoute>
+              <WriterDashboard />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/projects/:jobId" element={
+            <ProtectedRoute>
+              <JobDetails />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/workroom/:jobId" element={
+            <ProtectedRoute>
+              <Workroom />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/projects" element={
+            <ProtectedRoute>
+              {user && <Projects />}
+            </ProtectedRoute>
+          } />
+
+          <Route path="/writers" element={
+            <ProtectedRoute>
+              <FindWriter />
             </ProtectedRoute>
           } />
 
@@ -213,15 +218,15 @@ function AppContent() {
           } />
 
           {/* --- Admin Routes --- */}
-            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-              <Route index element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="verifications" element={<AdminVerifications />} />
-              <Route path="chats" element={<AdminChats />} />
-              <Route path="connections" element={<AdminConnections />} />
-              <Route path="settings" element={<AdminSettings />} />
-            </Route>
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="verifications" element={<AdminVerifications />} />
+            <Route path="chats" element={<AdminChats />} />
+            <Route path="connections" element={<AdminConnections />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
 
 
           {/* --- Pitch Deck --- */}

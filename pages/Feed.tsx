@@ -36,7 +36,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                 setLoading(true);
 
                 // Fetch all dashboard data in parallel
-                const [statsData, connectionsData, chatsData, writersData, collegePeers] = await Promise.all([
+                const [statsData, rawConnections, chatsData, writersData, collegePeers] = await Promise.all([
                     db.getDashboardStats(user.id).catch(err => ({ activeCount: 0, activeOrders: [] })),
                     db.getMyConnections(user.id).catch(err => []),
                     db.getChats(user.id).catch(err => []),
@@ -47,10 +47,24 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                 if (isMounted) {
                     setStats({
                         ...statsData,
-                        connectionsCount: connectionsData.length,
+                        connectionsCount: rawConnections.length,
                         unreadMessages: chatsData.filter((c: any) => (c.unread_count || 0) > 0).length || 0
                     });
-                    setConnections(connectionsData);
+
+                    // Transform raw connections to user objects for display
+                    // The service returns connections where participants is an array of hydrated User objects
+                    const transformedConnections = rawConnections.map((conn: any) => {
+                        const otherUser = conn.participants.find((p: any) => p.id !== user.id);
+                        return {
+                            id: otherUser?.id || conn.id,
+                            full_name: otherUser?.full_name || otherUser?.handle || 'Unknown',
+                            handle: otherUser?.handle || 'User',
+                            avatar_url: otherUser?.avatar_url,
+                            school: otherUser?.school
+                        };
+                    });
+                    setConnections(transformedConnections);
+
                     setRecentChats(chatsData);
                     setTopWriters(writersData);
                     setPeersAtCollege(collegePeers);
@@ -153,7 +167,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                             </div>
 
                             {/* Messages Card */}
-                            <div onClick={() => navigate('/messages')} className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
+                            <div onClick={() => navigate('/chats')} className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
                                 <div className="flex justify-between items-start mb-4">
                                     <h3 className="text-gray-500 font-bold text-xs uppercase tracking-wider">Messages</h3>
                                     <div className="size-8 rounded-lg bg-green-50 text-green-500 flex items-center justify-center">
@@ -276,13 +290,13 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             <span className="material-symbols-outlined text-green-500">chat</span>
                                             Messages
                                         </h2>
-                                        <button onClick={() => navigate('/messages')} className="text-sm font-bold text-gray-400 hover:text-gray-600">View All</button>
+                                        <button onClick={() => navigate('/chats')} className="text-sm font-bold text-gray-400 hover:text-gray-600">View All</button>
                                     </div>
 
                                     {recentChats.length > 0 ? (
                                         <div className="space-y-4">
                                             {recentChats.slice(0, 4).map((chat) => (
-                                                <div key={chat.id} onClick={() => navigate(`/messages?chat=${chat.other_id || ''}`)} className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 p-2 rounded-xl transition-colors -mx-2">
+                                                <div key={chat.id} onClick={() => navigate(`/chats/${chat.id}`)} className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 p-2 rounded-xl transition-colors -mx-2">
                                                     <div className="relative">
                                                         <Avatar src={chat.other_avatar} alt={chat.other_handle} className="size-10 rounded-full" />
                                                         {(chat.unread_count || 0) > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold size-4 flex items-center justify-center rounded-full border border-white">{chat.unread_count}</span>}

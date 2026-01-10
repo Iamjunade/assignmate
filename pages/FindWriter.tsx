@@ -34,7 +34,7 @@ export const FindWriter = () => {
     const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
     const [writers, setWriters] = useState<WriterCardData[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeFilter, setActiveFilter] = useState('all');
+    const [activeFilter, setActiveFilter] = useState(searchParams.get('tab') === 'network' ? 'network' : 'all');
     const [sortBy, setSortBy] = useState('relevance');
 
     const collegeDropdownRef = useRef<HTMLDivElement>(null);
@@ -60,9 +60,10 @@ export const FindWriter = () => {
         const loadWriters = async () => {
             setLoading(true);
             try {
-                const allUsers = await dbService.getAllProfiles();
+                // Use getAllUsers instead of getAllProfiles
+                const allUsers = await dbService.getAllUsers();
                 const writerData: WriterCardData[] = allUsers
-                    .filter((u: User) => u.is_writer && u.id !== user?.id)
+                    .filter((u: User) => u.id !== user?.id)
                     .map((u: User, index: number) => ({
                         id: u.id,
                         name: u.full_name || u.handle || 'Anonymous',
@@ -71,7 +72,7 @@ export const FindWriter = () => {
                         rating: 4.5 + Math.random() * 0.5,
                         jobs: Math.floor(Math.random() * 150) + 10,
                         price: Math.floor(Math.random() * 500) + 200,
-                        subjects: u.subjects || ['General'],
+                        subjects: ['General'], // Default subject since it might not be in User type yet
                         level: Math.floor(Math.random() * 20) + 1,
                         isVerified: u.is_verified === 'verified',
                         isActive: Math.random() > 0.5,
@@ -110,12 +111,6 @@ export const FindWriter = () => {
     const trendingWriters = writers.filter(w => w.isTrending).slice(0, 4);
     const recommendedWriters = writers.filter(w => !w.isTrending);
 
-    const filters = [
-        { id: 'all', label: 'All Filters', icon: 'tune' },
-        { id: 'engineering', label: 'Engineering' },
-        { id: 'management', label: 'Management' },
-    ];
-
     return (
         <div className="min-h-screen bg-[#fcfaf8] text-[#1b140d] font-display antialiased">
             {/* Navbar */}
@@ -135,7 +130,7 @@ export const FindWriter = () => {
                     <div className="flex items-center gap-3">
                         {user ? (
                             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/profile')}>
-                                <Avatar src={user.avatar_url} name={user.full_name || user.handle} size="sm" />
+                                <Avatar src={user.avatar_url} alt={user.full_name || user.handle} className="size-8 rounded-full" />
                                 <span className="hidden sm:block text-sm font-medium">{user.full_name || user.handle}</span>
                             </div>
                         ) : (
@@ -401,7 +396,7 @@ const TrendingCard = ({ writer, rank, onHire }: { writer: WriterCardData; rank: 
             <div className={`flex flex-col items-center text-center ${writer.isPeerMatch ? 'mt-2' : ''}`}>
                 <div className="relative mb-3">
                     <div className={`w-20 h-20 rounded-full p-[3px] ${rank === 1 ? 'bg-gradient-to-br from-primary to-yellow-400' : writer.isPeerMatch ? 'bg-gradient-to-br from-primary to-pink-500' : 'bg-gradient-to-br from-gray-200 to-gray-300'}`}>
-                        <Avatar src={writer.avatar_url} name={writer.name} size="lg" className="w-full h-full rounded-full object-cover border-2 border-white" />
+                        <Avatar src={writer.avatar_url} alt={writer.name} className="w-full h-full rounded-full object-cover border-2 border-white" />
                     </div>
                     {writer.isVerified && (
                         <div className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-sm">
@@ -446,7 +441,7 @@ const WriterCard = ({ writer, onHire }: { writer: WriterCardData; onHire: () => 
             <div className="p-5 flex-1 flex flex-col">
                 <div className="flex items-start justify-between mb-4">
                     <div className="relative">
-                        <Avatar src={writer.avatar_url} name={writer.name} size="md" className="w-14 h-14 rounded-full object-cover border-2 border-[#f3ede7]" />
+                        <Avatar src={writer.avatar_url} alt={writer.name} className="w-14 h-14 rounded-full object-cover border-2 border-[#f3ede7]" />
                         <div className={`absolute -bottom-1 -right-1 ${getLevelColor()} text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white`}>
                             Lvl {writer.level}
                         </div>
