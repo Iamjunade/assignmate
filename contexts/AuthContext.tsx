@@ -49,7 +49,8 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         setUser({
           ...profile,
           email: fbUser.email || profile.email,
-          is_incomplete: false
+          // Use the actual value from Firestore, don't override!
+          is_incomplete: profile.is_incomplete ?? false
         } as User);
         presence.init(userId);
       } else {
