@@ -13,7 +13,10 @@ if (!admin.apps.length) {
                 projectId: process.env.FIREBASE_PROJECT_ID,
                 clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
                 // Handle private key line breaks for Vercel
-                privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                // Handle private key line breaks for Vercel (both escaped and unescaped variants)
+                privateKey: process.env.FIREBASE_PRIVATE_KEY
+                    ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+                    : undefined,
             }),
         });
     } catch (e) {
@@ -23,6 +26,9 @@ if (!admin.apps.length) {
     }
 }
 
+if (!process.env.GEMINI_API_KEY) {
+    console.error("Missing GEMINI_API_KEY");
+}
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const MODEL_NAME = "gemini-1.5-flash";
 
@@ -126,6 +132,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     } catch (error: any) {
         console.error("Gemini Error:", error);
-        return res.status(500).json({ error: 'AI processing failed' });
+        const msg = error.message || 'AI processing failed';
+        return res.status(500).json({ error: msg });
     }
 }

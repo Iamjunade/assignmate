@@ -39,7 +39,7 @@ export const ProfileBuilder = () => {
             if (messages.length === 0) {
                 setLoading(true);
                 try {
-                    const token = await (user as any)?.getIdToken();
+                    const token = await user?.getIdToken?.() || '';
                     const response = await fetch('/api/onboarding', {
                         method: 'POST',
                         headers: {
@@ -84,7 +84,7 @@ export const ProfileBuilder = () => {
                 text: m.text
             }));
 
-            const token = await (user as any).getIdToken();
+            const token = await user.getIdToken?.() || '';
             const response = await fetch('/api/onboarding', {
                 method: 'POST',
                 headers: {
@@ -98,6 +98,11 @@ export const ProfileBuilder = () => {
             });
 
             const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to fetch response');
+            }
+
             const { reply, isComplete: done, profileData: data } = result;
 
             setMessages(prev => [...prev, { role: 'ai', text: reply }]);
@@ -107,9 +112,11 @@ export const ProfileBuilder = () => {
                 setProfileData(data);
             }
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Chat error:", error);
-            setMessages(prev => [...prev, { role: 'ai', text: "I'm having a bit of trouble connected to my brain. Could you try saying that again?" }]);
+            // Display specific error if available from the backend response
+            const errorMessage = error.message || "I'm having a bit of trouble connecting to my brain. Could you try saying that again?";
+            setMessages(prev => [...prev, { role: 'ai', text: `Error: ${errorMessage}` }]);
         } finally {
             setLoading(false);
         }
