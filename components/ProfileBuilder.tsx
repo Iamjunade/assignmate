@@ -30,7 +30,7 @@ export const ProfileBuilder = () => {
             // Refresh local user state
             if (refreshProfile) await refreshProfile();
 
-            navigate('/');
+            navigate('/feed');
         } catch (error) {
             console.error("Error skipping onboarding:", error);
         } finally {
