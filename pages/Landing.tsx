@@ -42,9 +42,9 @@ export const Landing = () => {
     };
 
     return (
-        <div className="relative min-h-screen w-full font-display bg-background dark:bg-background-dark text-slate-900 dark:text-white transition-colors duration-300">
+        <div className="relative min-h-screen w-full font-display bg-background text-slate-900 transition-colors duration-300">
             {/* Navbar */}
-            <header className="fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-white/20 dark:border-slate-800">
+            <header className="fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white/80 bg-white/90 backdrop-blur-md border-b border-white/20 ">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
                         <div className="size-10 rounded-xl overflow-hidden shadow-lg shadow-orange-500/20 transition-transform group-hover:scale-105">
@@ -59,12 +59,12 @@ export const Landing = () => {
                             <button
                                 key={item}
                                 onClick={() => handleScrollTo(item.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-'))}
-                                className="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors"
+                                className="text-sm font-semibold text-slate-600 text-slate-600 hover:text-primary transition-colors"
                             >
                                 {item}
                             </button>
                         ))}
-                        <button onClick={handleSignup} className="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+                        <button onClick={handleSignup} className="text-sm font-semibold text-slate-600 text-slate-600 hover:text-primary transition-colors">
                             For Contributors
                         </button>
                     </nav>
@@ -86,7 +86,7 @@ export const Landing = () => {
                     </div>
 
                     {/* Mobile Menu Toggle */}
-                    <button className="lg:hidden p-2 text-slate-600 dark:text-slate-300" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                    <button className="lg:hidden p-2 text-slate-600 text-slate-600" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                         {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                     </button>
                 </div>
@@ -99,13 +99,13 @@ export const Landing = () => {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="fixed inset-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl lg:hidden pt-24 px-6 flex flex-col items-center gap-8"
+                        className="fixed inset-0 z-40 bg-white/95 bg-white/95 backdrop-blur-xl lg:hidden pt-24 px-6 flex flex-col items-center gap-8"
                     >
                         {['How it Works', 'Trust & Safety'].map((item) => (
                             <button
                                 key={item}
                                 onClick={() => { handleScrollTo(item.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')); setMobileMenuOpen(false); }}
-                                className="text-xl font-bold text-slate-800 dark:text-white"
+                                className="text-xl font-bold text-slate-800 text-slate-900"
                             >
                                 {item}
                             </button>
@@ -128,7 +128,7 @@ export const Landing = () => {
                         transition={{ duration: 0.8, ease: "easeOut" }}
                         className="flex flex-col gap-8 text-center lg:text-left"
                     >
-                        <div className="inline-flex items-center gap-2 self-center lg:self-start rounded-full bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 px-4 py-1.5 backdrop-blur-sm">
+                        <div className="inline-flex items-center gap-2 self-center lg:self-start rounded-full bg-orange-50 bg-orange-50 border border-orange-100  px-4 py-1.5 backdrop-blur-sm">
                             <span className="text-xs font-bold text-primary tracking-wider uppercase">🎉 100% Free & Campus Verified</span>
                         </div>
 
@@ -137,7 +137,7 @@ export const Landing = () => {
                             <span className="text-gradient relative">Grow Together.</span>
                         </h1>
 
-                        <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                        <p className="text-lg md:text-xl text-slate-600 text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
                             Join India's largest campus-verified community. Connect with seniors, share knowledge, and ace your exams together.
                         </p>
 
@@ -158,7 +158,7 @@ export const Landing = () => {
                                     </div>
                                 ))}
                             </div>
-                            <p className="text-sm font-medium text-slate-500">Trusted by <span className="text-slate-900 dark:text-white font-bold">10,000+ students</span></p>
+                            <p className="text-sm font-medium text-slate-500">Trusted by <span className="text-slate-900 text-slate-900 font-bold">10,000+ students</span></p>
                         </div>
                     </motion.div>
 
@@ -168,19 +168,19 @@ export const Landing = () => {
                         transition={{ duration: 1, delay: 0.2 }}
                         className="relative hidden lg:block"
                     >
-                        <div className="relative z-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-2xl p-6 rounded-3xl shadow-2xl border border-white/40 dark:border-slate-700/40 transform hover:rotate-0 transition-all duration-500">
+                        <div className="relative z-10 bg-white/80 bg-white/80 backdrop-blur-2xl p-6 rounded-3xl shadow-2xl border border-white/40  transform hover:rotate-0 transition-all duration-500">
                             {/* Floating Status Badge */}
                             <motion.div
                                 animate={{ y: [0, -10, 0] }}
                                 transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                                className="absolute -top-8 -right-8 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center gap-3"
+                                className="absolute -top-8 -right-8 bg-white bg-slate-100 p-4 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center gap-3"
                             >
-                                <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full">
-                                    <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
+                                <div className="bg-green-100 bg-green-100 p-2 rounded-full">
+                                    <CheckCircle size={20} className="text-green-600 " />
                                 </div>
                                 <div>
                                     <p className="text-xs font-bold text-slate-500">Status</p>
-                                    <p className="text-sm font-bold text-slate-900 dark:text-white">Concept Clarified!</p>
+                                    <p className="text-sm font-bold text-slate-900 text-slate-900">Concept Clarified!</p>
                                 </div>
                             </motion.div>
 
@@ -194,7 +194,7 @@ export const Landing = () => {
                                         <img src="/logo.png" className="w-full h-full object-cover" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-slate-900 dark:text-white">Sai Tej</h3>
+                                        <h3 className="font-bold text-slate-900 text-slate-900">Sai Tej</h3>
                                         <p className="text-xs text-slate-500">CMRIT Hyd</p>
                                     </div>
                                 </div>
@@ -217,7 +217,7 @@ export const Landing = () => {
                         <div className="flex-1 flex items-center px-4 h-14 w-full">
                             <Search className="text-slate-400 mr-3" size={24} />
                             <input
-                                className="bg-transparent border-none w-full text-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-0 focus:outline-none"
+                                className="bg-transparent border-none w-full text-lg text-slate-900 text-slate-900 placeholder:text-slate-400 focus:ring-0 focus:outline-none"
                                 placeholder={placeholderText}
                                 type="text"
                                 value={searchSubject}
@@ -233,11 +233,11 @@ export const Landing = () => {
             </section>
 
             {/* How It Works */}
-            <section id="how-it-works" className="py-24 px-6 bg-white dark:bg-slate-900/50">
+            <section id="how-it-works" className="py-24 px-6 bg-white bg-white/50">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl md:text-5xl font-black mb-6">How it works</h2>
-                        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Five simple steps to collaborative learning with your campus community.</p>
+                        <p className="text-lg text-slate-600 text-slate-500 max-w-2xl mx-auto">Five simple steps to collaborative learning with your campus community.</p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
@@ -251,11 +251,11 @@ export const Landing = () => {
                                 whileHover={{ y: -5 }}
                                 className="card-clean p-8 group"
                             >
-                                <div className="size-16 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <div className="size-16 rounded-2xl bg-slate-50 bg-slate-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                     {feature.icon}
                                 </div>
                                 <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                                <p className="text-slate-500 dark:text-slate-400">{feature.desc}</p>
+                                <p className="text-slate-500 text-slate-500">{feature.desc}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -264,7 +264,7 @@ export const Landing = () => {
 
             {/* CTA Section */}
             <section className="py-24 px-6">
-                <div className="max-w-6xl mx-auto rounded-[3rem] bg-slate-900 dark:bg-slate-800 p-12 md:p-24 text-center relative overflow-hidden">
+                <div className="max-w-6xl mx-auto rounded-[3rem] bg-slate-900 bg-slate-100 p-12 md:p-24 text-center relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px]" />
                     <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px]" />
 
