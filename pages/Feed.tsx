@@ -177,6 +177,13 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             Find Peers
                                         </button>
                                         <button
+                                            onClick={() => navigate('/community')}
+                                            className="h-12 px-6 rounded-xl bg-white/20 backdrop-blur-sm text-white font-bold hover:bg-white/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 group btn-ripple"
+                                        >
+                                            <span className="material-symbols-outlined group-hover:scale-110 transition-transform">forum</span>
+                                            Community
+                                        </button>
+                                        <button
                                             onClick={() => navigate('/connections')}
                                             className="h-12 px-6 rounded-xl bg-white/20 backdrop-blur-sm text-white font-bold hover:bg-white/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 group btn-ripple"
                                         >
