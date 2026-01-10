@@ -831,6 +831,49 @@ export const dbService = {
             return { id: d.id, ...data, mentor_id: data.writer_id };
         });
     },
+
+    // Get all projects where user is a collaborator (for both users)
+    getCollabProjects: async (userId: string) => {
+        // Query 1: Check collaborators array
+        const collabQuery = query(
+            collection(getDb(), 'orders'),
+            where('collaborators', 'array-contains', userId),
+            orderBy('created_at', 'desc')
+        );
+
+        // Query 2: Fallback - check student_id (legacy orders)
+        const studentQuery = query(
+            collection(getDb(), 'orders'),
+            where('student_id', '==', userId),
+            orderBy('created_at', 'desc')
+        );
+
+        // Query 3: Fallback - check writer_id (legacy orders)
+        const writerQuery = query(
+            collection(getDb(), 'orders'),
+            where('writer_id', '==', userId),
+            orderBy('created_at', 'desc')
+        );
+
+        const [collabSnap, studentSnap, writerSnap] = await Promise.all([
+            getDocs(collabQuery).catch(() => ({ docs: [] })),
+            getDocs(studentQuery).catch(() => ({ docs: [] })),
+            getDocs(writerQuery).catch(() => ({ docs: [] }))
+        ]);
+
+        // Merge and deduplicate
+        const projectMap = new Map();
+        [...collabSnap.docs, ...studentSnap.docs, ...writerSnap.docs].forEach(d => {
+            const data = d.data();
+            projectMap.set(d.id, { id: d.id, ...data, mentor_id: data.writer_id });
+        });
+
+        // Sort by created_at desc
+        return Array.from(projectMap.values()).sort((a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+    },
+
     getPendingVerifications: async () => {
         const q = query(collection(getDb(), 'users'), where('is_verified', '==', 'pending'));
         const snap = await getDocs(q);
@@ -1085,20 +1128,32 @@ export const dbService = {
     // ==========================================
 
     sendOffer: async (chatId: string, senderId: string, senderName: string, offerData: {
-        subject: string;
         title: string;
         description?: string;
-        pages: number;
         deadline: string;
-        budget: number;
+        isPaid?: boolean;
+        budget?: number;
+        // Legacy fields for backward compatibility
+        subject?: string;
+        pages?: number;
     }) => {
+        const isPaidProject = offerData.isPaid ?? (offerData.budget && offerData.budget > 0);
+
         const offer = {
             sender_id: senderId,
             sender_name: senderName,
             type: 'offer',
-            text: `📋 Project Offer: ${offerData.title}`,
+            text: isPaidProject
+                ? `💼 Collab Request: ${offerData.title} (₹${offerData.budget || 0})`
+                : `🤝 Collab Request: ${offerData.title} (Free)`,
             offer: {
-                ...offerData,
+                title: offerData.title,
+                description: offerData.description || '',
+                deadline: offerData.deadline,
+                isPaid: isPaidProject,
+                budget: offerData.budget || 0,
+                subject: offerData.subject || 'Collaboration',
+                pages: offerData.pages || 1,
                 status: 'pending' as 'pending' | 'accepted' | 'rejected',
                 senderId: senderId,
                 senderName: senderName
@@ -1119,7 +1174,7 @@ export const dbService = {
             const isPoster = chatData.poster_id === senderId;
 
             await updateDoc(chatRef, {
-                last_message: `📋 Offer: ${offerData.title}`,
+                last_message: isPaidProject ? `💼 Collab: ${offerData.title}` : `🤝 Collab: ${offerData.title}`,
                 updated_at: new Date().toISOString(),
                 [isPoster ? 'unread_count_writer' : 'unread_count_poster']: (chatData[isPoster ? 'unread_count_writer' : 'unread_count_poster'] || 0) + 1
             });
@@ -1157,21 +1212,24 @@ export const dbService = {
             if (chatSnap.exists()) {
                 const chatData = chatSnap.data();
 
-                // Create the order/project
-                const orderId = `order_${Date.now()}`;
+                // Create the order/project with BOTH users as collaborators
+                const orderId = `collab_${Date.now()}`;
                 await setDoc(doc(getDb(), 'orders', orderId), {
                     id: orderId,
                     chat_id: chatId,
-                    student_id: offer.senderId, // The person who sent the offer (student/hirer)
-                    poster_id: offer.senderId, // Keep for backward compatibility
-                    writer_id: userId, // The person accepting is the writer
+                    // Store both users as collaborators so it appears in both "My Projects"
+                    collaborators: [offer.senderId, userId],
+                    student_id: offer.senderId, // Person who sent the request
+                    poster_id: offer.senderId, // Legacy compatibility
+                    writer_id: userId, // Person who accepted
                     title: offer.title,
-                    subject: offer.subject,
+                    subject: offer.subject || 'Collaboration',
                     description: offer.description || '',
-                    pages: offer.pages,
+                    pages: offer.pages || 1,
                     deadline: offer.deadline,
-                    budget: offer.budget,
-                    amount: offer.budget, // For escrow balance calculation
+                    budget: offer.budget || 0,
+                    amount: offer.budget || 0,
+                    isPaid: offer.isPaid || false,
                     status: 'in_progress',
                     completion_percentage: 0,
                     created_at: new Date().toISOString(),
@@ -1179,10 +1237,13 @@ export const dbService = {
                 });
 
                 // Send a system message about acceptance
+                const isPaid = offer.isPaid || (offer.budget && offer.budget > 0);
                 await addDoc(collection(getDb(), 'chats', chatId, 'messages'), {
                     sender_id: 'system',
                     type: 'system',
-                    text: `✅ Offer accepted! Project "${offer.title}" has been started.`,
+                    text: isPaid
+                        ? `✅ Collab accepted! Project "${offer.title}" (₹${offer.budget}) has started.`
+                        : `🤝 Collab accepted! Project "${offer.title}" has started.`,
                     created_at: new Date().toISOString(),
                     readBy: []
                 });
