@@ -23,11 +23,11 @@ export const Landing = () => {
                     <div className="hidden md:flex items-center gap-10">
                         <a className="text-sm font-medium text-gray-400 hover:text-white transition-colors" href="#how-it-works">How it Works</a>
                         <a className="text-sm font-medium text-gray-400 hover:text-white transition-colors" href="#safety">Trust &amp; Safety</a>
-                        <a className="text-sm font-medium text-gray-400 hover:text-white transition-colors" href="#contributors">For Writers</a>
+                        <a className="text-sm font-medium text-gray-400 hover:text-white transition-colors" href="#contributors">For Contributors</a>
                         <div className="h-4 w-px bg-[#262626] mx-2"></div>
                         <button onClick={handleLogin} className="text-sm font-medium text-white hover:text-primary transition-colors">Login</button>
                         <button onClick={handleSignup} className="px-6 py-2.5 bg-primary hover:bg-orange-600 text-white font-bold rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg shadow-primary/20">
-                            Join Marketplace
+                            Join Now
                         </button>
                     </div>
                     <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(true)}>
@@ -59,23 +59,22 @@ export const Landing = () => {
                     <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
                         <div className="space-y-8">
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] border-primary/20">
-                                <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-                                <span className="text-sm font-bold tracking-wider text-primary uppercase">100% Secure & Escrow Protected</span>
+                                <span className="material-symbols-outlined text-primary text-sm">shield_lock</span>
+                                <span className="text-sm font-bold tracking-wider text-primary uppercase">100% Free & Campus Verified</span>
                             </div>
-                            <h1 className="text-6xl md:text-7xl font-extrabold leading-[1.1] tracking-tight">
-                                Learn Better. <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Excel Together.</span>
+                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight">
+                                Learn Together. <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Grow Together.</span>
                             </h1>
-                            <p className="text-xl text-gray-400 max-w-lg leading-relaxed">
-                                India's premier student marketplace for verified assignment assistance. Connect with top university peers and secure your grades with bank-grade safety.
+                            <p className="text-lg text-gray-400 max-w-lg leading-relaxed">
+                                Join a free, campus-verified community where students explain concepts, share knowledge, and build understanding together.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <button onClick={handleSignup} className="px-8 py-4 bg-primary text-white font-bold text-lg rounded-2xl hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-[0_0_40px_-10px_rgba(255,107,0,0.3)]">
-                                    Post Assignment
-                                    <span className="material-symbols-outlined">arrow_forward</span>
+                                    Explore Topics
                                 </button>
                                 <button onClick={handleSignup} className="px-8 py-4 bg-white/[0.03] backdrop-blur-xl border border-white/10 text-white font-bold text-lg rounded-2xl hover:bg-white/5 transition-all">
-                                    Become a Writer
+                                    Become a Contributor
                                 </button>
                             </div>
                             <div className="flex items-center gap-4 pt-4">
@@ -84,7 +83,7 @@ export const Landing = () => {
                                         <img key={i} alt="User Avatar" className="w-10 h-10 rounded-full border-2 border-[#0A0A0A]" src={`https://i.pravatar.cc/150?img=${i + 10}`} />
                                     ))}
                                 </div>
-                                <p className="text-sm text-gray-400">Trusted by <span className="text-white font-bold">50,000+ Students</span> across IITs, DU & BITS</p>
+                                <p className="text-sm text-gray-400">Trusted by <span className="text-white font-bold">10,000+ students</span> across IITs & DU</p>
                             </div>
                         </div>
 
@@ -92,34 +91,30 @@ export const Landing = () => {
                         <div className="relative group">
                             <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/50 aspect-[4/5] md:aspect-[4/3]">
                                 <img alt="Students Studying" className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700" src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1600" />
-                                <div className="absolute bottom-6 left-6 right-6 bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] p-6 rounded-2xl">
-                                    <div className="flex items-center justify-between mb-4">
+                                <div className="absolute bottom-6 left-6 right-6 bg-[#1E1E1E]/90 backdrop-blur-xl border border-white/10 p-4 rounded-2xl">
+                                    <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className="relative">
-                                                <img alt="Verified Writer" className="w-12 h-12 rounded-full border-2 border-primary" src="https://i.pravatar.cc/150?img=33" />
-                                                <span className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-0.5 border-2 border-[#161616]">
-                                                    <span className="material-symbols-outlined text-[10px] text-white">verified</span>
+                                                <img alt="Verified Contributor" className="w-10 h-10 rounded-full border-2 border-primary" src="https://i.pravatar.cc/150?img=12" />
+                                                <span className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-0.5 border-2 border-[#1E1E1E]">
+                                                    <span className="material-symbols-outlined text-[8px] text-white">verified</span>
                                                 </span>
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-white">Ishaan Sharma</h4>
-                                                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">IIT DELHI • FINAL YEAR</p>
+                                                <h4 className="font-bold text-white text-sm">Sai Tej</h4>
+                                                <p className="text-[10px] text-gray-400">CMRIT Hyd</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-[10px] text-gray-400 font-bold uppercase">Success Rate</p>
-                                            <p className="text-primary font-bold text-lg">98.4%</p>
+                                            <p className="text-[9px] text-gray-500 font-medium uppercase tracking-wide">Contribution Score</p>
+                                            <p className="text-primary font-bold text-sm">🔥 4.9</p>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold">Mathematics</span>
-                                        <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold">Data Structures</span>
-                                        <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold">+4 More</span>
-                                    </div>
                                 </div>
-                                <div className="absolute top-6 right-6 px-4 py-2 bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-full border-emerald-500/20 flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></span>
-                                    <span className="text-xs font-bold text-emerald-400">Active Concept Clarified</span>
+                                <div className="absolute top-4 right-4 px-3 py-1.5 bg-[#1E1E1E]/80 backdrop-blur-xl border border-white/10 rounded-lg flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-green-500 text-sm">check_circle</span>
+                                    <span className="text-[10px] font-bold text-white">Status</span>
+                                    <span className="text-[10px] font-bold text-green-400">Concept Clarified</span>
                                 </div>
                             </div>
                         </div>
@@ -127,21 +122,19 @@ export const Landing = () => {
                 </section>
 
                 {/* Trust Badges Section */}
-                <section className="border-y border-[#262626] py-12 bg-[#161616]/30">
+                <section className="border-y border-[#262626] py-10 bg-[#161616]/30">
                     <div className="max-w-7xl mx-auto px-6">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                        <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-8">Campus Verified & Trusted By</p>
+                        <div className="flex flex-wrap justify-center gap-12 md:gap-20">
                             {[
-                                { icon: 'verified_user', title: 'UniVerify', sub: 'Campus Locked' },
-                                { icon: 'payments', title: 'Escrow Pro', sub: 'Funds Secured' },
-                                { icon: 'lock', title: 'ID Check', sub: 'Bank-Grade Privacy' },
-                                { icon: 'groups', title: 'Peer Support', sub: '24/7 Academic Help' },
+                                { icon: 'verified_user', title: 'UniVerify' },
+                                { icon: 'badge', title: 'ID Check' },
+                                { icon: 'menu_book', title: 'Open Learning' },
+                                { icon: 'groups', title: 'Peer Support' },
                             ].map((item, i) => (
-                                <div key={i} className="flex items-center justify-center gap-3 text-gray-400 group">
-                                    <span className="material-symbols-outlined text-3xl group-hover:text-primary transition-colors">{item.icon}</span>
-                                    <div className="text-left">
-                                        <p className="text-white font-bold leading-none">{item.title}</p>
-                                        <p className="text-[11px] uppercase tracking-tighter">{item.sub}</p>
-                                    </div>
+                                <div key={i} className="flex items-center gap-2 text-gray-400 group hover:text-white transition-colors">
+                                    <span className="material-symbols-outlined text-xl group-hover:text-primary transition-colors">{item.icon}</span>
+                                    <span className="text-sm font-bold text-white">{item.title}</span>
                                 </div>
                             ))}
                         </div>
@@ -149,25 +142,25 @@ export const Landing = () => {
                 </section>
 
                 {/* Why AssignMate Section */}
-                <section className="py-32 px-6" id="safety">
-                    <div className="max-w-7xl mx-auto text-center mb-20">
-                        <h2 className="text-4xl md:text-5xl font-extrabold mb-6">Why AssignMate is a Community</h2>
-                        <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
-                            We've built a secure environment where trust and academic integrity come first. Every member is a verified peer from your specific university ecosystem.
+                <section className="py-24 px-6 bg-[#0A0A0A]" id="safety">
+                    <div className="max-w-7xl mx-auto text-center mb-16">
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Why AssignMate is a Community</h2>
+                        <p className="text-gray-400 max-w-2xl mx-auto">
+                            We serve the isolated professional. Open-sourced networking and support.
                         </p>
                     </div>
                     <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
                         {[
-                            { icon: 'verified_user', title: 'Community Trust', desc: 'Every peer is ID-verified. Look for the Blue Tick before you connect. No fake profiles, just real students helping students.', highlight: false },
-                            { icon: 'location_on', title: 'Hyper-Local Matching', desc: 'Find experts from your specific department and university (e.g., DU, IIT, BITS) who know exactly what your curriculum demands.', highlight: true },
-                            { icon: 'psychology', title: 'Collaborative Learning', desc: "It's not just about the work—it's about learning. Connect, discuss, and grow your network with fellow high-achievers.", highlight: false },
+                            { icon: 'verified', title: 'Community Trust', desc: "Every peer is ID-verified. Look for the blue tick before you connect. No fake profiles, just real students." },
+                            { icon: 'location_on', title: 'Campus Matching', desc: "Find seniors from your specific university (e.g., DU, IIT) who know exactly what your curriculum demands." },
+                            { icon: 'group', title: 'Collaborative Learning', desc: "It's not just about the work—it's about learning. Connect, discuss, and grow your network together." },
                         ].map((card, i) => (
-                            <div key={i} className={`group p-10 bg-white/[0.03] backdrop-blur-xl border rounded-[32px] transition-all duration-500 ${card.highlight ? 'border-primary/10 bg-primary/5 hover:bg-primary/10' : 'border-white/5 hover:bg-white/5 hover:border-primary/20'}`}>
-                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform ${card.highlight ? 'bg-primary shadow-lg shadow-primary/20' : 'bg-primary/10 border border-primary/20'}`}>
-                                    <span className={`material-symbols-outlined text-3xl ${card.highlight ? 'text-white' : 'text-primary'}`}>{card.icon}</span>
+                            <div key={i} className="group p-8 bg-[#1E1E1E] border border-[#323232] rounded-2xl hover:bg-[#252525] hover:border-primary/20 transition-all duration-300 flex flex-col items-start text-left">
+                                <div className="w-12 h-12 rounded-xl bg-[#0A0A0A] border border-[#323232] flex items-center justify-center mb-6 text-primary group-hover:scale-110 transition-transform">
+                                    <span className="material-symbols-outlined">{card.icon}</span>
                                 </div>
-                                <h3 className="text-2xl font-bold mb-4">{card.title}</h3>
-                                <p className={`leading-relaxed ${card.highlight ? 'text-gray-300' : 'text-gray-400'}`}>{card.desc}</p>
+                                <h3 className="text-xl font-bold text-white mb-3">{card.title}</h3>
+                                <p className="text-gray-400 text-sm leading-relaxed">{card.desc}</p>
                             </div>
                         ))}
                     </div>
