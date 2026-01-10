@@ -1,30 +1,37 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import * as admin from 'firebase-admin';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-    // Check if we are in production (Vercel) or local
-    // In Vercel, we need to use environment variables for service account
-    // For simplicity in this migration, we'll try to use the default creds or env vars
+// Helper to init Firebase safely
+const initFirebase = () => {
+    if (getApps().length) return;
+
     try {
-        admin.initializeApp({
-            credential: admin.credential.cert({
+        const privateKey = process.env.FIREBASE_PRIVATE_KEY
+            ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+            : undefined;
+
+        if (!privateKey) throw new Error("Missing FIREBASE_PRIVATE_KEY");
+
+        initializeApp({
+            credential: cert({
                 projectId: process.env.FIREBASE_PROJECT_ID,
                 clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                // Handle private key line breaks for Vercel
-                privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                privateKey: privateKey,
             }),
         });
     } catch (e) {
-        console.warn("Failed to init admin with cert, trying default:", e);
-        // Fallback or re-throw depending on env
-        if (!admin.apps.length) admin.initializeApp();
+        console.error("Firebase Init Error:", e);
+        throw e; // Re-throw to be caught in handler
     }
-}
+};
 
+if (!process.env.GEMINI_API_KEY) {
+    console.error("Missing GEMINI_API_KEY");
+}
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const MODEL_NAME = "gemini-1.5-flash";
+const MODEL_NAME = "gemini-1.5-flash-001";
 
 const SYSTEM_INSTRUCTION = `
 You are a friendly, student-like onboarding assistant for "AssignMate".
@@ -59,6 +66,13 @@ WHEN TO FINISH:
 `;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+    // 0. Init Firebase
+    try {
+        initFirebase();
+    } catch (error: any) {
+        return res.status(500).json({ error: `Server Init Failed: ${error.message}` });
+    }
+
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
@@ -71,7 +85,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const idToken = authHeader.split('Bearer ')[1];
     try {
-        await admin.auth().verifyIdToken(idToken);
+        // Use verified Auth instance
+        await getAuth().verifyIdToken(idToken);
     } catch (error) {
         console.error("Token verification failed:", error);
         return res.status(401).json({ error: 'Unauthorized: Invalid token' });
@@ -126,6 +141,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     } catch (error: any) {
         console.error("Gemini Error:", error);
-        return res.status(500).json({ error: 'AI processing failed' });
+        const msg = error.message || 'AI processing failed';
+        return res.status(500).json({ error: msg });
     }
 }

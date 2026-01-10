@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { dbService as db } from '../services/firestoreService'; // Assuming dbService is the named export
+import { getAuth } from 'firebase/auth'; // Import getAuth directly
+import { app } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { GlassCard } from './ui/GlassCard';
 import { GlassButton } from './ui/GlassButton';
@@ -39,7 +41,8 @@ export const ProfileBuilder = () => {
             if (messages.length === 0) {
                 setLoading(true);
                 try {
-                    const token = await (user as any)?.getIdToken();
+                    const auth = getAuth(app);
+                    const token = await auth.currentUser?.getIdToken() || '';
                     const response = await fetch('/api/onboarding', {
                         method: 'POST',
                         headers: {
@@ -48,8 +51,15 @@ export const ProfileBuilder = () => {
                         },
                         body: JSON.stringify({ history: [] })
                     });
-                    const data = await response.json();
-                    if (data.reply) {
+                    const text = await response.text();
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        console.error("Failed to parse init chat:", text);
+                        return;
+                    }
+                    if (data?.reply) {
                         setMessages([{ role: 'ai', text: data.reply }]);
                     }
                 } catch (error) {
@@ -84,7 +94,8 @@ export const ProfileBuilder = () => {
                 text: m.text
             }));
 
-            const token = await (user as any).getIdToken();
+            const auth = getAuth(app);
+            const token = await auth.currentUser?.getIdToken() || '';
             const response = await fetch('/api/onboarding', {
                 method: 'POST',
                 headers: {
@@ -97,7 +108,19 @@ export const ProfileBuilder = () => {
                 })
             });
 
-            const result = await response.json();
+            const text = await response.text();
+            let result;
+            try {
+                result = JSON.parse(text);
+            } catch (e) {
+                console.error("Failed to parse JSON response:", text.substring(0, 200));
+                throw new Error(`Server Error: ${text.substring(0, 100)}...`);
+            }
+
+            if (!response.ok) {
+                throw new Error(result.error || `Server Error: ${response.statusText}`);
+            }
+
             const { reply, isComplete: done, profileData: data } = result;
 
             setMessages(prev => [...prev, { role: 'ai', text: reply }]);
@@ -107,9 +130,11 @@ export const ProfileBuilder = () => {
                 setProfileData(data);
             }
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Chat error:", error);
-            setMessages(prev => [...prev, { role: 'ai', text: "I'm having a bit of trouble connected to my brain. Could you try saying that again?" }]);
+            // Display specific error if available from the backend response
+            const errorMessage = error.message || "I'm having a bit of trouble connecting to my brain. Could you try saying that again?";
+            setMessages(prev => [...prev, { role: 'ai', text: `Error: ${errorMessage}` }]);
         } finally {
             setLoading(false);
         }

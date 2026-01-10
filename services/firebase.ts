@@ -45,7 +45,7 @@ const firebaseConfig = {
     databaseURL: (import.meta as any).env.VITE_FIREBASE_DATABASE_URL
 };
 
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const authInstance = getAuth(app);
 const dbInstance = getFirestore(app);
 enableIndexedDbPersistence(dbInstance).catch((err) => {
