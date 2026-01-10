@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dbService as db } from '../services/firestoreService';
 import { useAuth } from '../contexts/AuthContext';
@@ -10,6 +10,13 @@ export const ProfileBuilder = () => {
     const { user, refreshProfile } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+
+    // Reactive navigation: safely redirect only when user state is updated
+    useEffect(() => {
+        if (user && !user.is_incomplete) {
+            navigate('/feed', { replace: true });
+        }
+    }, [user, navigate]);
 
     const handleSkip = async () => {
         if (!user) return;
@@ -27,13 +34,11 @@ export const ProfileBuilder = () => {
                 project_experience: []
             });
 
-            // Refresh local user state
+            // Trigger a refresh - the useEffect above will handle the nav when it completes
             if (refreshProfile) await refreshProfile();
 
-            navigate('/feed');
         } catch (error) {
             console.error("Error skipping onboarding:", error);
-        } finally {
             setLoading(false);
         }
     };
