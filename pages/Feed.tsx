@@ -33,10 +33,15 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
     useEffect(() => {
         if (user) {
             // Load common data
-            db.getDashboardStats(user.id).then(data => {
-                setStats(data);
-                setLoading(false);
-            });
+            db.getDashboardStats(user.id)
+                .then(data => {
+                    if (data) setStats(data);
+                    setLoading(false);
+                })
+                .catch(err => {
+                    console.error("Stats load failed", err);
+                    setLoading(false);
+                });
 
             // Real-time listener for active orders (updates immediately when offer accepted)
             const unsubOrders = db.listenToActiveOrders(user.id, (orders) => {
@@ -54,12 +59,16 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
             });
 
             // Load chats
-            db.getChats(user.id).then(chats => {
-                setRecentChats(chats.slice(0, 5));
-            });
+            db.getChats(user.id)
+                .then(chats => {
+                    setRecentChats(chats.slice(0, 5));
+                })
+                .catch(err => console.error("Chats load failed", err));
 
             // Load connections
-            db.getMyConnections(user.id).then(setConnections);
+            db.getMyConnections(user.id)
+                .then(setConnections)
+                .catch(err => console.error("Connections load failed", err));
 
             // Load available peers from same college
             db.getDashboardMentors(user.school, 8, user.id).then(setDashboardMentors);
