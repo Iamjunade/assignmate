@@ -30,14 +30,14 @@ const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: 
 const Connections = lazy(() => import('./pages/Connections').then(module => ({ default: module.Connections })));
 const Onboarding = lazy(() => import('./pages/Onboarding').then(module => ({ default: module.Onboarding })));
 const FindWriter = lazy(() => import('./pages/FindWriter').then(module => ({ default: module.FindWriter })));
-const Projects = lazy(() => import('./pages/Feed').then(module => ({ default: module.Feed }))); // Reuse Feed for Projects temporarily
+const Projects = lazy(() => import('./pages/Projects').then(module => ({ default: module.Projects })));
 const AdminVerifications = lazy(() => import('./admin/pages/AdminVerifications').then(module => ({ default: module.AdminVerifications })));
-const PitchDeck = lazy(() => import('./pages/Landing').then(module => ({ default: module.Landing })));
-const GDC = lazy(() => import('./pages/Landing').then(module => ({ default: module.Landing })));
-const Documentation = lazy(() => import('./pages/Landing').then(module => ({ default: module.Landing })));
-const TermsOfService = lazy(() => import('./pages/Landing').then(module => ({ default: module.Landing })));
-const PrivacyPolicy = lazy(() => import('./pages/Landing').then(module => ({ default: module.Landing })));
-const CommunityGuidelines = lazy(() => import('./pages/Landing').then(module => ({ default: module.Landing })));
+const PitchDeck = lazy(() => import('./pages/PitchDeck').then(module => ({ default: module.PitchDeck })));
+const GDC = lazy(() => import('./pages/GDC').then(module => ({ default: module.GDC })));
+const Documentation = lazy(() => import('./pages/Documentation').then(module => ({ default: module.Documentation })));
+const TermsOfService = lazy(() => import('./pages/TermsOfService').then(module => ({ default: module.TermsOfService })));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
+const CommunityGuidelines = lazy(() => import('./pages/CommunityGuidelines').then(module => ({ default: module.CommunityGuidelines })));
 const Community = lazy(() => import('./pages/Community').then(module => ({ default: module.Community })));
 
 export default function AppWrapper() {

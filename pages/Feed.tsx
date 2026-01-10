@@ -25,14 +25,45 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
     const [loading, setLoading] = useState(true);
     const [dashboardWriters, setDashboardWriters] = useState<any[]>([]);
 
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
-        if (user) {
-            db.getDashboardStats(user.id).then(data => {
-                setStats(data);
-                setLoading(false);
-            });
-            db.getDashboardWriters(user.school, 5, user.id).then(setDashboardWriters);
-        }
+        let isMounted = true;
+
+        const fetchData = async () => {
+            if (!user) return;
+            try {
+                setLoading(true);
+                setError(null);
+
+                // Fetch stats and writers in parallel
+                const [statsData, writersData] = await Promise.all([
+                    db.getDashboardStats(user.id).catch(err => {
+                        console.error("Failed to fetch dashboard stats:", err);
+                        // Return default stats on error to prevent page crash
+                        return { activeCount: 0, escrowBalance: 0, nextDeadline: null, nextDeadlineProject: null, activeOrders: [] };
+                    }),
+                    db.getDashboardWriters(user.school, 5, user.id).catch(err => {
+                        console.error("Failed to fetch dashboard writers:", err);
+                        return [];
+                    })
+                ]);
+
+                if (isMounted) {
+                    setStats(statsData);
+                    setDashboardWriters(writersData);
+                }
+            } catch (err) {
+                console.error("Dashboard data fetching critical error:", err);
+                if (isMounted) setError("Failed to load dashboard data. Please try refreshing.");
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        fetchData();
+
+        return () => { isMounted = false; };
     }, [user]);
 
     const formatCurrency = (amount: number) => {

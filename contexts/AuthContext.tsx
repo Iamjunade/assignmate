@@ -118,7 +118,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
         // Set flag to skip next syncUser call (prevents race condition with onAuthStateChanged)
         skipNextSyncRef.current = true;
-        setUser({ ...profile, email: res.data.user.email || email, is_incomplete: false });
+        setUser({ ...profile, email: res.data.user.email || email, is_incomplete: false } as User);
         presence.init(res.data.user.uid);
         notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
 
@@ -146,7 +146,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         is_incomplete: false
       });
 
-      setUser({ ...profile, email: user.email, is_incomplete: false });
+      setUser({ ...profile, email: user.email, is_incomplete: false } as User);
       presence.init(user.id);
       notificationService.sendWelcome(user.id, handle).catch(console.error);
 

@@ -838,18 +838,28 @@ export const dbService = {
     },
 
     getConnectionStatus: async (uid1: string, uid2: string) => {
-        // Check Requests
         const requestsRef = collection(getDb(), 'requests');
-        const q = query(requestsRef, where('fromId', '==', uid1), where('toId', '==', uid2), where('status', '==', 'pending'));
-        const reqSnap = await getDocs(q);
-        if (!reqSnap.empty) return 'pending';
 
-        // Check Actual Connection
+        // 1. Check if I sent a request (pending_sent)
+        const qSent = query(requestsRef, where('fromId', '==', uid1), where('toId', '==', uid2), where('status', '==', 'pending'));
+        const snapSent = await getDocs(qSent);
+        if (!snapSent.empty) return 'pending_sent';
+
+        // 2. Check if I received a request (pending_received)
+        const qReceived = query(requestsRef, where('fromId', '==', uid2), where('toId', '==', uid1), where('status', '==', 'pending'));
+        const snapReceived = await getDocs(qReceived);
+        if (!snapReceived.empty) return 'pending_received';
+
+        // 3. Check Actual Connection
+        // Optimization: Query specifically for the connection document if ID is deterministic
+        // Try both combinations just in case, though respondToConnectionRequest sorts it implicitly by creation logic?
+        // Actually respondToConnectionRequest uses `reqData.fromId` and `toId`.
+        // Let's rely on the participants array query which is safer.
         const connQ = query(collection(getDb(), 'connections'), where('participants', 'array-contains', uid1));
         const connSnap = await getDocs(connQ);
         const isConnected = connSnap.docs.some(doc => {
             const data = doc.data();
-            return data.participants && data.participants.some((p: any) => (p.id === uid2 || p === uid2));
+            return data.participants && data.participants.includes(uid2);
         });
 
         return isConnected ? 'connected' : 'none';
@@ -860,7 +870,7 @@ export const dbService = {
         try {
             const postsRef = collection(getDb(), 'community_posts');
             let q = query(postsRef, orderBy('created_at', 'desc'), limit(50));
-            
+
             if (college) {
                 // In a real app, you might want to filter by college, 
                 // but let's keep it global for now or add a filter if needed.
