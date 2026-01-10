@@ -5,7 +5,6 @@ import { dbService } from '../services/firestoreService';
 import { User } from '../types';
 import { Avatar } from '../components/ui/Avatar';
 import { Search, Filter, CheckCircle2, Circle, GraduationCap, MapPin, Star, UserCheck } from 'lucide-react';
-import { Dialog, DialogContent, DialogTrigger } from '../components/ui/dialog'; // Assuming we might need this later, or standard HTML dialog
 
 export const FindWriter = () => {
     const { user } = useAuth();
@@ -27,7 +26,7 @@ export const FindWriter = () => {
         const fetchUsers = async () => {
             try {
                 setLoading(true);
-                const users = await dbService.getAllUsers();
+                const users = (await dbService.getAllUsers()) as User[];
                 // Filter out current user
                 const others = users.filter(u => u.id !== user?.id);
                 setAllUsers(others);
@@ -77,10 +76,71 @@ export const FindWriter = () => {
     }, [searchQuery, filterType, allUsers, searchParams]);
 
 
+
     return (
         <div className="min-h-screen bg-[#FDFBF9] font-display text-slate-900">
-            {/* Navbar Placeholder - You might have a Layout wrapper, but adding margin for clarity */}
-            <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            {/* Navbar */}
+            <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-orange-100/50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                    {/* Left: Logo */}
+                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+                        <div className="size-8 text-[#FF6B4A]">
+                            <span className="material-symbols-outlined text-3xl leading-none">school</span>
+                        </div>
+                        <h2 className="text-[#1b140d] text-xl font-bold tracking-tight">AssignMate</h2>
+                    </div>
+
+                    {/* Center: Navigation Links */}
+                    <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-500">
+                        <a
+                            onClick={() => navigate('/')}
+                            className="cursor-pointer hover:text-slate-900 transition-colors"
+                        >
+                            Home
+                        </a>
+                        <a
+                            className="cursor-pointer text-[#FF6B4A] font-bold"
+                        >
+                            Find Peers
+                        </a>
+                        <a
+                            onClick={() => navigate('/projects')}
+                            className="cursor-pointer hover:text-slate-900 transition-colors"
+                        >
+                            My Assignments
+                        </a>
+                    </nav>
+
+                    {/* Right: Dashboard & Profile */}
+                    <div className="flex items-center gap-6">
+                        <a
+                            onClick={() => navigate('/feed')}
+                            className="hidden sm:block text-sm font-bold text-slate-900 hover:text-[#FF6B4A] cursor-pointer transition-colors"
+                        >
+                            Dashboard
+                        </a>
+                        {user ? (
+                            <div className="relative group cursor-pointer" onClick={() => navigate('/profile')}>
+                                <Avatar src={user.avatar_url} alt={user.full_name || user.handle} className="size-10 rounded-full border-2 border-white shadow-md" />
+                                <div className="absolute right-0 top-12 bg-white rounded-xl shadow-xl border border-slate-100 p-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right">
+                                    <div className="px-3 py-2 border-b border-slate-100 mb-1">
+                                        <p className="text-sm font-bold text-slate-900 truncate">{user.full_name}</p>
+                                        <p className="text-xs text-slate-500 truncate">@{user.handle}</p>
+                                    </div>
+                                    <button onClick={() => navigate('/feed')} className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors font-medium">Dashboard</button>
+                                    <button onClick={() => navigate('/profile')} className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors font-medium">My Profile</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <button onClick={() => navigate('/auth')} className="h-10 px-6 rounded-full bg-[#FF6B4A] text-white text-sm font-bold shadow-lg shadow-orange-200 hover:shadow-orange-300 hover:scale-105 transition-all">
+                                Login
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </header>
+
+            <div className="pt-12 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
 
                 {/* Header Section */}
                 <div className="text-center space-y-4 mb-12">
