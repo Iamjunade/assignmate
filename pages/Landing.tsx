@@ -10,7 +10,7 @@ export const Landing = () => {
     const handleSearch = () => navigate('/feed');
 
     return (
-        <div className="min-h-screen w-full font-sans antialiased bg-black text-[#F5F5F4] selection:bg-primary selection:text-white">
+        <div className="min-h-screen w-full font-body antialiased bg-[#0d0b09] text-[#F5F5F4] selection:bg-primary selection:text-white">
             {/* Navbar */}
             <nav className="fixed w-full z-50 transition-all duration-300 bg-black/80 backdrop-blur-xl border-b border-white/5">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -19,7 +19,7 @@ export const Landing = () => {
                             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,107,0,0.15)]">
                                 <span className="material-symbols-outlined text-xl">school</span>
                             </div>
-                            <span className="font-bold text-xl tracking-tight text-white">AssignMate</span>
+                            <span className="font-display font-bold text-xl tracking-tight text-white">AssignMate</span>
                         </div>
                         <div className="hidden md:flex items-center space-x-8">
                             <a className="text-sm font-medium text-[#E6D5B8]/80 hover:text-primary transition-colors" href="#how-it-works">How it Works</a>
@@ -66,7 +66,7 @@ export const Landing = () => {
                                 <span className="material-symbols-outlined text-sm text-primary">verified_user</span>
                                 100% Free & Campus Verified
                             </div>
-                            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1] mb-8">
+                            <h1 className="font-display text-5xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1] mb-8">
                                 Learn Together. <br />
                                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-400">Grow Together.</span>
                             </h1>
@@ -150,7 +150,7 @@ export const Landing = () => {
             <section className="py-32 relative bg-black" id="safety">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center max-w-3xl mx-auto mb-20">
-                        <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Why AssignMate is a Community</h2>
+                        <h2 className="font-display text-3xl md:text-5xl font-bold text-white mb-6">Why AssignMate is a Community</h2>
                         <p className="text-[#E6D5B8]/60 text-lg font-light leading-relaxed">We serve the isolated professional with open-sourced networking and support, transforming how students connect.</p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8">
@@ -164,7 +164,7 @@ export const Landing = () => {
                                 <div className="w-16 h-16 rounded-2xl bg-[#3A2E24] flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 shadow-inner">
                                     <span className="material-symbols-outlined text-3xl text-primary">{card.icon}</span>
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-4">{card.title}</h3>
+                                <h3 className="font-display text-xl font-bold text-white mb-4">{card.title}</h3>
                                 <p className="text-[#E6D5B8]/60 leading-relaxed text-sm">{card.desc}</p>
                             </div>
                         ))}
@@ -178,7 +178,7 @@ export const Landing = () => {
                     <div className="bg-black rounded-[2rem] p-10 md:p-14 text-center shadow-2xl border border-white/5 relative overflow-hidden group">
                         <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px]"></div>
                         <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px]"></div>
-                        <h3 className="text-3xl md:text-4xl font-bold text-white mb-8 relative z-10">Search your campus now</h3>
+                        <h3 className="font-display text-3xl md:text-4xl font-bold text-white mb-8 relative z-10">Search your campus now</h3>
                         <div className="relative max-w-xl mx-auto mb-8 z-10">
                             <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                                 <span className="material-symbols-outlined text-[#E6D5B8]/40">search</span>
@@ -208,7 +208,7 @@ export const Landing = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col lg:flex-row gap-20">
                         <div className="lg:w-1/3 lg:sticky lg:top-32 h-fit">
-                            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-8">How it works</h2>
+                            <h2 className="font-display text-4xl lg:text-5xl font-bold text-white mb-8">How it works</h2>
                             <p className="text-lg text-[#E6D5B8]/60 mb-10 leading-relaxed font-light">
                                 Five steps to secure, collaborative learning with your verified campus community. Simplicity meets security.
                             </p>
@@ -232,7 +232,7 @@ export const Landing = () => {
                                             {step.num}
                                         </div>
                                         <div className="pt-3">
-                                            <h4 className="text-2xl font-bold text-white mb-3 flex items-center gap-3">
+                                            <h4 className="font-display text-2xl font-bold text-white mb-3 flex items-center gap-3">
                                                 <span className="material-symbols-outlined text-primary text-xl">{step.icon}</span>
                                                 {step.title}
                                             </h4>
@@ -250,7 +250,7 @@ export const Landing = () => {
             <section className="py-32 bg-[#2c2219] relative" id="contributors">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-20">
-                        <h2 className="text-4xl font-bold text-white mb-6">Success Stories from Students</h2>
+                        <h2 className="font-display text-4xl font-bold text-white mb-6">Success Stories from Students</h2>
                         <div className="flex items-center justify-center gap-2 text-primary">
                             {[1, 2, 3, 4].map(i => (
                                 <span key={i} className="material-symbols-outlined text-2xl">star</span>

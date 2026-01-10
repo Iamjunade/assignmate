@@ -71,8 +71,8 @@ export default {
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
-                display: ['Manrope', 'sans-serif'], // Updated to Manrope
-                body: ['Noto Sans', 'sans-serif'],
+                display: ['Plus Jakarta Sans', 'sans-serif'], // Headers
+                body: ['Inter', 'sans-serif'], // Body text
             },
             borderRadius: {
                 "lg": "0.5rem",
