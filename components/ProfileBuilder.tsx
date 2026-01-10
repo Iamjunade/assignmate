@@ -15,8 +15,17 @@ export const ProfileBuilder = () => {
         if (!user) return;
         setLoading(true);
         try {
-            // Mark profile as complete (not incomplete)
-            await db.updateProfile(user.id, { is_incomplete: false });
+            // Mark profile as complete and init default fields
+            await db.updateProfile(user.id, {
+                is_incomplete: false,
+                bio_summary: user.bio || '', // Use signup bio
+                experience_level: 'Beginner',
+                strengths: [],
+                weaknesses: [],
+                interests: [],
+                collaboration_styles: [],
+                project_experience: []
+            });
 
             // Refresh local user state
             if (refreshProfile) await refreshProfile();
