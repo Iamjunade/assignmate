@@ -14,7 +14,7 @@ const SUGGESTED_TAGS = [
 ];
 
 export const Onboarding = () => {
-    const { user, refreshProfile } = useAuth();
+    const { user, refreshProfile, loading: authLoading } = useAuth();
     const navigate = useNavigate();
     const { success, error: toastError } = useToast();
 
@@ -27,6 +27,13 @@ export const Onboarding = () => {
     });
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(1);
+
+    // Redirect to auth if not authenticated
+    useEffect(() => {
+        if (!authLoading && !user) {
+            navigate('/auth', { replace: true });
+        }
+    }, [user, authLoading, navigate]);
 
     // Pre-fill form with existing user data
     useEffect(() => {
@@ -99,6 +106,18 @@ export const Onboarding = () => {
             setLoading(false);
         }
     };
+
+    // Show loading while auth is loading
+    if (authLoading || !user) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="size-8 text-primary animate-spin" />
+                    <p className="text-text-muted text-sm">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -217,8 +236,8 @@ export const Onboarding = () => {
                                             type="button"
                                             onClick={() => handleTagToggle(tag)}
                                             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${formData.tags.includes(tag)
-                                                    ? 'bg-primary text-white shadow-md'
-                                                    : 'bg-gray-100 text-text-muted hover:bg-gray-200'
+                                                ? 'bg-primary text-white shadow-md'
+                                                : 'bg-gray-100 text-text-muted hover:bg-gray-200'
                                                 }`}
                                         >
                                             {tag}
