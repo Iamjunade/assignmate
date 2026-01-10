@@ -44,7 +44,7 @@ export const Landing = () => {
     return (
         <div className="relative min-h-screen w-full font-display bg-background text-slate-900 transition-colors duration-300">
             {/* Navbar */}
-            <header className="fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white/80 bg-white/90 backdrop-blur-md border-b border-white/20 ">
+            <header className="fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white/90 backdrop-blur-md border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
                         <div className="size-10 rounded-xl overflow-hidden shadow-lg shadow-orange-500/20 transition-transform group-hover:scale-105">

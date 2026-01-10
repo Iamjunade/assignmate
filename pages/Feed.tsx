@@ -130,6 +130,19 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
     // ==========================================
     // UNIFIED DASHBOARD
     // ==========================================
+
+    // Guard: Show loading if user is null
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-text-muted text-sm">Loading dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />

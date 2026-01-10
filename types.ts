@@ -2,18 +2,19 @@ export interface User {
   id: string;
   getIdToken?: () => Promise<string>; // Added for Auth compatibility
   handle: string;
-  email: string;
+  email?: string; // Made optional for partial profiles
   full_name?: string;
-  school: string;
+  school?: string; // Made optional for partial profiles
   avatar_url?: string;
   cover_url?: string; // Custom profile cover image
 
-  xp: number;
+  xp?: number; // Made optional
   rating?: number;
   projects_completed?: number;
   portfolio?: string[]; // Array of image URLs (Handwriting samples)
   rate_per_page?: number; // Optional: For future expansion
   is_mentor?: boolean; // Toggle: Is the user open to work/mentor?
+  is_writer?: boolean; // Alias for is_mentor for backward compatibility
   bio?: string; // Short pitch: "I have neat handwriting"
   tags?: string[]; // e.g., ['Math', 'CS', 'English']
   saved_mentors?: string[]; // IDs of mentors this user has bookmarked
@@ -28,7 +29,7 @@ export interface User {
   response_time?: number; // in minutes
   languages?: string[];
   is_online?: boolean;
-  is_verified?: 'pending' | 'verified' | 'rejected' | 'none';
+  is_verified?: 'pending' | 'verified' | 'rejected' | 'none' | string;
   id_card_url?: string;
 
   // AI Profile Fields
