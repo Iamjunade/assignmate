@@ -890,12 +890,13 @@ export const dbService = {
     getCommunityPosts: async (college?: string) => {
         try {
             const postsRef = collection(getDb(), 'community_posts');
-            let q = query(postsRef, orderBy('created_at', 'desc'), limit(50));
-
+            let q;
             if (college) {
-                // In a real app, you might want to filter by college, 
-                // but let's keep it global for now or add a filter if needed.
-                // q = query(postsRef, where('user_school', '==', college), orderBy('created_at', 'desc'), limit(50));
+                // Filter by college
+                q = query(postsRef, where('user_school', '==', college), orderBy('created_at', 'desc'), limit(50));
+            } else {
+                // Global feed
+                q = query(postsRef, orderBy('created_at', 'desc'), limit(50));
             }
 
             const snap = await getDocs(q);

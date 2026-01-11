@@ -17,14 +17,17 @@ export const Community: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [posting, setPosting] = useState(false);
     const [newPost, setNewPost] = useState('');
+    const [viewMode, setViewMode] = useState<'global' | 'campus'>('global');
 
     useEffect(() => {
         fetchPosts();
-    }, []);
+    }, [viewMode]); // Re-fetch when view mode changes
 
     const fetchPosts = async () => {
         try {
-            const data = await db.getCommunityPosts();
+            setLoading(true); // Set loading true on re-fetch
+            const collegeFilter = viewMode === 'campus' && user?.school ? user.school : undefined;
+            const data = await db.getCommunityPosts(collegeFilter);
             setPosts(data as CommunityPost[]);
         } catch (error) {
             console.error("Error fetching posts:", error);
@@ -66,7 +69,7 @@ export const Community: React.FC = () => {
             setPosts(prev => prev.map(p => {
                 if (p.id === postId) {
                     const likes = p.likes || [];
-                    const newLikes = likes.includes(user.id) 
+                    const newLikes = likes.includes(user.id)
                         ? likes.filter(id => id !== user.id)
                         : [...likes, user.id];
                     return { ...p, likes: newLikes };
@@ -87,9 +90,25 @@ export const Community: React.FC = () => {
 
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
                     <div className="max-w-2xl mx-auto">
-                        <div className="mb-8">
+                        <div className="mb-6">
                             <h1 className="text-2xl font-extrabold text-text-dark tracking-tight">Community Feed</h1>
-                            <p className="text-text-muted text-sm mt-1">Share thoughts and connect with peers at {user?.school}.</p>
+                            <p className="text-text-muted text-sm mt-1">Share thoughts and connect with peers.</p>
+
+                            {/* View Toggle */}
+                            <div className="flex bg-gray-100 p-1 rounded-xl w-fit mt-4">
+                                <button
+                                    onClick={() => setViewMode('global')}
+                                    className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${viewMode === 'global' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    Global
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('campus')}
+                                    className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${viewMode === 'campus' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    My Campus
+                                </button>
+                            </div>
                         </div>
 
                         {/* Post Creation Form */}
@@ -168,7 +187,7 @@ export const Community: React.FC = () => {
                                         </p>
 
                                         <div className="mt-4 flex items-center gap-6 pt-4 border-t border-gray-50">
-                                            <button 
+                                            <button
                                                 onClick={() => handleToggleLike(post.id)}
                                                 className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${post.likes?.includes(user?.id || '') ? 'text-red-500' : 'text-text-muted hover:text-red-500'}`}
                                             >
