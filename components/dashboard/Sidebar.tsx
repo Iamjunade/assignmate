@@ -55,7 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group cursor-pointer ${isActive('/feed') ? 'bg-gradient-to-r from-primary/10 to-orange-500/5 text-primary ring-2 ring-primary/20 shadow-sm' : 'hover:bg-gray-100 hover:shadow-sm text-text-muted hover:text-text-dark'}`}
                 >
                     <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
-                    <span className="text-sm font-bold">Dashboard</span>
+                    <span className="text-sm font-bold">My Overview</span>
                 </a>
 
                 <a
@@ -63,7 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/projects') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
                 >
                     <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">assignment</span>
-                    <span className="text-sm font-medium group-hover:text-text-dark transition-colors">My Projects</span>
+                    <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Assignments</span>
                 </a>
 
                 <a
@@ -71,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/peers') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
                 >
                     <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">person_search</span>
-                    <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Find Peers</span>
+                    <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Find Teammates</span>
                 </a>
 
                 <a
@@ -79,7 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/chats') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
                 >
                     <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">chat_bubble</span>
-                    <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Messages</span>
+                    <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Discuss</span>
                     {unreadCount > 0 && (
                         <span className="ml-auto bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">{unreadCount}</span>
                     )}
@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/community') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
                 >
                     <span className="material-symbols-outlined group-hover:text-text-dark transition-colors">forum</span>
-                    <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Community</span>
+                    <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Campus Feed</span>
                 </a>
 
                 <div className="mt-6 mb-2 px-4 text-xs font-bold text-text-muted uppercase tracking-wider">Settings</div>
