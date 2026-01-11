@@ -29,6 +29,16 @@ export interface User {
   is_online?: boolean;
   is_verified?: 'pending' | 'verified' | 'rejected' | 'none';
   id_card_url?: string;
+  ai_profile?: AIProfile; // Optional AI-generated profile
+}
+
+export interface AIProfile {
+  strengths: string[];
+  weaknesses: string[];
+  interests: string[];
+  collaboration_style: string[];
+  project_experience: string[];
+  experience_level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Unspecified';
 }
 
 export interface Chat {

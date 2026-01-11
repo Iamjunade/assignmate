@@ -115,7 +115,8 @@ export const userApi = {
             languages: ['English'],
             is_online: true,
             id_card_url: null,
-            is_incomplete: metadata.is_incomplete ?? false // ✅ Added is_incomplete
+            is_incomplete: metadata.is_incomplete ?? false,
+            ai_profile: metadata.ai_profile || null // ✅ Save AI Profile if present
         };
 
         try {
