@@ -1,8 +1,11 @@
+// Safe global access
+declare const __GEMINI_API_KEY__: string | undefined;
+
 const env = (import.meta as any).env || {};
-// Check multiple sources for the API Key to support Vercel and local .env variations
-const API_KEY = env.VITE_GEMINI_API_KEY || (process?.env as any)?.GEMINI_API_KEY || (process?.env as any)?.API_KEY || '';
+const API_KEY = env.VITE_GEMINI_API_KEY || (typeof __GEMINI_API_KEY__ !== 'undefined' ? __GEMINI_API_KEY__ : '') || '';
 
 export const ai = {
+    // ... verified existing code ...
     verifyIdCard: async (file: File): Promise<{ verified: boolean; confidence: number; reason: string }> => {
         if (!API_KEY) {
             console.warn("Gemini API Key missing");
@@ -10,6 +13,7 @@ export const ai = {
         }
 
         try {
+            // ... existing implementation ...
             const base64Data = await fileToGenerativePart(file);
 
             const response = await fetch(
@@ -33,16 +37,8 @@ export const ai = {
 
             if (!text) throw new Error("No response from AI");
 
-            // Clean markdown code blocks if present
             const jsonStr = text.replace(/```json|```/g, '').trim();
-
-            let result;
-            try {
-                result = JSON.parse(jsonStr);
-            } catch (parseError) {
-                console.warn("AI returned invalid JSON. Raw text:", text);
-                return { verified: false, confidence: 0, reason: "AI Response Error" };
-            }
+            const result = JSON.parse(jsonStr);
 
             return {
                 verified: result.is_valid && result.confidence > 0.85,
@@ -57,8 +53,8 @@ export const ai = {
 
     onboardingChat: async (history: { role: 'user' | 'model'; parts: { text: string }[] }[]) => {
         if (!API_KEY) {
-            console.warn("Gemini API Key missing");
-            return { text: "Error: API Key Missing" };
+            console.warn("Gemini API Key missing (onboardingChat)");
+            return { text: "Error: API Key Missing in Configuration. Please check Vercel Env Vars." };
         }
 
         const systemPrompt = `
