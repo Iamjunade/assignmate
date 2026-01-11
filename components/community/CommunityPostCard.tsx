@@ -4,6 +4,7 @@ import { CommunityPost } from '../../types';
 import { Avatar } from '../ui/Avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { Heart, MessageSquare, Share2, MoreHorizontal, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface CommunityPostCardProps {
     post: CommunityPost;
@@ -12,26 +13,37 @@ interface CommunityPostCardProps {
 
 export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLike }) => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [expanded, setExpanded] = useState(false);
 
     const isLiked = post.likes?.includes(user?.id || '');
     const isLongPost = post.content.length > 280;
     const displayContent = expanded || !isLongPost ? post.content : post.content.slice(0, 280) + '...';
 
+    const handleProfileClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (post.user_id) {
+            navigate(`/profile/${post.user_id}`);
+        }
+    };
+
     return (
         <div className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 group">
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
+                <div
+                    className="flex items-center gap-3 cursor-pointer group/profile"
+                    onClick={handleProfileClick}
+                >
                     <Avatar
                         src={post.user_avatar}
                         alt={post.user_handle}
-                        className="size-12 rounded-full border border-gray-100"
+                        className="size-12 rounded-full border border-gray-100 group-hover/profile:border-orange-200 transition-colors"
                         fallback={post.user_handle?.charAt(0)}
                     />
                     <div>
                         <div className="flex items-center gap-1.5">
-                            <h3 className="text-base font-bold text-slate-900 leading-none">
+                            <h3 className="text-base font-bold text-slate-900 leading-none group-hover/profile:text-orange-600 transition-colors">
                                 {post.user_handle}
                             </h3>
                             {/* Verified Badge Mock */}
@@ -71,8 +83,8 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
                     <button
                         onClick={() => onLike(post.id)}
                         className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${isLiked
-                                ? 'bg-red-50 text-red-500'
-                                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                            ? 'bg-red-50 text-red-500'
+                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
                             }`}
                     >
                         <Heart size={20} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "scale-110" : ""} />
