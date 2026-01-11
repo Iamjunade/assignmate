@@ -14,11 +14,12 @@ export const FindWriter = () => {
     // State
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+    const [connectionIds, setConnectionIds] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
 
     // Filters
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-    const [filterType, setFilterType] = useState<'all' | 'contributors' | 'verified' | 'online'>('all');
+    const [filterType, setFilterType] = useState<'all' | 'contributors' | 'verified' | 'online' | 'network'>('all');
     const [sortBy, setSortBy] = useState<'relevance' | 'rating'>('relevance');
 
     // Initial Fetch
@@ -26,11 +27,29 @@ export const FindWriter = () => {
         const fetchUsers = async () => {
             try {
                 setLoading(true);
-                const users = (await dbService.getAllUsers()) as User[];
+                const [users, connections] = await Promise.all([
+                    dbService.getAllUsers() as Promise<User[]>,
+                    user?.id ? dbService.getMyConnections(user.id) : Promise.resolve([])
+                ]);
+
                 // Filter out current user
                 const others = users.filter(u => u.id !== user?.id);
                 setAllUsers(others);
                 setFilteredUsers(others);
+
+                // Process connection IDs
+                const ids = new Set<string>();
+                connections.forEach((conn: any) => {
+                    // Extract ID from connection object (handles both populated User objects and raw IDs)
+                    const otherId = conn.participants?.find((p: any) => (p.id || p) !== user?.id);
+                    const actualId = typeof otherId === 'object' ? otherId.id : otherId;
+                    if (actualId) ids.add(actualId);
+
+                    // Also check for direct ID if the structure is different
+                    if (conn.id && conn.id !== user?.id) ids.add(conn.id);
+                });
+                setConnectionIds(ids);
+
             } catch (error) {
                 console.error("Error fetching users:", error);
             } finally {
@@ -66,10 +85,9 @@ export const FindWriter = () => {
             result = result.filter(u => u.is_verified === 'verified');
         } else if (activeFilter === 'online') {
             result = result.filter(u => u.is_online);
+        } else if (activeFilter === 'network') {
+            result = result.filter(u => u.id && connectionIds.has(u.id));
         }
-        // 'network' logic could be added here if we had a list of connections ID
-        // For now, we'll leave it as 'all' or filtered by search if 'network' is selected without specific ID list logic here
-        // (Ideally we'd fetch connections and filter by that, but for this step we focus on the main search)
 
         setFilteredUsers(result);
 
@@ -212,7 +230,7 @@ export const FindWriter = () => {
                         </button>
                         {/* Clear Filter */}
                         {filterType !== 'all' && (
-                            <button onClick={() => setFilterType('all')} className="text-slate-400 hover:text-slate-600 text-xs font-bold underline px-2">Clear</button>
+                            <button onClick={() => { setFilterType('all'); navigate('/peers'); }} className="text-slate-400 hover:text-slate-600 text-xs font-bold underline px-2">Clear</button>
                         )}
                     </div>
 
@@ -228,7 +246,16 @@ export const FindWriter = () => {
 
                 {/* Results Grid */}
                 <div>
-                    <h2 className="text-xl font-bold text-slate-900 mb-2">All Students</h2>
+                    <div className="flex items-center gap-3 mb-4">
+                        <h2 className="text-xl font-bold text-slate-900">
+                            {(searchParams.get('tab') === 'network' || filterType === 'network') ? 'My Network' : 'All Students'}
+                        </h2>
+                        {(searchParams.get('tab') === 'network' || filterType === 'network') && (
+                            <span className="bg-orange-100 text-orange-600 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                                Your Connections
+                            </span>
+                        )}
+                    </div>
                     <p className="text-slate-500 text-sm mb-6">{filteredUsers.length} students found</p>
 
                     {loading ? (
