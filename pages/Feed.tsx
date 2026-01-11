@@ -121,7 +121,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         <span className="material-symbols-outlined">person_search</span>
                                         Find Peers
                                     </button>
-                                    <button onClick={() => navigate('/peers?tab=network')} className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-white/30 transition-all">
+                                    <button onClick={() => navigate('/connections')} className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-white/30 transition-all">
                                         <span className="material-symbols-outlined">group</span>
                                         My Network
                                     </button>
