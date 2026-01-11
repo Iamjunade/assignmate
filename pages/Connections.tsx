@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { dbService as db } from '../services/firestoreService';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
-import { Loader2, UserPlus, MessageSquare, Users, X, Check } from 'lucide-react';
-
-const MotionDiv = motion.div as any;
+import { Loader2, MessageSquare, X, Check, Search } from 'lucide-react';
+import { Avatar } from '../components/ui/Avatar';
 
 export const Connections = ({ user }: { user: User }) => {
     const navigate = useNavigate();
@@ -15,13 +13,13 @@ export const Connections = ({ user }: { user: User }) => {
     const [connections, setConnections] = useState<any[]>([]);
     const [requests, setRequests] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         if (!user) return;
         const loadData = async () => {
             setLoading(true);
             try {
-                // Ensure your firestoreService actually returns populated user objects, not just IDs
                 const [myConns, myReqs] = await Promise.all([
                     db.getMyConnections(user.id),
                     db.getIncomingRequests(user.id)
@@ -37,16 +35,12 @@ export const Connections = ({ user }: { user: User }) => {
         loadData();
     }, [user]);
 
-    // ✅ FIXED: Check for existing chat before creating a new one
     const handleMessage = async (targetUserId: string) => {
         try {
-            // 1. Try to find an existing chat first
             const existingChatId = await db.findExistingChat(user.id, targetUserId);
-
             if (existingChatId) {
                 navigate(`/chats/${existingChatId}`);
             } else {
-                // 2. Create new if none exists
                 const chat = await db.createChat(null, user.id, targetUserId);
                 navigate(`/chats/${chat.id}`);
             }
@@ -65,91 +59,191 @@ export const Connections = ({ user }: { user: User }) => {
         window.location.reload();
     };
 
-    return (
-        <div className="bg-background-light dark:bg-background-dark text-text-main h-screen flex overflow-hidden">
-            <Sidebar user={user} />
-            <main className="flex-1 flex flex-col h-full overflow-hidden relative">
-                <DashboardHeader />
-                <div className="flex-1 overflow-y-auto p-6">
-                    <div className="max-w-4xl mx-auto">
-                        <h1 className="text-2xl font-bold mb-6">My Network</h1>
+    const filteredConnections = connections.filter(conn => {
+        const otherUser = Array.isArray(conn.participants)
+            ? conn.participants.find((p: any) => p.id !== user.id) || conn.participants[0]
+            : null;
+        if (!otherUser) return false;
 
-                        {/* Tabs */}
-                        <div className="flex gap-4 mb-6 border-b border-gray-200 dark:border-gray-700 pb-1">
-                            <button
-                                onClick={() => setActiveTab('network')}
-                                className={`pb-2 px-1 text-sm font-bold ${activeTab === 'network' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'}`}
-                            >
-                                Connections ({connections.length})
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('pending')}
-                                className={`pb-2 px-1 text-sm font-bold ${activeTab === 'pending' ? 'text-primary border-b-2 border-primary' : 'text-gray-500'}`}
-                            >
-                                Requests ({requests.length})
-                            </button>
+        const q = searchQuery.toLowerCase();
+        return (otherUser.full_name?.toLowerCase() || '').includes(q) ||
+            (otherUser.handle?.toLowerCase() || '').includes(q) ||
+            (otherUser.school?.toLowerCase() || '').includes(q);
+    });
+
+    return (
+        <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
+            <Sidebar user={user} />
+
+            <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#F9FAFB]">
+                <DashboardHeader />
+
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20">
+                    <div className="max-w-7xl mx-auto space-y-8">
+
+                        {/* Hero Section */}
+                        <div className="bg-gradient-to-r from-[#FF8C42] to-[#FF5E62] rounded-[2rem] p-8 md:p-10 text-white shadow-lg relative overflow-hidden">
+                            <div className="relative z-10">
+                                <div className="flex items-center gap-2 text-white/80 text-sm font-medium mb-2">
+                                    <span className="material-symbols-outlined text-[18px]">group</span>
+                                    <span>NETWORK & CONNECTIONS</span>
+                                </div>
+                                <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                                    Your Professional Network
+                                </h1>
+                                <p className="text-white/90 text-lg max-w-xl mb-8 leading-relaxed">
+                                    Manage your connections and pending requests. Build your network to collaborate and grow together.
+                                </p>
+
+                                <div className="flex gap-4">
+                                    <button
+                                        onClick={() => setActiveTab('network')}
+                                        className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${activeTab === 'network'
+                                                ? 'bg-white text-[#FF6B4A] shadow-lg scale-105'
+                                                : 'bg-white/20 text-white hover:bg-white/30'
+                                            }`}
+                                    >
+                                        <span className="material-symbols-outlined">diversity_3</span>
+                                        Connections <span className="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full ml-1">{connections.length}</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('pending')}
+                                        className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${activeTab === 'pending'
+                                                ? 'bg-white text-[#FF6B4A] shadow-lg scale-105'
+                                                : 'bg-white/20 text-white hover:bg-white/30'
+                                            }`}
+                                    >
+                                        <span className="material-symbols-outlined">person_add</span>
+                                        Requests <span className="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full ml-1">{requests.length}</span>
+                                    </button>
+                                </div>
+                            </div>
+                            {/* Decorative Circles */}
+                            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/5 rounded-full blur-2xl -ml-10 -mb-10"></div>
                         </div>
 
-                        {loading ? (
-                            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-primary" /></div>
-                        ) : (
-                            <div className="grid gap-4">
-                                {activeTab === 'network' && (
-                                    connections.length > 0 ? (
-                                        connections.map(conn => {
-                                            // Robust check to find the "other" user
-                                            const otherUser = Array.isArray(conn.participants)
-                                                ? conn.participants.find((p: any) => p.id !== user.id) || conn.participants[0]
-                                                : null;
-
-                                            if (!otherUser) return null;
-
-                                            return (
-                                                <div key={conn.id} className="bg-white dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center justify-between shadow-sm">
-                                                    <div className="flex items-center gap-4">
-                                                        <img
-                                                            src={otherUser.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${otherUser.full_name}`}
-                                                            className="w-12 h-12 rounded-full object-cover"
-                                                            alt=""
-                                                        />
-                                                        <div>
-                                                            <h3 className="font-bold text-lg">{otherUser.full_name}</h3>
-                                                            <p className="text-xs text-gray-500">{otherUser.school}</p>
-                                                        </div>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => handleMessage(otherUser.id)}
-                                                        className="p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors"
-                                                    >
-                                                        <MessageSquare size={20} />
-                                                    </button>
-                                                </div>
-                                            );
-                                        })
-                                    ) : <p className="text-gray-500 text-center py-10">No connections yet. Go find some peers!</p>
-                                )}
-
-                                {activeTab === 'pending' && (
-                                    requests.length > 0 ? (
-                                        requests.map(req => (
-                                            <div key={req.id} className="bg-white dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center justify-between shadow-sm">
-                                                <div className="flex items-center gap-4">
-                                                    <img src={req.fromUser?.avatar_url} className="w-12 h-12 rounded-full bg-gray-200" alt="" />
-                                                    <div>
-                                                        <h3 className="font-bold">{req.fromUser?.full_name}</h3>
-                                                        <p className="text-xs text-gray-500">Wants to connect</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button onClick={() => handleReject(req)} className="p-2 rounded-full bg-red-50 text-red-500 hover:bg-red-100"><X size={20} /></button>
-                                                    <button onClick={() => handleAccept(req)} className="p-2 rounded-full bg-green-50 text-green-600 hover:bg-green-100"><Check size={20} /></button>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : <p className="text-gray-500 text-center py-10">No pending requests.</p>
-                                )}
+                        {/* Search Bar (Only for network tab) */}
+                        {activeTab === 'network' && (
+                            <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex items-center max-w-2xl">
+                                <div className="pl-4 text-gray-400">
+                                    <Search size={20} />
+                                </div>
+                                <input
+                                    type="text"
+                                    className="flex-1 bg-transparent border-none h-12 px-4 text-base outline-none placeholder:text-gray-400 font-medium text-gray-700"
+                                    placeholder="Search connections by name or college..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
                             </div>
                         )}
+
+                        {/* Content Area */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {loading ? (
+                                <div className="col-span-full flex justify-center py-20">
+                                    <Loader2 className="animate-spin text-orange-500 size-10" />
+                                </div>
+                            ) : (
+                                <>
+                                    {activeTab === 'network' && (
+                                        filteredConnections.length > 0 ? (
+                                            filteredConnections.map(conn => {
+                                                const otherUser = Array.isArray(conn.participants)
+                                                    ? conn.participants.find((p: any) => p.id !== user.id) || conn.participants[0]
+                                                    : null;
+
+                                                if (!otherUser) return null;
+
+                                                return (
+                                                    <div key={conn.id} className="bg-white rounded-[1.5rem] border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-orange-100 transition-all group">
+                                                        <div className="flex items-start justify-between mb-4">
+                                                            <div className="relative">
+                                                                <Avatar src={otherUser.avatar_url} alt={otherUser.full_name} className="size-16 rounded-full ring-4 ring-gray-50 group-hover:ring-orange-50 transition-all" />
+                                                                <div className="absolute bottom-0 right-0 size-4 bg-green-500 border-2 border-white rounded-full"></div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => handleMessage(otherUser.id)}
+                                                                className="size-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all shadow-sm"
+                                                                title="Message"
+                                                            >
+                                                                <MessageSquare size={18} />
+                                                            </button>
+                                                        </div>
+
+                                                        <div className="mb-4">
+                                                            <h3 className="font-bold text-lg text-slate-900 truncate">{otherUser.full_name || otherUser.handle}</h3>
+                                                            <p className="text-sm text-slate-500 truncate flex items-center gap-1">
+                                                                <span className="material-symbols-outlined text-sm">school</span>
+                                                                {otherUser.school || 'Student'}
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="flex gap-2">
+                                                            <button onClick={() => navigate(`/profile/${otherUser.id}`)} className="flex-1 py-2.5 rounded-xl bg-gray-50 text-gray-600 font-bold text-sm hover:bg-gray-100 transition-colors">
+                                                                View Profile
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="col-span-full text-center py-20 bg-white rounded-[2rem] border border-dashed border-gray-200">
+                                                <div className="bg-gray-50 size-20 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                                                    <span className="material-symbols-outlined text-4xl">group_off</span>
+                                                </div>
+                                                <h3 className="text-lg font-bold text-gray-900">No connections found</h3>
+                                                <p className="text-gray-500 mb-6">Start connecting with peers to build your network.</p>
+                                                <button onClick={() => navigate('/peers')} className="bg-[#FF6B4A] text-white px-6 py-2.5 rounded-full font-bold shadow-lg hover:shadow-orange-200 transition-all">
+                                                    Find Peers
+                                                </button>
+                                            </div>
+                                        )
+                                    )}
+
+                                    {activeTab === 'pending' && (
+                                        requests.length > 0 ? (
+                                            requests.map(req => (
+                                                <div key={req.id} className="bg-white rounded-[1.5rem] border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all">
+                                                    <div className="flex items-center gap-4 mb-4">
+                                                        <Avatar src={req.fromUser?.avatar_url} alt={req.fromUser?.full_name} className="size-14 rounded-full ring-2 ring-gray-50" />
+                                                        <div>
+                                                            <h3 className="font-bold text-slate-900">{req.fromUser?.full_name || 'User'}</h3>
+                                                            <p className="text-xs text-slate-500">Wants to connect with you</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <button
+                                                            onClick={() => handleReject(req)}
+                                                            className="py-2.5 rounded-xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all flex items-center justify-center gap-2"
+                                                        >
+                                                            <X size={16} /> Decline
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleAccept(req)}
+                                                            className="py-2.5 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                                                        >
+                                                            <Check size={16} /> Accept
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="col-span-full text-center py-20 bg-white rounded-[2rem] border border-dashed border-gray-200">
+                                                <div className="bg-gray-50 size-20 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                                                    <span className="material-symbols-outlined text-4xl">inbox</span>
+                                                </div>
+                                                <h3 className="text-lg font-bold text-gray-900">No pending requests</h3>
+                                                <p className="text-gray-500">You're all caught up!</p>
+                                            </div>
+                                        )
+                                    )}
+                                </>
+                            )}
+                        </div>
+
                     </div>
                 </div>
             </main>
