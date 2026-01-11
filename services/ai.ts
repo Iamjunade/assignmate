@@ -1,5 +1,6 @@
 const env = (import.meta as any).env || {};
-const API_KEY = env.VITE_GEMINI_API_KEY || '';
+// Check multiple sources for the API Key to support Vercel and local .env variations
+const API_KEY = env.VITE_GEMINI_API_KEY || (process?.env as any)?.GEMINI_API_KEY || (process?.env as any)?.API_KEY || '';
 
 export const ai = {
     verifyIdCard: async (file: File): Promise<{ verified: boolean; confidence: number; reason: string }> => {
