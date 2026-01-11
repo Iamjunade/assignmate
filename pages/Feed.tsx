@@ -114,16 +114,16 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     <span className="text-4xl animate-wave">👋</span>
                                 </h1>
                                 <p className="text-white/90 text-lg max-w-xl mb-8 leading-relaxed">
-                                    Your academic focus today: Ask a doubt, collaborate on a project, or connect with peers.
+                                    Need help with your assignments? Connect with verified peers from top universities across India.
                                 </p>
                                 <div className="flex flex-wrap gap-4">
-                                    <button onClick={() => navigate('/community')} className="bg-white text-[#FF6B4A] px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                                        <span className="material-symbols-outlined">forum</span>
-                                        Ask a Question
+                                    <button onClick={() => navigate('/peers')} className="bg-white text-[#FF6B4A] px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+                                        <span className="material-symbols-outlined">person_search</span>
+                                        Find Peers
                                     </button>
-                                    <button onClick={() => navigate('/peers')} className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-white/30 transition-all">
-                                        <span className="material-symbols-outlined">group_add</span>
-                                        Find Teammates
+                                    <button onClick={() => navigate('/connections')} className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-white/30 transition-all">
+                                        <span className="material-symbols-outlined">group</span>
+                                        My Network
                                     </button>
                                 </div>
                             </div>
@@ -137,7 +137,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                             {/* Active Projects Card */}
                             <div onClick={() => navigate('/projects')} className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
                                 <div className="flex justify-between items-start mb-4">
-                                    <h3 className="text-gray-500 font-bold text-xs uppercase tracking-wider">Assignments in Progress</h3>
+                                    <h3 className="text-gray-500 font-bold text-xs uppercase tracking-wider">Active Projects</h3>
                                     <div className="size-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center">
                                         <span className="material-symbols-outlined text-xl">assignment</span>
                                     </div>
@@ -151,7 +151,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                             {/* My Network Card */}
                             <div onClick={() => navigate('/writers?tab=network')} className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
                                 <div className="flex justify-between items-start mb-4">
-                                    <h3 className="text-gray-500 font-bold text-xs uppercase tracking-wider">Study Network</h3>
+                                    <h3 className="text-gray-500 font-bold text-xs uppercase tracking-wider">My Network</h3>
                                     <div className="size-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center">
                                         <span className="material-symbols-outlined text-xl">group</span>
                                     </div>
@@ -169,7 +169,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                             {/* Messages Card */}
                             <div onClick={() => navigate('/chats')} className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
                                 <div className="flex justify-between items-start mb-4">
-                                    <h3 className="text-gray-500 font-bold text-xs uppercase tracking-wider">Academic Discussions</h3>
+                                    <h3 className="text-gray-500 font-bold text-xs uppercase tracking-wider">Messages</h3>
                                     <div className="size-8 rounded-lg bg-green-50 text-green-500 flex items-center justify-center">
                                         <span className="material-symbols-outlined text-xl">chat</span>
                                     </div>
@@ -196,7 +196,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     <div className="flex items-center justify-between mb-6">
                                         <h2 className="text-lg font-bold text-[#111827] flex items-center gap-2">
                                             <span className="material-symbols-outlined text-blue-500">diversity_3</span>
-                                            Your Study Circle
+                                            Your Connections
                                         </h2>
                                         <button onClick={() => navigate('/writers?tab=network')} className="text-sm font-bold text-orange-500 hover:text-orange-600 flex items-center gap-1">
                                             View All <span className="material-symbols-outlined text-sm">arrow_forward</span>
@@ -225,7 +225,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         </div>
                                     ) : (
                                         <div className="text-center py-8">
-                                            <p className="text-gray-500 text-sm">You haven't added anyone yet. Find peers in your branch to collaborate.</p>
+                                            <p className="text-gray-500 text-sm">No connections yet. Connect with peers!</p>
                                         </div>
                                     )}
                                 </section>
@@ -235,7 +235,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     <div className="flex items-center justify-between mb-6">
                                         <h2 className="text-lg font-bold text-[#111827] flex items-center gap-2">
                                             <span className="material-symbols-outlined text-orange-500">folder_open</span>
-                                            Active Assignments
+                                            Active Projects
                                             <span className="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full">{stats.activeCount}</span>
                                         </h2>
                                         <button onClick={() => navigate('/projects')} className="text-sm font-bold text-gray-400 hover:text-gray-600">View All</button>
@@ -274,7 +274,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         </div>
                                     ) : (
                                         <div className="text-center py-10 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
-                                            <p className="text-gray-500 font-medium">No active work. Start a new project or offer help.</p>
+                                            <p className="text-gray-500 font-medium">No active projects</p>
                                             <button onClick={() => navigate('/writers')} className="mt-2 text-orange-500 font-bold text-sm hover:underline">Post a new project</button>
                                         </div>
                                     )}
@@ -323,7 +323,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     <div className="flex items-center justify-between mb-6">
                                         <h2 className="text-lg font-bold text-[#111827] flex items-center gap-2">
                                             <span className="material-symbols-outlined text-amber-500">star</span>
-                                            Campus Leaders
+                                            Top Trending
                                         </h2>
                                         <button onClick={() => navigate('/writers')} className="text-sm font-bold text-gray-400 hover:text-gray-600">See All</button>
                                     </div>
