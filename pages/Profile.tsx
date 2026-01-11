@@ -356,7 +356,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                     <p className="text-primary font-bold text-sm mb-1">@{profileUser.handle}</p>
                                     <p className="text-secondary text-sm font-medium flex items-center justify-center gap-1.5">
                                         <span className="material-symbols-outlined text-base">school</span>
-                                        {profileUser.school || 'University Student'}
+                                        {profileUser.school || 'Community Member'}
                                     </p>
 
                                     {/* XP Level Bar */}
@@ -397,7 +397,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                             >
                                                 <MessageSquare size={16} /> Message
                                             </button>
-                                        ) : connectionStatus === 'pending_sent' || connectionStatus === 'pending' ? (
+                                        ) : connectionStatus === 'pending_sent' ? (
                                             <button disabled className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-200 text-gray-500 font-bold text-sm">
                                                 <Clock size={16} /> Pending
                                             </button>
@@ -429,27 +429,11 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                     {/* Availability Status */}
                                     <div className="mt-6 pt-6 border-t border-border-light w-full flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className={`size-2.5 rounded-full ${isWriter ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
+                                            <div className="size-2.5 rounded-full bg-green-500 animate-pulse"></div>
                                             <span className="text-sm font-medium text-secondary">
-                                                {isWriter ? 'Writer Mode On' : 'Writer Mode Off'}
+                                                Available to Collaborate
                                             </span>
                                         </div>
-                                        {isOwnProfile ? (
-                                            <label className="relative inline-flex items-center cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={isWriter}
-                                                    onChange={(e) => handleWriterToggle(e.target.checked)}
-                                                    className="sr-only peer"
-                                                />
-                                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
-                                            </label>
-                                        ) : (
-                                            <label className="relative inline-flex items-center cursor-default">
-                                                <input type="checkbox" checked={isWriter} className="sr-only peer" readOnly />
-                                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
-                                            </label>
-                                        )}
                                     </div>
                                 </div>
 
@@ -457,7 +441,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                 <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light">
                                     <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
                                         <Shield size={20} className="text-primary" />
-                                        Trust Score
+                                        Community Trust
                                     </h3>
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between p-3 rounded-xl bg-green-50 border border-green-100">
@@ -520,10 +504,10 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                 {/* Stats Grid */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {[
-                                        { label: 'Total Earned', value: `₹${profileUser.total_earned || 0}`, icon: 'payments', color: 'text-green-600', bg: 'bg-green-50' },
-                                        { label: 'Assignments', value: projectsCompleted, icon: 'assignment', color: 'text-blue-600', bg: 'bg-blue-50' },
-                                        { label: 'Rating', value: rating.toFixed(1), icon: 'star', color: 'text-yellow-600', bg: 'bg-yellow-50' },
-                                        { label: 'On-Time Rate', value: `${profileUser.on_time_rate || 100}%`, icon: 'schedule', color: 'text-purple-600', bg: 'bg-purple-50' },
+                                        { label: 'Contributions', value: projectsCompleted, icon: 'assignment', color: 'text-blue-600', bg: 'bg-blue-50' },
+                                        { label: 'Topics Helped In', value: profileUser.tags?.length || 0, icon: 'topic', color: 'text-green-600', bg: 'bg-green-50' },
+                                        { label: 'Community Level', value: level, icon: 'military_tech', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+                                        { label: 'Participation', value: `${profileUser.on_time_rate || 100}%`, icon: 'history', color: 'text-purple-600', bg: 'bg-purple-50' },
                                     ].map((stat, i) => (
                                         <div key={i} className="bg-white p-5 rounded-2xl shadow-sm border border-border-light flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
                                             <div className={`p-3 rounded-full ${stat.bg} mb-3`}>
@@ -537,16 +521,21 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
 
                                 {/* Tabs Navigation */}
                                 <div className="bg-white rounded-2xl p-1.5 shadow-sm border border-border-light inline-flex w-full md:w-auto overflow-x-auto">
-                                    {['portfolio', 'about', 'reviews', 'network'].map((tab) => (
+                                    {[
+                                        { id: 'portfolio', label: 'Contributions' },
+                                        { id: 'about', label: 'About' },
+                                        { id: 'reviews', label: 'Activity' },
+                                        { id: 'network', label: 'Network' }
+                                    ].map((tab) => (
                                         <button
-                                            key={tab}
-                                            onClick={() => setActiveTab(tab)}
-                                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex-1 md:flex-none ${activeTab === tab
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex-1 md:flex-none ${activeTab === tab.id
                                                 ? 'bg-primary text-white shadow-md'
                                                 : 'text-secondary hover:bg-gray-50'
                                                 }`}
                                         >
-                                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                            {tab.label}
                                         </button>
                                     ))}
                                 </div>
@@ -563,14 +552,14 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         {activeTab === 'portfolio' && (
                                             <div className="space-y-6">
                                                 <div className="flex items-center justify-between">
-                                                    <h2 className="text-xl font-bold font-display">Featured Projects</h2>
+                                                    <h2 className="text-xl font-bold font-display">Projects & Collaborations</h2>
                                                     {isOwnProfile && (
                                                         <>
                                                             <button
                                                                 onClick={() => portfolioInputRef.current?.click()}
                                                                 className="text-sm font-bold text-primary hover:underline flex items-center gap-1"
                                                             >
-                                                                <Plus size={16} /> Add New
+                                                                <Plus size={16} /> Add Project
                                                             </button>
                                                             <input
                                                                 type="file"
@@ -593,7 +582,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                             <div className="p-4 rounded-full bg-orange-100 group-hover:scale-110 transition-transform">
                                                                 <Upload size={24} className="text-primary" />
                                                             </div>
-                                                            <span className="font-bold text-secondary group-hover:text-primary transition-colors">Upload Project</span>
+                                                            <span className="font-bold text-secondary group-hover:text-primary transition-colors">Add Project / Collaboration</span>
                                                         </button>
                                                     )}
 
@@ -656,6 +645,48 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                             </p>
                                                         </div>
 
+                                                        {/* AI Profile Section */}
+                                                        {profileUser.ai_profile && (
+                                                            <div className="bg-gradient-to-br from-violet-50 to-purple-50 p-6 rounded-2xl border border-violet-100">
+                                                                <h3 className="text-lg font-bold font-display mb-4 flex items-center gap-2 text-violet-900">
+                                                                    <span className="material-symbols-outlined text-violet-600">psychology</span>
+                                                                    Learning Profile
+                                                                </h3>
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                                    <div>
+                                                                        <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">Strengths</h4>
+                                                                        <div className="flex flex-wrap gap-2">
+                                                                            {profileUser.ai_profile.strengths?.map((s: string, i: number) => (
+                                                                                <span key={i} className="px-2.5 py-1 rounded-lg bg-white text-violet-700 text-xs font-bold border border-violet-100 shadow-sm">
+                                                                                    {s}
+                                                                                </span>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">Interests</h4>
+                                                                        <div className="flex flex-wrap gap-2">
+                                                                            {profileUser.ai_profile.interests?.map((s: string, i: number) => (
+                                                                                <span key={i} className="px-2.5 py-1 rounded-lg bg-white text-violet-700 text-xs font-bold border border-violet-100 shadow-sm">
+                                                                                    {s}
+                                                                                </span>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="col-span-full">
+                                                                        <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">Collaboration Style</h4>
+                                                                        <div className="flex flex-wrap gap-2">
+                                                                            {profileUser.ai_profile.collaboration_style?.map((s: string, i: number) => (
+                                                                                <span key={i} className="px-2.5 py-1 rounded-lg bg-white text-violet-700 text-xs font-bold border border-violet-100 shadow-sm">
+                                                                                    {s}
+                                                                                </span>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                             <div>
                                                                 <h3 className="text-lg font-bold font-display mb-3 flex items-center gap-2">
@@ -704,6 +735,28 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                         </div>
                                                     </>
                                                 )}
+                                            </div>
+                                        )}
+
+                                        {activeTab === 'reviews' && (
+                                            <div className="bg-white rounded-3xl p-8 shadow-soft border border-border-light text-center space-y-4">
+                                                <div className="inline-flex items-center justify-center size-16 rounded-full bg-blue-50 text-blue-500 mb-2">
+                                                    <span className="material-symbols-outlined text-3xl">history_edu</span>
+                                                </div>
+                                                <h3 className="text-xl font-bold font-display text-text-main">Community Activity</h3>
+                                                <p className="text-secondary max-w-sm mx-auto">
+                                                    Participation timeline and community contributions will appear here.
+                                                </p>
+                                                <div className="pt-4 flex justify-center gap-2">
+                                                    <div className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center">
+                                                        <span className="text-xs font-bold text-secondary uppercase">Joined</span>
+                                                        <span className="font-bold text-text-main">-</span>
+                                                    </div>
+                                                    <div className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center">
+                                                        <span className="text-xs font-bold text-secondary uppercase">Active</span>
+                                                        <span className="font-bold text-text-main text-green-500">Now</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
 
