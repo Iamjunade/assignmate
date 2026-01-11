@@ -45,7 +45,7 @@ export const Community: React.FC = () => {
             const postData = {
                 user_id: user.id,
                 user_handle: user.handle || user.full_name || 'Anonymous',
-                user_avatar: user.avatar_url,
+                user_avatar: user.avatar_url || null, // Firestore doesn't like undefined
                 user_school: user.school || 'Unknown University',
                 content: newPost.trim(),
             };
