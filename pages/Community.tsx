@@ -42,20 +42,24 @@ export const Community: React.FC = () => {
 
         setPosting(true);
         try {
-            const postData = {
-                user_id: user.id,
-                user_handle: user.handle || user.full_name || 'Anonymous',
-                user_avatar: user.avatar_url || null, // Firestore doesn't like undefined
-                user_school: user.school || 'Unknown University',
-                content: newPost.trim(),
+            // Firestore explicitly forbids 'undefined' values.
+            // We must ensure every field is a valid type (string or null).
+            const safePostData = {
+                user_id: user.id, // Auth user ID is guaranteed if user check passed
+                user_handle: (user.handle || user.full_name || 'Anonymous User') ?? 'Anonymous',
+                user_avatar: user.avatar_url ?? null,
+                user_school: (user.school || 'Unknown University') ?? 'Unknown School',
+                content: newPost.trim() ?? '',
             };
 
-            await db.createCommunityPost(postData);
+            await db.createCommunityPost(safePostData);
             setNewPost('');
             toast('Post shared successfully!', 'success');
             fetchPosts();
-        } catch (error) {
-            toast('Failed to share post. Please try again.', 'error');
+        } catch (error: any) {
+            console.error("Failed to share post. Full error:", error);
+            const errorMessage = error?.message || "Unknown error";
+            toast(`Failed to share post: ${errorMessage}`, 'error');
         } finally {
             setPosting(false);
         }
