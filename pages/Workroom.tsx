@@ -3,11 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { dbService as db } from '../services/firestoreService';
 import { GlassCard } from '../components/ui/GlassCard';
-import { 
-  MessageSquare, 
-  FileText, 
-  Clock, 
-  CheckCircle2, 
+import {
+  MessageSquare,
+  FileText,
+  Clock,
+  CheckCircle2,
   AlertCircle,
   Paperclip,
   Send,
@@ -19,11 +19,13 @@ import {
   Plus
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Workroom() {
   const { jobId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { error: toastError } = useToast();
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('messages');
@@ -118,11 +120,10 @@ export default function Workroom() {
             </div>
             <div className="space-y-3">
               {milestones.map((m) => (
-                <div key={m.id} className={`p-4 rounded-xl border transition-all ${
-                  m.status === 'completed' ? 'bg-green-500/5 border-green-500/20' : 
-                  m.status === 'in_progress' ? 'bg-red-500/5 border-red-500/30' : 
-                  'bg-slate-900/30 border-slate-800/50'
-                }`}>
+                <div key={m.id} className={`p-4 rounded-xl border transition-all ${m.status === 'completed' ? 'bg-green-500/5 border-green-500/20' :
+                  m.status === 'in_progress' ? 'bg-red-500/5 border-red-500/30' :
+                    'bg-slate-900/30 border-slate-800/50'
+                  }`}>
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="text-sm font-medium text-white">{m.title}</h4>
                     <span className="text-sm font-bold text-white">${m.amount}</span>
@@ -154,19 +155,17 @@ export default function Workroom() {
         <div className="lg:col-span-8 flex flex-col bg-slate-950/20">
           {/* Tab Headers */}
           <div className="flex border-b border-slate-800 px-6">
-            <button 
+            <button
               onClick={() => setActiveTab('messages')}
-              className={`py-4 px-6 text-sm font-bold border-b-2 transition-all ${
-                activeTab === 'messages' ? 'border-red-500 text-white' : 'border-transparent text-slate-500 hover:text-slate-300'
-              }`}
+              className={`py-4 px-6 text-sm font-bold border-b-2 transition-all ${activeTab === 'messages' ? 'border-red-500 text-white' : 'border-transparent text-slate-500 hover:text-slate-300'
+                }`}
             >
               Messages
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('files')}
-              className={`py-4 px-6 text-sm font-bold border-b-2 transition-all ${
-                activeTab === 'files' ? 'border-red-500 text-white' : 'border-transparent text-slate-500 hover:text-slate-300'
-              }`}
+              className={`py-4 px-6 text-sm font-bold border-b-2 transition-all ${activeTab === 'files' ? 'border-red-500 text-white' : 'border-transparent text-slate-500 hover:text-slate-300'
+                }`}
             >
               Files & Deliverables
             </button>
@@ -197,7 +196,7 @@ export default function Workroom() {
                 {/* Input Area */}
                 <div className="pt-4 border-t border-slate-800">
                   <div className="relative">
-                    <textarea 
+                    <textarea
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder="Type a message..."
@@ -205,7 +204,10 @@ export default function Workroom() {
                       rows={2}
                     />
                     <div className="absolute right-3 bottom-3 flex items-center gap-2">
-                      <button className="p-2 text-slate-500 hover:text-white transition-colors">
+                      <button
+                        onClick={() => toastError("File uploads coming soon to Workroom. Please use Direct Chat.")}
+                        className="p-2 text-slate-500 hover:text-white transition-colors"
+                      >
                         <Paperclip size={18} />
                       </button>
                       <button className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all">
@@ -219,7 +221,10 @@ export default function Workroom() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="font-bold text-white">Shared Files</h3>
-                  <button className="bg-slate-900 border border-slate-800 px-4 py-2 rounded-lg text-xs text-white hover:bg-slate-800 transition-all flex items-center gap-2">
+                  <button
+                    onClick={() => toastError("File uploads coming soon to Workroom. Please use Direct Chat.")}
+                    className="bg-slate-900 border border-slate-800 px-4 py-2 rounded-lg text-xs text-white hover:bg-slate-800 transition-all flex items-center gap-2"
+                  >
                     <Plus size={14} /> Upload File
                   </button>
                 </div>

@@ -265,7 +265,14 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
 
                 const url = await db.uploadFile(file, path);
                 await db.updateProfile(profileUser.id, { avatar_url: url });
-                if (isOwnProfile) await refreshProfile();
+
+                // CRITICAL FIX: Update global auth state so other pages (Feed) see the new avatar immediately
+                if (isOwnProfile) {
+                    await refreshProfile();
+                }
+
+                // Update local state
+                if (isOwnProfile) await refreshProfile(); // local refresh
                 setProfileUser({ ...profileUser, avatar_url: url });
                 success("Avatar updated");
             } catch (e: any) {

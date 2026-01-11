@@ -934,5 +934,45 @@ export const dbService = {
         } else {
             await updateDoc(postRef, { likes: arrayUnion(userId) });
         }
+    },
+
+    // --- MISSING METHODS STUBS ---
+    getProjectById: async (id: string) => {
+        if (!id) return null;
+        try {
+            const docRef = doc(getDb(), 'orders', id);
+            const snap = await getDoc(docRef);
+            if (snap.exists()) {
+                const data = snap.data();
+                // Fetch writer/hirer details if needed, for now return raw data
+                return { id: snap.id, ...data };
+            }
+            return null;
+        } catch (error) {
+            console.error("Error fetching project:", error);
+            return null;
+        }
+    },
+
+    sendOffer: async (chatId: string, senderId: string, senderName: string, offerData: any) => {
+        const newMessage = {
+            sender_id: senderId,
+            sender_name: senderName,
+            type: 'offer',
+            offer: { ...offerData, status: 'pending' },
+            created_at: new Date().toISOString(),
+            readBy: [senderId]
+        };
+        const res = await addDoc(collection(getDb(), 'chats', chatId, 'messages'), newMessage);
+        return { id: res.id, ...newMessage };
+    },
+
+    respondToOffer: async (chatId: string, messageId: string, userId: string, status: 'accepted' | 'rejected') => {
+        const msgRef = doc(getDb(), 'chats', chatId, 'messages', messageId);
+        await updateDoc(msgRef, {
+            'offer.status': status,
+            'offer.responded_at': new Date().toISOString(),
+            'offer.responded_by': userId
+        });
     }
 };
