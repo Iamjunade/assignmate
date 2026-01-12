@@ -152,19 +152,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                         <span className="material-symbols-outlined">person_search</span>
                                         Find Peers
                                     </button>
-                                    <button
-                                        onClick={async () => {
-                                            try {
-                                                const stats = await db.getDashboardStats(user?.id || '');
-                                                alert(`DEBUG INFO:\nUser ID: ${user?.id}\nActive Projects Found: ${stats.activeOrders.length}\n\nFirst Project: ${JSON.stringify(stats.activeOrders[0] || {}, null, 2)}`);
-                                            } catch (e: any) {
-                                                alert('Debug Error: ' + e.message);
-                                            }
-                                        }}
-                                        className="bg-red-500 text-white px-4 py-3 rounded-xl font-bold text-xs uppercase hover:bg-red-600 transition-colors shadow-lg"
-                                    >
-                                        Debug Sync
-                                    </button>
+
                                     <button onClick={() => navigate('/connections')} className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-white/30 transition-all">
                                         <span className="material-symbols-outlined">group</span>
                                         My Network

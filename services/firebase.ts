@@ -41,7 +41,7 @@ const firebaseConfig = {
     messagingSenderId: (import.meta as any).env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     appId: (import.meta as any).env.VITE_FIREBASE_APP_ID,
     measurementId: (import.meta as any).env.VITE_FIREBASE_MEASUREMENT_ID,
-    databaseURL: (import.meta as any).env.VITE_FIREBASE_DATABASE_URL
+    databaseURL: (import.meta as any).env.VITE_FIREBASE_DATABASE_URL || "https://assignmate-cfe7e-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);

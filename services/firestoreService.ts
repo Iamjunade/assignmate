@@ -974,7 +974,7 @@ export const dbService = {
     },
 
     respondToOffer: async (chatId: string, messageId: string, userId: string, status: 'accepted' | 'rejected') => {
-        console.log(`[respondToOffer] Starting for chat ${chatId}, msg ${messageId}, status ${status}`);
+
         const msgRef = doc(getDb(), 'chats', chatId, 'messages', messageId);
 
         // 1. Update message status
@@ -983,7 +983,7 @@ export const dbService = {
             'offer.responded_at': new Date().toISOString(),
             'offer.responded_by': userId
         });
-        console.log(`[respondToOffer] Message updated to ${status}`);
+
 
         // 2. If Accepted, Create Order/Project
         if (status === 'accepted') {
@@ -993,7 +993,7 @@ export const dbService = {
                 const msgData = msgSnap.data();
                 const offer = msgData?.offer;
 
-                console.log('[respondToOffer] Offer data retrieved:', offer);
+
 
                 if (!offer) {
                     console.error('[respondToOffer] No offer data found in message');
@@ -1005,7 +1005,7 @@ export const dbService = {
                 const chatSnap = await getDoc(chatRef);
                 const chatData = chatSnap.data();
 
-                console.log('[respondToOffer] Chat data retrieved:', chatData);
+
 
                 if (!chatData) {
                     console.error('[respondToOffer] No chat data found');
@@ -1026,10 +1026,10 @@ export const dbService = {
                     chat_id: chatId
                 };
 
-                console.log('[respondToOffer] Creating order with data:', orderData);
+
 
                 const orderRef = await addDoc(collection(getDb(), 'orders'), orderData);
-                console.log(`[respondToOffer] Order created successfully with ID: ${orderRef.id}`);
+
 
             } catch (error) {
                 console.error("Error creating project from offer:", error);
