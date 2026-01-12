@@ -119,9 +119,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
         return dashboardMessages[dayOfYear % dashboardMessages.length];
     };
 
-    const handleChat = (otherUserId: string) => {
-        navigate(`/messages?chat=${otherUserId}`);
-    };
+
 
     return (
         <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
@@ -249,7 +247,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                     </div>
                                                     <h3 className="font-bold text-sm text-[#111827] truncate w-full mb-1">{conn.full_name?.split(' ')[0] || conn.handle}</h3>
                                                     <p className="text-[10px] text-gray-500 font-medium mb-3 truncate w-full">{conn.handle}</p>
-                                                    <button onClick={() => handleChat(conn.id)} className="w-full py-1.5 rounded-lg bg-orange-100 text-orange-600 text-xs font-bold hover:bg-orange-200 transition-colors flex items-center justify-center gap-1">
+                                                    <button onClick={() => onChat && onChat(conn)} className="w-full py-1.5 rounded-lg bg-orange-100 text-orange-600 text-xs font-bold hover:bg-orange-200 transition-colors flex items-center justify-center gap-1">
                                                         <span className="material-symbols-outlined text-sm">chat</span> Chat
                                                     </button>
                                                 </div>
