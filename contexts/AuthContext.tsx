@@ -240,10 +240,16 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const resetPassword = async (email: string) => { const res = await firebaseAuth.resetPassword(email); if (res.error) throw res.error; };
 
   const refreshProfile = async () => {
-    if (!user) return;
-    // Reset sync lock to force a refresh (useful when user data is stale)
+    if (!firebaseAuth.currentUser) return;
+
+    // 1. Force reload of Auth user to get fresh emailVerified status
+    await firebaseAuth.currentUser.reload();
+
+    // 2. Reset sync lock
     syncingRef.current = null;
-    await syncUser({ uid: user.id, email: user.email });
+
+    // 3. Sync with the FRESH current user object
+    await syncUser(firebaseAuth.currentUser);
   };
 
   const value = {
@@ -262,17 +268,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{
-      user, loading, login, loginWithGoogle, register, completeGoogleSignup,
-      loginAnonymously, logout, deleteAccount, resetPassword,
-      // ✅ ISSUE 13 FIX: Improved refreshProfile with force refresh option
-      refreshProfile: async () => {
-        if (!user) return;
-        // Reset sync lock to force a refresh (useful when user data is stale)
-        syncingRef.current = null;
-        await syncUser({ uid: user.id, email: user.email });
-      }
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

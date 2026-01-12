@@ -10,10 +10,11 @@ import { AIProfileBuilder } from '../components/onboarding/AIProfileBuilder';
 
 export const Onboarding = () => {
     const navigate = useNavigate();
-    const { user, completeGoogleSignup } = useAuth();
+    const { user, completeGoogleSignup, refreshProfile, resendVerification } = useAuth();
     const { error, success } = useToast();
 
     const [loading, setLoading] = useState(false);
+    const [verifying, setVerifying] = useState(false);
     const [form, setForm] = useState({ fullName: '', handle: '', school: '', bio: '' });
     const [isWriter, setIsWriter] = useState(false);
     const [showAI, setShowAI] = useState(false);
@@ -36,68 +37,87 @@ export const Onboarding = () => {
     useEffect(() => {
         if (!user) {
             navigate('/auth');
-        } else if (isProfileComplete(user)) {
+        } else if (isProfileComplete(user) && user.emailVerified) {
+            // Only redirect if explicitly verified (or if using Google which is auto-verified)
             navigate('/feed');
         }
     }, [user, navigate]);
 
-    const handleAIComplete = async (data: any, bioSummary: string) => {
-        setAiData(data);
-        const autoBio = bioSummary || form.bio;
-
-        // Auto-submit with available data or defaults
-        setLoading(true);
-        setShowAI(false);
+    const handleCheckVerification = async () => {
+        setVerifying(true);
         try {
-            // Use existing form data or defaults (backend handles empty school/handle gracefully if needed, 
-            // but we passing what we have. If completely empty, backend generates defaults)
-            await completeGoogleSignup(
-                form.handle,
-                form.school,
-                isWriter,
-                autoBio,
-                form.fullName,
-                data
-            );
-            success("Profile created! Redirecting...");
-            // Navigation handled by useEffect
-        } catch (err: any) {
-            console.error("Auto-creation failed", err);
-            // If failed (e.g. missing critical fields), fall back to form view
-            setForm(prev => ({ ...prev, bio: autoBio }));
-            error("Please complete the remaining fields.");
-            setLoading(false);
+            await refreshProfile();
+            // The useEffect above will handle redirect if verified and complete
+            // Or the component will re-render and remove the gate if verified but incomplete
+            success("Profile status updated.");
+        } catch (e) {
+            console.error("Verification check failed", e);
+            error("Could not verify status using latest data.");
+        } finally {
+            setVerifying(false);
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!form.fullName || form.fullName.trim().length < 2) {
-            error("Full name must be at least 2 characters.");
-            return;
-        }
-        if (!form.school) {
-            error("Please select your college.");
-            return;
-        }
-        if (!form.handle || form.handle.length < 3) {
-            error("Handle must be at least 3 characters.");
-            return;
-        }
-
-        setLoading(true);
+    const handleResendEmail = async () => {
         try {
-            await completeGoogleSignup(form.handle, form.school, isWriter, form.bio, form.fullName, aiData);
-            success("Profile setup complete! Welcome.");
-        } catch (err: any) {
-            console.error("Profile completion error:", err);
-            error(err.message || "Failed to complete profile setup.");
-            setLoading(false);
+            if (resendVerification) {
+                await resendVerification();
+                success("Verification email sent! Check your inbox.");
+            }
+        } catch (e: any) {
+            error("Failed to send email: " + e.message);
         }
     };
 
     if (!user) return null;
+
+    // 🛑 EMAIL VERIFICATION GATE
+    // We block onboarding if:
+    // 1. User has an email (not anon)
+    // 2. Email is NOT verified
+    if (user.email && !user.emailVerified) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background-light dark:bg-[#1a120b] p-6 font-display">
+                <div className="w-full max-w-md bg-white dark:bg-white/5 rounded-3xl shadow-2xl border border-gray-200 dark:border-white/10 p-8 md:p-10 text-center">
+                    <div className="size-20 rounded-full bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center mx-auto mb-6">
+                        <span className="material-symbols-outlined text-4xl text-orange-600 dark:text-orange-500">mail</span>
+                    </div>
+
+                    <h1 className="text-2xl font-black text-[#1b140d] dark:text-white mb-3">Verify Your Email</h1>
+                    <p className="text-gray-500 dark:text-gray-400 mb-8">
+                        We need to verify your email address <strong>{user.email}</strong> before you can set up your profile.
+                    </p>
+
+                    <div className="space-y-3">
+                        <button
+                            onClick={handleCheckVerification}
+                            disabled={verifying}
+                            className="w-full py-3.5 bg-primary hover:bg-primary/90 text-[#1b140d] font-bold rounded-xl shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                        >
+                            {verifying ? (
+                                <span className="size-5 border-2 border-[#1b140d] border-t-transparent rounded-full animate-spin"></span>
+                            ) : (
+                                <span className="material-symbols-outlined">refresh</span>
+                            )}
+                            I've Verified It
+                        </button>
+
+                        <button
+                            onClick={handleResendEmail}
+                            className="w-full py-3.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined">send</span>
+                            Resend Email
+                        </button>
+                    </div>
+
+                    <p className="mt-8 text-xs text-gray-400">
+                        Can't find it? Check your spam folder or wait a few minutes.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     if (showAI) {
         return (
