@@ -88,6 +88,37 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
         return 'Good Evening';
     };
 
+    const dashboardMessages = [
+        "Together we can achieve more than we ever could alone.",
+        "Every challenge is an opportunity to learn something new today.",
+        "Connect, collaborate, and create something amazing with your peers.",
+        "Your unique perspective makes our community stronger.",
+        "Great things happen when brilliant minds come together.",
+        "Helping others is the fastest way to master a subject yourself.",
+        "Small steps every day lead to big achievements over time.",
+        "You are part of a network of future leaders and innovators.",
+        "Share your knowledge and watch it grow exponentially.",
+        "Success is a journey best shared with supportive friends.",
+        "Don't hesitate to reach out; someone is waiting to help.",
+        "Your potential is limitless when you stay curious and open.",
+        "Learning is not a race, but a collaborative adventure.",
+        "A problem shared is a problem halved—find your study buddy.",
+        "Celebrate every milestone, no matter how small it seems.",
+        "Stay inspired, stay connected, and keep pushing forward.",
+        "The best way to predict the future is to create it together.",
+        "Kindness and collaboration are the keys to true success.",
+        "Every peer you meet has something valuable to teach you.",
+        "Let's make today a day of progress and positive connection."
+    ];
+
+    const getDailyMessage = () => {
+        const start = new Date(new Date().getFullYear(), 0, 0);
+        const diff = (new Date().getTime() - start.getTime()) + ((start.getTimezoneOffset() - new Date().getTimezoneOffset()) * 60 * 1000);
+        const oneDay = 1000 * 60 * 60 * 24;
+        const dayOfYear = Math.floor(diff / oneDay);
+        return dashboardMessages[dayOfYear % dashboardMessages.length];
+    };
+
     const handleChat = (otherUserId: string) => {
         navigate(`/messages?chat=${otherUserId}`);
     };
@@ -114,7 +145,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                     <span className="text-4xl animate-wave">👋</span>
                                 </h1>
                                 <p className="text-white/90 text-lg max-w-xl mb-8 leading-relaxed">
-                                    Need help with your assignments? Connect with verified peers from top universities across India.
+                                    {getDailyMessage()}
                                 </p>
                                 <div className="flex flex-wrap gap-4">
                                     <button onClick={() => navigate('/peers')} className="bg-white text-[#FF6B4A] px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 transition-all">
