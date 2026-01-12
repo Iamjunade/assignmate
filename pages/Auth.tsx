@@ -196,13 +196,13 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                 <div className="relative z-10 my-auto max-w-lg">
                     <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 mb-6 backdrop-blur-sm">
                         <span className="material-symbols-outlined text-primary text-sm">security</span>
-                        <span className="text-xs font-bold text-primary tracking-wide uppercase">Bank-Grade Trust</span>
+                        <span className="text-xs font-bold text-primary tracking-wide uppercase">Campus Verified</span>
                     </div>
                     <h1 className="text-4xl xl:text-5xl font-black leading-tight mb-6 text-white">
-                        No more <span className="text-primary">Last-Minute Panic</span>.
+                        Learn, Connect, and <span className="text-primary">Grow Together</span>.
                     </h1>
                     <p className="text-gray-300 text-lg mb-10 leading-relaxed">
-                        Join 10,000+ students on India's #1 secure marketplace. Connect with verified seniors from your college and get help fast.
+                        Connect with verified students from your campus to discuss subjects, collaborate on projects, and learn together.
                     </p>
 
                     <div className="bg-white/10 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-2xl transform rotate-1 hover:rotate-0 transition-all duration-500 cursor-default">
@@ -214,7 +214,7 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                             </div>
                             <span className="material-symbols-outlined text-white/20 text-2xl">format_quote</span>
                         </div>
-                        <p className="text-sm font-medium text-gray-200 leading-relaxed mb-4">"I was skeptical about paying someone online, but the Escrow system made me feel safe. The writer was from my own college (DU) and knew exactly what to do!"</p>
+                        <p className="text-sm font-medium text-gray-200 leading-relaxed mb-4">"Trusted by students across multiple campuses to find peers and collaborate securely."</p>
                         <div className="flex items-center gap-3">
                             <img alt="Student" className="w-10 h-10 rounded-full border-2 border-primary/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJY7INpqcQQsp-lWIu_rci1_QHqrnpb0EAo-biaiC6wl7kwVrHi2tXL_SgRPHg3B6QlVAZZoHglXZskrcdpi-4n0Wm7YynjXmZeHxKcAzdh9QhdLZDKtKGCFBQ_8jhcoZp6hIGw-BNWHmAWYFBhwdLJZWAcY9VNbEsSDoZcF0aT3Gy3KBUkqodRXB9gYJIcLKPrhwPmgHdZ3Xo_ZGylB9o72htjvtUMgJYyCJBru4khkMPJ4xswsqbk07QogKRO4RAWmdaPtl7TJNG" />
                             <div>
@@ -230,7 +230,7 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
 
                 <div className="relative z-10 flex justify-between items-center text-xs text-gray-500 font-medium tracking-wide uppercase">
                     <span>© 2026 AssignMate</span>
-                    <span>Hyper-local & Secure</span>
+                    <span>Community-Driven & Verified</span>
                 </div>
             </div>
 
@@ -352,7 +352,7 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                                             <span className="material-symbols-outlined absolute left-4 top-4 text-gray-400 group-focus-within:text-primary transition-colors">edit_note</span>
                                             <textarea
                                                 className="w-full h-24 pl-12 pr-4 py-3 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-medium text-[#1b140d] dark:text-white placeholder-gray-400 transition-all outline-none resize-none"
-                                                placeholder="Tell us a bit about yourself..."
+                                                placeholder="Tell us about your interests or what you enjoy learning..."
                                                 value={form.bio}
                                                 onChange={e => setForm({ ...form, bio: e.target.value })}
                                             />
@@ -416,7 +416,7 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                                         >
                                             <Search className={!isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
                                             <span className={`text-xs font-bold mt-2 ${!isWriter ? 'text-orange-600' : 'text-slate-500'}`}>
-                                                Find Help
+                                                Learn & Collaborate
                                             </span>
                                         </div>
                                         <div
@@ -426,9 +426,9 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                                                 : 'bg-white border-slate-200 hover:bg-slate-50'
                                                 }`}
                                         >
-                                            <PenTool className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
+                                            <GraduationCap className={isWriter ? 'text-orange-500' : 'text-slate-400'} size={24} />
                                             <span className={`text-xs font-bold mt-2 ${isWriter ? 'text-orange-600' : 'text-slate-500'}`}>
-                                                Earn Money
+                                                Contribute & Connect
                                             </span>
                                         </div>
                                     </div>
