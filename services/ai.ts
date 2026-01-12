@@ -152,7 +152,7 @@ If the user says "skip" or similar, move to the next step.
             console.log(`🤖 Call AI: using Key ending in ...${cleanKey.slice(-4)}`);
 
             const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${cleanKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${cleanKey}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
