@@ -25,6 +25,7 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
     const [loadingComments, setLoadingComments] = useState(false);
     const [commentText, setCommentText] = useState('');
     const [postingComment, setPostingComment] = useState(false);
+    const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
     const [localCommentsCount, setLocalCommentsCount] = useState(post.comments_count || 0);
 
     const isLiked = post.likes?.includes(user?.id || '');
@@ -76,9 +77,16 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
 
         setPostingComment(true);
         try {
-            const newComment = await db.addComment(post.id, user, commentText.trim());
+            const newComment = await db.addComment(
+                post.id,
+                user,
+                commentText.trim(),
+                replyingTo?.id,
+                replyingTo?.user_handle
+            );
             setComments(prev => [...prev, newComment as Comment]);
             setCommentText('');
+            setReplyingTo(null);
             setLocalCommentsCount(prev => prev + 1);
         } catch (error) {
             console.error("Failed to post comment:", error);
@@ -86,6 +94,13 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
         } finally {
             setPostingComment(false);
         }
+    };
+
+    const handleReplyClick = (comment: Comment) => {
+        setReplyingTo(comment);
+        // Clean off previous text? No, maybe they typed something. 
+        // Just focus input (optional but good UX)
+        // Ideally we scroll to input, but it's likely visible.
     };
 
     const handleDeleteComment = async (commentId: string) => {
@@ -207,8 +222,21 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
             {/* Comments Section */}
             {showComments && (
                 <div className="mt-6 pt-6 border-t border-gray-100 animate-in slide-in-from-top-2">
+                    {/* Replying Status */}
+                    {replyingTo && (
+                        <div className="flex items-center justify-between bg-orange-50 px-4 py-2 rounded-t-xl text-sm border-b border-orange-100/50">
+                            <span className="text-orange-700 font-medium">Replying to <span className="font-bold">@{replyingTo.user_handle}</span></span>
+                            <button
+                                onClick={() => setReplyingTo(null)}
+                                className="text-orange-400 hover:text-orange-600 font-bold px-2"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    )}
+
                     {/* Add Comment Input */}
-                    <form onSubmit={handlePostComment} className="flex gap-3 mb-6">
+                    <form onSubmit={handlePostComment} className={`flex gap-3 mb-6 ${replyingTo ? 'bg-orange-50/30 p-2 rounded-b-xl rounded-tr-xl' : ''}`}>
                         <Avatar
                             src={user?.avatar_url}
                             alt={user?.handle}
@@ -218,10 +246,11 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
                         <div className="flex-1 relative">
                             <input
                                 type="text"
-                                placeholder="Write a reply..."
+                                placeholder={replyingTo ? `Reply to ${replyingTo.user_handle}...` : "Write a reply..."}
                                 value={commentText}
                                 onChange={(e) => setCommentText(e.target.value)}
                                 className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 pr-12 text-sm focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
+                                autoFocus={!!replyingTo}
                             />
                             <button
                                 type="submit"
@@ -256,11 +285,23 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
                                                     {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                                                 </span>
                                             </div>
-                                            <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
+                                            <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
+                                                {comment.reply_to_handle && (
+                                                    <span className="text-orange-500 font-medium mr-1.5">
+                                                        @{comment.reply_to_handle}
+                                                    </span>
+                                                )}
+                                                {comment.content}
+                                            </p>
                                         </div>
                                         <div className="flex items-center gap-4 mt-1 px-2">
                                             <button className="text-xs font-semibold text-gray-400 hover:text-gray-600">Like</button>
-                                            <button className="text-xs font-semibold text-gray-400 hover:text-gray-600">Reply</button>
+                                            <button
+                                                onClick={() => handleReplyClick(comment)}
+                                                className="text-xs font-semibold text-gray-400 hover:text-orange-500 transition-colors"
+                                            >
+                                                Reply
+                                            </button>
                                             {/* Delete Button: Show if current user is comment owner OR post owner */}
                                             {(user?.id === comment.user_id || isOwner) && (
                                                 <button

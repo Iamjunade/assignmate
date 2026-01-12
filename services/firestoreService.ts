@@ -1073,7 +1073,7 @@ export const dbService = {
         }
     },
 
-    addComment: async (postId: string, user: any, content: string) => {
+    addComment: async (postId: string, user: any, content: string, replyToId?: string, replyToHandle?: string) => {
         try {
             const commentsRef = collection(getDb(), 'community_posts', postId, 'comments');
             const newComment = {
@@ -1082,7 +1082,9 @@ export const dbService = {
                 user_handle: user.handle || user.full_name || 'Anonymous',
                 user_avatar: user.avatar_url || null,
                 content: content,
-                created_at: new Date().toISOString()
+                created_at: new Date().toISOString(),
+                reply_to_id: replyToId || null,
+                reply_to_handle: replyToHandle || null
             };
 
             await addDoc(commentsRef, newComment);
@@ -1095,6 +1097,61 @@ export const dbService = {
             await updateDoc(postRef, {
                 comments_count: increment(1)
             });
+
+            // NOTIFICATION LOGIC
+            const senderName = user.handle || user.full_name || 'Someone';
+            const { notificationService } = await import('./notificationService');
+
+            // 1. Notify Reply Target (if a reply and target isn't sender)
+            if (replyToId) {
+                // We need to find WHO replyToId belongs to.
+                // Optimistically we assume the UI passed reasonable data, but we need the userId of that comment.
+                // Fetch the comment we replied to.
+                const originalCommentRef = doc(getDb(), 'community_posts', postId, 'comments', replyToId);
+                const originalCommentSnap = await getDoc(originalCommentRef);
+
+                if (originalCommentSnap.exists()) {
+                    const originalUserId = originalCommentSnap.data().user_id;
+                    if (originalUserId && originalUserId !== user.id) {
+                        await notificationService.sendCommunityComment(
+                            originalUserId,
+                            senderName,
+                            postId,
+                            `Replied: ${content}`
+                        );
+                    }
+                }
+            }
+
+            // 2. Notify Post Owner (if not sender AND not already notified by being the reply target)
+            // If I reply to the post owner's comment, condition 1 covered it. 
+            // If I reply to someone else, post owner SHOULD also know? Yes.
+            if (postSnap.exists()) {
+                const ownerId = postSnap.data().user_id;
+                // If owner is not sender...
+                if (ownerId && ownerId !== user.id) {
+                    // And if owner wasn't already notified (i.e., we didn't just reply to the owner's comment)
+                    // We need to know if Condition 1 fired for Owner.
+                    // This creates a double read or complex logic. 
+                    // Simpler: Just notify Post Owner always (unless sender). They might get 2 notifications if they reuse the system.
+                    // Let's send a distinct 'commented on your post' notification.
+
+                    // Optimization: Check if we already notified this ID above.
+                    // Since we can't easily share state across these blocks without variables:
+                    let alreadyNotified = false;
+                    if (replyToId) {
+                        const originalCommentRef = doc(getDb(), 'community_posts', postId, 'comments', replyToId);
+                        const originalSnap = await getDoc(originalCommentRef); // Double read? Firestore caches slightly.
+                        if (originalSnap.exists() && originalSnap.data().user_id === ownerId) {
+                            alreadyNotified = true;
+                        }
+                    }
+
+                    if (!alreadyNotified) {
+                        await notificationService.sendCommunityComment(ownerId, senderName, postId, content);
+                    }
+                }
+            }
 
             return newComment;
         } catch (error) {
