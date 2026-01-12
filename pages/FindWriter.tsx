@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { dbService } from '../services/firestoreService';
+import { collegeService, College } from '../services/collegeService';
 import { User } from '../types';
 import { Avatar } from '../components/ui/Avatar';
-import { Search, Filter, CheckCircle2, Circle, GraduationCap, MapPin, Star, UserCheck } from 'lucide-react';
+import { Search, Filter, CheckCircle2, Circle, GraduationCap, MapPin, Star, UserCheck, Loader2, X } from 'lucide-react';
 
 export const FindWriter = () => {
     const { user } = useAuth();
@@ -21,6 +22,11 @@ export const FindWriter = () => {
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
     const [filterType, setFilterType] = useState<'all' | 'contributors' | 'verified' | 'online' | 'network'>('all');
     const [sortBy, setSortBy] = useState<'relevance' | 'rating'>('relevance');
+
+    // Autocomplete State
+    const [acOpen, setAcOpen] = useState(false);
+    const [acResults, setAcResults] = useState<College[]>([]);
+    const acWrapperRef = useRef<HTMLDivElement>(null);
 
     // Initial Fetch
     useEffect(() => {
@@ -59,6 +65,43 @@ export const FindWriter = () => {
 
         fetchUsers();
     }, [user?.id]);
+
+    // College Autocomplete Logic
+    useEffect(() => {
+        if (!searchQuery.trim() || searchQuery.length < 2) {
+            setAcResults([]);
+            return;
+        }
+
+        let active = true;
+        collegeService.getAll().then(colleges => {
+            if (!active) return;
+            const q = searchQuery.toLowerCase();
+            const matches = colleges.filter(c =>
+                c.name.toLowerCase().includes(q) ||
+                c.state.toLowerCase().includes(q)
+            ).slice(0, 8); // Limit suggestions
+            setAcResults(matches);
+        });
+
+        return () => { active = false; };
+    }, [searchQuery]);
+
+    // Click outside handler for autocomplete
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (acWrapperRef.current && !acWrapperRef.current.contains(event.target as Node)) {
+                setAcOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [acWrapperRef]);
+
+    const handleSelectCollege = (name: string) => {
+        setSearchQuery(name);
+        setAcOpen(false);
+    };
 
     // Filtering Logic
     useEffect(() => {
@@ -101,9 +144,9 @@ export const FindWriter = () => {
             <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-orange-100/50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
                     {/* Left: Logo */}
-                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                        <div className="size-8 text-[#FF6B4A]">
-                            <span className="material-symbols-outlined text-3xl leading-none">school</span>
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+                        <div className="w-9 h-9 rounded-lg overflow-hidden shadow-sm">
+                            <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
                         </div>
                         <h2 className="text-[#1b140d] text-xl font-bold tracking-tight">AssignMate</h2>
                     </div>
@@ -117,7 +160,7 @@ export const FindWriter = () => {
                             Home
                         </a>
                         <a
-                            className="cursor-pointer text-[#FF6B4A] font-bold"
+                            className="cursor-pointer text-[#FF6B4A] font-bold bg-orange-50 px-3 py-1 rounded-full"
                         >
                             Find Peers
                         </a>
@@ -171,33 +214,85 @@ export const FindWriter = () => {
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF8C42] to-[#FF5E62]">Study Partner</span>
                     </h1>
                     <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-                        Search by name, college, city, or state to connect with verified peers who can help you succeed.
+                        Search by name, college, city, or state to connect with verified peers.
                     </p>
                 </div>
 
-                {/* Search Bar */}
-                <div className="max-w-3xl mx-auto mb-16 relative z-10">
-                    <div className="bg-white p-2 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 flex items-center">
+                {/* Search Bar - Enhanced */}
+                <div className="max-w-3xl mx-auto mb-16 relative z-30" ref={acWrapperRef}>
+                    <div className="bg-white p-2 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 flex items-center hover:shadow-[0_8px_30px_rgb(255,107,74,0.1)] transition-shadow duration-300">
                         <div className="pl-6 text-slate-400">
-                            <Search size={22} />
+                            <Search size={22} className={`transition-colors ${acOpen ? 'text-orange-500' : ''}`} />
                         </div>
                         <input
                             type="text"
                             className="flex-1 bg-transparent border-none h-14 px-4 text-lg outline-none placeholder:text-slate-400 font-medium text-slate-700"
-                            placeholder="Search by name, college, city..."
+                            placeholder="Start typing your college name..."
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setAcOpen(true);
+                            }}
+                            onFocus={() => setAcOpen(true)}
                         />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="p-2 text-slate-300 hover:text-slate-500 mr-2"
+                            >
+                                <X size={20} />
+                            </button>
+                        )}
                         <button className="bg-[#FF6B4A] hover:bg-[#ff5530] text-white px-8 h-12 rounded-full font-bold text-lg shadow-lg hover:shadow-orange-200 transition-all flex items-center gap-2">
                             Search
                         </button>
                     </div>
-                    {/* Popular Tags */}
-                    <div className="flex items-center justify-center gap-3 mt-4 text-xs font-medium text-slate-400">
-                        <span>Popular:</span>
-                        {['IIT Delhi', 'Mumbai', 'Bangalore', 'CMR Institute'].map(tag => (
-                            <button key={tag} onClick={() => setSearchQuery(tag)} className="hover:text-[#FF6B4A] transition-colors bg-white border border-slate-100 px-3 py-1 rounded-full cursor-pointer">
-                                {tag}
+
+                    {/* Autocomplete Dropdown */}
+                    {acOpen && acResults.length > 0 && searchQuery.length >= 2 && (
+                        <div className="absolute top-full left-4 right-4 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
+                            <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                <GraduationCap size={14} /> Suggested Colleges
+                            </div>
+                            <div className="max-h-72 overflow-y-auto">
+                                {acResults.map((college, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handleSelectCollege(college.name)}
+                                        className="w-full text-left px-5 py-3 hover:bg-orange-50 transition-colors border-b border-slate-50 text-slate-700 hover:text-orange-700 flex items-center justify-between group"
+                                    >
+                                        <div className="font-bold">{college.name}</div>
+                                        <div className="text-xs text-slate-400 font-medium group-hover:text-orange-400 flex items-center gap-1">
+                                            <MapPin size={12} /> {college.state}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Popular Tags / Smart Suggestions */}
+                    <div className="flex flex-wrap items-center justify-center gap-3 mt-6 text-xs font-medium text-slate-400">
+                        <span className="uppercase tracking-wide font-bold text-slate-300">Popular Campuses:</span>
+                        {[
+                            { name: 'IIT Delhi', type: 'popular' },
+                            { name: 'BITS Pilani', type: 'popular' },
+                            { name: 'Delhi University', type: 'popular' },
+                            { name: 'CMR Institute', type: 'near' }
+                        ].map(tag => (
+                            <button
+                                key={tag.name}
+                                onClick={() => setSearchQuery(tag.name)}
+                                className={`
+                                    transition-all px-3 py-1.5 rounded-full cursor-pointer border flex items-center gap-1.5
+                                    ${tag.type === 'near'
+                                        ? 'bg-orange-50 border-orange-100 text-orange-600 hover:bg-orange-100'
+                                        : 'bg-white border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-500'
+                                    }
+                                `}
+                            >
+                                {tag.type === 'near' && <MapPin size={10} className="text-orange-500" />}
+                                {tag.name}
                             </button>
                         ))}
                     </div>
