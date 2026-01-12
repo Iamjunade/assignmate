@@ -5,7 +5,7 @@ import { ArrowLeft, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserPresence } from '../components/UserPresence';
 import { Sidebar } from '../components/dashboard/Sidebar';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
 import { OfferModal, CollabData } from '../components/chat/OfferModal';
 import { OfferCard } from '../components/chat/OfferCard';
@@ -18,6 +18,7 @@ const MotionButton = motion.button as any;
 
 export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, onBack?: () => void }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { error: toastError, success: toastSuccess } = useToast();
     const [messages, setMessages] = useState<any[]>([]);
     const [text, setText] = useState('');
@@ -33,6 +34,16 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     const endRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Auto-open Offer Modal if requested via navigation state
+    useEffect(() => {
+        if (location.state && (location.state as any).openCollaborate) {
+            setShowOfferModal(true);
+            setShowActions(false);
+            // Clear state to prevent reopening on refresh if desired
+            window.history.replaceState({}, document.title);
+        }
+    }, [location]);
 
     // 1. Fetch Chat Details on mount
     useEffect(() => {

@@ -1,32 +1,81 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { MobileNav } from '../components/dashboard/MobileNav';
 import { useAuth } from '../contexts/AuthContext';
 import { dbService as db } from '../services/firestoreService';
-import { Loader2, FolderPlus, Search, Filter, Calendar, Users, ChevronRight } from 'lucide-react';
+import { Loader2, FolderPlus, Search, Filter, Calendar, Users, ChevronRight, UserPlus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Avatar } from '../components/ui/Avatar';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const Projects: React.FC = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [projects, setProjects] = useState<any[]>([]);
+    const [connections, setConnections] = useState<any[]>([]);
+    const [showNewProjectDropdown, setShowNewProjectDropdown] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowNewProjectDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     useEffect(() => {
-        // Mocking projects for now, or fetching from a 'projects' collection if it exists
-        const fetchProjects = async () => {
+        const loadData = async () => {
+            if (!user) return;
             try {
-                // For now, let's use a mock or fetch active orders as projects
-                const stats = await db.getDashboardStats(user?.id || '');
+                const [stats, conns] = await Promise.all([
+                    db.getDashboardStats(user.id),
+                    db.getMyConnections(user.id)
+                ]);
                 setProjects(stats.activeOrders || []);
+
+                // Process connections to get the "other" user details
+                const processedConns = conns.map((c: any) => {
+                    // Start by looking for the "other" user in participants list
+                    if (c.participants && Array.isArray(c.participants)) {
+                        const otherUser = c.participants.find((p: any) => (p.id || p) !== user.id);
+                        if (otherUser && typeof otherUser === 'object') return otherUser; // Already populated
+                    }
+                    // Fallback if structure varies
+                    return c;
+                }).filter(Boolean);
+
+                setConnections(processedConns);
             } catch (error) {
-                console.error("Error fetching projects:", error);
+                console.error("Error fetching data:", error);
             } finally {
                 setLoading(false);
             }
         };
-
-        if (user) fetchProjects();
+        loadData();
     }, [user]);
+
+    const handleStartProject = async (peerId: string) => {
+        if (!user) return;
+        try {
+            // Find existing chat or create new one
+            let chatId = await db.findExistingChat(user.id, peerId);
+            if (!chatId) {
+                const newChat = await db.createChat(null, user.id, peerId);
+                chatId = newChat.id;
+            }
+            // Navigate with state to auto-open Collaborate modal
+            navigate(`/chats/${chatId}`, { state: { openCollaborate: true } });
+        } catch (err) {
+            console.error("Error starting project flow:", err);
+            alert("Failed to open chat. Please try again.");
+        }
+    };
 
     return (
         <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
@@ -42,10 +91,77 @@ export const Projects: React.FC = () => {
                                 <h1 className="text-2xl font-extrabold text-text-dark tracking-tight">My Projects</h1>
                                 <p className="text-text-muted text-sm mt-1">Manage and track your ongoing academic collaborations.</p>
                             </div>
-                            <button className="bg-primary text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg hover:shadow-xl transition-all flex items-center gap-2 self-start sm:self-auto">
-                                <FolderPlus size={18} />
-                                New Project
-                            </button>
+
+                            {/* Smart New Project Dropdown */}
+                            <div className="relative self-start sm:self-auto" ref={dropdownRef}>
+                                <button
+                                    onClick={() => setShowNewProjectDropdown(!showNewProjectDropdown)}
+                                    className="bg-primary text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+                                >
+                                    <FolderPlus size={18} />
+                                    New Project
+                                    <ChevronRight size={16} className={`transition-transform duration-200 ${showNewProjectDropdown ? 'rotate-90' : ''}`} />
+                                </button>
+
+                                <AnimatePresence>
+                                    {showNewProjectDropdown && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-border-subtle z-50 overflow-hidden"
+                                        >
+                                            <div className="p-4 border-b border-border-subtle bg-gray-50/50">
+                                                <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Select Collaborator</h3>
+                                                <p className="text-[10px] text-text-muted">Choose a connection to start a project with.</p>
+                                            </div>
+
+                                            <div className="max-h-64 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                                                {connections.length > 0 ? (
+                                                    connections.map((conn) => (
+                                                        <button
+                                                            key={conn.id || conn.objectID}
+                                                            onClick={() => handleStartProject(conn.id || conn.objectID)}
+                                                            className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-secondary-bg transition-all group"
+                                                        >
+                                                            <Avatar
+                                                                src={conn.avatar_url}
+                                                                alt={conn.handle}
+                                                                className="size-10 rounded-full border border-gray-100"
+                                                                fallback={conn.handle?.charAt(0)}
+                                                            />
+                                                            <div className="flex-1 text-left min-w-0">
+                                                                <p className="font-bold text-sm text-text-dark truncate group-hover:text-primary transition-colors">
+                                                                    {conn.full_name || conn.handle}
+                                                                </p>
+                                                                <p className="text-xs text-text-muted truncate">
+                                                                    @{conn.handle}
+                                                                </p>
+                                                            </div>
+                                                            <span className="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity text-xl">
+                                                                handshake
+                                                            </span>
+                                                        </button>
+                                                    ))
+                                                ) : (
+                                                    <div className="text-center py-6 px-4">
+                                                        <div className="mx-auto size-10 bg-gray-100 rounded-full flex items-center justify-center mb-2 text-gray-400">
+                                                            <UserPlus size={20} />
+                                                        </div>
+                                                        <p className="text-sm font-bold text-text-dark">No connections yet</p>
+                                                        <button
+                                                            onClick={() => navigate('/peers')}
+                                                            className="text-xs text-primary font-bold mt-2 hover:underline"
+                                                        >
+                                                            Find Peers
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
 
                         {/* Filters & Search */}
