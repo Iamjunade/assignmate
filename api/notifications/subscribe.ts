@@ -13,10 +13,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (!admin.apps.length) {
-        console.error('Firebase Admin not initialized. Check FIREBASE_SERVICE_ACCOUNT_KEY.');
-        return res.status(500).json({
-            error: 'Server Configuration Error: Firebase Admin not initialized'
-        });
+        const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+        if (!key) {
+            console.error('FIREBASE_SERVICE_ACCOUNT_KEY is missing');
+            return res.status(500).json({ error: 'Server Config: Missing FIREBASE_SERVICE_ACCOUNT_KEY' });
+        }
+        try {
+            const parsed = JSON.parse(key);
+            if (!parsed.project_id) {
+                return res.status(500).json({ error: 'Server Config: Invalid Service Account (missing project_id)' });
+            }
+            // Attempt manual init if it failed during import for some reason
+            admin.initializeApp({
+                credential: admin.credential.cert(parsed),
+            });
+        } catch (e: any) {
+            console.error('JSON Parse Error for Service Account:', e);
+            return res.status(500).json({ error: `Server Config: Invalid JSON in Key - ${e.message}` });
+        }
+    }
+
+    // Double check after potential manual init
+    if (!admin.apps.length) {
+        return res.status(500).json({ error: 'Server Config: Admin Init Failed Unknown Reason' });
     }
 
     try {
