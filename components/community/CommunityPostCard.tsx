@@ -219,109 +219,150 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
                 </button>
             </div>
 
-            {/* Comments Section */}
-            {showComments && (
-                <div className="mt-6 pt-6 border-t border-gray-100 animate-in slide-in-from-top-2">
-                    {/* Replying Status */}
-                    {replyingTo && (
-                        <div className="flex items-center justify-between bg-orange-50 px-4 py-2 rounded-t-xl text-sm border-b border-orange-100/50">
-                            <span className="text-orange-700 font-medium">Replying to <span className="font-bold">@{replyingTo.user_handle}</span></span>
-                            <button
-                                onClick={() => setReplyingTo(null)}
-                                className="text-orange-400 hover:text-orange-600 font-bold px-2"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    )}
+            className="text-orange-400 hover:text-orange-600 font-bold px-2"
+                        >
+            Cancel
+        </button>
+                    </div >
+                )}
 
-                    {/* Add Comment Input */}
-                    <form onSubmit={handlePostComment} className={`flex gap-3 mb-6 ${replyingTo ? 'bg-orange-50/30 p-2 rounded-b-xl rounded-tr-xl' : ''}`}>
-                        <Avatar
-                            src={user?.avatar_url}
-                            alt={user?.handle}
-                            fallback={user?.full_name?.charAt(0)}
-                            className="size-8 mt-1"
-                        />
-                        <div className="flex-1 relative">
-                            <input
-                                type="text"
-                                placeholder={replyingTo ? `Reply to ${replyingTo.user_handle}...` : "Write a reply..."}
-                                value={commentText}
-                                onChange={(e) => setCommentText(e.target.value)}
-                                className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 pr-12 text-sm focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
-                                autoFocus={!!replyingTo}
-                            />
-                            <button
-                                type="submit"
-                                disabled={!commentText.trim() || postingComment}
-                                className="absolute right-2 top-1.5 p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
-                            >
-                                {postingComment ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-                            </button>
-                        </div>
-                    </form>
+{/* Add Comment Input */ }
+<form onSubmit={handlePostComment} className={`flex gap-3 mb-6 ${replyingTo ? 'bg-orange-50/30 p-2 rounded-b-xl rounded-tr-xl' : ''}`}>
+    <Avatar
+        src={user?.avatar_url}
+        alt={user?.handle}
+        fallback={user?.full_name?.charAt(0)}
+        className="size-8 mt-1"
+    />
+    <div className="flex-1 relative">
+        <input
+            type="text"
+            placeholder={replyingTo ? `Reply to ${replyingTo.user_handle}...` : "Write a reply..."}
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 pr-12 text-sm focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
+            autoFocus={!!replyingTo}
+        />
+        <button
+            type="submit"
+            disabled={!commentText.trim() || postingComment}
+            className="absolute right-2 top-1.5 p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+        >
+            {postingComment ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+        </button>
+    </div>
+</form>
 
-                    {/* Comments List */}
-                    {loadingComments ? (
-                        <div className="flex justify-center py-4">
-                            <Loader2 size={24} className="animate-spin text-gray-300" />
-                        </div>
-                    ) : (
-                        <div className="space-y-5">
-                            {comments.map((comment) => (
-                                <div key={comment.id} className="flex gap-3 group">
-                                    <Avatar
-                                        src={comment.user_avatar}
-                                        alt={comment.user_handle}
-                                        fallback={comment.user_handle?.charAt(0)}
-                                        className="size-8"
-                                    />
-                                    <div className="flex-1">
-                                        <div className="bg-gray-50 rounded-2xl rounded-tl-none px-4 py-3">
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="text-sm font-bold text-slate-900">{comment.user_handle}</span>
-                                                <span className="text-xs text-gray-400">
-                                                    {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
-                                                {comment.reply_to_handle && (
-                                                    <span className="text-orange-500 font-medium mr-1.5">
-                                                        @{comment.reply_to_handle}
-                                                    </span>
-                                                )}
-                                                {comment.content}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-4 mt-1 px-2">
-                                            <button className="text-xs font-semibold text-gray-400 hover:text-gray-600">Like</button>
-                                            <button
-                                                onClick={() => handleReplyClick(comment)}
-                                                className="text-xs font-semibold text-gray-400 hover:text-orange-500 transition-colors"
-                                            >
-                                                Reply
-                                            </button>
-                                            {/* Delete Button: Show if current user is comment owner OR post owner */}
-                                            {(user?.id === comment.user_id || isOwner) && (
-                                                <button
-                                                    onClick={() => handleDeleteComment(comment.id)}
-                                                    className="text-xs font-semibold text-red-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                                                >
-                                                    Delete
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                            {comments.length === 0 && (
-                                <p className="text-center text-sm text-gray-400 py-2 italic">No replies yet. Be the first!</p>
-                            )}
-                        </div>
-                    )}
-                </div>
-            )}
+{/* Comments List */ }
+{
+    loadingComments ? (
+        <div className="flex justify-center py-4">
+            <Loader2 size={24} className="animate-spin text-gray-300" />
         </div>
+    ) : (
+        <div className="space-y-6">
+            {(() => {
+                // Thread Organization Logic
+                const commentMap = new Map(comments.map(c => [c.id, c]));
+                const roots: Comment[] = [];
+                const repliesByRoot: Record<string, Comment[]> = {};
+
+                const findVizRoot = (c: Comment) => {
+                    let cur = c;
+                    // Trace up until true root or orphaned tip
+                    while (cur.reply_to_id) {
+                        const parent = commentMap.get(cur.reply_to_id);
+                        if (!parent) return cur; // Parent missing, treat as root
+                        cur = parent;
+                    }
+                    return cur;
+                };
+
+                comments.forEach(c => {
+                    if (!c.reply_to_id) {
+                        roots.push(c);
+                        return;
+                    }
+                    const root = findVizRoot(c);
+                    if (root.id === c.id) {
+                        roots.push(c); // Orphan tip treated as root
+                    } else {
+                        if (!repliesByRoot[root.id]) repliesByRoot[root.id] = [];
+                        repliesByRoot[root.id].push(c);
+                    }
+                });
+
+                // Render Helper
+                const renderCommentItem = (comment: Comment, isReply = false) => (
+                    <div key={comment.id} className={`flex gap-3 group ${isReply ? 'ml-0' : ''}`}>
+                        <Avatar
+                            src={comment.user_avatar}
+                            alt={comment.user_handle}
+                            fallback={comment.user_handle?.charAt(0)}
+                            className={isReply ? "size-6 mt-1" : "size-8"}
+                        />
+                        <div className="flex-1">
+                            <div className={`bg-gray-50 px-4 py-2 ${isReply ? "rounded-xl" : "rounded-2xl rounded-tl-none"}`}>
+                                <div className="flex items-center justify-between mb-0.5">
+                                    <span className={`font-bold text-slate-900 ${isReply ? "text-xs" : "text-sm"}`}>{comment.user_handle}</span>
+                                    <span className="text-[10px] text-gray-400">
+                                        {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                                    </span>
+                                </div>
+                                <p className={`text-slate-600 whitespace-pre-wrap leading-relaxed ${isReply ? "text-xs" : "text-sm"}`}>
+                                    {comment.reply_to_handle && (
+                                        <span className="text-orange-500 font-medium mr-1.5">
+                                            @{comment.reply_to_handle}
+                                        </span>
+                                    )}
+                                    {comment.content}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-4 mt-1 px-2">
+                                <button
+                                    onClick={() => handleReplyClick(comment)}
+                                    className="text-xs font-semibold text-gray-400 hover:text-orange-500 transition-colors"
+                                >
+                                    Reply
+                                </button>
+                                {(user?.id === comment.user_id || isOwner) && (
+                                    <button
+                                        onClick={() => handleDeleteComment(comment.id)}
+                                        className="text-xs font-semibold text-red-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                                    >
+                                        Delete
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+
+                if (roots.length === 0) {
+                    return <p className="text-center text-sm text-gray-400 py-2 italic">No replies yet. Be the first!</p>;
+                }
+
+                return roots.map(root => (
+                    <div key={root.id} className="flex flex-col gap-3">
+                        {renderCommentItem(root)}
+
+                        {/* Render Replies */}
+                        {repliesByRoot[root.id] && repliesByRoot[root.id].length > 0 && (
+                            <div className="flex flex-col gap-3 pl-10 mt-1 relative">
+                                {/* Optional: Guide Line */}
+                                <div className="absolute left-4 top-0 bottom-4 w-px bg-gray-100"></div>
+
+                                {repliesByRoot[root.id].map(reply => renderCommentItem(reply, true))}
+                            </div>
+                        )}
+                    </div>
+                ));
+            })()}
+        </div>
+    )
+}
+            </div >
+            )}
+        </div >
     );
 };
