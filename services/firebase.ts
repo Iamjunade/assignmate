@@ -136,16 +136,24 @@ export const fcm = {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
                 const currentToken = await getToken(messagingInstance, {
-                    // Ideally use env var for VAPID key, but keeping existing one for now if valid
+                    // Ideally use env var for VAPID key
                     vapidKey: "BBlG6uz8HQjkYoEfJxxcBhcUC8HFb3uWH2z4zEclEk7KUBG_zTQaFHyAFwzAmzmUKPRK7xxUveJNVCI3pV9yZNo"
                 });
 
                 if (currentToken) {
-                    // Save token to Firestore subcollection (Multi-device support)
-                    // Path: users/{userId}/fcm_tokens/{token}
-                    const tokenRef = doc(dbInstance, 'users', userId, 'fcm_tokens', currentToken);
+                    // Get or Create Device ID for this browser
+                    let deviceId = localStorage.getItem('fcm_device_id');
+                    if (!deviceId) {
+                        deviceId = crypto.randomUUID(); // Modern browsers support this
+                        localStorage.setItem('fcm_device_id', deviceId);
+                    }
+
+                    // Save token to Firestore subcollection using safe Device ID
+                    // Path: users/{userId}/fcm_tokens/{deviceId}
+                    const tokenRef = doc(dbInstance, 'users', userId, 'fcm_tokens', deviceId);
                     await setDoc(tokenRef, {
-                        token: currentToken,
+                        token: currentToken, // The actual FCM token
+                        deviceId: deviceId,
                         platform: 'web',
                         last_updated: serverTimestamp()
                     });
