@@ -111,19 +111,20 @@ export const OfferCard: React.FC<OfferCardProps> = ({
 
                 {/* Body */}
                 <div className="p-5 space-y-4">
-                    {/* Pages Only */}
-                    <div className="bg-secondary-bg p-3 rounded-xl">
-                        <p className="text-[10px] text-text-muted uppercase tracking-wide font-bold mb-1">Pages</p>
-                        <p className="text-sm font-bold text-text-dark">{offer.pages} {offer.pages === 1 ? 'page' : 'pages'}</p>
-                    </div>
-
                     {/* Description */}
-                    {offer.description && (
-                        <div>
-                            <p className="text-[10px] text-text-muted uppercase tracking-wide font-bold mb-1.5">Description</p>
-                            <p className="text-sm text-text-dark leading-relaxed line-clamp-3">{offer.description}</p>
-                        </div>
-                    )}
+                    <div className="min-h-[60px]">
+                        {offer.description ? (
+                            <div>
+                                <p className="text-[10px] text-text-muted uppercase tracking-wide font-bold mb-1.5 flex items-center gap-1.5">
+                                    <span className="material-symbols-outlined text-[14px]">format_align_left</span>
+                                    Description
+                                </p>
+                                <p className="text-[15px] text-text-dark leading-relaxed whitespace-pre-wrap">{offer.description}</p>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-text-muted italic">No additional details provided.</p>
+                        )}
+                    </div>
 
                     {/* Deadline & Budget */}
                     <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
