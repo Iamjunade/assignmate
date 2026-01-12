@@ -149,36 +149,66 @@ If the user says "skip" or similar, move to the next step.
 `;
 
         try {
-            console.log(`🤖 Call AI: using Key ending in ...${cleanKey.slice(-4)}`);
+            let response;
+            let attempts = 0;
+            const maxAttempts = 3;
 
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${cleanKey}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        system_instruction: {
-                            parts: [{ text: systemPrompt }]
-                        },
-                        contents: history,
-                        generationConfig: {
-                            temperature: 0.7,
-                            maxOutputTokens: 500,
-                        },
-                        safetySettings: [
-                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
-                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
-                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
-                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
-                        ]
-                    })
+            while (attempts < maxAttempts) {
+                try {
+                    console.log(`🤖 Call AI (Attempt ${attempts + 1}/${maxAttempts}): using Key ending in ...${cleanKey.slice(-4)}`);
+
+                    response = await fetch(
+                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${cleanKey}`,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                system_instruction: {
+                                    parts: [{ text: systemPrompt }]
+                                },
+                                contents: history,
+                                generationConfig: {
+                                    temperature: 0.7,
+                                    maxOutputTokens: 500,
+                                },
+                                safetySettings: [
+                                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+                                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
+                                ]
+                            })
+                        }
+                    );
+
+                    if (response.status === 429) {
+                        attempts++;
+                        if (attempts === maxAttempts) break; // Final attempt failed, let it fall through to error handling
+
+                        const waitTime = 2000 * Math.pow(2, attempts); // 4s, 8s
+                        console.warn(`⏳ Rate Limited (429). Retrying in ${waitTime / 1000}s...`);
+                        await new Promise(resolve => setTimeout(resolve, waitTime));
+                        continue;
+                    }
+
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        console.error(`❌ AI Error: ${response.status} ${response.statusText}`, errorBody);
+                        throw new Error(`AI API HTTP ${response.status}: ${errorBody}`);
+                    }
+
+                    // If successful, break loop
+                    break;
+                } catch (err: any) {
+                    if (attempts === maxAttempts - 1) throw err; // Throw on last attempt
+                    attempts++;
                 }
-            );
+            }
 
-            if (!response.ok) {
-                const errorBody = await response.text();
-                console.error(`❌ AI Error: ${response.status} ${response.statusText}`, errorBody);
-                throw new Error(`AI API HTTP ${response.status}: ${errorBody}`);
+            if (!response || !response.ok) {
+                // If we exited loop without success (e.g. valid 429 on last try)
+                const errorBody = await response?.text() || "Unknown Error";
+                throw new Error(`AI API Failed after ${maxAttempts} attempts. Status: ${response?.status || 'Unknown'}.`);
             }
 
             const data = await response.json();
