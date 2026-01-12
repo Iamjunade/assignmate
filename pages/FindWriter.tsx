@@ -222,10 +222,7 @@ export const FindWriter = () => {
 
                 {/* Header Section */}
                 <div className="text-center space-y-4 mb-12">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-100 text-orange-600 text-xs font-bold uppercase tracking-wider shadow-sm mb-4">
-                        <span className="material-symbols-outlined text-sm filled">verified_user</span>
-                        Trusted by 10,000+ Students
-                    </div>
+
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900">
                         Find Your Perfect <br className="hidden md:block" />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF8C42] to-[#FF5E62]">Study Partner</span>
