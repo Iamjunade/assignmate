@@ -970,11 +970,12 @@ export const dbService = {
                 // Campus Feed: Show Global posts + Campus posts from MY college
                 posts = posts.filter(p =>
                     p.scope === 'global' ||
+                    !p.scope ||
                     (p.scope === 'campus' && p.user_school === collegeName)
                 );
             } else {
-                // Global Feed: Show ONLY Global posts
-                posts = posts.filter(p => p.scope === 'global');
+                // Global Feed: Show ONLY Global posts (and legacy posts)
+                posts = posts.filter(p => p.scope === 'global' || !p.scope);
             }
 
             return posts;
