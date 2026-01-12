@@ -138,6 +138,17 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         presence.init(res.data.user.uid);
         notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
 
+        // ✅ Trigger Brevo Email Verification (Vercel Function)
+        fetch('/api/send-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            uid: res.data.user.uid,
+            fullName: fullName
+          })
+        }).catch(err => console.error("Failed to send verification email:", err));
+
         return { data: { ...res.data, session: true } };
       } catch (error: any) {
         console.error("Registration Error - Profile creation failed:", error);
