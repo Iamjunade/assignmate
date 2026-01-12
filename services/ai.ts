@@ -52,7 +52,8 @@ export const ai = {
     },
 
     onboardingChat: async (history: { role: 'user' | 'model'; parts: { text: string }[] }[]) => {
-        if (!API_KEY) {
+        const cleanKey = API_KEY ? API_KEY.trim() : '';
+        if (!cleanKey) {
             console.warn("Gemini API Key missing (onboardingChat)");
             return { text: "Error: API Key Missing in Configuration. Please check Vercel Env Vars." };
         }
@@ -148,8 +149,10 @@ If the user says "skip" or similar, move to the next step.
 `;
 
         try {
+            console.log(`🤖 Call AI: using Key ending in ...${cleanKey.slice(-4)}`);
+
             const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${cleanKey}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -166,15 +169,27 @@ If the user says "skip" or similar, move to the next step.
                 }
             );
 
+            if (!response.ok) {
+                const errorBody = await response.text();
+                console.error(`❌ AI Error: ${response.status} ${response.statusText}`, errorBody);
+                throw new Error(`AI API HTTP ${response.status}: ${errorBody}`);
+            }
+
             const data = await response.json();
             const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-            if (!text) throw new Error("No response from AI");
+            if (!text) throw new Error("No response from AI (Empty candidates)");
 
             return { text };
-        } catch (e) {
+        } catch (e: any) {
             console.error("AI Chat Failed", e);
-            return { text: "Sorry, I'm having trouble connecting. Please try manually filling the form." };
+            let userMessage = "Sorry, I'm having trouble connecting. Please try manually filling the form.";
+
+            if (e.message.includes('404')) userMessage += " (Model not found)";
+            if (e.message.includes('400')) userMessage += " (Invalid Request)";
+            if (e.message.includes('403')) userMessage += " (key Rejected)";
+
+            return { text: userMessage };
         }
     }
 };
