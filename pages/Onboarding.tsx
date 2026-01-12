@@ -25,7 +25,9 @@ export const Onboarding = () => {
             setForm(prev => ({
                 ...prev,
                 fullName: user.full_name || '',
-                handle: prev.handle || user.handle || ''
+                handle: prev.handle || user.handle || '',
+                school: prev.school || user.school || '', // Sync school from signup
+                bio: prev.bio || user.bio || ''           // Sync bio from signup
             }));
         }
     }, [user]);
