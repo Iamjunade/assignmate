@@ -28,14 +28,19 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const syncingRef = useRef<string | null>(null);
   const skipNextSyncRef = useRef<boolean>(false); // Flag to prevent race condition after registration
   const userJustSetRef = useRef<boolean>(false); // Flag to track if user was just set by register/completeSignup
+  const isManualRegistration = useRef<boolean>(false); // ✅ Fix: Flag to pause sync logic during manual registration
 
 
   // Sync user profile from Firestore
   const syncUser = async (fbUser: any) => {
     const userId = fbUser.uid;
 
-    // Skip sync if register() or completeGoogleSignup() just set the user
-    // This prevents the race condition where onAuthStateChanged fires after we've already set the user
+    // Skip sync if we are manually handling registration
+    if (isManualRegistration.current) {
+      setLoading(false);
+      return;
+    }
+
     if (skipNextSyncRef.current) {
       skipNextSyncRef.current = false;
       // User was already set synchronously by register/completeSignup
@@ -110,62 +115,69 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
   // ✅ FIXED: register function now SAVES the name and bio
   const register = async (email: string, pass: string, fullName: string, handle: string, school: string, is_writer: boolean, bio?: string) => {
-    const res = await firebaseAuth.register(email, pass);
-    if (res.error) return res;
+    // Flag to tell syncUser to back off
+    isManualRegistration.current = true;
 
-    if (res.data?.user) {
-      try {
-        // Create full profile immediately
-        const profile = await userApi.createProfile(res.data.user.uid, {
-          handle,
-          school,
-          email,
-          full_name: fullName, // <--- SAVED HERE
-          bio: bio || '',      // <--- SAVED HERE
-          is_writer,
-          is_incomplete: false,
-          avatar_url: null
-        });
-
-        // CRITICAL: Set user state FIRST, then set skip flags
-        // This prevents race condition where onAuthStateChanged fires between flag set and user set
-        const completeProfile = { ...profile, email: res.data.user.email || email, is_incomplete: false } as User;
-        setUser(completeProfile);
-
-        // Now set flags to prevent syncUser from overwriting our freshly set user
-        userJustSetRef.current = true;
-        skipNextSyncRef.current = true;
-
-        presence.init(res.data.user.uid);
-        notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
-
-        // ✅ Native Firebase Email Verification
-        // Await ensures email is sent BEFORE navigating to onboarding
-        try {
-          await sendEmailVerification(res.data.user);
-          console.log("Verification email sent (Native)");
-        } catch (err) {
-          console.error("Failed to send verification email:", err);
-          // Don't block registration if email fails, but log it
-        }
-
-        return { data: { ...res.data, session: true } };
-      } catch (error: any) {
-        console.error("Registration Error - Profile creation failed:", error);
-
-        // ✅ ISSUE 7 FIX: Rollback - Delete the Firebase Auth user to prevent orphaned accounts
-        // This ensures consistency between Auth and Firestore
-        try {
-          await firebaseAuth.deleteUser();
-          console.log("Rollback: Firebase Auth user deleted after profile creation failure");
-        } catch (deleteError) {
-          console.error("Rollback failed - orphaned Auth user may exist:", deleteError);
-        }
-
-        return { error: { message: "Registration failed. Please try again." } };
+    try {
+      const res = await firebaseAuth.register(email, pass);
+      if (res.error) {
+        isManualRegistration.current = false;
+        return res;
       }
+
+      if (res.data?.user) {
+        try {
+          // Create full profile immediately
+          const profile = await userApi.createProfile(res.data.user.uid, {
+            handle,
+            school,
+            email,
+            full_name: fullName,
+            bio: bio || '',
+            is_writer,
+            is_incomplete: false,
+            avatar_url: null
+          });
+
+          // CRITICAL: Set user state FIRST
+          const completeProfile = { ...profile, email: res.data.user.email || email, is_incomplete: false } as User;
+          setUser(completeProfile);
+
+          presence.init(res.data.user.uid);
+          notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
+
+          // ✅ Native Firebase Email Verification
+          try {
+            await sendEmailVerification(res.data.user);
+            console.log("Verification email sent (Native)");
+            alert("Verification email sent! Please check your inbox before continuing.");
+          } catch (err) {
+            console.error("Failed to send verification email:", err);
+          }
+
+          // Reset flag after successful setup
+          isManualRegistration.current = false;
+          return { data: { ...res.data, session: true } };
+        } catch (error: any) {
+          console.error("Registration Error - Profile creation failed:", error);
+
+          // Rollback
+          try {
+            await firebaseAuth.deleteUser();
+            console.log("Rollback: Firebase Auth user deleted after profile creation failure");
+          } catch (deleteError) {
+            console.error("Rollback failed - orphaned Auth user may exist:", deleteError);
+          }
+
+          isManualRegistration.current = false;
+          return { error: { message: "Registration failed. Please try again." } };
+        }
+      }
+      return res;
+    } catch (e) {
+      isManualRegistration.current = false;
+      throw e;
     }
-    return res;
   };
 
   const completeGoogleSignup = async (handle: string, school: string, is_writer: boolean, bio?: string, fullName?: string, aiProfile?: any) => {
