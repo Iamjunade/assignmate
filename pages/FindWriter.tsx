@@ -29,6 +29,8 @@ export const FindWriter = () => {
     const [acUserResults, setAcUserResults] = useState<User[]>([]);
     const acWrapperRef = useRef<HTMLDivElement>(null);
 
+    const resultsRef = useRef<HTMLDivElement>(null);
+
     // Initial Fetch
     useEffect(() => {
         const fetchUsers = async () => {
@@ -113,6 +115,7 @@ export const FindWriter = () => {
     const handleSelectCollege = (name: string) => {
         setSearchQuery(name);
         setAcOpen(false);
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     const handleSelectUser = (userId: string) => {
@@ -257,7 +260,10 @@ export const FindWriter = () => {
                                 <X size={20} />
                             </button>
                         )}
-                        <button className="bg-[#FF6B4A] hover:bg-[#ff5530] text-white px-8 h-12 rounded-full font-bold text-lg shadow-lg hover:shadow-orange-200 transition-all flex items-center gap-2">
+                        <button
+                            onClick={() => resultsRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                            className="bg-[#FF6B4A] hover:bg-[#ff5530] text-white px-8 h-12 rounded-full font-bold text-lg shadow-lg hover:shadow-orange-200 transition-all flex items-center gap-2"
+                        >
                             Search
                         </button>
                     </div>
@@ -391,7 +397,7 @@ export const FindWriter = () => {
                 </div>
 
                 {/* Results Grid */}
-                <div>
+                <div ref={resultsRef}>
                     <div className="flex items-center gap-3 mb-4">
                         <h2 className="text-xl font-bold text-slate-900">
                             {(searchParams.get('tab') === 'network' || filterType === 'network') ? 'My Network' : 'All Students'}
