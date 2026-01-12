@@ -280,5 +280,8 @@ export const auth = {
     onAuthStateChange: (callback: (user: any) => void) => {
         if (!authInstance) return () => { };
         return onAuthStateChanged(authInstance, callback);
+    },
+    get currentUser() {
+        return authInstance?.currentUser;
     }
 };

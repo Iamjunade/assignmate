@@ -17,6 +17,7 @@ export interface User {
   tags?: string[]; // e.g., ['Math', 'CS', 'English']
   saved_writers?: string[]; // IDs of writers this user has bookmarked
   is_incomplete?: boolean; // Flag for Google users who haven't set handle/school
+  emailVerified?: boolean; // From Firebase Auth
   fcm_token?: string; // Firebase Cloud Messaging Token for Push Notifications
   visibility?: 'global' | 'college'; // Visibility setting for the profile
   role?: 'user' | 'admin' | 'moderator'; // Role-based access control

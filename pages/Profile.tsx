@@ -20,7 +20,7 @@ import { Avatar } from '../components/ui/Avatar';
 export const Profile = ({ user: currentUser }: { user: any }) => {
     const { userId } = useParams();
     const navigate = useNavigate();
-    const { refreshProfile, deleteAccount } = useAuth();
+    const { refreshProfile, deleteAccount, resendVerification } = useAuth();
     const { success, error } = useToast();
 
     // 1. Determine if we are viewing our own profile
@@ -451,15 +451,59 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         Community Trust
                                     </h3>
                                     <div className="space-y-3">
-                                        <div className="flex items-center justify-between p-3 rounded-xl bg-green-50 border border-green-100">
-                                            <div className="flex items-center gap-3">
-                                                <div className="bg-green-100 p-1.5 rounded-full">
-                                                    <Mail size={16} className="text-green-600" />
+                                        {/* Dynamic Email Verification Status */}
+                                        {isOwnProfile ? (
+                                            // LOGIC FOR OWN PROFILE
+                                            currentUser?.emailVerified ? (
+                                                <div className="flex items-center justify-between p-3 rounded-xl bg-green-50 border border-green-100">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="bg-green-100 p-1.5 rounded-full">
+                                                            <Mail size={16} className="text-green-600" />
+                                                        </div>
+                                                        <span className="text-sm font-medium text-green-900">Email Verified</span>
+                                                    </div>
+                                                    <Check size={16} className="text-green-600" />
                                                 </div>
-                                                <span className="text-sm font-medium text-green-900">Email Verified</span>
+                                            ) : (
+                                                <div className="flex items-center justify-between p-3 rounded-xl bg-orange-50 border border-orange-100">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="bg-orange-100 p-1.5 rounded-full">
+                                                            <Mail size={16} className="text-orange-600" />
+                                                        </div>
+                                                        <span className="text-sm font-medium text-orange-900">Email Not Verified</span>
+                                                    </div>
+                                                    <button
+                                                        onClick={async () => {
+                                                            try {
+                                                                if (resendVerification) {
+                                                                    await resendVerification();
+                                                                    alert("Verification email resent! Please check your inbox.");
+                                                                } else {
+                                                                    alert("Service unavailable. Please reload.");
+                                                                }
+                                                            } catch (e: any) {
+                                                                console.error(e);
+                                                                alert("Failed to send: " + e.message);
+                                                            }
+                                                        }}
+                                                        className="text-xs font-bold text-orange-600 hover:text-orange-700 hover:underline"
+                                                    >
+                                                        Verify
+                                                    </button>
+                                                </div>
+                                            )
+                                        ) : (
+                                            // LOGIC FOR VIEWING OTHERS
+                                            <div className="flex items-center justify-between p-3 rounded-xl bg-green-50 border border-green-100">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="bg-green-100 p-1.5 rounded-full">
+                                                        <Mail size={16} className="text-green-600" />
+                                                    </div>
+                                                    <span className="text-sm font-medium text-green-900">Email Verified</span>
+                                                </div>
+                                                <Check size={16} className="text-green-600" />
                                             </div>
-                                            <Check size={16} className="text-green-600" />
-                                        </div>
+                                        )}
 
                                         <div className={`flex items-center justify-between p-3 rounded-xl border ${profileUser.is_verified === 'verified' ? 'bg-blue-50 border-blue-100' : 'bg-gray-50 border-gray-100'}`}>
                                             <div className="flex items-center gap-3">

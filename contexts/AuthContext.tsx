@@ -18,6 +18,7 @@ interface AuthContextType {
   refreshProfile: () => Promise<void>;
   deleteAccount: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  resendVerification: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -64,6 +65,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         setUser({
           ...typedProfile,
           email: fbUser.email || typedProfile.email || '',
+          emailVerified: fbUser.emailVerified, // ✅ Sync from Auth
           // Use the actual value from Firestore, don't override!
           is_incomplete: typedProfile.is_incomplete ?? false
         } as User);
@@ -140,7 +142,12 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           });
 
           // CRITICAL: Set user state FIRST
-          const completeProfile = { ...profile, email: res.data.user.email || email, is_incomplete: false } as User;
+          const completeProfile = {
+            ...profile,
+            email: res.data.user.email || email,
+            is_incomplete: false,
+            emailVerified: false // Manual signup is not verified initially
+          } as User;
           setUser(completeProfile);
 
           presence.init(res.data.user.uid);
@@ -212,27 +219,47 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const loginWithGoogle = firebaseAuth.loginWithGoogle;
   const loginAnonymously = firebaseAuth.loginAnonymously;
   const deleteAccount = async () => {
-    if (!user) return;
-
+    if (!firebaseAuth.currentUser) return;
     try {
-      await userApi.deleteProfile(user.id);
-      const res = await firebaseAuth.deleteUser();
-
-      if (res.error) {
-        throw res.error;
-      }
-
+      // 1. Delete from Firestore first
+      await userApi.deleteProfile(firebaseAuth.currentUser.uid);
+      // 2. Delete from Auth
+      await firebaseAuth.deleteUser();
       setUser(null);
-    } catch (error: any) {
-      if (error.code === 'auth/requires-recent-login') {
-        alert("For security, please log out and log back in before deleting your account.");
-      } else {
-        console.error("Delete Account Error:", error);
-        throw error;
-      }
+    } catch (e) {
+      throw e;
     }
   };
+
+  const resendVerification = async () => {
+    if (firebaseAuth.currentUser) {
+      await sendEmailVerification(firebaseAuth.currentUser);
+    }
+  };
+
   const resetPassword = async (email: string) => { const res = await firebaseAuth.resetPassword(email); if (res.error) throw res.error; };
+
+  const refreshProfile = async () => {
+    if (!user) return;
+    // Reset sync lock to force a refresh (useful when user data is stale)
+    syncingRef.current = null;
+    await syncUser({ uid: user.id, email: user.email });
+  };
+
+  const value = {
+    user,
+    loading,
+    login: firebaseAuth.login,
+    loginWithGoogle,
+    register,
+    completeGoogleSignup,
+    loginAnonymously,
+    logout,
+    refreshProfile,
+    deleteAccount,
+    resetPassword: firebaseAuth.resetPassword,
+    resendVerification
+  };
 
   return (
     <AuthContext.Provider value={{
