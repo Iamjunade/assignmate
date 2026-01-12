@@ -958,22 +958,34 @@ export const dbService = {
     },
 
     // --- COMMUNITY POSTS ---
+    // --- COMMUNITY POSTS ---
     getCommunityPosts: async (college?: string) => {
         try {
             const postsRef = collection(getDb(), 'community_posts');
-            let q;
+            let docs = [];
+
             if (college) {
-                // Filter by college
-                q = query(postsRef, where('user_school', '==', college), orderBy('created_at', 'desc'), limit(50));
+                // Filter by college ONLY (No orderBy to avoid Composite Index requirement)
+                const q = query(postsRef, where('user_school', '==', college));
+                const snap = await getDocs(q);
+                docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                // Sort in memory
+                docs.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+                // Limit to 50
+                docs = docs.slice(0, 50);
             } else {
-                // Global feed
-                q = query(postsRef, orderBy('created_at', 'desc'), limit(50));
+                // Global feed - standard index usually available
+                const q = query(postsRef, orderBy('created_at', 'desc'), limit(50));
+                const snap = await getDocs(q);
+                docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             }
 
-            const snap = await getDocs(q);
-            return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            return docs;
         } catch (error) {
             console.error("Error fetching community posts:", error);
+            // Fallback: Return empty array so UI doesn't crash
             return [];
         }
     },

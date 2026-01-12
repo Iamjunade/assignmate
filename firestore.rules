@@ -14,9 +14,43 @@ service cloud.firestore {
     // --- Users Collection ---
     // Anyone authenticated can read profiles (needed for Feed/Search)
     // Only the owner can create/update/delete their own profile
+    // --- Users Collection ---
+    // Anyone authenticated can read profiles (needed for Feed/Search)
+    // Only the owner can create/update/delete their own profile
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow create, update, delete: if isAuthenticated() && isOwner(userId);
+      allow create, delete: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && (
+        isOwner(userId) || 
+        (
+          // Allow incrementing projects_completed by 1 by any auth user (for peer updates)
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['projects_completed']) &&
+          request.resource.data.projects_completed == resource.data.projects_completed + 1
+        )
+      );
+    }
+
+    // ... (Chats, Requests, Connections, Notifications, FCM unchanged) ...
+
+    match /community_posts/{postId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.user_id == request.auth.uid || 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'comments_count'])
+      );
+      allow delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+
+      // Comments Subcollection
+      match /comments/{commentId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
+        // Allow delete if: Auth is Comment Owner OR Auth is Post Owner
+        allow delete: if isAuthenticated() && (
+          resource.data.user_id == request.auth.uid ||
+          get(/databases/$(database)/documents/community_posts/$(postId)).data.user_id == request.auth.uid
+        );
+      }
     }
 
     // --- Chats Collection ---
