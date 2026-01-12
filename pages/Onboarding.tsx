@@ -39,11 +39,33 @@ export const Onboarding = () => {
         }
     }, [user, navigate]);
 
-    const handleAIComplete = (data: any, bioSummary: string) => {
+    const handleAIComplete = async (data: any, bioSummary: string) => {
         setAiData(data);
-        setForm(prev => ({ ...prev, bio: bioSummary }));
+        const autoBio = bioSummary || form.bio;
+
+        // Auto-submit with available data or defaults
+        setLoading(true);
         setShowAI(false);
-        success("Profile built with AI! Review and submit.");
+        try {
+            // Use existing form data or defaults (backend handles empty school/handle gracefully if needed, 
+            // but we passing what we have. If completely empty, backend generates defaults)
+            await completeGoogleSignup(
+                form.handle,
+                form.school,
+                isWriter,
+                autoBio,
+                form.fullName,
+                data
+            );
+            success("Profile created! Redirecting...");
+            // Navigation handled by useEffect
+        } catch (err: any) {
+            console.error("Auto-creation failed", err);
+            // If failed (e.g. missing critical fields), fall back to form view
+            setForm(prev => ({ ...prev, bio: autoBio }));
+            error("Please complete the remaining fields.");
+            setLoading(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

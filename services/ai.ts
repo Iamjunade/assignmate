@@ -130,8 +130,9 @@ DATA PROCESSING RULES:
 - Be conservative in interpretation.
 
 STRUCTURED OUTPUT FORMAT (INTERNAL ONLY):
-Return a JSON object in this exact format at the very end when all steps are done:
+Convert the conversation into structured JSON using ONLY the user's answers.
 
+Format:
 {
   "strengths": [],
   "weaknesses": [],
@@ -141,11 +142,14 @@ Return a JSON object in this exact format at the very end when all steps are don
   "experience_level": "Beginner | Intermediate | Advanced | Unspecified"
 }
 
-FINAL MESSAGE TO USER:
-"Thanks! Your profile has been set up.
-You can edit it anytime from your profile settings."
+Rules:
+- Do not invent data
+- Be conservative
+- Leave fields empty if unclear
+- Output JSON only
 
-If the user says "skip" or similar, move to the next step.
+FINAL MESSAGE TO USER:
+"Redirecting to your new profile... 🚀"
 `;
 
         try {
