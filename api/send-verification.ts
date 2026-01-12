@@ -61,7 +61,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // 2. Setup Nodemailer (Zoho SMTP)
         const transporter = nodemailer.createTransport({
-            host: process.env.ZOHO_HOST || 'smtp.zoho.com', // Default to .com, but editable via env
+            host: process.env.ZOHO_HOST || 'smtppro.zoho.in', // Updated per user screenshot
             port: 465,
             secure: true, // true for 465, false for other ports
             auth: {
