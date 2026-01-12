@@ -960,20 +960,24 @@ export const dbService = {
     getCommunityPosts: async (collegeName?: string) => {
         try {
             const postsRef = collection(getDb(), 'community_posts');
-            let q;
+            // Fetch more to allow for filtering
+            const q = query(postsRef, orderBy('created_at', 'desc'), limit(100));
+            const snap = await getDocs(q);
+
+            let posts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
 
             if (collegeName) {
-                // Fetch Global posts (always visible) OR Campus posts for this college
-                // Ideally we'd use an OR query, but for now we'll fetch general feed.
-                // If we want ONLY campus posts, we'd query where('user_school', '==', collegeName).
-                // Let's stick to the strategy: Fetch recent posts and let UI/Service filter or just fetch all for now.
-                q = query(postsRef, orderBy('created_at', 'desc'), limit(50));
+                // Campus Feed: Show Global posts + Campus posts from MY college
+                posts = posts.filter(p =>
+                    p.scope === 'global' ||
+                    (p.scope === 'campus' && p.user_school === collegeName)
+                );
             } else {
-                q = query(postsRef, orderBy('created_at', 'desc'), limit(50));
+                // Global Feed: Show ONLY Global posts
+                posts = posts.filter(p => p.scope === 'global');
             }
 
-            const snap = await getDocs(q);
-            return snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+            return posts;
         } catch (error) {
             console.error("Error fetching community posts:", error);
             return [];
@@ -983,7 +987,10 @@ export const dbService = {
     getUserPosts: async (userId: string) => {
         try {
             const postsRef = collection(getDb(), 'community_posts');
-            const q = query(postsRef, where('user_id', '==', userId), orderBy('created_at', 'desc'), limit(20));
+            // Ensure userId is valid
+            if (!userId) return [];
+
+            const q = query(postsRef, where('user_id', '==', userId), orderBy('created_at', 'desc'), limit(50));
             const snapshot = await getDocs(q);
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
         } catch (error) {
