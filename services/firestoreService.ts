@@ -757,16 +757,24 @@ export const dbService = {
     // --- DASHBOARD METHODS ---
     getDashboardStats: async (userId: string) => {
         if (!userId) return { activeCount: 0, escrowBalance: 0, nextDeadline: null, nextDeadlineProject: null, activeOrders: [] };
+
         // 1. Get Active Orders (using participants for bidirectional visibility)
         const q = query(
             collection(getDb(), 'orders'),
             where('participants', 'array-contains', userId),
-            where('status', '==', 'in_progress'),
-            orderBy('deadline', 'asc')
+            where('status', '==', 'in_progress')
+            // orderBy('deadline', 'asc') // Removed to avoid needing a complex composite index immediately
         );
 
         const snap = await getDocs(q);
-        const activeOrders = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+        let activeOrders = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+
+        // Sort in memory (client-side) to ensure order without index
+        activeOrders.sort((a, b) => {
+            const tA = a.deadline ? new Date(a.deadline).getTime() : Infinity;
+            const tB = b.deadline ? new Date(b.deadline).getTime() : Infinity;
+            return tA - tB;
+        });
 
         // 2. Calculate Stats
         const activeCount = activeOrders.length;
@@ -966,13 +974,16 @@ export const dbService = {
     },
 
     respondToOffer: async (chatId: string, messageId: string, userId: string, status: 'accepted' | 'rejected') => {
+        console.log(`[respondToOffer] Starting for chat ${chatId}, msg ${messageId}, status ${status}`);
         const msgRef = doc(getDb(), 'chats', chatId, 'messages', messageId);
+
         // 1. Update message status
         await updateDoc(msgRef, {
             'offer.status': status,
             'offer.responded_at': new Date().toISOString(),
             'offer.responded_by': userId
         });
+        console.log(`[respondToOffer] Message updated to ${status}`);
 
         // 2. If Accepted, Create Order/Project
         if (status === 'accepted') {
@@ -982,21 +993,30 @@ export const dbService = {
                 const msgData = msgSnap.data();
                 const offer = msgData?.offer;
 
-                if (!offer) return;
+                console.log('[respondToOffer] Offer data retrieved:', offer);
+
+                if (!offer) {
+                    console.error('[respondToOffer] No offer data found in message');
+                    return;
+                }
 
                 // Fetch Chat Details to identify Student vs Writer
-                // As per convention: poster = student, writer = writer
                 const chatRef = doc(getDb(), 'chats', chatId);
                 const chatSnap = await getDoc(chatRef);
                 const chatData = chatSnap.data();
 
-                if (!chatData) return;
+                console.log('[respondToOffer] Chat data retrieved:', chatData);
+
+                if (!chatData) {
+                    console.error('[respondToOffer] No chat data found');
+                    return;
+                }
 
                 const orderData = {
                     title: offer.title || 'Untitled Project',
                     description: offer.description || '',
                     budget: offer.budget || 0,
-                    amount: offer.budget || 0, // Mapping budget to amount for Dashboard stats
+                    amount: offer.budget || 0,
                     deadline: offer.deadline,
                     status: 'in_progress',
                     student_id: chatData.poster_id,
@@ -1006,15 +1026,14 @@ export const dbService = {
                     chat_id: chatId
                 };
 
-                await addDoc(collection(getDb(), 'orders'), orderData);
+                console.log('[respondToOffer] Creating order with data:', orderData);
 
-                // Notify
-                const { notifications } = await import('./firebase'); // Import helper if needed or use existing notification system
-                // (Existing notification logic is inside sendMessage for chats, but we might want a system notification here)
+                const orderRef = await addDoc(collection(getDb(), 'orders'), orderData);
+                console.log(`[respondToOffer] Order created successfully with ID: ${orderRef.id}`);
 
             } catch (error) {
                 console.error("Error creating project from offer:", error);
-                throw error; // Re-throw to let UI know
+                throw error;
             }
         }
     }
