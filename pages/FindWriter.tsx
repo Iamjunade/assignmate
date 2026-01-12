@@ -174,7 +174,7 @@ export const FindWriter = () => {
                     {/* Center: Navigation Links */}
                     <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-500">
                         <a
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate('/feed')}
                             className="cursor-pointer hover:text-slate-900 transition-colors"
                         >
                             Home
