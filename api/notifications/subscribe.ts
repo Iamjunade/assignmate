@@ -12,6 +12,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: 'Missing token' });
     }
 
+    if (!admin.apps.length) {
+        console.error('Firebase Admin not initialized. Check FIREBASE_SERVICE_ACCOUNT_KEY.');
+        return res.status(500).json({
+            error: 'Server Configuration Error: Firebase Admin not initialized'
+        });
+    }
+
     try {
         // Subscribe to Global
         await admin.messaging().subscribeToTopic(token, 'global_posts');
