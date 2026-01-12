@@ -72,203 +72,200 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Global Notification & FCM Listener
-  useEffect(() => {
-    if (!user) return;
+  import { useFcmToken } from './hooks/useFcmToken';
 
-    // 1. Request FCM Permission & Save Token
-    fcm.requestPermission(user.id).then(token => {
-      if (token) {
-        db.updateProfile(user.id, { fcm_token: token });
+  // ... imports
+
+  function AppContent() {
+    const { user, logout } = useAuth();
+    const { toast } = useToast();
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // Initialize FCM Token Management
+    useFcmToken();
+
+    // Global Notification Listener (Fallback Internal System)
+    useEffect(() => {
+      if (!user) return;
+
+      // Fallback: Internal Firestore Listener
+      const unsubscribe = notifications.listen(user.id, (data) => {
+        toast(
+          `${data.senderName}: ${data.content.length > 30 ? data.content.substring(0, 30) + '...' : data.content}`,
+          'info'
+        );
+      });
+
+      return () => unsubscribe();
+    }, [user]);
+
+    const startChatFromWriter = async (writer: User) => {
+      if (!user) {
+        navigate('/auth');
+        return;
       }
-    });
+      const chat = await db.createChat(null, user.id, writer.id);
+      navigate(`/chats/${chat.id}`);
+    };
 
-    // 2. Listen for Foreground FCM Messages
-    fcm.onForegroundMessage((payload) => {
-      const { title, body } = payload.notification || {};
-      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-      audio.volume = 0.5;
-      audio.play().catch(() => { });
-      toast(`${title || 'New Notification'}: ${body || ''}`, 'info');
-    });
+    const navItems = [
+      { label: 'Browse', href: '/', onClick: () => navigate('/') },
+      { label: 'How it Works', href: '/', onClick: () => navigate('/') },
+      { label: 'Pricing', href: '/', onClick: () => navigate('/') },
+    ];
 
-    // 3. Fallback: Internal Firestore Listener
-    const unsubscribe = notifications.listen(user.id, (data) => {
-      toast(
-        `${data.senderName}: ${data.content.length > 30 ? data.content.substring(0, 30) + '...' : data.content}`,
-        'info'
-      );
-    });
+    const authNavItems = [
+      { label: 'Feed', href: '/feed', onClick: () => navigate('/feed') },
+      { label: 'Messages', href: '/chats', onClick: () => navigate('/chats') },
+      { label: 'Connections', href: '/connections', onClick: () => navigate('/connections') },
+      { label: 'Profile', href: '/profile', onClick: () => navigate('/profile') },
+    ];
 
-    return () => unsubscribe();
-  }, [user]);
+    return (
+      <div className="min-h-screen bg-background">
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-screen text-slate-400">
+            <Loader2 className="animate-spin" />
+          </div>
+        }>
+          <Routes>
+            {/* --- Dashboard Routes (Self-contained Layouts) --- */}
+            <Route path="/feed" element={
+              <ProtectedRoute>
+                <Feed user={user} onChat={startChatFromWriter} />
+              </ProtectedRoute>
+            } />
 
-  const startChatFromWriter = async (writer: User) => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    const chat = await db.createChat(null, user.id, writer.id);
-    navigate(`/chats/${chat.id}`);
-  };
+            <Route path="/community" element={
+              <ProtectedRoute>
+                <Community />
+              </ProtectedRoute>
+            } />
 
-  const navItems = [
-    { label: 'Browse', href: '/', onClick: () => navigate('/') },
-    { label: 'How it Works', href: '/', onClick: () => navigate('/') },
-    { label: 'Pricing', href: '/', onClick: () => navigate('/') },
-  ];
+            <Route path="/talent" element={
+              <ProtectedRoute>
+                <TalentFeed />
+              </ProtectedRoute>
+            } />
 
-  const authNavItems = [
-    { label: 'Feed', href: '/feed', onClick: () => navigate('/feed') },
-    { label: 'Messages', href: '/chats', onClick: () => navigate('/chats') },
-    { label: 'Connections', href: '/connections', onClick: () => navigate('/connections') },
-    { label: 'Profile', href: '/profile', onClick: () => navigate('/profile') },
-  ];
+            <Route path="/mentors" element={<Navigate to="/talent" replace />} />
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-screen text-slate-400">
-          <Loader2 className="animate-spin" />
-        </div>
-      }>
-        <Routes>
-          {/* --- Dashboard Routes (Self-contained Layouts) --- */}
-          <Route path="/feed" element={
-            <ProtectedRoute>
-              <Feed user={user} onChat={startChatFromWriter} />
-            </ProtectedRoute>
-          } />
+            <Route path="/dashboard/hirer" element={
+              <ProtectedRoute>
+                <HirerDashboard />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/community" element={
-            <ProtectedRoute>
-              <Community />
-            </ProtectedRoute>
-          } />
+            <Route path="/dashboard/writer" element={
+              <ProtectedRoute>
+                <WriterDashboard />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/talent" element={
-            <ProtectedRoute>
-              <TalentFeed />
-            </ProtectedRoute>
-          } />
+            <Route path="/projects/:jobId" element={
+              <ProtectedRoute>
+                <JobDetails />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/mentors" element={<Navigate to="/talent" replace />} />
+            <Route path="/workroom/:jobId" element={
+              <ProtectedRoute>
+                <Workroom />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/dashboard/hirer" element={
-            <ProtectedRoute>
-              <HirerDashboard />
-            </ProtectedRoute>
-          } />
+            <Route path="/projects" element={
+              <ProtectedRoute>
+                {user && <Projects />}
+              </ProtectedRoute>
+            } />
 
-          <Route path="/dashboard/writer" element={
-            <ProtectedRoute>
-              <WriterDashboard />
-            </ProtectedRoute>
-          } />
+            <Route path="/peers" element={
+              <ProtectedRoute>
+                <FindWriter />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/projects/:jobId" element={
-            <ProtectedRoute>
-              <JobDetails />
-            </ProtectedRoute>
-          } />
+            <Route path="/connections" element={
+              <ProtectedRoute>
+                {user && <Connections user={user} />}
+              </ProtectedRoute>
+            } />
 
-          <Route path="/workroom/:jobId" element={
-            <ProtectedRoute>
-              <Workroom />
-            </ProtectedRoute>
-          } />
+            <Route path="/chats/*" element={
+              <ProtectedRoute>
+                <Routes>
+                  <Route path="/" element={<ChatListWrapper user={user} />} />
+                  <Route path="/:chatId" element={<ChatRoomWrapper user={user} />} />
+                </Routes>
+              </ProtectedRoute>
+            } />
 
-          <Route path="/projects" element={
-            <ProtectedRoute>
-              {user && <Projects />}
-            </ProtectedRoute>
-          } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                {user && <Profile user={user} />}
+              </ProtectedRoute>
+            } />
 
-          <Route path="/peers" element={
-            <ProtectedRoute>
-              <FindWriter />
-            </ProtectedRoute>
-          } />
+            <Route path="/profile/:userId" element={
+              <ProtectedRoute>
+                {user && <Profile user={user} />}
+              </ProtectedRoute>
+            } />
 
-          <Route path="/connections" element={
-            <ProtectedRoute>
-              {user && <Connections user={user} />}
-            </ProtectedRoute>
-          } />
-
-          <Route path="/chats/*" element={
-            <ProtectedRoute>
-              <Routes>
-                <Route path="/" element={<ChatListWrapper user={user} />} />
-                <Route path="/:chatId" element={<ChatRoomWrapper user={user} />} />
-              </Routes>
-            </ProtectedRoute>
-          } />
-
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              {user && <Profile user={user} />}
-            </ProtectedRoute>
-          } />
-
-          <Route path="/profile/:userId" element={
-            <ProtectedRoute>
-              {user && <Profile user={user} />}
-            </ProtectedRoute>
-          } />
-
-          {/* --- Admin Routes --- */}
-          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="verifications" element={<AdminVerifications />} />
-            <Route path="chats" element={<AdminChats />} />
-            <Route path="connections" element={<AdminConnections />} />
-            <Route path="settings" element={<AdminSettings />} />
-          </Route>
+            {/* --- Admin Routes --- */}
+            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="verifications" element={<AdminVerifications />} />
+              <Route path="chats" element={<AdminChats />} />
+              <Route path="connections" element={<AdminConnections />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
 
 
-          {/* --- Pitch Deck --- */}
-          <Route path="/pitch" element={<PitchDeck />} />
+            {/* --- Pitch Deck --- */}
+            <Route path="/pitch" element={<PitchDeck />} />
 
-          {/* --- GDC Presentation --- */}
-          <Route path="/gdc" element={<GDC />} />
+            {/* --- GDC Presentation --- */}
+            <Route path="/gdc" element={<GDC />} />
 
-          {/* --- Documentation --- */}
-          <Route path="/docs" element={<Documentation />} />
-          <Route path="/docs/:section" element={<Documentation />} />
+            {/* --- Documentation --- */}
+            <Route path="/docs" element={<Documentation />} />
+            <Route path="/docs/:section" element={<Documentation />} />
 
-          {/* --- Legal Pages --- */}
-          <Route path="/terms" element={<TermsOfService />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/community-guidelines" element={<CommunityGuidelines />} />
+            {/* --- Legal Pages --- */}
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/community-guidelines" element={<CommunityGuidelines />} />
 
-          {/* --- Public Routes (Glass Layout) --- */}
-          <Route element={
-            <GlassLayout>
-              <Outlet />
-            </GlassLayout>
-          }>
-            <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<Auth onComplete={() => navigate('/feed')} />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            {/* Catch-all redirect */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
+            {/* --- Public Routes (Glass Layout) --- */}
+            <Route element={
+              <GlassLayout>
+                <Outlet />
+              </GlassLayout>
+            }>
+              <Route path="/" element={<Landing />} />
+              <Route path="/auth" element={<Auth onComplete={() => navigate('/feed')} />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              {/* Catch-all redirect */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
 
-        </Routes>
-      </Suspense>
-    </div>
-  );
-}
+          </Routes>
+        </Suspense>
+      </div>
+    );
+  }
 
-// Wrapper components to handle params
-function ChatListWrapper({ user }: { user: any }) {
-  return <ChatList user={user} />;
-}
+  // Wrapper components to handle params
+  function ChatListWrapper({ user }: { user: any }) {
+    return <ChatList user={user} />;
+  }
 
-function ChatRoomWrapper({ user }: { user: any }) {
-  const { chatId } = useParams();
-  return <ChatRoom chatId={chatId!} user={user} />;
-}
+  function ChatRoomWrapper({ user }: { user: any }) {
+    const { chatId } = useParams();
+    return <ChatRoom chatId={chatId!} user={user} />;
+  }
