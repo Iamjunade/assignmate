@@ -460,12 +460,14 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                                             {!isMe && (
                                                                 <div className="size-7 shrink-0 mb-1">
                                                                     {!isSequence && (
-                                                                        <Avatar
-                                                                            src={chatDetails?.other_avatar}
-                                                                            alt={chatDetails?.other_handle}
-                                                                            className="size-7 rounded-full"
-                                                                            fallback={chatDetails?.other_handle?.charAt(0)}
-                                                                        />
+                                                                        <div onClick={() => navigate(`/profile/${m.sender_id}`)} className="cursor-pointer hover:opacity-80 transition-opacity">
+                                                                            <Avatar
+                                                                                src={chatDetails?.other_avatar}
+                                                                                alt={chatDetails?.other_handle}
+                                                                                className="size-7 rounded-full"
+                                                                                fallback={chatDetails?.other_handle?.charAt(0)}
+                                                                            />
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                             )}

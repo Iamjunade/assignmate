@@ -304,16 +304,23 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
                                     // Render Helper
                                     const renderCommentItem = (comment: Comment, isReply = false) => (
                                         <div key={comment.id} className={`flex gap-3 group ${isReply ? 'ml-0' : ''}`}>
-                                            <Avatar
-                                                src={comment.user_avatar}
-                                                alt={comment.user_handle}
-                                                fallback={comment.user_handle?.charAt(0)}
-                                                className={isReply ? "size-6 mt-1" : "size-8"}
-                                            />
+                                            <div onClick={(e) => { e.stopPropagation(); navigate(`/profile/${comment.user_id}`); }} className="cursor-pointer hover:opacity-80 transition-opacity">
+                                                <Avatar
+                                                    src={comment.user_avatar}
+                                                    alt={comment.user_handle}
+                                                    fallback={comment.user_handle?.charAt(0)}
+                                                    className={isReply ? "size-6 mt-1" : "size-8"}
+                                                />
+                                            </div>
                                             <div className="flex-1">
                                                 <div className={`bg-gray-50 px-4 py-2 ${isReply ? "rounded-xl" : "rounded-2xl rounded-tl-none"}`}>
                                                     <div className="flex items-center justify-between mb-0.5">
-                                                        <span className={`font-bold text-slate-900 ${isReply ? "text-xs" : "text-sm"}`}>{comment.user_handle}</span>
+                                                        <span
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/profile/${comment.user_id}`); }}
+                                                            className={`font-bold text-slate-900 hover:text-orange-600 hover:underline cursor-pointer transition-colors ${isReply ? "text-xs" : "text-sm"}`}
+                                                        >
+                                                            {comment.user_handle}
+                                                        </span>
                                                         <span className="text-[10px] text-gray-400">
                                                             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                                                         </span>
