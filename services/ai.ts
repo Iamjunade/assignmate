@@ -152,7 +152,7 @@ If the user says "skip" or similar, move to the next step.
             console.log(`🤖 Call AI: using Key ending in ...${cleanKey.slice(-4)}`);
 
             const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${cleanKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cleanKey}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -164,7 +164,13 @@ If the user says "skip" or similar, move to the next step.
                         generationConfig: {
                             temperature: 0.7,
                             maxOutputTokens: 500,
-                        }
+                        },
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
+                        ]
                     })
                 }
             );
@@ -178,7 +184,10 @@ If the user says "skip" or similar, move to the next step.
             const data = await response.json();
             const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-            if (!text) throw new Error("No response from AI (Empty candidates)");
+            if (!text) {
+                console.warn("⚠️ AI returned empty text. Full Response:", JSON.stringify(data, null, 2));
+                throw new Error(`No response from AI (Finish Reason: ${data.candidates?.[0]?.finishReason || 'Unknown'})`);
+            }
 
             return { text };
         } catch (e: any) {
