@@ -1,3 +1,4 @@
+import { sendEmailVerification } from 'firebase/auth';
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { auth as firebaseAuth, presence } from '../services/firebase';
 import { userApi } from '../services/firestoreService';
@@ -138,16 +139,11 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         presence.init(res.data.user.uid);
         notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
 
-        // ✅ Trigger Brevo Email Verification (Vercel Function)
-        fetch('/api/send-verification', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: email,
-            uid: res.data.user.uid,
-            fullName: fullName
-          })
-        }).catch(err => console.error("Failed to send verification email:", err));
+        // ✅ Native Firebase Email Verification
+        // No custom Vercel/Zoho needed.
+        sendEmailVerification(res.data.user)
+          .then(() => console.log("Verification email sent (Native)"))
+          .catch(err => console.error("Failed to send verification email:", err));
 
         return { data: { ...res.data, session: true } };
       } catch (error: any) {
@@ -211,8 +207,13 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       }
 
       setUser(null);
-    } catch (error) {
-      throw error;
+    } catch (error: any) {
+      if (error.code === 'auth/requires-recent-login') {
+        alert("For security, please log out and log back in before deleting your account.");
+      } else {
+        console.error("Delete Account Error:", error);
+        throw error;
+      }
     }
   };
   const resetPassword = async (email: string) => { const res = await firebaseAuth.resetPassword(email); if (res.error) throw res.error; };
