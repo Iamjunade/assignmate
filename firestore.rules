@@ -67,25 +67,28 @@ service cloud.firestore {
 
     // --- Orders Collection (Projects/Assignments) ---
     match /orders/{orderId} {
-      // Read: Student (hirer) or Writer involved in the order
+      // Read: Participant in the order
       allow read: if isAuthenticated() && (
         resource.data.student_id == request.auth.uid ||
         resource.data.poster_id == request.auth.uid ||
-        resource.data.writer_id == request.auth.uid
+        resource.data.writer_id == request.auth.uid ||
+        request.auth.uid in resource.data.participants
       );
       
-      // Create: Must be student/poster or writer in the new order
+      // Create: Must be participant
       allow create: if isAuthenticated() && (
         request.resource.data.student_id == request.auth.uid ||
         request.resource.data.poster_id == request.auth.uid ||
-        request.resource.data.writer_id == request.auth.uid
+        request.resource.data.writer_id == request.auth.uid ||
+        request.auth.uid in request.resource.data.participants
       );
       
-      // Update: Only participants can update
+      // Update: Must be participant
       allow update: if isAuthenticated() && (
         resource.data.student_id == request.auth.uid ||
         resource.data.poster_id == request.auth.uid ||
-        resource.data.writer_id == request.auth.uid
+        resource.data.writer_id == request.auth.uid ||
+        request.auth.uid in resource.data.participants
       );
     }
 
