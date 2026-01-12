@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { dbService as db } from '../services/firestoreService';
-import { CommunityPost } from '../types';
-import { CommunityPostCard } from '../components/community/CommunityPostCard';
+import { dbService as db } from '../../services/firestoreService';
+import { CommunityPost } from '../../types';
+import { CommunityPostCard } from '../community/CommunityPostCard';
 import { Loader2, MessageSquare } from 'lucide-react';
 
 interface ActivityFeedProps {
