@@ -182,10 +182,10 @@ export const FindWriter = () => {
                             Find Peers
                         </a>
                         <a
-                            onClick={() => navigate('/projects')}
+                            onClick={() => navigate('/community')}
                             className="cursor-pointer hover:text-slate-900 transition-colors"
                         >
-                            My Assignments
+                            Community
                         </a>
                     </nav>
 
