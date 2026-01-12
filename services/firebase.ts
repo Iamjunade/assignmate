@@ -72,7 +72,7 @@ export const db = dbInstance;
 
 // --- Notifications System (Firestore Based - Legacy/Internal) ---
 export const notifications = {
-    send: async (receiverId: string, senderName: string, content: string, chatId: string, type: 'chat' | 'connection' | 'system' = 'chat') => {
+    send: async (receiverId: string, senderName: string, content: string, chatId: string, type: 'chat' | 'connection' | 'system' | 'community_like' | 'community_comment' = 'chat') => {
         if (!dbInstance) return;
         try {
             await addDoc(collection(dbInstance, 'notifications'), {

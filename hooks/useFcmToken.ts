@@ -17,6 +17,16 @@ export const useFcmToken = () => {
             if (token) {
                 setToken(token);
                 console.log('FCM Token secured:', token);
+
+                // Subscribe to topics (Vercel API)
+                fetch('/api/notifications/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token,
+                        school: user.school
+                    })
+                }).catch(err => console.error('Subscription error:', err));
             }
 
             // 2. Setup Foreground Listener

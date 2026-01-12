@@ -154,6 +154,18 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
             if (prev.some(m => m.id === sentMsg.id)) return prev;
             return [...prev, sentMsg];
         });
+
+        // Send Notification (Vercel API)
+        fetch('/api/notifications/send-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chatId,
+                senderId: user.id,
+                senderName: user.full_name || user.handle,
+                content: contentToSend
+            })
+        }).catch(err => console.error('Notification failed:', err));
     };
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {

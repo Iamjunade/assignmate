@@ -51,8 +51,22 @@ export const Community: React.FC = () => {
                 scope: scope
             };
 
-            await db.createCommunityPost(safePostData);
+            const newPost = await db.createCommunityPost(safePostData);
             toast('Discussion started successfully!', 'success');
+
+            // Send Notification (Vercel API)
+            fetch('/api/notifications/send-post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    postId: newPost.id,
+                    content: safePostData.content,
+                    scope: safePostData.scope,
+                    userSchool: safePostData.user_school,
+                    userSchoolName: safePostData.user_school
+                })
+            }).catch(err => console.error('Notification failed:', err));
+
             fetchPosts();
         } catch (error: any) {
             console.error("Failed to share post:", error);

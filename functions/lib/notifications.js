@@ -19,23 +19,17 @@ exports.onNewMessage = functions.firestore
     if (!message || !message.sender_id)
         return;
     try {
-        // 1. Get Chat Metadata to find participants
         const chatDoc = await admin.firestore().collection('chats').doc(chatId).get();
         if (!chatDoc.exists)
             return;
         const chatData = chatDoc.data();
         const participants = (chatData === null || chatData === void 0 ? void 0 : chatData.participants) || [];
-        // 2. Identify Recipient(s) - exclude sender
         const recipientIds = participants.filter((uid) => uid !== message.sender_id);
         if (recipientIds.length === 0)
             return;
-        // 3. Fetch Sender Details (for Title)
-        // Optimization: Message usually contains sender_name, use that if available to save read
         const senderName = message.sender_name || 'Someone';
         const messageBody = message.type === 'offer' ? 'Sent you a project offer' : (message.content || 'Sent a message');
-        // 4. Send to each recipient
         const sendPromises = recipientIds.map(async (uid) => {
-            // Fetch user's tokens
             const tokensSnap = await admin.firestore()
                 .collection('users')
                 .doc(uid)
@@ -46,30 +40,33 @@ exports.onNewMessage = functions.firestore
             const tokens = tokensSnap.docs.map(t => t.data().token).filter(t => !!t);
             if (tokens.length === 0)
                 return;
-            // Create Payload
-            const payload = {
+            // Create Multicast Message (V1 API)
+            const messagePayload = {
+                tokens: tokens,
                 notification: {
                     title: senderName,
                     body: messageBody,
-                    clickAction: `https://assignmate.live/chats/${chatId}`,
-                    icon: '/logo.png'
                 },
                 data: {
                     type: 'chat',
                     chatId: chatId,
-                    url: `/chats/${chatId}`
+                    url: `/chats/${chatId}`,
+                    click_action: `/chats/${chatId}` // Legacy support
+                },
+                webpush: {
+                    fcmOptions: {
+                        link: `/chats/${chatId}`
+                    }
                 }
             };
-            // Send
-            const response = await admin.messaging().sendToDevice(tokens, payload);
+            const response = await admin.messaging().sendEachForMulticast(messagePayload);
             // Cleanup Invalid Tokens
             const tokensToRemove = [];
-            response.results.forEach((result, index) => {
-                const error = result.error;
-                if (error) {
-                    if (error.code === 'messaging/invalid-registration-token' ||
-                        error.code === 'messaging/registration-token-not-registered') {
-                        // Delete invalid token
+            response.responses.forEach((resp, index) => {
+                if (!resp.success && resp.error) {
+                    const errorCode = resp.error.code;
+                    if (errorCode === 'messaging/invalid-registration-token' ||
+                        errorCode === 'messaging/registration-token-not-registered') {
                         tokensToRemove.push(tokensSnap.docs[index].ref.delete());
                     }
                 }
@@ -98,26 +95,28 @@ exports.onNewPost = functions.firestore
         let topic = 'global_posts';
         let title = 'New Global Discussion';
         if (scope === 'campus' && school) {
-            // Sanitize school name for topic (remove spaces, special chars)
-            // standard topic format: "school_CMRIT"
             const sanitizedSchool = school.replace(/[^a-zA-Z0-9]/g, '_');
             topic = `school_${sanitizedSchool}`;
             title = `New in ${school}`;
         }
-        const payload = {
+        const messagePayload = {
+            topic: topic,
             notification: {
                 title: title,
                 body: post.content ? (post.content.substring(0, 100) + (post.content.length > 100 ? '...' : '')) : 'New post',
-                icon: '/logo.png',
-                clickAction: '/community'
             },
             data: {
                 type: 'post',
                 postId: context.params.postId,
                 url: '/community'
+            },
+            webpush: {
+                fcmOptions: {
+                    link: '/community'
+                }
             }
         };
-        await admin.messaging().sendToTopic(topic, payload);
+        await admin.messaging().send(messagePayload);
     }
     catch (error) {
         console.error('[onNewPost] Error:', error);
@@ -130,7 +129,6 @@ exports.onNewPost = functions.firestore
 exports.onTokenWrite = functions.firestore
     .document('users/{userId}/fcm_tokens/{tokenId}')
     .onWrite(async (change, context) => {
-    // If deleted, do nothing (Firebase handles topic unsubscribe lazily or we can't do it easily without token)
     if (!change.after.exists)
         return;
     const data = change.after.data();
@@ -139,9 +137,7 @@ exports.onTokenWrite = functions.firestore
     if (!token)
         return;
     try {
-        // 1. Subscribe to Global Topic
         await admin.messaging().subscribeToTopic(token, 'global_posts');
-        // 2. Fetuch User to get School
         const userDoc = await admin.firestore().collection('users').doc(userId).get();
         const userData = userDoc.data();
         if (userData && userData.school) {
@@ -164,47 +160,45 @@ exports.onConnectionRequest = functions.firestore
     const request = snap.data();
     if (!request)
         return;
-    const toUserId = request.toId; // Recipient
-    const fromUserId = request.fromId; // Sender
+    const toUserId = request.toId;
+    const fromUserId = request.fromId;
     if (!toUserId || !fromUserId)
         return;
     try {
-        // 1. Fetch Sender Details
         const senderDoc = await admin.firestore().collection('users').doc(fromUserId).get();
         const senderName = ((_a = senderDoc.data()) === null || _a === void 0 ? void 0 : _a.full_name) || 'Someone';
-        // 2. Fetch Recipient Tokens
         const tokensSnap = await admin.firestore()
             .collection('users')
             .doc(toUserId)
             .collection('fcm_tokens')
             .get();
-        if (tokensSnap.empty) {
-            console.log(`[onConnectionRequest] No tokens for user ${toUserId}`);
+        if (tokensSnap.empty)
             return;
-        }
         const tokens = tokensSnap.docs.map(t => t.data().token).filter(Boolean);
-        // 3. Send Notification
-        const payload = {
+        const messagePayload = {
+            tokens: tokens,
             notification: {
                 title: 'New Connection Request',
                 body: `${senderName} wants to connect with you.`,
-                icon: '/logo.png',
-                clickAction: `/profile/${fromUserId}`
             },
             data: {
                 type: 'connection_request',
                 fromUserId: fromUserId,
                 url: `/profile/${fromUserId}`
+            },
+            webpush: {
+                fcmOptions: {
+                    link: `/profile/${fromUserId}`
+                }
             }
         };
-        const response = await admin.messaging().sendToDevice(tokens, payload);
-        // 4. Cleanup
+        const response = await admin.messaging().sendEachForMulticast(messagePayload);
         const tokensToRemove = [];
-        response.results.forEach((result, index) => {
-            const error = result.error;
-            if (error) {
-                if (error.code === 'messaging/invalid-registration-token' ||
-                    error.code === 'messaging/registration-token-not-registered') {
+        response.responses.forEach((resp, index) => {
+            if (!resp.success && resp.error) {
+                const errorCode = resp.error.code;
+                if (errorCode === 'messaging/invalid-registration-token' ||
+                    errorCode === 'messaging/registration-token-not-registered') {
                     tokensToRemove.push(tokensSnap.docs[index].ref.delete());
                 }
             }

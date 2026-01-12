@@ -151,6 +151,19 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
         try {
             await db.sendConnectionRequest(currentUser.id, profileUser.id);
             setConnectionStatus('pending_sent');
+            success("Connection request sent!");
+
+            // Send Notification (Vercel API)
+            fetch('/api/notifications/send-connection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    toId: profileUser.id,
+                    fromId: currentUser.id,
+                    senderName: currentUser.full_name || currentUser.handle
+                })
+            }).catch(err => console.error('Notification failed:', err));
+            setConnectionStatus('pending_sent');
             success("Connection request sent");
         } catch (e) {
             error("Failed to send request");
@@ -421,7 +434,18 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                 onClick={async () => {
                                                     await db.sendConnectionRequest(currentUser.id, profileUser.id);
                                                     setConnectionStatus('pending_sent');
-                                                    success("Request sent!");
+                                                    success("Connection request sent!");
+
+                                                    // Send Notification (Vercel API)
+                                                    fetch('/api/notifications/send-connection', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({
+                                                            toId: profileUser.id,
+                                                            fromId: currentUser.id,
+                                                            senderName: currentUser.full_name || currentUser.handle
+                                                        })
+                                                    }).catch(err => console.error('Notification failed:', err));
                                                 }}
                                                 className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-[#1b140d] font-bold text-sm hover:opacity-90 transition-colors shadow-sm"
                                             >
