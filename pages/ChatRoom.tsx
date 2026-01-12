@@ -351,14 +351,14 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                     onClick={handleCreateOffer}
                                     className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white text-sm font-bold hover:shadow-lg hover:scale-[1.02] transition-all"
                                 >
-                                    <span className="material-symbols-outlined text-lg">receipt_long</span>
-                                    Create Offer
+                                    <span className="material-symbols-outlined text-lg">handshake</span>
+                                    Collaborate
                                 </button>
                                 <button
                                     onClick={handleCreateOffer}
                                     className="md:hidden size-10 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white flex items-center justify-center shadow-md"
                                 >
-                                    <span className="material-symbols-outlined">receipt_long</span>
+                                    <span className="material-symbols-outlined">handshake</span>
                                 </button>
                                 <button
                                     onClick={() => navigate(`/profile/${chatDetails?.poster_id === user.id ? chatDetails?.writer_id : chatDetails?.poster_id}`)}

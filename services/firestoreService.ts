@@ -957,10 +957,55 @@ export const dbService = {
 
     respondToOffer: async (chatId: string, messageId: string, userId: string, status: 'accepted' | 'rejected') => {
         const msgRef = doc(getDb(), 'chats', chatId, 'messages', messageId);
+        // 1. Update message status
         await updateDoc(msgRef, {
             'offer.status': status,
             'offer.responded_at': new Date().toISOString(),
             'offer.responded_by': userId
         });
+
+        // 2. If Accepted, Create Order/Project
+        if (status === 'accepted') {
+            try {
+                // Fetch Offer Details
+                const msgSnap = await getDoc(msgRef);
+                const msgData = msgSnap.data();
+                const offer = msgData?.offer;
+
+                if (!offer) return;
+
+                // Fetch Chat Details to identify Student vs Writer
+                // As per convention: poster = student, writer = writer
+                const chatRef = doc(getDb(), 'chats', chatId);
+                const chatSnap = await getDoc(chatRef);
+                const chatData = chatSnap.data();
+
+                if (!chatData) return;
+
+                const orderData = {
+                    title: offer.title || 'Untitled Project',
+                    description: offer.description || '',
+                    budget: offer.budget || 0,
+                    amount: offer.budget || 0, // Mapping budget to amount for Dashboard stats
+                    deadline: offer.deadline,
+                    status: 'in_progress',
+                    student_id: chatData.poster_id,
+                    writer_id: chatData.writer_id,
+                    created_at: new Date().toISOString(),
+                    participants: chatData.participants || [chatData.poster_id, chatData.writer_id],
+                    chat_id: chatId
+                };
+
+                await addDoc(collection(getDb(), 'orders'), orderData);
+
+                // Notify
+                const { notifications } = await import('./firebase'); // Import helper if needed or use existing notification system
+                // (Existing notification logic is inside sendMessage for chats, but we might want a system notification here)
+
+            } catch (error) {
+                console.error("Error creating project from offer:", error);
+                throw error; // Re-throw to let UI know
+            }
+        }
     }
 };
