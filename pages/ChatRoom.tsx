@@ -208,7 +208,8 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                 isPaid: collabData.isPaid,
                 budget: collabData.budget
             });
-            setMessages(prev => [...prev, sentOffer]);
+            // Removed manual setMessages to prevent duplication with onSnapshot listener
+            // setMessages(prev => [...prev, sentOffer]);
             toastSuccess("Collab request sent!");
         } catch (error: any) {
             console.error("Failed to send collab request", error);

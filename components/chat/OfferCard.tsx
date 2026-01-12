@@ -111,16 +111,10 @@ export const OfferCard: React.FC<OfferCardProps> = ({
 
                 {/* Body */}
                 <div className="p-5 space-y-4">
-                    {/* Subject & Pages */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-secondary-bg p-3 rounded-xl">
-                            <p className="text-[10px] text-text-muted uppercase tracking-wide font-bold mb-1">Subject</p>
-                            <p className="text-sm font-bold text-text-dark">{offer.subject}</p>
-                        </div>
-                        <div className="bg-secondary-bg p-3 rounded-xl">
-                            <p className="text-[10px] text-text-muted uppercase tracking-wide font-bold mb-1">Pages</p>
-                            <p className="text-sm font-bold text-text-dark">{offer.pages} {offer.pages === 1 ? 'page' : 'pages'}</p>
-                        </div>
+                    {/* Pages Only */}
+                    <div className="bg-secondary-bg p-3 rounded-xl">
+                        <p className="text-[10px] text-text-muted uppercase tracking-wide font-bold mb-1">Pages</p>
+                        <p className="text-sm font-bold text-text-dark">{offer.pages} {offer.pages === 1 ? 'page' : 'pages'}</p>
                     </div>
 
                     {/* Description */}
@@ -132,7 +126,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
                     )}
 
                     {/* Deadline & Budget */}
-                    <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border-subtle">
+                    <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
                         <div>
                             <p className="text-[10px] text-text-muted uppercase tracking-wide font-bold mb-1">Deadline</p>
                             <div className="flex items-center gap-1.5 text-red-600">
@@ -140,10 +134,12 @@ export const OfferCard: React.FC<OfferCardProps> = ({
                                 <span className="font-bold">{formatDeadline(offer.deadline)}</span>
                             </div>
                         </div>
-                        <div className="text-right">
-                            <p className="text-[10px] text-text-muted uppercase tracking-wide font-bold mb-1">Budget</p>
-                            <p className="text-2xl font-extrabold text-primary">₹{offer.budget.toLocaleString()}</p>
-                        </div>
+                        {offer.budget > 0 && (
+                            <div className="text-right">
+                                <p className="text-[10px] text-text-muted uppercase tracking-wide font-bold mb-1">Budget</p>
+                                <p className="text-2xl font-extrabold text-primary">₹{offer.budget.toLocaleString()}</p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Action Buttons (only for receiver and pending offers) */}
