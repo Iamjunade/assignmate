@@ -484,6 +484,48 @@ export const dbService = {
 
 
 
+    // --- ORDER MANAGEMENT ---
+    updateOrderStatus: async (orderId: string, newStatus: 'in_progress' | 'completed' | 'cancelled', userId: string) => {
+        const orderRef = doc(getDb(), 'orders', orderId);
+        const orderSnap = await getDoc(orderRef);
+
+        if (!orderSnap.exists()) throw new Error("Order not found");
+
+        const orderData = orderSnap.data();
+        if (!orderData.participants.includes(userId)) {
+            throw new Error("Unauthorized: You are not a participant in this project.");
+        }
+
+        const updates: any = {
+            status: newStatus,
+            updated_at: new Date().toISOString()
+        };
+
+        if (newStatus === 'completed') {
+            updates.completion_percentage = 100;
+        }
+
+        await updateDoc(orderRef, updates);
+
+        // If completed, increment 'projects_completed' for ALL participants
+        if (newStatus === 'completed' && orderData.status !== 'completed') {
+            const batch = (await import('firebase/firestore')).writeBatch(getDb());
+
+            // Increment for all participants
+            // We use increment(1) from firestore
+            const { increment } = await import('firebase/firestore');
+
+            orderData.participants.forEach((pid: string) => {
+                const userRef = doc(getDb(), 'users', pid);
+                batch.update(userRef, {
+                    projects_completed: increment(1),
+                    // Also ensure total_earned updates if it's the writer (logic can be refined later)
+                });
+            });
+
+            await batch.commit();
+        }
+    },
     // --- CHAT SYSTEM ---
     getChats: async (userId: string) => {
         try {
