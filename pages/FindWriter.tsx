@@ -25,7 +25,8 @@ export const FindWriter = () => {
 
     // Autocomplete State
     const [acOpen, setAcOpen] = useState(false);
-    const [acResults, setAcResults] = useState<College[]>([]);
+    const [acCollegeResults, setAcCollegeResults] = useState<College[]>([]);
+    const [acUserResults, setAcUserResults] = useState<User[]>([]);
     const acWrapperRef = useRef<HTMLDivElement>(null);
 
     // Initial Fetch
@@ -66,26 +67,37 @@ export const FindWriter = () => {
         fetchUsers();
     }, [user?.id]);
 
-    // College Autocomplete Logic
+    // Autocomplete Logic (Combined)
     useEffect(() => {
         if (!searchQuery.trim() || searchQuery.length < 2) {
-            setAcResults([]);
+            setAcCollegeResults([]);
+            setAcUserResults([]);
             return;
         }
 
+        const q = searchQuery.toLowerCase();
+
+        // 1. Search Users (Peers)
+        // Prioritize: Handle match > Name match
+        const users = allUsers.filter(u =>
+            (u.handle?.toLowerCase().includes(q)) ||
+            (u.full_name?.toLowerCase().includes(q))
+        ).slice(0, 5); // Limit user results
+        setAcUserResults(users);
+
+        // 2. Search Colleges
         let active = true;
         collegeService.getAll().then(colleges => {
             if (!active) return;
-            const q = searchQuery.toLowerCase();
             const matches = colleges.filter(c =>
                 c.name.toLowerCase().includes(q) ||
                 c.state.toLowerCase().includes(q)
-            ).slice(0, 8); // Limit suggestions
-            setAcResults(matches);
+            ).slice(0, 5); // Limit college results
+            setAcCollegeResults(matches);
         });
 
         return () => { active = false; };
-    }, [searchQuery]);
+    }, [searchQuery, allUsers]);
 
     // Click outside handler for autocomplete
     useEffect(() => {
@@ -100,6 +112,11 @@ export const FindWriter = () => {
 
     const handleSelectCollege = (name: string) => {
         setSearchQuery(name);
+        setAcOpen(false);
+    };
+
+    const handleSelectUser = (userId: string) => {
+        navigate(`/profile/${userId}`);
         setAcOpen(false);
     };
 
@@ -248,25 +265,62 @@ export const FindWriter = () => {
                         </button>
                     </div>
 
+
                     {/* Autocomplete Dropdown */}
-                    {acOpen && acResults.length > 0 && searchQuery.length >= 2 && (
+                    {acOpen && (acUserResults.length > 0 || acCollegeResults.length > 0) && searchQuery.length >= 2 && (
                         <div className="absolute top-full left-4 right-4 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
-                            <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                <GraduationCap size={14} /> Suggested Colleges
-                            </div>
-                            <div className="max-h-72 overflow-y-auto">
-                                {acResults.map((college, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => handleSelectCollege(college.name)}
-                                        className="w-full text-left px-5 py-3 hover:bg-orange-50 transition-colors border-b border-slate-50 text-slate-700 hover:text-orange-700 flex items-center justify-between group"
-                                    >
-                                        <div className="font-bold">{college.name}</div>
-                                        <div className="text-xs text-slate-400 font-medium group-hover:text-orange-400 flex items-center gap-1">
-                                            <MapPin size={12} /> {college.state}
+                            <div className="max-h-[26rem] overflow-y-auto">
+
+                                {/* User Results */}
+                                {acUserResults.length > 0 && (
+                                    <>
+                                        <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                            <UserCheck size={14} /> Peers & Students
                                         </div>
-                                    </button>
-                                ))}
+                                        {acUserResults.map((u) => (
+                                            <button
+                                                key={u.id}
+                                                onClick={() => handleSelectUser(u.id)}
+                                                className="w-full text-left px-5 py-3 hover:bg-orange-50 transition-colors border-b border-slate-50 text-slate-700 hover:text-orange-700 flex items-center gap-3 group"
+                                            >
+                                                <Avatar src={u.avatar_url} alt={u.handle} className="size-8 rounded-full border border-slate-200" />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="font-bold truncate flex items-center gap-1.5">
+                                                        {u.handle || 'Anonymous'}
+                                                        {u.is_verified === 'verified' && <span className="material-symbols-outlined text-blue-500 text-[14px] filled">verified</span>}
+                                                    </div>
+                                                    <div className="text-xs text-slate-400 font-medium truncate">
+                                                        {u.full_name} • {u.school || 'College Student'}
+                                                    </div>
+                                                </div>
+                                                <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors">
+                                                    View Profile
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </>
+                                )}
+
+                                {/* College Results */}
+                                {acCollegeResults.length > 0 && (
+                                    <>
+                                        <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2 sticky top-0">
+                                            <GraduationCap size={14} /> Suggested Colleges
+                                        </div>
+                                        {acCollegeResults.map((college, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => handleSelectCollege(college.name)}
+                                                className="w-full text-left px-5 py-3 hover:bg-orange-50 transition-colors border-b border-slate-50 text-slate-700 hover:text-orange-700 flex items-center justify-between group"
+                                            >
+                                                <div className="font-bold">{college.name}</div>
+                                                <div className="text-xs text-slate-400 font-medium group-hover:text-orange-400 flex items-center gap-1">
+                                                    <MapPin size={12} /> {college.state}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </>
+                                )}
                             </div>
                         </div>
                     )}
