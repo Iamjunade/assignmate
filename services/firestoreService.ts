@@ -990,9 +990,14 @@ export const dbService = {
             // Ensure userId is valid
             if (!userId) return [];
 
-            const q = query(postsRef, where('user_id', '==', userId), orderBy('created_at', 'desc'), limit(50));
+            // Remove orderBy to avoid needing a composite index (user_id + created_at)
+            const q = query(postsRef, where('user_id', '==', userId), limit(50));
             const snapshot = await getDocs(q);
-            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+
+            const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+
+            // Client-side sort
+            return posts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         } catch (error) {
             console.error("Error fetching user posts:", error);
             return [];
