@@ -46,7 +46,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate }) =
                                 <Users size={12} className="text-gray-500" />
                             )}
                         </div>
-                        <span>With <span className="text-text-dark font-bold">{project.writer_handle || 'Peer'}</span></span>
+                        <span>With <span className="text-text-dark font-bold">{project.writer_handle || 'Unknown Peer'}</span></span>
                     </div>
                 </div>
 

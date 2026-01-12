@@ -847,7 +847,15 @@ export const dbService = {
                 otherId = order.student_id === userId ? order.writer_id : order.student_id;
             }
 
-            if (!otherId) return order;
+            if (!otherId) {
+                return {
+                    ...order,
+                    writer_handle: 'Unknown Participant',
+                    writer_avatar: null,
+                    writer_school: 'Unknown',
+                    writer_verified: false
+                };
+            }
 
             try {
                 const userSnap = await getDoc(doc(getDb(), 'users', otherId));
@@ -860,11 +868,25 @@ export const dbService = {
                         writer_school: u.school,
                         writer_verified: u.is_verified === 'verified'
                     };
+                } else {
+                    return {
+                        ...order,
+                        writer_handle: 'Deleted User',
+                        writer_avatar: null,
+                        writer_school: 'Unknown',
+                        writer_verified: false
+                    };
                 }
             } catch (e) {
                 console.error("Error hydrating order peer:", e);
+                return {
+                    ...order,
+                    writer_handle: 'Error Loading User',
+                    writer_avatar: null,
+                    writer_school: 'Unknown',
+                    writer_verified: false
+                };
             }
-            return order;
         }));
 
         return {
