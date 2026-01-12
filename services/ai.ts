@@ -192,13 +192,29 @@ If the user says "skip" or similar, move to the next step.
             return { text };
         } catch (e: any) {
             console.error("AI Chat Failed", e);
-            let userMessage = "Sorry, I'm having trouble connecting. Please try manually filling the form.";
+            let userMessage = "Sorry, I'm having trouble connecting.";
 
-            if (e.message.includes('404')) userMessage += " (Model not found)";
-            if (e.message.includes('400')) userMessage += " (Invalid Request)";
-            if (e.message.includes('403')) userMessage += " (key Rejected)";
+            // If 404, try to list available models to help debug
+            if (e.message.includes('404')) {
+                userMessage += " (Model not found). Checking available models...";
+                try {
+                    const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${cleanKey}`);
+                    const listData = await listResp.json();
+                    console.log("📜 Available Models for this Key:", listData);
+                    if (listData.models) {
+                        const modelNames = listData.models.map((m: any) => m.name.replace('models/', ''));
+                        console.warn("👉 Try using one of these:", modelNames.join(', '));
+                    }
+                } catch (listErr) {
+                    console.error("Failed to list models", listErr);
+                }
+            } else if (e.message.includes('400')) {
+                userMessage += " (Invalid Request)";
+            } else if (e.message.includes('403')) {
+                userMessage += " (Key Rejected)";
+            }
 
-            return { text: userMessage };
+            return { text: userMessage + " Please check console for details or try manually." };
         }
     }
 };
