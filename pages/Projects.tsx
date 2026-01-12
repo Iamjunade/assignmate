@@ -52,9 +52,9 @@ export const Projects: React.FC = () => {
                         <div className="flex flex-col sm:flex-row gap-4 mb-8">
                             <div className="flex-1 relative">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
-                                <input 
-                                    type="text" 
-                                    placeholder="Search projects..." 
+                                <input
+                                    type="text"
+                                    placeholder="Search projects..."
                                     className="w-full pl-12 pr-4 py-3 bg-white rounded-2xl border border-border-subtle focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium outline-none"
                                 />
                             </div>
@@ -81,29 +81,54 @@ export const Projects: React.FC = () => {
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
                                 {projects.map((project) => (
-                                    <div key={project.id} className="group bg-white p-6 rounded-[2.5rem] border border-border-subtle shadow-card hover:shadow-soft hover:border-primary/20 transition-all duration-300">
-                                        <div className="flex items-center justify-between gap-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="size-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
-                                                    <Calendar size={24} />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-lg font-bold text-text-dark group-hover:text-primary transition-colors">{project.title || 'Untitled Project'}</h3>
-                                                    <div className="flex items-center gap-4 mt-1">
-                                                        <div className="flex items-center gap-1.5 text-text-muted text-xs font-bold">
-                                                            <Users size={14} />
-                                                            {project.writer_handle || 'Pending Match'}
-                                                        </div>
-                                                        <div className="size-1 bg-gray-300 rounded-full" />
-                                                        <span className="text-xs font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                            {project.status || 'Active'}
-                                                        </span>
+                                    <div key={project.id} className="group bg-white p-6 rounded-[2rem] border border-border-subtle shadow-card hover:shadow-soft hover:border-primary/20 transition-all duration-300 flex flex-col gap-4 cursor-pointer" onClick={() => console.log('Navigate to project details')}>
+                                        {/* Header */}
+                                        <div className="flex justify-between items-start gap-4">
+                                            <div className="flex-1">
+                                                <h3 className="text-lg sm:text-xl font-bold text-text-dark group-hover:text-primary transition-colors line-clamp-1">{project.title || 'Untitled Project'}</h3>
+                                                <div className="flex items-center gap-2 mt-1.5 text-sm font-medium text-text-muted">
+                                                    <div className="size-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                                        {project.writer_avatar ? (
+                                                            <img src={project.writer_avatar} alt="Avatar" className="size-6 rounded-full object-cover" />
+                                                        ) : (
+                                                            <Users size={12} className="text-gray-500" />
+                                                        )}
                                                     </div>
+                                                    <span>With <span className="text-text-dark font-bold">{project.writer_handle || 'Peer'}</span></span>
                                                 </div>
                                             </div>
-                                            <button className="size-10 rounded-full bg-gray-50 text-text-muted hover:bg-primary hover:text-white transition-all flex items-center justify-center">
-                                                <ChevronRight size={20} />
-                                            </button>
+                                            <span className={`shrink-0 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${project.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-orange-50 text-orange-600'}`}>
+                                                {project.status === 'in_progress' ? 'In Progress' : project.status || 'Active'}
+                                            </span>
+                                        </div>
+
+                                        {/* Description */}
+                                        <p className="text-sm text-text-muted leading-relaxed line-clamp-2 min-h-[2.5rem]">
+                                            {project.description || 'No description provided.'}
+                                        </p>
+
+                                        {/* Footer Details */}
+                                        <div className="flex items-center justify-between pt-4 border-t border-border-subtle mt-auto">
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <div className="flex items-center gap-1.5 text-text-muted bg-gray-50 px-2.5 py-1 rounded-lg">
+                                                    <Calendar size={14} className="text-orange-500" />
+                                                    <span className="font-bold text-text-dark text-xs">
+                                                        {project.deadline ? new Date(project.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No Deadline'}
+                                                    </span>
+                                                </div>
+                                                {project.pages > 0 && (
+                                                    <div className="hidden sm:flex items-center gap-1.5 text-text-muted bg-gray-50 px-2.5 py-1 rounded-lg">
+                                                        <FolderPlus size={14} className="text-blue-500" />
+                                                        <span className="font-bold text-text-dark text-xs">{project.pages} Pages</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {project.budget > 0 && (
+                                                <div className="text-right">
+                                                    <span className="text-lg font-extrabold text-[#111827]">₹{project.budget.toLocaleString()}</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

@@ -757,10 +757,10 @@ export const dbService = {
     // --- DASHBOARD METHODS ---
     getDashboardStats: async (userId: string) => {
         if (!userId) return { activeCount: 0, escrowBalance: 0, nextDeadline: null, nextDeadlineProject: null, activeOrders: [] };
-        // 1. Get Active Orders (where student_id == userId AND status == 'in_progress')
+        // 1. Get Active Orders (using participants for bidirectional visibility)
         const q = query(
             collection(getDb(), 'orders'),
-            where('student_id', '==', userId),
+            where('participants', 'array-contains', userId),
             where('status', '==', 'in_progress'),
             orderBy('deadline', 'asc')
         );
@@ -777,32 +777,42 @@ export const dbService = {
         let nextDeadlineProject = null;
 
         if (activeOrders.length > 0) {
-            // Since we ordered by deadline asc, the first one is the next deadline
             const firstOrder = activeOrders[0];
             if (firstOrder.deadline) {
                 const daysLeft = Math.ceil((new Date(firstOrder.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                nextDeadline = daysLeft > 0 ? daysLeft : 0; // 0 means due today or overdue
+                nextDeadline = daysLeft > 0 ? daysLeft : 0;
                 nextDeadlineProject = firstOrder.title;
             }
         }
 
-        // 4. Hydrate Orders with Writer Data
+        // 4. Hydrate Orders with "Other Party" Data (display as writer_handle for UI compat)
         const hydratedOrders = await Promise.all(activeOrders.map(async (order) => {
-            if (!order.writer_id) return order;
+            // Find the ID of the other participant
+            let otherId = null;
+            if (order.participants && Array.isArray(order.participants)) {
+                otherId = order.participants.find((uid: string) => uid !== userId);
+            }
+            // Fallback for legacy orders
+            if (!otherId) {
+                otherId = order.student_id === userId ? order.writer_id : order.student_id;
+            }
+
+            if (!otherId) return order;
+
             try {
-                const writerSnap = await getDoc(doc(getDb(), 'users', order.writer_id));
-                if (writerSnap.exists()) {
-                    const w = writerSnap.data();
+                const userSnap = await getDoc(doc(getDb(), 'users', otherId));
+                if (userSnap.exists()) {
+                    const u = userSnap.data();
                     return {
                         ...order,
-                        writer_handle: w.handle,
-                        writer_avatar: w.avatar_url,
-                        writer_school: w.school,
-                        writer_verified: w.is_verified === 'verified'
+                        writer_handle: u.handle || u.full_name || 'User',
+                        writer_avatar: u.avatar_url,
+                        writer_school: u.school,
+                        writer_verified: u.is_verified === 'verified'
                     };
                 }
             } catch (e) {
-                console.error("Error hydrating order writer:", e);
+                console.error("Error hydrating order peer:", e);
             }
             return order;
         }));

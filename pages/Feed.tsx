@@ -285,7 +285,14 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                                                 <h3 className="font-bold text-[#111827]">{order.title}</h3>
                                                                 <span className="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full">In Progress</span>
                                                             </div>
-                                                            <p className="text-xs text-gray-500">Due: {format(new Date(order.deadline), 'MMM d, yyyy')}</p>
+                                                            <div className="flex items-center gap-3 text-xs text-gray-500">
+                                                                <span>Due: {format(new Date(order.deadline), 'MMM d, yyyy')}</span>
+                                                                {order.budget > 0 && (
+                                                                    <span className="flex items-center gap-0.5 font-bold text-gray-900 bg-white border border-gray-200 px-1.5 py-0.5 rounded shadow-sm">
+                                                                        ₹{order.budget.toLocaleString()}
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-4">
