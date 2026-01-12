@@ -140,10 +140,14 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
         notificationService.sendWelcome(res.data.user.uid, handle).catch(console.error);
 
         // ✅ Native Firebase Email Verification
-        // No custom Vercel/Zoho needed.
-        sendEmailVerification(res.data.user)
-          .then(() => console.log("Verification email sent (Native)"))
-          .catch(err => console.error("Failed to send verification email:", err));
+        // Await ensures email is sent BEFORE navigating to onboarding
+        try {
+          await sendEmailVerification(res.data.user);
+          console.log("Verification email sent (Native)");
+        } catch (err) {
+          console.error("Failed to send verification email:", err);
+          // Don't block registration if email fails, but log it
+        }
 
         return { data: { ...res.data, session: true } };
       } catch (error: any) {
