@@ -23,6 +23,9 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ noti
             navigate(`/chats/${notification.chatId}`);
         } else if (notification.type === 'connection') {
             navigate('/connections');
+        } else if (notification.type === 'community_like' || notification.type === 'community_comment') {
+            navigate('/community');
+            // Future: Navigate to specific post using notification.chatId (which holds postId)
         }
 
         onClose();
@@ -57,12 +60,16 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ noti
                     >
                         <div className={`size-10 rounded-full flex items-center justify-center flex-shrink-0 ${notification.type === 'chat' ? 'bg-blue-100 text-blue-600' :
                             notification.type === 'connection' ? 'bg-purple-100 text-purple-600' :
-                                'bg-orange-100 text-orange-600'
+                                notification.type === 'community_like' ? 'bg-pink-100 text-pink-600' :
+                                    notification.type === 'community_comment' ? 'bg-green-100 text-green-600' :
+                                        'bg-orange-100 text-orange-600'
                             }`}>
                             <span className="material-symbols-outlined text-xl">
                                 {notification.type === 'chat' ? 'chat' :
                                     notification.type === 'connection' ? 'person_add' :
-                                        'notifications'}
+                                        notification.type === 'community_like' ? 'thumb_up' :
+                                            notification.type === 'community_comment' ? 'comment' :
+                                                'notifications'}
                             </span>
                         </div>
                         <div className="flex-1 min-w-0">

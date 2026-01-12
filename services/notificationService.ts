@@ -39,5 +39,26 @@ export const notificationService = {
             '',
             'system'
         );
+    },
+
+    sendCommunityLike: async (receiverId: string, senderName: string, postId: string) => {
+        await notifications.send(
+            receiverId,
+            senderName,
+            `liked your discussion post.`,
+            postId, // Using postId in the 'link'/chatId field or similar, handled by UI logic
+            'community_like'
+        );
+    },
+
+    sendCommunityComment: async (receiverId: string, senderName: string, postId: string, commentPreview: string) => {
+        const preview = commentPreview.length > 50 ? commentPreview.substring(0, 50) + '...' : commentPreview;
+        await notifications.send(
+            receiverId,
+            senderName,
+            `commented: "${preview}"`,
+            postId,
+            'community_comment'
+        );
     }
 };

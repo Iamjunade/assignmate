@@ -1021,11 +1021,31 @@ export const dbService = {
         const postSnap = await getDoc(postRef);
         if (!postSnap.exists()) return;
 
-        const likes = postSnap.data().likes || [];
+        const data = postSnap.data();
+        const likes = data.likes || [];
+        const ownerId = data.user_id;
+
         if (likes.includes(userId)) {
             await updateDoc(postRef, { likes: arrayRemove(userId) });
         } else {
             await updateDoc(postRef, { likes: arrayUnion(userId) });
+
+            // Send Notification (if not owner)
+            if (ownerId && ownerId !== userId) {
+                try {
+                    // Fetch sender details to pass name (or reliable on client side? Service best to fetch or pass user object)
+                    // For speed, let's fetch sender doc quickly or assume standard flow handles it. 
+                    // Optimization: Pass "User" or fetch. strict types says arguments. 
+                    // Let's fetch sender profile quickly for the name.
+                    const userDoc = await getDoc(doc(getDb(), 'users', userId));
+                    const senderName = userDoc.exists() ? (userDoc.data().handle || userDoc.data().full_name || 'Someone') : 'Someone';
+
+                    const { notificationService } = await import('./notificationService');
+                    await notificationService.sendCommunityLike(ownerId, senderName, postId);
+                } catch (e) {
+                    console.error("Failed to send like notification", e);
+                }
+            }
         }
     },
 
@@ -1069,7 +1089,9 @@ export const dbService = {
 
             // Increment comment count on post
             const postRef = doc(getDb(), 'community_posts', postId);
+            const postSnap = await getDoc(postRef);
             const { increment } = await import('firebase/firestore');
+
             await updateDoc(postRef, {
                 comments_count: increment(1)
             });
