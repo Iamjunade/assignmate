@@ -957,46 +957,37 @@ export const dbService = {
         return isConnected ? 'connected' : 'none';
     },
 
-    // --- COMMUNITY POSTS ---
-    // --- COMMUNITY POSTS ---
-    getCommunityPosts: async (college?: string) => {
+    getCommunityPosts: async (collegeName?: string) => {
         try {
             const postsRef = collection(getDb(), 'community_posts');
-            let docs = [];
+            let q;
 
-            if (college) {
-                // Campus Feed:
-                // 1. Fetch posts from this school (using existing index on user_school)
-                // 2. Filter in-memory for scope == 'campus'
-                const q = query(postsRef, where('user_school', '==', college));
-                const snap = await getDocs(q);
-
-                docs = snap.docs
-                    .map(d => ({ id: d.id, ...d.data() } as any))
-                    .filter(p => p.scope === 'campus'); // Strict filter
-
-                // Sort in memory
-                docs.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-                // Limit to 50
-                docs = docs.slice(0, 50);
+            if (collegeName) {
+                // Fetch Global posts (always visible) OR Campus posts for this college
+                // Ideally we'd use an OR query, but for now we'll fetch general feed.
+                // If we want ONLY campus posts, we'd query where('user_school', '==', collegeName).
+                // Let's stick to the strategy: Fetch recent posts and let UI/Service filter or just fetch all for now.
+                q = query(postsRef, orderBy('created_at', 'desc'), limit(50));
             } else {
-                // Global Feed:
-                // Fetch all recent posts, then filter for scope == 'global' (or legacy missing scope)
-                // This ensures we don't need a composite index on scope+created_at immediately.
-
-                const q = query(postsRef, orderBy('created_at', 'desc'), limit(50));
-                const snap = await getDocs(q);
-
-                docs = snap.docs
-                    .map(d => ({ id: d.id, ...d.data() } as any))
-                    .filter(p => p.scope === 'global' || !p.scope);
+                q = query(postsRef, orderBy('created_at', 'desc'), limit(50));
             }
 
-            return docs;
+            const snap = await getDocs(q);
+            return snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
         } catch (error) {
             console.error("Error fetching community posts:", error);
-            // Fallback: Return empty array so UI doesn't crash
+            return [];
+        }
+    },
+
+    getUserPosts: async (userId: string) => {
+        try {
+            const postsRef = collection(getDb(), 'community_posts');
+            const q = query(postsRef, where('user_id', '==', userId), orderBy('created_at', 'desc'), limit(20));
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+        } catch (error) {
+            console.error("Error fetching user posts:", error);
             return [];
         }
     },

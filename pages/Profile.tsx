@@ -16,6 +16,7 @@ import { GlassInput } from '../components/ui/GlassInput';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { Avatar } from '../components/ui/Avatar';
+import { ActivityFeed } from '../components/profile/ActivityFeed';
 
 export const Profile = ({ user: currentUser }: { user: any }) => {
     const { userId } = useParams();
@@ -807,24 +808,13 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         )}
 
                                         {activeTab === 'reviews' && (
-                                            <div className="bg-white rounded-3xl p-8 shadow-soft border border-border-light text-center space-y-4">
-                                                <div className="inline-flex items-center justify-center size-16 rounded-full bg-blue-50 text-blue-500 mb-2">
-                                                    <span className="material-symbols-outlined text-3xl">history_edu</span>
-                                                </div>
-                                                <h3 className="text-xl font-bold font-display text-text-main">Community Activity</h3>
-                                                <p className="text-secondary max-w-sm mx-auto">
-                                                    Participation timeline and community contributions will appear here.
-                                                </p>
-                                                <div className="pt-4 flex justify-center gap-2">
-                                                    <div className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center">
-                                                        <span className="text-xs font-bold text-secondary uppercase">Joined</span>
-                                                        <span className="font-bold text-text-main">-</span>
-                                                    </div>
-                                                    <div className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center">
-                                                        <span className="text-xs font-bold text-secondary uppercase">Active</span>
-                                                        <span className="font-bold text-text-main text-green-500">Now</span>
-                                                    </div>
-                                                </div>
+                                            <div className="space-y-6">
+                                                {/* Activity Feed */}
+                                                <ActivityFeed
+                                                    userId={profileUser.id}
+                                                    userSchool={profileUser.school}
+                                                    viewerSchool={currentUser?.school}
+                                                />
                                             </div>
                                         )}
 
