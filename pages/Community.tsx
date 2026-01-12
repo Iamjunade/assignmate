@@ -38,7 +38,7 @@ export const Community: React.FC = () => {
         }
     };
 
-    const handleCreatePost = async (content: string) => {
+    const handleCreatePost = async (content: string, scope: 'global' | 'campus') => {
         if (!user) return;
         setPosting(true);
         try {
@@ -48,6 +48,7 @@ export const Community: React.FC = () => {
                 user_avatar: user.avatar_url ?? null,
                 user_school: (user.school || 'Unknown University') ?? 'Unknown School',
                 content: content.trim() ?? '',
+                scope: scope
             };
 
             await db.createCommunityPost(safePostData);

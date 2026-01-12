@@ -128,6 +128,7 @@ export interface CommunityPost {
   created_at: string;
   likes?: string[]; // User IDs
   comments_count?: number;
+  scope?: 'global' | 'campus';
 }
 
 export interface Comment {

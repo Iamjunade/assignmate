@@ -4,7 +4,7 @@ import { Loader2, Send, Star } from 'lucide-react';
 import { Avatar } from '../ui/Avatar';
 
 interface PostComposerProps {
-    onPost: (content: string) => Promise<void>;
+    onPost: (content: string, scope: 'global' | 'campus') => Promise<void>;
     posting: boolean;
 }
 
@@ -18,11 +18,12 @@ const QUICK_PROMPTS = [
 export const PostComposer: React.FC<PostComposerProps> = ({ onPost, posting }) => {
     const { user } = useAuth();
     const [content, setContent] = useState('');
+    const [scope, setScope] = useState<'global' | 'campus'>('campus');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!content.trim() || posting) return;
-        await onPost(content);
+        await onPost(content, scope);
         setContent('');
     };
 
@@ -66,9 +67,18 @@ export const PostComposer: React.FC<PostComposerProps> = ({ onPost, posting }) =
                         )}
 
                         <div className="mt-4 flex items-center justify-between">
-                            <p className="text-xs text-gray-400 font-medium">
-                                Tip: Be specific about your branch and year.
-                            </p>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-400 font-medium hidden sm:inline">Post to:</span>
+                                <select
+                                    value={scope}
+                                    onChange={(e) => setScope(e.target.value as 'global' | 'campus')}
+                                    className="text-xs font-bold bg-gray-50 border-gray-200 rounded-lg py-1.5 px-2 focus:ring-orange-500 focus:border-orange-500 text-gray-700"
+                                >
+                                    <option value="campus">My Campus</option>
+                                    <option value="global">Global Network</option>
+                                </select>
+                            </div>
+
                             <button
                                 type="submit"
                                 disabled={!content.trim() || posting}

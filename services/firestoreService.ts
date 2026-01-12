@@ -965,10 +965,15 @@ export const dbService = {
             let docs = [];
 
             if (college) {
-                // Filter by college ONLY (No orderBy to avoid Composite Index requirement)
+                // Campus Feed:
+                // 1. Fetch posts from this school (using existing index on user_school)
+                // 2. Filter in-memory for scope == 'campus'
                 const q = query(postsRef, where('user_school', '==', college));
                 const snap = await getDocs(q);
-                docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                docs = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() } as any))
+                    .filter(p => p.scope === 'campus'); // Strict filter
 
                 // Sort in memory
                 docs.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -976,10 +981,16 @@ export const dbService = {
                 // Limit to 50
                 docs = docs.slice(0, 50);
             } else {
-                // Global feed - standard index usually available
+                // Global Feed:
+                // Fetch all recent posts, then filter for scope == 'global' (or legacy missing scope)
+                // This ensures we don't need a composite index on scope+created_at immediately.
+
                 const q = query(postsRef, orderBy('created_at', 'desc'), limit(50));
                 const snap = await getDocs(q);
-                docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                docs = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() } as any))
+                    .filter(p => p.scope === 'global' || !p.scope);
             }
 
             return docs;
