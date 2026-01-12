@@ -472,15 +472,15 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                             </div>
                                             {profileUser.is_verified === 'verified' ? (
                                                 <Check size={16} className="text-blue-600" />
-                                            ) : (
+                                            ) : isOwnProfile ? (
                                                 <button
-                                                    onClick={() => isOwnProfile && idInputRef.current?.click()}
-                                                    className={`text-xs font-bold ${isOwnProfile ? 'text-primary hover:underline' : 'text-gray-400 cursor-default'}`}
-                                                    disabled={idUploading || !isOwnProfile}
+                                                    onClick={() => idInputRef.current?.click()}
+                                                    className="text-xs font-bold text-primary hover:underline"
+                                                    disabled={idUploading}
                                                 >
                                                     {idUploading ? '...' : 'Verify'}
                                                 </button>
-                                            )}
+                                            ) : null}
                                             <input
                                                 type="file"
                                                 ref={idInputRef}
