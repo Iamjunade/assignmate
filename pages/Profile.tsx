@@ -690,6 +690,23 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                                             ))}
                                                                         </div>
                                                                     </div>
+
+                                                                    {/* Private: Weaknesses (Only visible to owner) */}
+                                                                    {isOwnProfile && profileUser.ai_profile.weaknesses && profileUser.ai_profile.weaknesses.length > 0 && (
+                                                                        <div className="col-span-full pt-4 border-t border-violet-100/50">
+                                                                            <div className="flex items-center gap-2 mb-2">
+                                                                                <span className="material-symbols-outlined text-violet-400 text-sm">lock</span>
+                                                                                <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider">Areas to Improve (Private)</h4>
+                                                                            </div>
+                                                                            <div className="flex flex-wrap gap-2">
+                                                                                {profileUser.ai_profile.weaknesses.map((s: string, i: number) => (
+                                                                                    <span key={i} className="px-2.5 py-1 rounded-lg bg-white/50 text-violet-600/80 text-xs font-medium border border-violet-100/50 dashed border">
+                                                                                        {s}
+                                                                                    </span>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         )}
