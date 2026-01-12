@@ -81,6 +81,10 @@ export const Community: React.FC = () => {
         }
     };
 
+    const handleDeletePost = async (postId: string) => {
+        setPosts(prev => prev.filter(p => p.id !== postId));
+    };
+
     return (
         <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />
@@ -158,7 +162,12 @@ export const Community: React.FC = () => {
                         ) : (
                             <div className="space-y-6">
                                 {posts.map((post) => (
-                                    <CommunityPostCard key={post.id} post={post} onLike={handleToggleLike} />
+                                    <CommunityPostCard
+                                        key={post.id}
+                                        post={post}
+                                        onLike={handleToggleLike}
+                                        onDelete={handleDeletePost}
+                                    />
                                 ))}
 
                                 <div className="text-center py-8">

@@ -1,24 +1,38 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { CommunityPost } from '../../types';
+import { CommunityPost, Comment } from '../../types';
 import { Avatar } from '../ui/Avatar';
 import { formatDistanceToNow } from 'date-fns';
-import { Heart, MessageSquare, Share2, MoreHorizontal, CheckCircle } from 'lucide-react';
+import { Heart, MessageSquare, Share2, MoreHorizontal, CheckCircle, Trash2, Send, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { dbService as db } from '../../services/firestoreService';
+import { useToast } from '../../contexts/ToastContext';
 
 interface CommunityPostCardProps {
     post: CommunityPost;
     onLike: (id: string) => void;
+    onDelete: (id: string) => void;
 }
 
-export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLike }) => {
+export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLike, onDelete }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { toast } = useToast();
+
     const [expanded, setExpanded] = useState(false);
+    const [showComments, setShowComments] = useState(false);
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [loadingComments, setLoadingComments] = useState(false);
+    const [commentText, setCommentText] = useState('');
+    const [postingComment, setPostingComment] = useState(false);
+    const [localCommentsCount, setLocalCommentsCount] = useState(post.comments_count || 0);
 
     const isLiked = post.likes?.includes(user?.id || '');
     const isLongPost = post.content.length > 280;
     const displayContent = expanded || !isLongPost ? post.content : post.content.slice(0, 280) + '...';
+    const isOwner = user?.id === post.user_id;
+
+    const [showMenu, setShowMenu] = useState(false);
 
     const handleProfileClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -27,10 +41,72 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
         }
     };
 
+    const handleDeletePost = async () => {
+        if (!user || !isOwner) return;
+        if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+        try {
+            await db.deleteCommunityPost(post.id, user.id);
+            onDelete(post.id);
+            toast("Post deleted", 'success');
+        } catch (error) {
+            console.error("Failed to delete post:", error);
+            toast("Failed to delete post", 'error');
+        }
+    };
+
+    const fetchComments = async () => {
+        if (!showComments && comments.length === 0) {
+            setLoadingComments(true);
+            try {
+                const fetched = await db.getComments(post.id);
+                setComments(fetched as Comment[]);
+            } catch (error) {
+                console.error("Error loading comments:", error);
+            } finally {
+                setLoadingComments(false);
+            }
+        }
+        setShowComments(!showComments);
+    };
+
+    const handlePostComment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user || !commentText.trim()) return;
+
+        setPostingComment(true);
+        try {
+            const newComment = await db.addComment(post.id, user, commentText.trim());
+            setComments(prev => [...prev, newComment as Comment]);
+            setCommentText('');
+            setLocalCommentsCount(prev => prev + 1);
+        } catch (error) {
+            console.error("Failed to post comment:", error);
+            toast("Failed to post comment", 'error');
+        } finally {
+            setPostingComment(false);
+        }
+    };
+
+    const handleDeleteComment = async (commentId: string) => {
+        if (!user) return;
+        if (!window.confirm("Delete this comment?")) return;
+
+        try {
+            await db.deleteComment(post.id, commentId, user.id);
+            setComments(prev => prev.filter(c => c.id !== commentId));
+            setLocalCommentsCount(prev => prev - 1);
+            toast("Comment deleted", 'success');
+        } catch (error) {
+            console.error("Failed to delete comment:", error);
+            toast("Failed to delete comment", 'error');
+        }
+    };
+
     return (
         <div className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 group">
             {/* Header */}
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between mb-4 relative">
                 <div
                     className="flex items-center gap-3 cursor-pointer group/profile"
                     onClick={handleProfileClick}
@@ -60,9 +136,32 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
                         </div>
                     </div>
                 </div>
-                <button className="text-gray-300 hover:text-gray-600 transition-colors">
-                    <MoreHorizontal size={20} />
-                </button>
+
+                {isOwner && (
+                    <div className="relative">
+                        <button
+                            className="text-gray-300 hover:text-gray-600 transition-colors p-1"
+                            onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+                        >
+                            <MoreHorizontal size={20} />
+                        </button>
+                        {showMenu && (
+                            <div className="absolute right-0 top-8 bg-white rounded-xl shadow-lg border border-gray-100 py-1 min-w-[120px] z-10 animate-in fade-in zoom-in-95 duration-200">
+                                <button
+                                    onClick={() => { setShowMenu(false); handleDeletePost(); }}
+                                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium"
+                                >
+                                    <Trash2 size={16} />
+                                    Delete
+                                </button>
+                            </div>
+                        )}
+                        {/* Click outside closer could be added here */}
+                        {showMenu && (
+                            <div className="fixed inset-0 z-0 cursor-default" onClick={() => setShowMenu(false)}></div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Content */}
@@ -91,9 +190,12 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
                         <span className="text-sm font-bold">{post.likes?.length || 0} Helpful</span>
                     </button>
 
-                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-full text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all">
-                        <MessageSquare size={20} />
-                        <span className="text-sm font-bold">{post.comments_count || 0} Replies</span>
+                    <button
+                        onClick={fetchComments}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${showComments ? 'bg-orange-50 text-orange-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'}`}
+                    >
+                        <MessageSquare size={20} className={showComments ? "fill-current" : ""} />
+                        <span className="text-sm font-bold">{localCommentsCount} Replies</span>
                     </button>
                 </div>
 
@@ -101,6 +203,84 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
                     <Share2 size={20} />
                 </button>
             </div>
+
+            {/* Comments Section */}
+            {showComments && (
+                <div className="mt-6 pt-6 border-t border-gray-100 animate-in slide-in-from-top-2">
+                    {/* Add Comment Input */}
+                    <form onSubmit={handlePostComment} className="flex gap-3 mb-6">
+                        <Avatar
+                            src={user?.avatar_url}
+                            alt={user?.handle}
+                            fallback={user?.full_name?.charAt(0)}
+                            className="size-8 mt-1"
+                        />
+                        <div className="flex-1 relative">
+                            <input
+                                type="text"
+                                placeholder="Write a reply..."
+                                value={commentText}
+                                onChange={(e) => setCommentText(e.target.value)}
+                                className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 pr-12 text-sm focus:ring-2 focus:ring-orange-100 focus:bg-white transition-all"
+                            />
+                            <button
+                                type="submit"
+                                disabled={!commentText.trim() || postingComment}
+                                className="absolute right-2 top-1.5 p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+                            >
+                                {postingComment ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                            </button>
+                        </div>
+                    </form>
+
+                    {/* Comments List */}
+                    {loadingComments ? (
+                        <div className="flex justify-center py-4">
+                            <Loader2 size={24} className="animate-spin text-gray-300" />
+                        </div>
+                    ) : (
+                        <div className="space-y-5">
+                            {comments.map((comment) => (
+                                <div key={comment.id} className="flex gap-3 group">
+                                    <Avatar
+                                        src={comment.user_avatar}
+                                        alt={comment.user_handle}
+                                        fallback={comment.user_handle?.charAt(0)}
+                                        className="size-8"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="bg-gray-50 rounded-2xl rounded-tl-none px-4 py-3">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-sm font-bold text-slate-900">{comment.user_handle}</span>
+                                                <span className="text-xs text-gray-400">
+                                                    {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
+                                        </div>
+                                        <div className="flex items-center gap-4 mt-1 px-2">
+                                            <button className="text-xs font-semibold text-gray-400 hover:text-gray-600">Like</button>
+                                            <button className="text-xs font-semibold text-gray-400 hover:text-gray-600">Reply</button>
+                                            {/* Delete Button: Show if current user is comment owner OR post owner */}
+                                            {(user?.id === comment.user_id || isOwner) && (
+                                                <button
+                                                    onClick={() => handleDeleteComment(comment.id)}
+                                                    className="text-xs font-semibold text-red-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                                                >
+                                                    Delete
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            {comments.length === 0 && (
+                                <p className="text-center text-sm text-gray-400 py-2 italic">No replies yet. Be the first!</p>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

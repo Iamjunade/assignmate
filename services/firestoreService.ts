@@ -984,6 +984,86 @@ export const dbService = {
         }
     },
 
+    deleteCommunityPost: async (postId: string, userId: string) => {
+        const postRef = doc(getDb(), 'community_posts', postId);
+        const postSnap = await getDoc(postRef);
+        if (!postSnap.exists()) throw new Error("Post not found");
+
+        if (postSnap.data().user_id !== userId) {
+            throw new Error("Unauthorized: You can only delete your own posts.");
+        }
+
+        await deleteDoc(postRef);
+    },
+
+    getComments: async (postId: string) => {
+        try {
+            const commentsRef = collection(getDb(), 'community_posts', postId, 'comments');
+            const q = query(commentsRef, orderBy('created_at', 'asc'));
+            const snap = await getDocs(q);
+            return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (error) {
+            console.error("Error fetching comments:", error);
+            return [];
+        }
+    },
+
+    addComment: async (postId: string, user: any, content: string) => {
+        try {
+            const commentsRef = collection(getDb(), 'community_posts', postId, 'comments');
+            const newComment = {
+                post_id: postId,
+                user_id: user.id,
+                user_handle: user.handle || user.full_name || 'Anonymous',
+                user_avatar: user.avatar_url || null,
+                content: content,
+                created_at: new Date().toISOString()
+            };
+
+            await addDoc(commentsRef, newComment);
+
+            // Increment comment count on post
+            const postRef = doc(getDb(), 'community_posts', postId);
+            const { increment } = await import('firebase/firestore');
+            await updateDoc(postRef, {
+                comments_count: increment(1)
+            });
+
+            return newComment;
+        } catch (error) {
+            console.error("Error adding comment:", error);
+            throw error;
+        }
+    },
+
+    deleteComment: async (postId: string, commentId: string, userId: string) => {
+        const commentRef = doc(getDb(), 'community_posts', postId, 'comments', commentId);
+        const postRef = doc(getDb(), 'community_posts', postId);
+
+        const [commentSnap, postSnap] = await Promise.all([
+            getDoc(commentRef),
+            getDoc(postRef)
+        ]);
+
+        if (!commentSnap.exists()) throw new Error("Comment not found");
+
+        const commentOwner = commentSnap.data().user_id;
+        const postOwner = postSnap.exists() ? postSnap.data().user_id : null;
+
+        // Allow deletion if User is Comment Owner OR Post Owner
+        if (userId !== commentOwner && userId !== postOwner) {
+            throw new Error("Unauthorized");
+        }
+
+        await deleteDoc(commentRef);
+
+        // Decrement comment count
+        const { increment } = await import('firebase/firestore');
+        await updateDoc(postRef, {
+            comments_count: increment(-1)
+        });
+    },
+
     // --- MISSING METHODS STUBS ---
     getProjectById: async (id: string) => {
         if (!id) return null;

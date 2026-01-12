@@ -129,3 +129,13 @@ export interface CommunityPost {
   likes?: string[]; // User IDs
   comments_count?: number;
 }
+
+export interface Comment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  user_handle: string;
+  user_avatar?: string;
+  content: string;
+  created_at: string;
+}
