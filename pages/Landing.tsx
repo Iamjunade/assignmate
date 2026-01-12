@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export const Landing = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const handleLogin = () => navigate('/auth');
@@ -26,10 +28,33 @@ export const Landing = () => {
                             <a className="text-sm font-medium text-[#E6D5B8]/80 hover:text-primary transition-colors" href="#safety">Trust & Safety</a>
                             <a className="text-sm font-medium text-[#E6D5B8]/80 hover:text-primary transition-colors" href="#contributors">For Contributors</a>
                             <div className="h-4 w-px bg-white/10 mx-2"></div>
-                            <button onClick={handleLogin} className="text-sm font-medium text-white hover:text-primary transition-colors">Login</button>
-                            <button onClick={handleSignup} className="bg-primary hover:bg-orange-600 text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-[0_0_20px_rgba(255,107,0,0.15)] hover:shadow-[0_0_40px_rgba(255,107,0,0.3)] transform hover:-translate-y-0.5">
-                                Join Now
-                            </button>
+                            {user ? (
+                                <div className="flex items-center gap-6">
+                                    <button
+                                        onClick={() => navigate('/feed')}
+                                        className="text-sm font-medium text-white hover:text-primary transition-colors"
+                                    >
+                                        Dashboard
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/profile')}
+                                        className="block w-10 h-10 rounded-full border border-white/10 p-0.5 hover:border-primary transition-colors cursor-pointer overflow-hidden group"
+                                    >
+                                        <img
+                                            src={user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || 'User')}&background=random`}
+                                            alt={user.full_name}
+                                            className="w-full h-full rounded-full object-cover group-hover:scale-105 transition-transform"
+                                        />
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <button onClick={handleLogin} className="text-sm font-medium text-white hover:text-primary transition-colors">Login</button>
+                                    <button onClick={handleSignup} className="bg-primary hover:bg-orange-600 text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-[0_0_20px_rgba(255,107,0,0.15)] hover:shadow-[0_0_40px_rgba(255,107,0,0.3)] transform hover:-translate-y-0.5">
+                                        Join Now
+                                    </button>
+                                </>
+                            )}
                         </div>
                         <div className="md:hidden flex items-center">
                             <button className="text-gray-300 hover:text-white focus:outline-none" onClick={() => setMobileMenuOpen(true)}>
@@ -48,8 +73,17 @@ export const Landing = () => {
                     </button>
                     <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-white">How it Works</a>
                     <a href="#safety" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-white">Trust & Safety</a>
-                    <button onClick={handleLogin} className="text-xl font-bold text-primary">Login</button>
-                    <button onClick={handleSignup} className="px-8 py-3 rounded-full bg-primary text-white font-bold text-lg w-full max-w-xs">Join Now</button>
+                    {user ? (
+                        <>
+                            <button onClick={() => navigate('/feed')} className="text-xl font-bold text-primary">Dashboard</button>
+                            <button onClick={() => navigate('/profile')} className="text-xl font-bold text-white">My Profile</button>
+                        </>
+                    ) : (
+                        <>
+                            <button onClick={handleLogin} className="text-xl font-bold text-primary">Login</button>
+                            <button onClick={handleSignup} className="px-8 py-3 rounded-full bg-primary text-white font-bold text-lg w-full max-w-xs">Join Now</button>
+                        </>
+                    )}
                 </div>
             )}
 
