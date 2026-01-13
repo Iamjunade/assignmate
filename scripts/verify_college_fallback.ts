@@ -1,8 +1,8 @@
-import { searchCollegeFallback } from '../services/collegeFallback/index';
+import { searchCollegeFallback } from '../api/_lib/collegeFallback/index';
 // @ts-ignore
-import { ingestion } from '../services/collegeFallback/ingestion';
+import { ingestion } from '../api/_lib/collegeFallback/ingestion';
 // @ts-ignore
-import { cache } from '../services/collegeFallback/cache';
+import { cache } from '../api/_lib/collegeFallback/cache';
 
 // Mock console to keep output clean but visible
 const originalConsole = { ...console };
