@@ -136,7 +136,48 @@ export const userApi = {
     },
 
     deleteProfile: async (id: string) => {
-        await deleteDoc(doc(getDb(), 'users', id));
+        const db = getDb();
+        const { writeBatch, collection, query, where, getDocs, doc } = await import('firebase/firestore');
+
+        // Helper to commit batches of 500
+        const performBatchDelete = async (docs: any[]) => {
+            const BATCH_SIZE = 500;
+            for (let i = 0; i < docs.length; i += BATCH_SIZE) {
+                const batch = writeBatch(db);
+                const chunk = docs.slice(i, i + BATCH_SIZE);
+                chunk.forEach(d => batch.delete(d.ref));
+                await batch.commit();
+            }
+        };
+
+        const docsToDelete: any[] = [];
+
+        // 1. User Profile
+        // We push a dummy object with a 'ref' property to match the structure expected by performBatchDelete
+        docsToDelete.push({ ref: doc(db, 'users', id) });
+
+        // 2. Connections
+        const connectionsQ = query(collection(db, 'connections'), where('participants', 'array-contains', id));
+        const connSnap = await getDocs(connectionsQ);
+        connSnap.forEach(d => docsToDelete.push(d));
+
+        // 3. Requests (Sent)
+        const reqSentQ = query(collection(db, 'requests'), where('fromId', '==', id));
+        const reqSentSnap = await getDocs(reqSentQ);
+        reqSentSnap.forEach(d => docsToDelete.push(d));
+
+        // 4. Requests (Received)
+        const reqRecvQ = query(collection(db, 'requests'), where('toId', '==', id));
+        const reqRecvSnap = await getDocs(reqRecvQ);
+        reqRecvSnap.forEach(d => docsToDelete.push(d));
+
+        // 5. Chats
+        const chatsQ = query(collection(db, 'chats'), where('participants', 'array-contains', id));
+        const chatsSnap = await getDocs(chatsQ);
+        chatsSnap.forEach(d => docsToDelete.push(d));
+
+        // Execute Batch Deletes
+        await performBatchDelete(docsToDelete);
     },
 
 };
