@@ -1336,5 +1336,97 @@ export const dbService = {
                 throw error;
             }
         }
+    },
+    sendRenegotiation: async (chatId: string, orderId: string, senderId: string, senderName: string, offerData: any) => {
+        const newMessage = {
+            sender_id: senderId,
+            sender_name: senderName,
+            type: 'renegotiation',
+            offer: { ...offerData, orderId, status: 'pending' },
+            created_at: new Date().toISOString(),
+            readBy: [senderId]
+        };
+        const res = await addDoc(collection(getDb(), 'chats', chatId, 'messages'), newMessage);
+
+        // Notify
+        const chatRef = doc(getDb(), 'chats', chatId);
+        const chatSnap = await getDoc(chatRef);
+        if (chatSnap.exists()) {
+            const chatData = chatSnap.data();
+            const isSenderPoster = chatData.poster_id === senderId;
+            const receiverId = isSenderPoster ? chatData.writer_id : chatData.poster_id;
+            const { notificationService } = await import('./notificationService');
+            // Use a custom notification or generic 'New Offer'
+            // For now standard offer notification might suffice but specific is better
+            // Just relying on standard chat notification logic in sendMessage wrapper? 
+            // sendRenegotiation writes directly, so we should trigger notification manually or refactor.
+            // Let's manually trigger a generic "New Project Update" notification
+            await notificationService.sendChatMessage(receiverId, senderName, "Sent a project update request", chatId);
+        }
+
+        return { id: res.id, ...newMessage };
+    },
+
+    respondToRenegotiation: async (chatId: string, messageId: string, userId: string, status: 'accepted' | 'rejected') => {
+        const msgRef = doc(getDb(), 'chats', chatId, 'messages', messageId);
+
+        // 1. Update message status
+        await updateDoc(msgRef, {
+            'offer.status': status,
+            'offer.responded_at': new Date().toISOString(),
+            'offer.responded_by': userId
+        });
+
+        // 2. If Accepted, Update EXISTING Order
+        if (status === 'accepted') {
+            try {
+                const msgSnap = await getDoc(msgRef);
+                const msgData = msgSnap.data();
+                const offer = msgData?.offer;
+
+                if (!offer || !offer.orderId) {
+                    console.error('[respondToRenegotiation] No offer/orderId found');
+                    return;
+                }
+
+                const orderRef = doc(getDb(), 'orders', offer.orderId);
+
+                const updates: any = {};
+                if (offer.budget) {
+                    updates.budget = offer.budget;
+                    updates.amount = offer.budget; // syncing both fields
+                }
+                if (offer.deadline) updates.deadline = offer.deadline;
+                if (offer.description) updates.description = offer.description;
+                if (offer.title) updates.title = offer.title;
+
+                updates.updated_at = new Date().toISOString();
+
+                await updateDoc(orderRef, updates);
+
+            } catch (error) {
+                console.error("Error updating project from renegotiation:", error);
+                throw error;
+            }
+        }
+    },
+    submitProposal: async (jobId: string, proposalData: any) => {
+        // 1. Get Job to find owner
+        const orderRef = doc(getDb(), 'orders', jobId);
+        const orderSnap = await getDoc(orderRef);
+        if (!orderSnap.exists()) throw new Error("Project not found");
+        const order = orderSnap.data();
+
+        // 2. Create/Get Chat
+        // We need sender (writer) and receiver (student)
+        const writerId = proposalData.writer_id;
+        const studentId = order.student_id;
+
+        const chat = await dbService.createChat(jobId, studentId, writerId);
+
+        // 3. Send Proposal Message
+        await dbService.sendMessage(chat.id, writerId, `New Proposal for "${order.title}": ${proposalData.cover_letter}`, 'text');
+
+        return chat.id;
     }
 };

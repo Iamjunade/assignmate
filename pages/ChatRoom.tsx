@@ -242,9 +242,17 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     };
 
     const handleAcceptOffer = async (messageId: string) => {
+        const msg = messages.find(m => m.id === messageId);
+        const isRenegotiation = msg?.type === 'renegotiation';
+
         try {
-            await db.respondToOffer(chatId, messageId, user.id, 'accepted');
-            toastSuccess("Offer accepted! Project started.");
+            if (isRenegotiation) {
+                await db.respondToRenegotiation(chatId, messageId, user.id, 'accepted');
+                toastSuccess("Terms updated! Project modified.");
+            } else {
+                await db.respondToOffer(chatId, messageId, user.id, 'accepted');
+                toastSuccess("Offer accepted! Project started.");
+            }
         } catch (error: any) {
             console.error("Failed to accept offer", error);
             toastError(error.message || "Failed to accept offer");
@@ -252,9 +260,17 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     };
 
     const handleRejectOffer = async (messageId: string) => {
+        const msg = messages.find(m => m.id === messageId);
+        const isRenegotiation = msg?.type === 'renegotiation';
+
         try {
-            await db.respondToOffer(chatId, messageId, user.id, 'rejected');
-            toastSuccess("Offer declined.");
+            if (isRenegotiation) {
+                await db.respondToRenegotiation(chatId, messageId, user.id, 'rejected');
+                toastSuccess("Renegotiation declined.");
+            } else {
+                await db.respondToOffer(chatId, messageId, user.id, 'rejected');
+                toastSuccess("Offer declined.");
+            }
         } catch (error: any) {
             console.error("Failed to reject offer", error);
             toastError(error.message || "Failed to decline offer");
@@ -417,12 +433,12 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                     <div className="space-y-1">
                                         {dayMessages.map((m, i) => {
                                             const isMe = m.sender_id === user.id;
-                                            const isOffer = m.type === 'offer';
+                                            const isOffer = m.type === 'offer' || m.type === 'renegotiation';
                                             const isSystem = m.type === 'system' || m.content?.includes("**OFFER PROPOSAL**");
 
                                             // Check if previous message was from same person (for grouping)
                                             const prevMsg = i > 0 ? dayMessages[i - 1] : null;
-                                            const isSequence = prevMsg && prevMsg.sender_id === m.sender_id && !prevMsg.type?.includes('offer') && !prevMsg.type?.includes('system');
+                                            const isSequence = prevMsg && prevMsg.sender_id === m.sender_id && !prevMsg.type?.includes('offer') && !prevMsg.type?.includes('system') && !prevMsg.type?.includes('renegotiation');
 
                                             // Render Offer Card
                                             if (isOffer && m.offer) {
@@ -439,7 +455,8 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                                             budget: m.offer.budget,
                                                             status: m.offer.status || 'pending',
                                                             senderId: m.sender_id,
-                                                            senderName: m.sender_name
+                                                            senderName: m.sender_name,
+                                                            orderId: m.offer.orderId
                                                         }}
                                                         isOwn={isMe}
                                                         onAccept={() => handleAcceptOffer(m.id)}

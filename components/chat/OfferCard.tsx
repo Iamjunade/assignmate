@@ -16,6 +16,7 @@ interface OfferCardProps {
         status: 'pending' | 'accepted' | 'rejected';
         senderId: string;
         senderName?: string;
+        orderId?: string;
     };
     isOwn: boolean;
     onAccept?: () => void;
@@ -98,11 +99,11 @@ export const OfferCard: React.FC<OfferCardProps> = ({
         >
             <div className="bg-white rounded-2xl shadow-lg border border-border-subtle overflow-hidden">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-primary to-orange-500 px-5 py-4 text-white">
+                <div className={`bg-gradient-to-r ${offer.orderId ? 'from-purple-600 to-indigo-600' : 'from-primary to-orange-500'} px-5 py-4 text-white`}>
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined">description</span>
-                            <span className="text-sm font-bold uppercase tracking-wide">Project Offer</span>
+                            <span className="material-symbols-outlined">{offer.orderId ? 'edit_note' : 'description'}</span>
+                            <span className="text-sm font-bold uppercase tracking-wide">{offer.orderId ? 'Update Request' : 'Project Offer'}</span>
                         </div>
                         {getStatusBadge()}
                     </div>

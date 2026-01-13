@@ -3,12 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { dbService as db } from '../services/firestoreService';
 import { GlassCard } from '../components/ui/GlassCard';
-import { 
-  Briefcase, 
-  Clock, 
-  DollarSign, 
-  MapPin, 
-  User, 
+import {
+  Briefcase,
+  Clock,
+  DollarSign,
+  MapPin,
+  User,
   ChevronLeft,
   Share2,
   Flag,
@@ -31,11 +31,25 @@ export default function JobDetails() {
   const [applying, setApplying] = useState(false);
   const [proposal, setProposal] = useState('');
 
+  const [renegotiating, setRenegotiating] = useState(false);
+  const [newBudget, setNewBudget] = useState(0);
+  const [newDeadline, setNewDeadline] = useState('');
+  const [progress, setProgress] = useState(0);
+  const [updating, setUpdating] = useState(false);
+
   useEffect(() => {
     if (jobId) {
       loadJob();
     }
   }, [jobId]);
+
+  useEffect(() => {
+    if (job) {
+      setProgress(job.completion_percentage || 0);
+      setNewBudget(job.budget || 0);
+      setNewDeadline(job.deadline || '');
+    }
+  }, [job]);
 
   const loadJob = async () => {
     try {
@@ -75,6 +89,63 @@ export default function JobDetails() {
     }
   };
 
+  const handleUpdateProgress = async () => {
+    if (!user || !job) return;
+    setUpdating(true);
+    try {
+      await db.updateOrderStatus(job.id, job.status, user.id); // Base update
+      // Need to patch updateOrderStatus or just update the doc manually for percentage since it wasn't exposed?
+      // The current `updateOrderStatus` in `firestoreService` only updates status. 
+      // Implementation plan didn't specify updating `updateOrderStatus` to take percentage.
+      // Let's assume we update the doc directly here for now as a quick fix or if `updateOrderStatus` handles it implicitly (it doesn't).
+      // Actually, let's update `updateOrderStatus` to accept percentage later or use a raw update here.
+      // For now, let's assume `updateOrderStatus` might be insufficient. 
+      // Let's use a direct update for now to ensure it works.
+      const { doc, updateDoc, getFirestore } = await import('firebase/firestore');
+      await updateDoc(doc(getFirestore(), 'orders', job.id), {
+        completion_percentage: progress,
+        updated_at: new Date().toISOString()
+      });
+
+      toast('Progress updated!', 'success');
+      setJob((prev: any) => ({ ...prev, completion_percentage: progress }));
+    } catch (error) {
+      console.error("Failed to update progress", error);
+      toast('Failed to update progress', 'error');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleRenegotiate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !job) return;
+
+    setUpdating(true);
+    try {
+      await db.sendRenegotiation(
+        job.chat_id,
+        job.id,
+        user.id,
+        user.handle || user.full_name,
+        {
+          title: job.title,
+          description: job.description,
+          deadline: newDeadline,
+          budget: Number(newBudget),
+          pages: job.pages || 0
+        }
+      );
+      toast('Renegotiation offer sent to chat!', 'success');
+      setRenegotiating(false);
+    } catch (error) {
+      console.error("Failed to send renegotiation", error);
+      toast('Failed to send request', 'error');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#020617] flex items-center justify-center">
@@ -93,11 +164,15 @@ export default function JobDetails() {
     );
   }
 
+  const isOwner = user?.id === job.student_id;
+  const isWriter = user?.id === job.writer_id;
+  const isParticipant = isOwner || isWriter;
+
   return (
     <div className="min-h-screen bg-[#020617] p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Navigation */}
-        <button 
+        <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
         >
@@ -125,17 +200,95 @@ export default function JobDetails() {
                 <div className="flex flex-wrap gap-4 text-sm">
                   <div className="flex items-center gap-1.5 text-green-400 font-bold bg-green-500/10 px-3 py-1 rounded-full">
                     <DollarSign size={16} />
-                    ${job.budget_min} - ${job.budget_max}
+                    ${job.amount || job.budget_min || job.budget || 0}
                   </div>
                   <div className="flex items-center gap-1.5 text-slate-400 bg-slate-900/50 px-3 py-1 rounded-full border border-slate-800">
                     <Clock size={16} />
-                    Posted {new Date(job.created_at).toLocaleDateString()}
+                    Due {new Date(job.deadline || job.created_at).toLocaleDateString()}
                   </div>
                   <div className="flex items-center gap-1.5 text-slate-400 bg-slate-900/50 px-3 py-1 rounded-full border border-slate-800">
                     <MapPin size={16} />
                     Remote
                   </div>
                 </div>
+
+                {isParticipant && job.status === 'in_progress' && (
+                  <div className="py-4 border-y border-slate-800/50 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                        <span className="material-symbols-outlined text-orange-500">engineering</span>
+                        Project Progress
+                      </h3>
+                      <span className="text-2xl font-bold text-orange-500">{progress}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={progress}
+                      onChange={(e) => setProgress(Number(e.target.value))}
+                      className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                    />
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={handleUpdateProgress}
+                        disabled={updating}
+                        className="px-4 py-2 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-all flex items-center gap-2"
+                      >
+                        {updating ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={18} />}
+                        Update Progress
+                      </button>
+                      <button
+                        onClick={() => setRenegotiating(!renegotiating)}
+                        className="px-4 py-2 border border-slate-700 text-slate-300 font-bold rounded-lg hover:bg-slate-800 transition-all flex items-center gap-2"
+                      >
+                        <span className="material-symbols-outlined text-lg">edit_note</span>
+                        Renegotiate Terms
+                      </button>
+                    </div>
+
+                    {renegotiating && (
+                      <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 space-y-4 animate-in fade-in slide-in-from-top-2">
+                        <h4 className="font-bold text-white">Propose New Terms</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-xs text-slate-500 font-bold uppercase">New Budget</label>
+                            <input
+                              type="number"
+                              value={newBudget}
+                              onChange={(e) => setNewBudget(Number(e.target.value))}
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs text-slate-500 font-bold uppercase">New Deadline</label>
+                            <input
+                              type="date"
+                              value={newDeadline}
+                              onChange={(e) => setNewDeadline(e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => setRenegotiating(false)}
+                            className="px-3 py-1.5 text-xs font-bold text-slate-400 hover:text-white"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleRenegotiate}
+                            disabled={updating}
+                            className="px-3 py-1.5 text-xs font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          >
+                            Send Proposal
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold text-white border-b border-slate-800 pb-2">Description</h3>
@@ -157,22 +310,22 @@ export default function JobDetails() {
               </div>
             </GlassCard>
 
-            {/* Application Section */}
-            {user?.role === 'writer' && (
+            {/* Application Section - Only show if Writer and NOT active */}
+            {user?.is_writer && !isParticipant && (
               <GlassCard className="p-8 border-slate-800/50 space-y-4">
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
                   <Send size={24} className="text-red-500" />
                   Apply for this Project
                 </h3>
                 <form onSubmit={handleApply} className="space-y-4">
-                  <textarea 
+                  <textarea
                     value={proposal}
                     onChange={(e) => setProposal(e.target.value)}
                     placeholder="Describe why you're a good fit for this project..."
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white min-h-[150px] focus:ring-2 focus:ring-red-500/50 focus:outline-none transition-all"
                     required
                   />
-                  <button 
+                  <button
                     type="submit"
                     disabled={applying}
                     className="w-full bg-red-600 hover:bg-red-700 disabled:bg-slate-800 text-white py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
@@ -193,7 +346,7 @@ export default function JobDetails() {
                   <User size={24} />
                 </div>
                 <div>
-                  <p className="font-bold text-white">{job.hirer_name || 'Project Owner'}</p>
+                  <p className="font-bold text-white">{job.hirer_name || job.writer_handle || 'Project Owner'}</p>
                   <div className="flex items-center gap-1 text-xs text-slate-500">
                     <CheckCircle2 size={12} className="text-blue-400" />
                     Payment Verified
