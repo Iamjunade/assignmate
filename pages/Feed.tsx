@@ -179,7 +179,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                             </div>
 
                             {/* My Network Card */}
-                            <div onClick={() => navigate('/writers?tab=network')} className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
+                            <div onClick={() => navigate('/connections')} className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
                                 <div className="flex justify-between items-start mb-4">
                                     <h3 className="text-gray-500 font-bold text-xs uppercase tracking-wider">My Network</h3>
                                     <div className="size-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center">
@@ -228,7 +228,7 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
                                             <span className="material-symbols-outlined text-blue-500">diversity_3</span>
                                             Your Connections
                                         </h2>
-                                        <button onClick={() => navigate('/writers?tab=network')} className="text-sm font-bold text-orange-500 hover:text-orange-600 flex items-center gap-1">
+                                        <button onClick={() => navigate('/connections')} className="text-sm font-bold text-orange-500 hover:text-orange-600 flex items-center gap-1">
                                             View All <span className="material-symbols-outlined text-sm">arrow_forward</span>
                                         </button>
                                     </div>
