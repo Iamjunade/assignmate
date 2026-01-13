@@ -1,15 +1,15 @@
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js');
 
-// Initialize Firebase (Use your exact config here)
-// TODO: Replace with actual config values from the project
+// Initialize Firebase
+// TODO: YOU MUST FILL THESE VALUES FOR BACKGROUND NOTIFICATIONS TO WORK
 firebase.initializeApp({
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAfGO0SkAJopglyoHpoHASuddExfdlCxtI", // (from .env VITE_FIREBASE_API_KEY)
+  authDomain: "assignmate-cfe7e.firebaseapp.com",
+  projectId: "assignmate-cfe7e",
+  storageBucket: "assignmate-cfe7e.appspot.com",
+  messagingSenderId: "52219651086", // (from .env VITE_FIREBASE_MESSAGING_SENDER_ID)
+  appId: "1:52219651086:web:a6014135e38c3c2799c85f" // (from .env VITE_FIREBASE_APP_ID)
 });
 
 const messaging = firebase.messaging();
