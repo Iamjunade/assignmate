@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { searchCollegeFallback } from '../_lib/collegeFallback';
+import { searchCollegeFallback } from './fallbackLogic';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 
 // Helper to init Firebase safely (reused logic from other handlers)

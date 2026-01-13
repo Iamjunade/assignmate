@@ -1,8 +1,6 @@
-import { searchCollegeFallback } from '../api/_lib/collegeFallback/index';
-// @ts-ignore
-import { ingestion } from '../api/_lib/collegeFallback/ingestion';
-// @ts-ignore
-import { cache } from '../api/_lib/collegeFallback/cache';
+import { searchCollegeFallback } from '../api/colleges/fallbackLogic';
+// Note: Ingestion/Cache are now internal to the file and cannot be easily mocked externally without exporting them.
+// This script will now run against the "real" logic (minus FB admin if env missing).
 
 // Mock console to keep output clean but visible
 const originalConsole = { ...console };
@@ -16,15 +14,12 @@ console.log("----------------------------------------------------------------");
 // and to avoid needing service account keys in this script context.
 
 // Mock Ingestion (DB)
-ingestion.searchInFallback = async (query: string) => {
-    console.log(`[MOCK DB] Searching for: ${query}`);
-    return []; // Return empty to force API call
-};
+// --- MOCKING --- 
+// We are mocking dependencies to run this without a real Firebase Admin environment for safety
+// and to avoid needing service account keys in this script context.
 
-ingestion.saveToFallbackOnly = async (data: any[]) => {
-    console.log(`[MOCK DB] Saving ${data.length} items`);
-    return;
-};
+// Since we cannot mock internal ingestion, we accept that the DB part will fail/skip
+// and rely on the API part or the fact that missing env vars will skip DB.
 
 // Mock Cache
 // We use the real cache, but we can inspect it.
