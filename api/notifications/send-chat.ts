@@ -71,13 +71,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const senderAvatar = senderData?.avatar_url || 'https://assignmate.live/logo.png';
 
         // Send Multicast
+        // DOCS: https://firebase.google.com/docs/reference/admin/node/firebase-admin.messaging.multicastmessage
         const messagePayload = {
             tokens: tokens, // array of tokens
             notification: {
                 title: senderName || 'New Message',
                 body: content || 'You have a new message',
-                icon: senderAvatar,
-                image: senderAvatar // Also set image for better visibility
+                // ONLY standard fields allowed here: title, body, imageUrl
+                imageUrl: senderAvatar
             },
             data: {
                 url: `/chats/${chatId}`,
@@ -86,6 +87,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 click_action: `/chats/${chatId}` // Legacy support
             },
             webpush: {
+                headers: {
+                    image: senderAvatar
+                },
+                notification: {
+                    icon: senderAvatar,
+                    image: senderAvatar,
+                    body: content || 'You have a new message',
+                    title: senderName || 'New Message',
+                },
                 fcmOptions: {
                     link: `/chats/${chatId}`
                 }
