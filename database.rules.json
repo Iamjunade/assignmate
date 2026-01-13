@@ -10,7 +10,7 @@
             "$chatId": {
                 "$uid": {
                     ".read": "auth != null",
-                    ".write": "auth != null && auth.uid === $uid"
+                    ".write": "auth != null"
                 }
             }
         }
