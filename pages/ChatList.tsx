@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { dbService as db } from '../services/firestoreService';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { MessageSquare, Loader2 } from 'lucide-react';
+import { MessageSquare, Loader2, UserPlus } from 'lucide-react';
 import { UserPresence } from '../components/UserPresence';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
@@ -18,6 +18,11 @@ export const ChatList = ({ user, onSelect, selectedId }: { user: any, onSelect?:
     const [filter, setFilter] = useState('all'); // 'all', 'unread', 'active'
     const [search, setSearch] = useState('');
 
+    // New Chat Dropdown State
+    const [connections, setConnections] = useState<any[]>([]);
+    const [showNewChat, setShowNewChat] = useState(false);
+    const [loadingConnections, setLoadingConnections] = useState(false);
+
     useEffect(() => {
         const loadChats = () => {
             db.getChats(user.id).then(data => {
@@ -29,8 +34,20 @@ export const ChatList = ({ user, onSelect, selectedId }: { user: any, onSelect?:
             });
         };
 
+        const loadConnections = () => {
+            setLoadingConnections(true);
+            db.getMyConnections(user.id).then(data => {
+                setConnections(data);
+                setLoadingConnections(false);
+            }).catch(err => {
+                console.error("Failed to load connections:", err);
+                setLoadingConnections(false);
+            });
+        };
+
         // Initial Load
         loadChats();
+        loadConnections();
 
         // Realtime Subscription
         const unsubscribe = db.listenToChats(user.id, (data) => {
@@ -61,6 +78,21 @@ export const ChatList = ({ user, onSelect, selectedId }: { user: any, onSelect?:
         navigate(`/chats/${id}`);
     };
 
+    const startNewChat = async (peer: any) => {
+        try {
+            setShowNewChat(false);
+            const chat = await db.createChat(null, user.id, peer.id);
+            navigate(`/chats/${chat.id}`);
+        } catch (error) {
+            console.error("Failed to create chat:", error);
+        }
+    };
+
+    // Helper to extract the *other* user from a connection object
+    const getPeerFromConnection = (conn: any) => {
+        return conn.participants.find((p: any) => p.id !== user.id) || {};
+    };
+
     return (
         <div className="bg-background text-text-dark antialiased h-screen supports-[height:100dvh]:h-[100dvh] overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />
@@ -72,9 +104,68 @@ export const ChatList = ({ user, onSelect, selectedId }: { user: any, onSelect?:
                     <div className="max-w-5xl mx-auto h-full flex flex-col">
                         <div className="flex items-center justify-between mb-6">
                             <h1 className="text-2xl font-bold tracking-tight text-text-main">Messages</h1>
-                            <button className="size-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                                <span className="material-symbols-outlined">edit_square</span>
-                            </button>
+
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowNewChat(!showNewChat)}
+                                    className={`size-10 flex items-center justify-center rounded-full transition-colors ${showNewChat ? 'bg-primary text-white shadow-lg ring-2 ring-primary/20' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
+                                >
+                                    <span className="material-symbols-outlined">edit_square</span>
+                                </button>
+
+                                {/* New Chat Dropdown */}
+                                {showNewChat && (
+                                    <>
+                                        <div className="fixed inset-0 z-10" onClick={() => setShowNewChat(false)}></div>
+                                        <div className="absolute right-0 top-12 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+                                                <h3 className="font-bold text-gray-900 text-sm">New Message</h3>
+                                                <p className="text-xs text-gray-500 mt-0.5">Select a connection to start chatting</p>
+                                            </div>
+                                            <div className="max-h-80 overflow-y-auto p-2 space-y-1">
+                                                {loadingConnections ? (
+                                                    <div className="p-4 flex justify-center text-primary">
+                                                        <Loader2 className="animate-spin" size={20} />
+                                                    </div>
+                                                ) : connections.length > 0 ? (
+                                                    connections.map(conn => {
+                                                        const peer = getPeerFromConnection(conn);
+                                                        if (!peer.id) return null;
+                                                        return (
+                                                            <button
+                                                                key={conn.id}
+                                                                onClick={() => startNewChat(peer)}
+                                                                className="w-full p-2 flex items-center gap-3 hover:bg-gray-50 rounded-xl transition-colors text-left group"
+                                                            >
+                                                                <div className="relative">
+                                                                    <img src={peer.avatar_url} alt={peer.handle} className="size-10 rounded-full bg-gray-200 object-cover border border-gray-100" />
+                                                                    <div className={`absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-white ${peer.is_online ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <h4 className="font-bold text-sm text-gray-900 group-hover:text-primary transition-colors truncate">
+                                                                        {peer.full_name || peer.handle}
+                                                                    </h4>
+                                                                    <p className="text-xs text-gray-500 truncate">{peer.school || 'Student'}</p>
+                                                                </div>
+                                                                <span className="material-symbols-outlined text-gray-300 group-hover:text-primary text-[20px]">chat_bubble</span>
+                                                            </button>
+                                                        )
+                                                    })
+                                                ) : (
+                                                    <div className="p-6 text-center">
+                                                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400">
+                                                            <UserPlus size={20} />
+                                                        </div>
+                                                        <p className="text-sm font-bold text-gray-900">No connections yet</p>
+                                                        <p className="text-xs text-gray-500 mt-1 mb-3">Connect with peers to start messaging.</p>
+                                                        <button onClick={() => navigate('/peers')} className="text-xs font-bold text-primary hover:underline">Find Peers</button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
 
                         {/* Search & Filter */}
