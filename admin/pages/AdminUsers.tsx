@@ -83,7 +83,7 @@ export const AdminUsers = () => {
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden">
                                             {user.avatar_url ? (
-                                                <img src={user.avatar_url} alt={user.handle} className="w-full h-full object-cover" />
+                                                <img src={user.avatar_url} alt={user.handle} className="w-full h-full object-cover rounded-full" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-slate-500 font-bold">
                                                     {user.handle?.[0]?.toUpperCase()}
@@ -98,8 +98,8 @@ export const AdminUsers = () => {
                                 </td>
                                 <td className="p-4">
                                     <span className={`px-2 py-1 rounded text-xs font-medium ${user.is_writer
-                                            ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                            : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                        ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                                        : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                                         }`}>
                                         {user.is_writer ? 'Writer' : 'Student'}
                                     </span>

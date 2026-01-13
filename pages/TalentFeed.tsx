@@ -2,12 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { dbService as db } from '../services/firestoreService';
 import { GlassCard } from '../components/ui/GlassCard';
-import { 
-  Search, 
-  Filter, 
-  Star, 
-  MapPin, 
-  MessageSquare, 
+import {
+  Search,
+  Filter,
+  Star,
+  MapPin,
+  MessageSquare,
   UserPlus,
   ChevronRight,
   ShieldCheck,
@@ -62,8 +62,8 @@ export default function TalentFeed() {
         <div className="flex flex-col md:flex-row gap-4 items-center">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search by skill, name, or keywords..."
               className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl pl-12 pr-4 py-4 text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all"
             />
@@ -80,11 +80,10 @@ export default function TalentFeed() {
             <button
               key={cat.id}
               onClick={() => setFilter(cat.id)}
-              className={`px-6 py-2 rounded-full whitespace-nowrap transition-all ${
-                filter === cat.id 
-                ? 'bg-red-600 text-white font-semibold' 
-                : 'bg-slate-900 text-slate-400 hover:bg-slate-800'
-              }`}
+              className={`px-6 py-2 rounded-full whitespace-nowrap transition-all ${filter === cat.id
+                  ? 'bg-red-600 text-white font-semibold'
+                  : 'bg-slate-900 text-slate-400 hover:bg-slate-800'
+                }`}
             >
               {cat.label}
             </button>
@@ -101,8 +100,8 @@ export default function TalentFeed() {
         ) : talent.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {talent.map((person) => (
-              <GlassCard 
-                key={person.id} 
+              <GlassCard
+                key={person.id}
                 className="p-6 border-slate-800/50 hover:border-slate-700/50 transition-all group cursor-pointer"
                 onClick={() => navigate(`/profile/${person.id}`)}
               >
@@ -113,7 +112,7 @@ export default function TalentFeed() {
                       <div className="relative">
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold overflow-hidden">
                           {person.avatar_url ? (
-                            <img src={person.avatar_url} alt={person.handle} className="w-full h-full object-cover" />
+                            <img src={person.avatar_url} alt={person.handle} className="w-full h-full object-cover rounded-full" />
                           ) : (
                             person.handle?.[0]?.toUpperCase() || 'U'
                           )}
@@ -181,7 +180,7 @@ export default function TalentFeed() {
               <h3 className="text-lg font-medium text-white">No talent found</h3>
               <p className="text-sm text-slate-400">Try adjusting your filters or search terms.</p>
             </div>
-            <button 
+            <button
               onClick={() => setFilter('all')}
               className="text-red-400 font-semibold hover:text-red-300 transition-colors"
             >

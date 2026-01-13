@@ -26,7 +26,7 @@ export const Avatar: React.FC<AvatarProps> = ({ src, alt, className = '', fallba
     };
 
     return (
-        <div className={`overflow-hidden bg-gray-200 flex items-center justify-center relative ${className}`}>
+        <div className={`overflow-hidden bg-gray-200 flex items-center justify-center relative rounded-full ${className}`}>
             {src && !error ? (
                 <img
                     src={src}

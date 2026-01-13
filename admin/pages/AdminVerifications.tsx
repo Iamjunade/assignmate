@@ -86,7 +86,7 @@ export const AdminVerifications = () => {
                                             <div className="w-12 h-12 rounded-full bg-slate-800 overflow-hidden border border-slate-700">
                                                 <img
                                                     src={user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}
-                                                    className="w-full h-full object-cover"
+                                                    className="w-full h-full object-cover rounded-full"
                                                     alt="Avatar"
                                                 />
                                             </div>
