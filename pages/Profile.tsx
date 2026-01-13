@@ -988,6 +988,13 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                         </div>
                     )}
                 </AnimatePresence>
+
+                <DisconnectModal
+                    isOpen={showDisconnectModal}
+                    onClose={() => setShowDisconnectModal(false)}
+                    onConfirm={handleDisconnect}
+                    userName={profileUser?.full_name || 'User'}
+                />
             </main>
         </div>
     );
