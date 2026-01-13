@@ -1,4 +1,3 @@
-```typescript
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // Helper to init admin locally to avoid shared module crashes in Vercel
@@ -31,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         admin = await getLocalFirebaseAdmin();
     } catch (e: any) {
         console.error("Firebase Init Error:", e);
-        return res.status(500).json({ error: `Server Config Error: ${ e.message } ` });
+        return res.status(500).json({ error: `Server Config Error: ${e.message} ` });
     }
 
     const { chatId, senderId, senderName, content, type } = req.body;
@@ -74,13 +73,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 body: content || 'You have a new message',
             },
             data: {
-                url: `/ chats / ${ chatId } `,
+                url: `/ chats / ${chatId} `,
                 chatId: chatId,
                 type: type || 'chat'
             },
             webpush: {
                 fcmOptions: {
-                    link: `/ chats / ${ chatId } `
+                    link: `/ chats / ${chatId} `
                 }
             }
         };
@@ -114,4 +113,3 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: error.message });
     }
 }
-```
