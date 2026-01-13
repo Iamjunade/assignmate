@@ -1,48 +1,90 @@
 import React from 'react';
 import { GlassLayout } from '../components/layout/GlassLayout';
-import { Lock } from 'lucide-react';
+import { Footer } from '../components/layout/Footer';
+import { Lock, Eye, Server, ShieldCheck, Mail } from 'lucide-react';
 
 export const PrivacyPolicy: React.FC = () => {
     return (
         <GlassLayout>
-            <div className="max-w-4xl mx-auto py-20 px-6 sm:px-8">
-                <div className="text-center mb-16">
-                    <div className="inline-flex items-center justify-center size-16 bg-primary/10 text-primary rounded-2xl mb-6">
-                        <Lock size={32} />
+            <div className="min-h-screen flex flex-col">
+                <div className="flex-grow max-w-5xl mx-auto py-20 px-6 sm:px-8">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center justify-center size-20 bg-primary/10 text-primary rounded-3xl mb-8 shadow-inner shadow-primary/20">
+                            <Lock size={40} />
+                        </div>
+                        <h1 className="text-4xl sm:text-6xl font-display font-bold text-slate-900 dark:text-white tracking-tight mb-6">Privacy Policy</h1>
+                        <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
+                            <ShieldCheck size={16} />
+                            <p className="text-lg">Last updated: January 1, 2026</p>
+                        </div>
                     </div>
-                    <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">Privacy Policy</h1>
-                    <p className="mt-4 text-slate-500 text-lg">Last updated: January 2026</p>
+
+                    <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-[2.5rem] p-10 sm:p-16 shadow-xl">
+                        <div className="prose prose-lg prose-slate dark:prose-invert max-w-none">
+                            <p className="lead text-xl text-slate-600 dark:text-slate-300 mb-12">
+                                Your privacy is paramount. AssignMate is designed to protect your identity while enabling transparent collaboration. This policy outlines how we handle your data.
+                            </p>
+
+                            <h3 className="flex items-center gap-3 mt-12 mb-6">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold text-sm">1</span>
+                                Information We Collect
+                            </h3>
+                            <p>To provide our services, we collect:</p>
+                            <ul className="list-disc pl-6 space-y-2 marker:text-primary">
+                                <li><strong>Identity Data:</strong> Name, university email (.edu), and profile picture (via Google Auth or upload).</li>
+                                <li><strong>Academic Verification:</strong> Student ID cards or transcripts used for verification (encrypted and stored strictly for verification purposes).</li>
+                                <li><strong>Usage Data:</strong> Chats, posts, and interaction history on the platform.</li>
+                            </ul>
+
+                            <h3 className="flex items-center gap-3 mt-12 mb-6">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold text-sm">2</span>
+                                How We Use Your Data
+                            </h3>
+                            <p>We use your data strictly to:</p>
+                            <ul className="list-disc pl-6 space-y-2 marker:text-primary">
+                                <li>Verify your student status (Campus Verified badge).</li>
+                                <li>Match you with relevant peers and mentors.</li>
+                                <li>Process secure payments and escrow.</li>
+                                <li>Maintain platform safety and prevent fraud.</li>
+                            </ul>
+
+                            <h3 className="flex items-center gap-3 mt-12 mb-6">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold text-sm">3</span>
+                                Data Protection & Sharing
+                            </h3>
+                            <p>
+                                <strong>We do not sell your personal data.</strong> We share data only with:
+                            </p>
+                            <ul className="list-disc pl-6 space-y-2 marker:text-primary">
+                                <li><strong>Service Providers:</strong> Cloud hosting (Firebase), payment processors (Razorpay/Stripe).</li>
+                                <li><strong>Legal Obligations:</strong> Compliance with law enforcement if required.</li>
+                            </ul>
+                            <p className="mt-4 p-4 bg-primary/5 rounded-xl border border-primary/10 text-sm">
+                                <Server className="inline-block w-4 h-4 mr-2 text-primary" />
+                                Your data is encrypted in transit (TLS) and at rest. Verification documents are isolated with restricted access.
+                            </p>
+
+                            <h3 className="flex items-center gap-3 mt-12 mb-6">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold text-sm">4</span>
+                                Your Rights
+                            </h3>
+                            <p>
+                                You have the right to access, correct, or delete your personal data. You can export your data or request account deletion directly from your Profile settings.
+                            </p>
+
+                            <div className="mt-16 pt-8 border-t border-slate-200 dark:border-white/10">
+                                <h4 className="flex items-center gap-2 mb-4 font-bold text-slate-900 dark:text-white">
+                                    <Mail className="text-primary" size={20} />
+                                    Privacy Contact
+                                </h4>
+                                <p className="text-sm">
+                                    For data requests or privacy concerns, contact our Data Protection Officer at <a href="mailto:privacy@assignmate.com" className="text-primary hover:underline">privacy@assignmate.com</a>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <div className="prose prose-slate prose-lg max-w-none bg-white/50 backdrop-blur-xl border border-white/40 p-8 sm:p-12 rounded-[2.5rem] shadow-glass">
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-bold text-slate-900 mb-4">1. Information We Collect</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            We collect information you provide directly to us when you create an account, update your profile, or communicate with other users. This may include your name, email address, school information, and profile picture.
-                        </p>
-                    </section>
-
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-bold text-slate-900 mb-4">2. How We Use Your Information</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            We use the information we collect to provide, maintain, and improve our services, to develop new ones, and to protect AssignMate and our users.
-                        </p>
-                    </section>
-
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-bold text-slate-900 mb-4">3. Information Sharing</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            We do not share your personal information with companies, organizations, or individuals outside of AssignMate except in the following cases: with your consent, for external processing, or for legal reasons.
-                        </p>
-                    </section>
-
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-bold text-slate-900 mb-4">4. Data Security</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            We work hard to protect AssignMate and our users from unauthorized access to or unauthorized alteration, disclosure, or destruction of information we hold.
-                        </p>
-                    </section>
-                </div>
+                <Footer />
             </div>
         </GlassLayout>
     );

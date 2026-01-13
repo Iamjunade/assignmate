@@ -4,6 +4,7 @@ import { Shield, Lock, Eye, AlertTriangle, CheckCircle, UserCheck } from 'lucide
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { dbService as db } from '../services/firestoreService';
+import { Footer } from '../components/layout/Footer';
 
 export const Safety = () => {
     const navigate = useNavigate();
@@ -133,8 +134,8 @@ export const Safety = () => {
                                             key={reason}
                                             onClick={() => setSelectedReason(reason)}
                                             className={`w-full p-4 rounded-xl border text-sm font-medium flex justify-between items-center transition-all ${selectedReason === reason
-                                                    ? 'bg-red-500/10 border-red-500 text-white'
-                                                    : 'bg-white/5 border-white/5 text-[#E6D5B8]/80 hover:bg-white/10 hover:border-white/10'
+                                                ? 'bg-red-500/10 border-red-500 text-white'
+                                                : 'bg-white/5 border-white/5 text-[#E6D5B8]/80 hover:bg-white/10 hover:border-white/10'
                                                 }`}
                                         >
                                             {reason}
@@ -192,6 +193,8 @@ export const Safety = () => {
                     </button>
                 </div>
             </section>
+            {/* Footer */}
+            <Footer />
         </div>
     );
 };
