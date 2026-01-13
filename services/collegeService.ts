@@ -52,24 +52,42 @@ export const collegeService = {
         if (!query || query.length < 2) return [];
 
         try {
-            // 1. Try Local Search first
-            const allColleges = await collegeService.getAll();
+            // Run both searches in parallel for better UX
+            const [localColleges, fallbackResults] = await Promise.all([
+                collegeService.getAll(),
+                collegeService.searchFallback(query)
+            ]);
+
             const lowerQ = query.toLowerCase();
-            const localMatches = allColleges.filter(c =>
+
+            // 1. Local Limits
+            const localMatches = localColleges.filter(c =>
                 c.name.toLowerCase().includes(lowerQ) ||
                 c.state.toLowerCase().includes(lowerQ)
-            ).slice(0, 10);
+            ).slice(0, 5); // Take top 5 local
 
-            if (localMatches.length > 0) {
-                return localMatches;
+            // 2. Merge with Fallback (Deduplicating by name)
+            const combined = [...localMatches];
+            const names = new Set(localMatches.map(c => c.name.toLowerCase()));
+
+            for (const college of fallbackResults) {
+                if (!names.has(college.name.toLowerCase())) {
+                    combined.push(college);
+                    names.add(college.name.toLowerCase());
+                }
             }
 
-            // 2. Fallback to API if no local matches
-            return await collegeService.searchFallback(query);
+            return combined.slice(0, 15); // Return top 15 total
 
         } catch (error) {
             console.error("Search failed:", error);
-            return []; // Fail gracefully
+            // Fallback to minimal local search if catastrophic failure
+            try {
+                const all = await collegeService.getAll();
+                return all.filter(c => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 10);
+            } catch (e) {
+                return [];
+            }
         }
     }
 };
