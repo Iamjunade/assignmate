@@ -14,9 +14,6 @@ service cloud.firestore {
     // --- Users Collection ---
     // Anyone authenticated can read profiles (needed for Feed/Search)
     // Only the owner can create/update/delete their own profile
-    // --- Users Collection ---
-    // Anyone authenticated can read profiles (needed for Feed/Search)
-    // Only the owner can create/update/delete their own profile
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create, delete: if isAuthenticated() && isOwner(userId);
@@ -134,14 +131,17 @@ service cloud.firestore {
     // --- Requests Collection (Connection Requests) ---
     match /requests/{requestId} {
       allow create: if isAuthenticated();
-      allow update: if isAuthenticated() && (request.auth.uid == resource.data.toId);
+      // FIX: Allow update if requester (to resend) OR receiver (to accept/reject)
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.toId ||
+        request.auth.uid == resource.data.fromId
+      );
       allow read: if isAuthenticated() && (
         resource.data.fromId == request.auth.uid || 
         resource.data.toId == request.auth.uid
       );
     }
 
-    // --- Connections Collection ---
     // --- Connections Collection ---
     match /connections/{connectionId} {
       // Allow access if the authenticated user is in the participants array
@@ -163,8 +163,6 @@ service cloud.firestore {
       allow update: if isAuthenticated() && resource.data.receiverId == request.auth.uid;
     }
 
-
-
     // --- Audit Logs ---
     match /audit_logs/{logId} {
       allow create: if isAuthenticated();
@@ -184,4 +182,3 @@ service cloud.firestore {
     }
   }
 }
-

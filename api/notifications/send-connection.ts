@@ -50,6 +50,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const tokens = tokensSnapshot.docs.map((d: any) => d.data().token).filter((t: any) => t);
         if (tokens.length === 0) return res.status(200).json({ message: 'No valid tokens' });
 
+        // Fetch Sender Profile for Avatar (Optional but good)
+        const senderDoc = await db.collection('users').doc(fromId).get();
+        const senderData = senderDoc.exists ? senderDoc.data() : {};
+        const senderAvatar = senderData?.avatar_url || 'https://assignmate.live/logo.png';
+
         const isAccepted = type === 'accepted';
         const title = isAccepted ? 'Connection Accepted' : 'New Connection Request';
         const body = isAccepted
@@ -61,12 +66,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             notification: {
                 title: title,
                 body: body,
+                imageUrl: senderAvatar
             },
             data: {
-                url: `/users/${fromId}`,
-                type: isAccepted ? 'connection_accepted' : 'connection_request'
+                url: `/users/${fromId}`, // Open the sender's profile
+                type: isAccepted ? 'connection_accepted' : 'connection_request',
+                click_action: `/users/${fromId}`
             },
             webpush: {
+                headers: {
+                    image: senderAvatar
+                },
+                notification: {
+                    title: title,
+                    body: body,
+                    icon: senderAvatar,
+                    image: senderAvatar
+                },
                 fcmOptions: {
                     link: `/users/${fromId}`
                 }
@@ -92,6 +108,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
 
         await Promise.all(tokensToRemove);
+
+        if (response.failureCount > 0 && response.successCount === 0) {
+            return res.status(500).json({
+                error: 'Delivery Failed',
+                details: response.responses.map((r: any) => r.error?.code)
+            });
+        }
 
         return res.status(200).json({ success: true, count: response.successCount });
 
