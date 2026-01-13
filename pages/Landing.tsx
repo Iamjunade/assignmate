@@ -362,15 +362,35 @@ export const Landing = () => {
                             </div>
                         </div>
                         {[
-                            { title: 'Platform', links: ['How it works', 'Browse Peers', 'Safety & Trust', 'Community'] },
-                            { title: 'Support', links: ['Help Center', 'Contact Us', 'Dispute Resolution'] },
-                            { title: 'Legal', links: ['Terms of Service', 'Privacy Policy', 'Community Guidelines', 'Academic Integrity'] },
+                            {
+                                title: 'Platform', links: [
+                                    { label: 'How it works', href: '#how-it-works' },
+                                    { label: 'Browse Peers', href: '/feed' },
+                                    { label: 'Safety & Trust', href: '/safety' },
+                                    { label: 'Community', href: '/community-about' }
+                                ]
+                            },
+                            {
+                                title: 'Support', links: [
+                                    { label: 'Help Center', href: '/docs' },
+                                    { label: 'Contact Us', href: 'mailto:support@assignmate.com' },
+                                    { label: 'Dispute Resolution', href: '/safety' }
+                                ]
+                            },
+                            {
+                                title: 'Legal', links: [
+                                    { label: 'Terms of Service', href: '/terms' },
+                                    { label: 'Privacy Policy', href: '/privacy' },
+                                    { label: 'Community Guidelines', href: '/community-guidelines' },
+                                    { label: 'Academic Integrity', href: '/community-guidelines' }
+                                ]
+                            },
                         ].map((col, i) => (
                             <div key={i}>
                                 <h4 className="text-primary font-bold text-xs uppercase tracking-widest mb-8">{col.title}</h4>
                                 <ul className="space-y-4 text-sm text-[#E6D5B8]/60">
                                     {col.links.map(link => (
-                                        <li key={link}><a className="hover:text-primary transition-colors" href="#">{link}</a></li>
+                                        <li key={link.label}><a className="hover:text-primary transition-colors" href={link.href}>{link.label}</a></li>
                                     ))}
                                 </ul>
                             </div>

@@ -44,6 +44,8 @@ const WriterDashboard = lazy(() => import('./pages/WriterDashboard'));
 const TalentFeed = lazy(() => import('./pages/TalentFeed'));
 const JobDetails = lazy(() => import('./pages/JobDetails'));
 const Workroom = lazy(() => import('./pages/Workroom'));
+const Safety = lazy(() => import('./pages/Safety').then(module => ({ default: module.Safety })));
+const CommunityLanding = lazy(() => import('./pages/CommunityLanding').then(module => ({ default: module.CommunityLanding })));
 
 export default function AppWrapper() {
   return (
@@ -243,6 +245,11 @@ function AppContent() {
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth onComplete={() => navigate('/feed')} />} />
             <Route path="/onboarding" element={<Onboarding />} />
+
+            {/* New Public Pages */}
+            <Route path="/safety" element={<Safety />} />
+            <Route path="/community-about" element={<CommunityLanding />} />
+
             {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
