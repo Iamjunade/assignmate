@@ -1,5 +1,10 @@
-import { getFirestore } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
+// --- CONFIG ---
+const CONFIG = {
+    ENABLED: process.env.ENABLE_COLLEGE_FALLBACK === 'true',
+    API_URL: process.env.COLLEGE_API_URL || 'https://indian-colleges-list.vercel.app/api/institutions',
+    CACHE_TTL_MS: 1000 * 60 * 60, // 1 hour
+    FALLBACK_COLLECTION: 'colleges_fallback'
+};
 
 // --- TYPES ---
 export interface College {
@@ -9,14 +14,6 @@ export interface College {
     university?: string;
     type?: string;
 }
-
-// --- CONFIG ---
-const CONFIG = {
-    ENABLED: process.env.ENABLE_COLLEGE_FALLBACK === 'true',
-    API_URL: process.env.COLLEGE_API_URL || 'https://indian-colleges-list.vercel.app/api/institutions',
-    CACHE_TTL_MS: 1000 * 60 * 60, // 1 hour
-    FALLBACK_COLLECTION: 'colleges_fallback'
-};
 
 // --- LOGGER ---
 const logger = {
@@ -36,7 +33,6 @@ interface CacheEntry {
     data: College[];
     timestamp: number;
 }
-// Global cache for warm lambda executions
 const memoryCache = new Map<string, CacheEntry>();
 
 const cache = {
@@ -54,15 +50,45 @@ const cache = {
     }
 };
 
+// --- DYNAMIC FIREBASE HELPER ---
+const getFirestore = async () => {
+    try {
+        const adminModule = await import('firebase-admin');
+        const admin = adminModule.default || adminModule;
+
+        // Check if apps initialized
+        if (admin.apps.length === 0) {
+            // Attempt to initialize if not already done (though caller should usually do this)
+            const key = process.env.FIREBASE_PRIVATE_KEY || process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+            if (key) {
+                const cert = admin.credential.cert;
+                const serviceAccount = key.startsWith('{') ? JSON.parse(key) : {
+                    projectId: process.env.FIREBASE_PROJECT_ID,
+                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                    privateKey: key.replace(/\\n/g, '\n'),
+                };
+
+                admin.initializeApp({
+                    credential: cert(serviceAccount)
+                });
+            }
+        }
+
+        return admin.firestore();
+    } catch (e) {
+        console.error("Dynamic Firebase Import Failed:", e);
+        return null;
+    }
+};
+
 // --- INGESTION ---
 const ingestion = {
     saveToFallbackOnly: async (colleges: College[]) => {
         if (colleges.length === 0) return;
         try {
-            // Ensure firebase app exists (handled by caller usually, but safe check)
-            if (getApps().length === 0) return; // Should be init by handler
+            const db = await getFirestore();
+            if (!db) return;
 
-            const db = getFirestore();
             const batch = db.batch();
             const collectionRef = db.collection(CONFIG.FALLBACK_COLLECTION);
 
@@ -87,9 +113,9 @@ const ingestion = {
 
     searchInFallback: async (query: string): Promise<College[]> => {
         try {
-            if (getApps().length === 0) return [];
+            const db = await getFirestore();
+            if (!db) return [];
 
-            const db = getFirestore();
             const collectionRef = db.collection(CONFIG.FALLBACK_COLLECTION);
             const q = collectionRef
                 .where('name', '>=', query)
@@ -99,7 +125,7 @@ const ingestion = {
             const snapshot = await q.get();
             if (snapshot.empty) return [];
 
-            return snapshot.docs.map(doc => {
+            return snapshot.docs.map((doc: any) => {
                 const data = doc.data();
                 return {
                     name: data.name,
@@ -155,7 +181,6 @@ export const searchCollegeFallback = async (query: string): Promise<College[]> =
     if (cachedResult) return cachedResult;
 
     // 2. Check Fallback DB
-    // We try/catch this block specifically in case Firestore init failed in handler
     try {
         const dbResult = await ingestion.searchInFallback(query);
         if (dbResult && dbResult.length > 0) {
@@ -163,7 +188,7 @@ export const searchCollegeFallback = async (query: string): Promise<College[]> =
             return dbResult;
         }
     } catch (e) {
-        // Continue to API if DB fails
+        // Continue to API
     }
 
     // 3. Ext API

@@ -1,32 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { searchCollegeFallback } from './fallbackLogic';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-
-// Helper to init Firebase safely (reused logic from other handlers)
-const initFirebase = () => {
-    if (getApps().length) return;
-
-    try {
-        const privateKey = process.env.FIREBASE_PRIVATE_KEY
-            ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-            : undefined;
-
-        if (!privateKey && process.env.NODE_ENV !== 'production') {
-            // In dev/test without full env, we might skip or warn
-            return;
-        }
-
-        initializeApp({
-            credential: cert({
-                projectId: process.env.FIREBASE_PROJECT_ID,
-                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                privateKey: privateKey,
-            }),
-        });
-    } catch (e) {
-        console.error("Firebase Init Error:", e);
-    }
-};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Enable CORS
@@ -51,8 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        initFirebase(); // Ensure firebase is ready for ingestion logic
-
+        // Fallback logic now handles its own Firebase dynamic init if needed
         const results = await searchCollegeFallback(query);
         return res.status(200).json(results);
     } catch (error: any) {
