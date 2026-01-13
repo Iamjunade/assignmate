@@ -46,6 +46,7 @@ const JobDetails = lazy(() => import('./pages/JobDetails'));
 const Workroom = lazy(() => import('./pages/Workroom'));
 const Safety = lazy(() => import('./pages/Safety').then(module => ({ default: module.Safety })));
 const CommunityLanding = lazy(() => import('./pages/CommunityLanding').then(module => ({ default: module.CommunityLanding })));
+const HelpCenter = lazy(() => import('./pages/HelpCenter').then(module => ({ default: module.HelpCenter })));
 
 export default function AppWrapper() {
   return (
@@ -249,6 +250,7 @@ function AppContent() {
             {/* New Public Pages */}
             <Route path="/safety" element={<Safety />} />
             <Route path="/community-about" element={<CommunityLanding />} />
+            <Route path="/help-center" element={<HelpCenter />} />
 
             {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
