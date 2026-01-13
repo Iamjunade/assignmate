@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { dbService as db } from '../services/firestoreService';
@@ -6,14 +5,14 @@ import {
   Clock,
   DollarSign,
   MapPin,
-  User,
   ChevronLeft,
   Share2,
   Flag,
   CheckCircle2,
   AlertCircle,
   Send,
-  Loader2
+  Loader2,
+  Calendar
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -37,6 +36,7 @@ export default function JobDetails() {
   const [newDeadline, setNewDeadline] = useState('');
   const [progress, setProgress] = useState(0);
   const [updating, setUpdating] = useState(false);
+  const [collaborator, setCollaborator] = useState<any>(null);
 
   useEffect(() => {
     if (jobId) {
@@ -45,12 +45,21 @@ export default function JobDetails() {
   }, [jobId]);
 
   useEffect(() => {
-    if (job) {
+    if (job && user) {
       setProgress(job.completion_percentage || 0);
       setNewBudget(job.budget || 0);
       setNewDeadline(job.deadline || '');
+
+      // Determine collaborator ID
+      const isOwner = user.id === job.student_id;
+      // If owner, collaborator is writer. If writer/applicant, collaborator is student (owner).
+      const collaboratorId = isOwner ? job.writer_id : job.student_id;
+
+      if (collaboratorId) {
+        db.getUser(collaboratorId).then(setCollaborator).catch(console.error);
+      }
     }
-  }, [job]);
+  }, [job, user]);
 
   const loadJob = async () => {
     try {
@@ -94,7 +103,7 @@ export default function JobDetails() {
     if (!user || !job) return;
     setUpdating(true);
     try {
-      await db.updateOrderStatus(job.id, job.status, user.id); // Base update
+      await db.updateOrderStatus(job.id, job.status, user.id);
 
       const { doc, updateDoc, getFirestore } = await import('firebase/firestore');
       await updateDoc(doc(getFirestore(), 'orders', job.id), {
@@ -163,6 +172,9 @@ export default function JobDetails() {
   const isWriter = user?.id === job.writer_id;
   const isParticipant = isOwner || isWriter;
 
+  const budgetVal = job.amount || job.budget_min || job.budget || 0;
+  const isPaid = budgetVal > 0;
+
   return (
     <div className="bg-background text-text-dark antialiased h-screen overflow-hidden flex selection:bg-primary/20 font-display">
       <Sidebar user={user} />
@@ -200,10 +212,17 @@ export default function JobDetails() {
                     </div>
 
                     <div className="flex flex-wrap gap-4 text-sm">
-                      <div className="flex items-center gap-1.5 text-green-600 font-bold bg-green-50 px-3 py-1 rounded-full border border-green-100">
-                        <DollarSign size={16} />
-                        ${job.amount || job.budget_min || job.budget || 0}
-                      </div>
+                      {isPaid ? (
+                        <div className="flex items-center gap-1.5 text-green-600 font-bold bg-green-50 px-3 py-1 rounded-full border border-green-100">
+                          <DollarSign size={16} />
+                          ${budgetVal.toLocaleString()}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 text-slate-500 font-bold bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                          Free Collaboration
+                        </div>
+                      )}
+
                       <div className="flex items-center gap-1.5 text-gray-500 bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
                         <Clock size={16} />
                         Due {format(new Date(job.deadline || job.created_at), 'MMM d, yyyy')}
@@ -355,34 +374,43 @@ export default function JobDetails() {
               {/* Sidebar Column */}
               <div className="space-y-6">
                 <div className="bg-white rounded-[1.5rem] border border-gray-100 shadow-sm p-6 space-y-4">
-                  <h3 className="text-lg font-bold text-[#111827] border-b border-gray-100 pb-2">About the Hirer</h3>
+                  <h3 className="text-lg font-bold text-[#111827] border-b border-gray-100 pb-2">About the Collaborator</h3>
                   <div className="flex items-center gap-4">
                     <Avatar
-                      src={job.hirer_avatar}
-                      alt={job.hirer_name || 'Hirer'}
+                      src={collaborator?.avatar_url || job.hirer_avatar}
+                      alt={collaborator?.full_name || collaborator?.handle || 'User'}
                       className="size-12 rounded-full ring-2 ring-gray-100"
-                      fallback={(job.hirer_name || 'H').charAt(0)}
+                      fallback={(collaborator?.handle || 'U').charAt(0)}
                     />
                     <div>
-                      <p className="font-bold text-[#111827]">{job.hirer_name || job.writer_handle || 'Project Owner'}</p>
+                      <p className="font-bold text-[#111827]">{collaborator?.full_name || collaborator?.handle || job.writer_handle || job.hirer_name || 'Project Member'}</p>
                       <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <CheckCircle2 size={12} className="text-blue-500" />
-                        Payment Verified
+                        {collaborator?.created_at ? (
+                          <span className="flex items-center gap-1">
+                            <Calendar size={12} className="text-orange-500" />
+                            {format(new Date(collaborator.created_at), 'MMMM yyyy')}
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1">
+                            <CheckCircle2 size={12} className="text-blue-500" />
+                            Verified Member
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 pt-2">
                     <div className="space-y-1">
-                      <p className="text-[10px] text-gray-400 font-bold uppercase">Jobs Posted</p>
-                      <p className="text-sm font-bold text-[#111827]">12</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase">Jobs</p>
+                      <p className="text-sm font-bold text-[#111827]">{collaborator?.jobs_posted || 0}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[10px] text-gray-400 font-bold uppercase">Hires</p>
-                      <p className="text-sm font-bold text-[#111827]">85%</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase">Completed</p>
+                      <p className="text-sm font-bold text-[#111827]">{collaborator?.projects_completed || 0}</p>
                     </div>
                   </div>
-                  <button className="w-full py-2.5 text-sm font-bold text-gray-500 hover:text-[#111827] border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
-                    View History
+                  <button onClick={() => collaborator?.id && navigate(`/profile/${collaborator.id}`)} className="w-full py-2.5 text-sm font-bold text-gray-500 hover:text-[#111827] border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
+                    View Profile
                   </button>
                 </div>
 
