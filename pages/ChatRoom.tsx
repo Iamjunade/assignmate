@@ -165,7 +165,16 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                 senderName: user.full_name || user.handle,
                 content: contentToSend
             })
-        }).catch(err => console.error('Notification failed:', err));
+        }).then(async (res) => {
+            if (!res.ok) {
+                const errorData = await res.json();
+                console.error('Notification API Error:', errorData);
+                toastError(`Notification failed: ${errorData.error || 'Server Error'}`);
+            }
+        }).catch(err => {
+            console.error('Notification Network Error:', err);
+            toastError("Notification failed: Network Error");
+        });
     };
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -798,25 +807,23 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                     <span className="material-symbols-outlined text-text-muted">person_search</span>
                                 </div>
                                 <p className="text-sm text-text-muted">No connections yet</p>
-                                <button
-                                    onClick={() => navigate('/peers')}
-                                    className="mt-3 text-sm text-primary font-bold hover:underline"
-                                >
+                                <button onClick={() => navigate('/feed')} className="mt-3 text-xs font-bold text-primary hover:underline">
                                     Find Peers
                                 </button>
                             </div>
                         )}
                     </div>
                 </aside>
-            </main>
 
-            {/* Offer Modal */}
-            <OfferModal
-                isOpen={showOfferModal}
-                onClose={() => setShowOfferModal(false)}
-                onSubmit={handleSubmitOffer}
-                recipientName={chatDetails?.other_handle}
-            />
+                {/* Offer Modal */}
+                {showOfferModal && (
+                    <OfferModal
+                        isOpen={showOfferModal}
+                        onClose={() => setShowOfferModal(false)}
+                        onSubmit={handleSubmitOffer}
+                    />
+                )}
+            </main>
         </div>
     );
 };
