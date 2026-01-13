@@ -113,12 +113,10 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     // Load connections and requests
     useEffect(() => {
         const loadNetwork = async () => {
-            if (profileUser?.id) {
-                // Only load requests if it's own profile
-                if (isOwnProfile) {
-                    const reqs = await db.getIncomingRequests(profileUser.id);
-                    setRequests(reqs);
-                }
+            if (profileUser?.id && isOwnProfile) {
+                // Only load network data if it's own profile (Privacy)
+                const reqs = await db.getIncomingRequests(profileUser.id);
+                setRequests(reqs);
                 const conns = await db.getMyConnections(profileUser.id);
                 setConnections(conns);
             }
@@ -153,9 +151,25 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     };
 
     const handleConnectionResponse = async (id: string, status: 'accepted' | 'rejected') => {
+        const req = requests.find(r => r.id === id);
         await db.respondToConnectionRequest(id, status);
-        const reqs = await db.getIncomingRequests(profileUser.id);
-        setRequests(reqs);
+
+        if (status === 'accepted' && req?.fromUser?.id) {
+            // Send Notification (Vercel API)
+            fetch('/api/notifications/send-connection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    toId: req.fromUser.id,
+                    fromId: currentUser.id,
+                    senderName: currentUser.full_name || currentUser.handle,
+                    type: 'accepted'
+                })
+            }).catch(err => console.error('Notification failed:', err));
+        }
+
+        const updatedReqs = await db.getIncomingRequests(profileUser.id);
+        setRequests(updatedReqs);
         const conns = await db.getMyConnections(profileUser.id);
         setConnections(conns);
         success('Connection ' + status);

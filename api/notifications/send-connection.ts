@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: `Server Config Error: ${e.message}` });
     }
 
-    const { toId, fromId, senderName } = req.body;
+    const { toId, fromId, senderName, type } = req.body;
 
     if (!toId || !fromId) {
         return res.status(400).json({ error: 'Missing IDs' });
@@ -50,15 +50,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const tokens = tokensSnapshot.docs.map((d: any) => d.data().token).filter((t: any) => t);
         if (tokens.length === 0) return res.status(200).json({ message: 'No valid tokens' });
 
+        const isAccepted = type === 'accepted';
+        const title = isAccepted ? 'Connection Accepted' : 'New Connection Request';
+        const body = isAccepted
+            ? `${senderName || 'A user'} is now in your network.`
+            : `${senderName || 'Someone'} wants to connect with you.`;
+
         const messagePayload = {
             tokens: tokens,
             notification: {
-                title: 'New Connection Request',
-                body: `${senderName || 'Usually known as someone'} wants to connect with you.`,
+                title: title,
+                body: body,
             },
             data: {
                 url: `/users/${fromId}`,
-                type: 'connection'
+                type: isAccepted ? 'connection_accepted' : 'connection_request'
             },
             webpush: {
                 fcmOptions: {
