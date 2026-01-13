@@ -1,9 +1,15 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import admin from '../_utils/firebaseAdmin';
+import admin, { tryInitAdmin } from '../_utils/firebaseAdmin';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
+    }
+
+    try {
+        tryInitAdmin();
+    } catch (e: any) {
+        return res.status(500).json({ error: `Server Config Error: ${e.message}` });
     }
 
     const { toId, fromId, senderName } = req.body;
