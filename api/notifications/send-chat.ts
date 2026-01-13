@@ -65,21 +65,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const tokens = tokensSnapshot.docs.map((d: any) => d.data().token).filter((t: any) => t);
         if (tokens.length === 0) return res.status(200).json({ message: 'No valid tokens' });
 
+        // Fetch Sender Profile for Avatar
+        const senderDoc = await db.collection('users').doc(senderId).get();
+        const senderData = senderDoc.exists ? senderDoc.data() : {};
+        const senderAvatar = senderData?.avatar_url || 'https://assignmate.live/logo.png';
+
         // Send Multicast
         const messagePayload = {
             tokens: tokens, // array of tokens
             notification: {
                 title: senderName || 'New Message',
                 body: content || 'You have a new message',
+                icon: senderAvatar, // Show sender's avatar
             },
             data: {
-                url: `/ chats / ${chatId} `,
+                url: `/chats/${chatId}`,
                 chatId: chatId,
                 type: type || 'chat'
             },
             webpush: {
                 fcmOptions: {
-                    link: `/ chats / ${chatId} `
+                    link: `/chats/${chatId}`
                 }
             }
         };

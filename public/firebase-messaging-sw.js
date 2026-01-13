@@ -21,7 +21,8 @@ messaging.onBackgroundMessage(function (payload) {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/logo.png', // Add your logo in public folder
+    icon: payload.notification.icon || '/logo.png', // Dynamic icon support
+    image: payload.notification.image, // Support large images
     badge: '/badge.png',
     data: { url: payload.data.click_action } // Link to open when clicked
   };
