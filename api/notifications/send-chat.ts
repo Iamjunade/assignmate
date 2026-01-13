@@ -76,12 +76,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             notification: {
                 title: senderName || 'New Message',
                 body: content || 'You have a new message',
-                icon: senderAvatar, // Show sender's avatar
+                icon: senderAvatar,
+                image: senderAvatar // Also set image for better visibility
             },
             data: {
                 url: `/chats/${chatId}`,
                 chatId: chatId,
-                type: type || 'chat'
+                type: type || 'chat',
+                click_action: `/chats/${chatId}` // Legacy support
             },
             webpush: {
                 fcmOptions: {
@@ -94,14 +96,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // Cleanup Invalid Tokens
         const tokensToRemove: Promise<any>[] = [];
+        const errorCodes: string[] = [];
+
         response.responses.forEach((resp: any, idx: number) => {
             if (!resp.success) {
                 const error = resp.error;
+                errorCodes.push(error?.code || 'unknown');
                 if (error && (error.code === 'messaging/invalid-registration-token' ||
                     error.code === 'messaging/registration-token-not-registered')) {
                     const failedToken = tokens[idx];
-                    // Find the doc ID for this token - assumes 1:1 if token is ID? No, deviceId is ID. 
-                    // We need to find the doc where token == failedToken.
                     const tokenDoc = tokensSnapshot.docs.find((d: any) => d.data().token === failedToken);
                     if (tokenDoc) {
                         tokensToRemove.push(tokenDoc.ref.delete());
@@ -112,7 +115,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         await Promise.all(tokensToRemove);
 
-        return res.status(200).json({ success: true, successCount: response.successCount, failureCount: response.failureCount });
+        // CRITICAL DEBUGGING: 
+        // If ALL tokens failed, return 500 so frontend shows an error.
+        if (response.failureCount > 0 && response.successCount === 0) {
+            return res.status(500).json({
+                error: 'Delivery Failed',
+                details: errorCodes.join(', '),
+                debug: 'All tokens invalid or unreachable'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            successCount: response.successCount,
+            failureCount: response.failureCount
+        });
 
     } catch (error: any) {
         console.error('Send Chat Error:', error);
