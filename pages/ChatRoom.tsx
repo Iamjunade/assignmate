@@ -279,13 +279,13 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     };
 
     const handleSwitchChat = async (otherId: string) => {
-        // Find existing chat or create new one
-        const existingChatId = await db.findExistingChat(user.id, otherId);
-        if (existingChatId) {
-            navigate(`/chats/${existingChatId}`);
-        } else {
-            const newChat = await db.createChat(null, user.id, otherId);
-            navigate(`/chats/${newChat.id}`);
+        try {
+            // createChat handles "get existing or create new" logic internally
+            const chat = await db.createChat(null, user.id, otherId);
+            navigate(`/chats/${chat.id}`);
+        } catch (error) {
+            console.error("Failed to switch chat:", error);
+            toastError("Failed to open chat");
         }
     };
 
