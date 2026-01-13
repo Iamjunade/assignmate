@@ -1,14 +1,15 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import admin from './_utils/firebaseAdmin';
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
     const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 
-    // Do NOT return the full key for security, just length/presence
     const status = {
         hasKey: !!key,
         keyLength: key ? key.length : 0,
         nodeVersion: process.version,
-        envKeys: Object.keys(process.env).filter(k => !k.includes('KEY') && !k.includes('SECRET')), // minimal debug
+        adminAppsLength: admin.apps.length, // Check if init worked
+        initError: (global as any).firebaseInitError // Access global error if we stored it (need to modify utility for this, but testing length is a good start)
     };
 
     try {
@@ -18,6 +19,18 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
         }
     } catch (e: any) {
         (status as any).jsonParse = 'Failed: ' + e.message;
+    }
+
+    // Try to init if 0
+    if (admin.apps.length === 0 && key) {
+        try {
+            admin.initializeApp({
+                credential: admin.credential.cert(JSON.parse(key)),
+            });
+            (status as any).manualInit = "Success";
+        } catch (e: any) {
+            (status as any).manualInit = "Failed: " + e.message;
+        }
     }
 
     res.status(200).json(status);
