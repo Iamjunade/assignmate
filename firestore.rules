@@ -176,6 +176,12 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow read, update, delete: if false; // Admin only
     }
+
+    // --- Safety Reports ---
+    match /safety_reports/{reportId} {
+      allow create: if request.auth != null; // Any auth user can report
+      allow read, update, delete: if false; // Admin only
+    }
   }
 }
 

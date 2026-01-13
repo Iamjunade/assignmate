@@ -421,6 +421,22 @@ export const dbService = {
         }
     },
 
+    createSafetyReport: async (reporterId: string, type: string, details: string = '') => {
+        try {
+            await addDoc(collection(getDb(), 'safety_reports'), {
+                reporter_id: reporterId,
+                type: type,
+                details: details,
+                status: 'pending',
+                created_at: serverTimestamp()
+            });
+            return { success: true };
+        } catch (e) {
+            console.error("Failed to create safety report:", e);
+            throw e;
+        }
+    },
+
     getNetworkMap: async (currentUserId: string) => {
         if (!currentUserId) return {};
         // This fetches who I am connected to

@@ -1,9 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Lock, Eye, AlertTriangle, CheckCircle, UserCheck } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
+import { dbService as db } from '../services/firestoreService';
 
 export const Safety = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const { toast } = useToast();
+    const [selectedReason, setSelectedReason] = useState<string | null>(null);
+    const [details, setDetails] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleReport = async () => {
+        if (!user) {
+            navigate('/auth');
+            return;
+        }
+        if (!selectedReason) return;
+
+        setIsSubmitting(true);
+        try {
+            await db.createSafetyReport(user.id, selectedReason, details);
+            toast("Report submitted successfully. We will review it shortly.", "success");
+            setSelectedReason(null);
+            setDetails('');
+        } catch (error) {
+            console.error(error);
+            toast("Failed to submit report. Please try again.", "error");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#0d0b09] text-[#F5F5F4] font-body selection:bg-primary selection:text-white pt-20">
@@ -88,8 +117,8 @@ export const Safety = () => {
                         </div>
                         <div className="relative">
                             <div className="absolute inset-0 bg-red-500/10 blur-[80px] rounded-full"></div>
-                            <div className="bg-[#0d0b09] p-8 rounded-3xl border border-white/10 relative shadow-2xl">
-                                <div className="flex items-start gap-4 mb-6">
+                            <div className="bg-[#0d0b09] p-8 rounded-3xl border border-white/10 relative shadow-2xl transition-all">
+                                <div className="flex items-center gap-4 mb-6">
                                     <div className="p-3 bg-red-500/10 rounded-xl">
                                         <AlertTriangle size={24} className="text-red-500" />
                                     </div>
@@ -99,13 +128,52 @@ export const Safety = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-3">
-                                    {['Harassment or Bullying', 'Spam or Scam', 'False Information', 'Academic Dishonesty'].map((reason) => (
-                                        <div key={reason} className="p-3 rounded-lg bg-white/5 border border-white/5 text-[#E6D5B8]/80 text-sm flex justify-between items-center cursor-not-allowed opacity-70">
+                                    {['Harassment or Bullying', 'Spam or Scam', 'False Information', 'Academic Dishonesty', 'Other'].map((reason) => (
+                                        <button
+                                            key={reason}
+                                            onClick={() => setSelectedReason(reason)}
+                                            className={`w-full p-4 rounded-xl border text-sm font-medium flex justify-between items-center transition-all ${selectedReason === reason
+                                                    ? 'bg-red-500/10 border-red-500 text-white'
+                                                    : 'bg-white/5 border-white/5 text-[#E6D5B8]/80 hover:bg-white/10 hover:border-white/10'
+                                                }`}
+                                        >
                                             {reason}
-                                            <span className="w-4 h-4 rounded-full border border-white/20"></span>
-                                        </div>
+                                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${selectedReason === reason ? 'border-red-500 bg-red-500' : 'border-white/20'
+                                                }`}>
+                                                {selectedReason === reason && <div className="w-2 h-2 rounded-full bg-white" />}
+                                            </div>
+                                        </button>
                                     ))}
                                 </div>
+
+                                {selectedReason && (
+                                    <div className="mt-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                                        <label className="block text-xs font-bold text-[#E6D5B8]/60 uppercase tracking-wider mb-2">
+                                            Additional Details
+                                        </label>
+                                        <textarea
+                                            value={details}
+                                            onChange={(e) => setDetails(e.target.value)}
+                                            placeholder="Please provide specific details..."
+                                            className="w-full p-4 rounded-xl bg-black/40 border border-white/10 text-white placeholder-white/20 focus:border-red-500 outline-none transition-all min-h-[100px] text-sm mb-4"
+                                        />
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={handleReport}
+                                                disabled={isSubmitting}
+                                                className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_14px_0_rgba(220,38,38,0.39)]"
+                                            >
+                                                {isSubmitting ? 'Submitting...' : 'Submit Report'}
+                                            </button>
+                                            <button
+                                                onClick={() => { setSelectedReason(null); setDetails(''); }}
+                                                className="px-4 py-3 bg-transparent hover:bg-white/5 text-[#E6D5B8]/60 font-medium rounded-xl transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
