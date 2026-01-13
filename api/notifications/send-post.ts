@@ -1,13 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import admin, { tryInitAdmin } from '../_utils/firebaseAdmin';
+import { getFirebaseAdmin } from '../_utils/firebaseAdmin';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
+    let admin;
     try {
-        tryInitAdmin();
+        admin = await getFirebaseAdmin();
     } catch (e: any) {
         return res.status(500).json({ error: `Server Config Error: ${e.message}` });
     }
@@ -49,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
         };
 
-        const response = await admin.messaging().send(messagePayload);
+        const response: any = await admin.messaging().send(messagePayload);
         return res.status(200).json({ success: true, messageId: response });
 
     } catch (error: any) {
