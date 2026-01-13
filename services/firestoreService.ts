@@ -387,6 +387,40 @@ export const dbService = {
         }
     },
 
+    removeConnection: async (userId: string, otherUserId: string) => {
+        // Find existing connection doc
+        const connectionsRef = collection(getDb(), 'connections');
+        // We know userId is a participant. We need the doc where otherUserId is ALSO a participant.
+        const q = query(connectionsRef, where('participants', 'array-contains', userId));
+        const snapshot = await getDocs(q);
+
+        const connectionDoc = snapshot.docs.find(doc => {
+            const data = doc.data();
+            return data.participants.includes(otherUserId);
+        });
+
+        if (connectionDoc) {
+            await deleteDoc(doc(getDb(), 'connections', connectionDoc.id));
+
+            // Also clean up any lingering 'accepted' REQUESTS between these two to prevent re-creation confusion?
+            // Optional, but good hygiene. 
+            // For now, just removing the "fact" of connection is enough.
+        }
+    },
+
+    logDisconnection: async (userId: string, disconnectedUserId: string, reason: string) => {
+        try {
+            await addDoc(collection(getDb(), 'disconnection_logs'), {
+                reporter_id: userId,
+                disconnected_user_id: disconnectedUserId,
+                reason: reason, // Optional
+                timestamp: serverTimestamp()
+            });
+        } catch (e) {
+            console.error("Failed to log disconnection:", e);
+        }
+    },
+
     getNetworkMap: async (currentUserId: string) => {
         if (!currentUserId) return {};
         // This fetches who I am connected to

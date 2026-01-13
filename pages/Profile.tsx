@@ -17,6 +17,7 @@ import { Sidebar } from '../components/dashboard/Sidebar';
 import { DashboardHeader } from '../components/dashboard/DashboardHeader';
 import { Avatar } from '../components/ui/Avatar';
 import { ActivityFeed } from '../components/profile/ActivityFeed';
+import DisconnectModal from '../components/ui/DisconnectModal';
 
 export const Profile = ({ user: currentUser }: { user: any }) => {
     const { userId } = useParams();
@@ -43,6 +44,20 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     const [uploading, setUploading] = useState(false);
     const [idUploading, setIdUploading] = useState(false);
     const [editingProfile, setEditingProfile] = useState(false);
+    const [showDisconnectModal, setShowDisconnectModal] = useState(false);
+
+    const handleDisconnect = async (reason: string) => {
+        if (!currentUser || !profileUser) return;
+        try {
+            await db.removeConnection(currentUser.id, profileUser.id);
+            await db.logDisconnection(currentUser.id, profileUser.id, reason);
+            setConnectionStatus('none');
+            success("Disconnected successfully");
+        } catch (e) {
+            console.error(e);
+            error("Failed to disconnect");
+        }
+    };
 
     // Form State
     const [bio, setBio] = useState('');
@@ -453,9 +468,19 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                             </button>
                                         )}
 
-                                        <button className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors">
-                                            <LinkIcon size={16} /> Share
-                                        </button>
+                                        {connectionStatus === 'connected' ? (
+                                            <button
+                                                onClick={() => setShowDisconnectModal(true)}
+                                                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-green-50 text-green-700 font-bold text-sm hover:bg-red-50 hover:text-red-600 hover:border-red-200 border border-green-100 transition-all group"
+                                            >
+                                                <span className="group-hover:hidden flex items-center gap-2"><UserCheck size={16} /> Connected</span>
+                                                <span className="hidden group-hover:flex items-center gap-2"><X size={16} /> Disconnect</span>
+                                            </button>
+                                        ) : (
+                                            <button className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors">
+                                                <LinkIcon size={16} /> Share
+                                            </button>
+                                        )}
                                     </div>
 
                                     {/* Availability Status */}
