@@ -4,6 +4,7 @@ import { dbService } from '../../services/firestoreService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 interface ProjectCardProps {
     project: any;
@@ -12,6 +13,7 @@ interface ProjectCardProps {
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate }) => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const { success, error } = useToast();
     const [showMenu, setShowMenu] = useState(false);
     const [updating, setUpdating] = useState(false);
@@ -32,8 +34,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate }) =
         }
     };
 
+    const budgetVal = project.amount || project.budget || 0;
+    const isPaid = budgetVal > 0;
+
     return (
-        <div className="group bg-white p-6 rounded-[2rem] border border-border-subtle shadow-card hover:shadow-soft hover:border-primary/20 transition-all duration-300 flex flex-col gap-4 relative">
+        <div
+            onClick={() => navigate(`/projects/${project.id}`)}
+            className="group bg-white p-6 rounded-[2rem] border border-border-subtle shadow-card hover:shadow-soft hover:border-primary/20 transition-all duration-300 flex flex-col gap-4 relative cursor-pointer"
+        >
             {/* Header */}
             <div className="flex justify-between items-start gap-4">
                 <div className="flex-1">
@@ -71,10 +79,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate }) =
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
+                                        onClick={(e) => e.stopPropagation()}
                                         className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-10 overflow-hidden"
                                     >
                                         <button
-                                            onClick={() => handleStatusChange('completed')}
+                                            onClick={(e) => { e.stopPropagation(); handleStatusChange('completed'); }}
                                             disabled={updating}
                                             className="w-full text-left px-4 py-3 text-sm font-bold text-green-600 hover:bg-green-50 flex items-center gap-2 transition-colors"
                                         >
@@ -82,7 +91,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate }) =
                                             Mark Complete
                                         </button>
                                         <button
-                                            onClick={() => handleStatusChange('cancelled')}
+                                            onClick={(e) => { e.stopPropagation(); handleStatusChange('cancelled'); }}
                                             disabled={updating}
                                             className="w-full text-left px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 flex items-center gap-2 transition-colors border-t border-gray-100"
                                         >
@@ -119,16 +128,18 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onUpdate }) =
                     )}
                 </div>
 
-                {project.budget > 0 && (
-                    <div className="text-right">
-                        <span className="text-lg font-extrabold text-[#111827]">₹{project.budget.toLocaleString()}</span>
-                    </div>
-                )}
+                <div className="text-right">
+                    {isPaid ? (
+                        <span className="text-lg font-extrabold text-[#111827]">${budgetVal.toLocaleString()}</span>
+                    ) : (
+                        <span className="text-sm font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">Free Collaboration</span>
+                    )}
+                </div>
             </div>
 
             {/* Backdrop for menu */}
             {showMenu && (
-                <div className="fixed inset-0 z-0" onClick={() => setShowMenu(false)} />
+                <div className="fixed inset-0 z-0" onClick={(e) => { e.stopPropagation(); setShowMenu(false); }} />
             )}
         </div>
     );
