@@ -87,18 +87,25 @@ export const FindWriter = () => {
         ).slice(0, 5); // Limit user results
         setAcUserResults(users);
 
-        // 2. Search Colleges
+        // 2. Search Colleges (Debounced)
         let active = true;
-        collegeService.getAll().then(colleges => {
-            if (!active) return;
-            const matches = colleges.filter(c =>
-                c.name.toLowerCase().includes(q) ||
-                c.state.toLowerCase().includes(q)
-            ).slice(0, 5); // Limit college results
-            setAcCollegeResults(matches);
-        });
 
-        return () => { active = false; };
+        const timerId = setTimeout(async () => {
+            if (!active) return;
+            try {
+                const matches = await collegeService.search(searchQuery); // Pass original query (service handles case) or q
+                if (active) {
+                    setAcCollegeResults(matches.slice(0, 5));
+                }
+            } catch (error) {
+                console.error("Autosuggest error:", error);
+            }
+        }, 300);
+
+        return () => {
+            active = false;
+            clearTimeout(timerId);
+        };
     }, [searchQuery, allUsers]);
 
     // Click outside handler for autocomplete

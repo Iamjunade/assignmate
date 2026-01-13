@@ -46,5 +46,30 @@ export const collegeService = {
             console.error("Fallback search failed:", error);
             return [];
         }
+    },
+
+    search: async (query: string): Promise<College[]> => {
+        if (!query || query.length < 2) return [];
+
+        try {
+            // 1. Try Local Search first
+            const allColleges = await collegeService.getAll();
+            const lowerQ = query.toLowerCase();
+            const localMatches = allColleges.filter(c =>
+                c.name.toLowerCase().includes(lowerQ) ||
+                c.state.toLowerCase().includes(lowerQ)
+            ).slice(0, 10);
+
+            if (localMatches.length > 0) {
+                return localMatches;
+            }
+
+            // 2. Fallback to API if no local matches
+            return await collegeService.searchFallback(query);
+
+        } catch (error) {
+            console.error("Search failed:", error);
+            return []; // Fail gracefully
+        }
     }
 };
