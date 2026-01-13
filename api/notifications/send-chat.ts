@@ -1,97 +1,117 @@
+```typescript
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getFirebaseAdmin } from '../_utils/firebaseAdmin';
+
+// Helper to init admin locally to avoid shared module crashes in Vercel
+const getLocalFirebaseAdmin = async () => {
+    // @ts-ignore
+    const adminModule = await import('firebase-admin');
+    const admin = adminModule.default || adminModule;
+
+    if (!admin.apps.length) {
+        const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+        if (key) {
+            const serviceAccount = JSON.parse(key);
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+            });
+        } else {
+            throw new Error("Missing Env Var: FIREBASE_SERVICE_ACCOUNT_KEY");
+        }
+    }
+    return admin;
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    let admin;
+    let admin: any;
     try {
-        admin = await getFirebaseAdmin();
+        admin = await getLocalFirebaseAdmin();
     } catch (e: any) {
-        return res.status(500).json({ error: `Server Config Error: ${e.message}` });
+        console.error("Firebase Init Error:", e);
+        return res.status(500).json({ error: `Server Config Error: ${ e.message } ` });
     }
 
     const { chatId, senderId, senderName, content, type } = req.body;
 
     if (!chatId || !senderId) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return res.status(400).json({ error: 'Missing chatId or senderId' });
     }
 
     try {
-        // 1. Fetch Chat Metadata to find participants (Secure Source of Truth)
-        const chatDoc = await admin.firestore().collection('chats').doc(chatId).get();
+        const db = admin.firestore();
+        const chatRef = db.collection('chats').doc(chatId);
+        const chatDoc = await chatRef.get();
+
         if (!chatDoc.exists) {
             return res.status(404).json({ error: 'Chat not found' });
         }
 
         const chatData = chatDoc.data();
-        const participants: string[] = chatData?.participants || [];
+        const participants = chatData?.participants || [];
+        const recipientId = participants.find((uid: string) => uid !== senderId);
 
-        // 2. Identify Recipients (exclude sender)
-        const recipientIds = participants.filter((uid) => uid !== senderId);
-
-        if (recipientIds.length === 0) {
-            return res.status(200).json({ status: 'No recipients' });
+        if (!recipientId) {
+            return res.status(200).json({ message: 'No recipient to notify' });
         }
 
-        const messageBody = type === 'offer' ? 'Sent you a project offer' : (content || 'Sent a message');
+        // Get Recipient Tokens
+        const tokensSnapshot = await db.collection('users').doc(recipientId).collection('fcm_tokens').get();
+        if (tokensSnapshot.empty) {
+            return res.status(200).json({ message: 'No tokens found for user' });
+        }
 
-        // 3. Send to each recipient
-        await Promise.all(recipientIds.map(async (uid) => {
-            const tokensSnap = await admin.firestore()
-                .collection('users')
-                .doc(uid)
-                .collection('fcm_tokens')
-                .get();
+        const tokens = tokensSnapshot.docs.map((d: any) => d.data().token).filter((t: any) => t);
+        if (tokens.length === 0) return res.status(200).json({ message: 'No valid tokens' });
 
-            if (tokensSnap.empty) return;
+        // Send Multicast
+        const messagePayload = {
+            tokens: tokens, // array of tokens
+            notification: {
+                title: senderName || 'New Message',
+                body: content || 'You have a new message',
+            },
+            data: {
+                url: `/ chats / ${ chatId } `,
+                chatId: chatId,
+                type: type || 'chat'
+            },
+            webpush: {
+                fcmOptions: {
+                    link: `/ chats / ${ chatId } `
+                }
+            }
+        };
 
-            const tokens = tokensSnap.docs.map(t => t.data().token).filter(t => !!t);
+        const response: any = await admin.messaging().sendEachForMulticast(messagePayload);
 
-            if (tokens.length === 0) return;
-
-            // Create Multicast Message
-            const messagePayload: admin.messaging.MulticastMessage = {
-                tokens: tokens,
-                notification: {
-                    title: senderName || 'Someone',
-                    body: messageBody,
-                },
-                data: {
-                    type: 'chat',
-                    chatId: chatId,
-                    url: `/chats/${chatId}`,
-                    click_action: `/chats/${chatId}`
-                },
-                webpush: {
-                    fcmOptions: {
-                        link: `/chats/${chatId}`
+        // Cleanup Invalid Tokens
+        const tokensToRemove: Promise<any>[] = [];
+        response.responses.forEach((resp: any, idx: number) => {
+            if (!resp.success) {
+                const error = resp.error;
+                if (error && (error.code === 'messaging/invalid-registration-token' ||
+                    error.code === 'messaging/registration-token-not-registered')) {
+                    const failedToken = tokens[idx];
+                    // Find the doc ID for this token - assumes 1:1 if token is ID? No, deviceId is ID. 
+                    // We need to find the doc where token == failedToken.
+                    const tokenDoc = tokensSnapshot.docs.find((d: any) => d.data().token === failedToken);
+                    if (tokenDoc) {
+                        tokensToRemove.push(tokenDoc.ref.delete());
                     }
                 }
-            };
+            }
+        });
 
-            const response: any = await admin.messaging().sendEachForMulticast(messagePayload);
+        await Promise.all(tokensToRemove);
 
-            // Cleanup Invalid Tokens
-            const tokensToRemove: Promise<any>[] = [];
-            response.responses.forEach((resp, index) => {
-                if (!resp.success && resp.error) {
-                    const errorCode = resp.error.code;
-                    if (errorCode === 'messaging/invalid-registration-token' ||
-                        errorCode === 'messaging/registration-token-not-registered') {
-                        tokensToRemove.push(tokensSnap.docs[index].ref.delete());
-                    }
-                }
-            });
-            await Promise.all(tokensToRemove);
-        }));
-
-        return res.status(200).json({ success: true, recipients: recipientIds.length });
+        return res.status(200).json({ success: true, successCount: response.successCount, failureCount: response.failureCount });
 
     } catch (error: any) {
-        console.error('Send Chat Notification Error:', error);
+        console.error('Send Chat Error:', error);
         return res.status(500).json({ error: error.message });
     }
 }
+```

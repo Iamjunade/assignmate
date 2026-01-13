@@ -1,54 +1,68 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getFirebaseAdmin } from '../_utils/firebaseAdmin';
+
+const getLocalFirebaseAdmin = async () => {
+    // @ts-ignore
+    const adminModule = await import('firebase-admin');
+    const admin = adminModule.default || adminModule;
+
+    if (!admin.apps.length) {
+        const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+        if (key) {
+            const serviceAccount = JSON.parse(key);
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+            });
+        } else {
+            throw new Error("Missing Env Var: FIREBASE_SERVICE_ACCOUNT_KEY");
+        }
+    }
+    return admin;
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    let admin;
+    let admin: any;
     try {
-        admin = await getFirebaseAdmin();
+        admin = await getLocalFirebaseAdmin();
     } catch (e: any) {
+        console.error("Firebase Init Error:", e);
         return res.status(500).json({ error: `Server Config Error: ${e.message}` });
     }
 
     const { toId, fromId, senderName } = req.body;
 
     if (!toId || !fromId) {
-        return res.status(400).json({ error: 'Missing user IDs' });
+        return res.status(400).json({ error: 'Missing IDs' });
     }
 
     try {
-        // Fetch Recipient Tokens
-        const tokensSnap = await admin.firestore()
-            .collection('users')
-            .doc(toId)
-            .collection('fcm_tokens')
-            .get();
+        const db = admin.firestore();
 
-        if (tokensSnap.empty) {
+        // Get Recipient Tokens
+        const tokensSnapshot = await db.collection('users').doc(toId).collection('fcm_tokens').get();
+        if (tokensSnapshot.empty) {
             return res.status(200).json({ message: 'No tokens found for user' });
         }
 
-        const tokens = tokensSnap.docs.map(t => t.data().token).filter(t => !!t);
+        const tokens = tokensSnapshot.docs.map((d: any) => d.data().token).filter((t: any) => t);
         if (tokens.length === 0) return res.status(200).json({ message: 'No valid tokens' });
 
-        const messagePayload: admin.messaging.MulticastMessage = {
+        const messagePayload = {
             tokens: tokens,
             notification: {
                 title: 'New Connection Request',
-                body: `${senderName || 'Someone'} wants to connect with you.`,
+                body: `${senderName || 'Usually known as someone'} wants to connect with you.`,
             },
             data: {
-                type: 'connection_request',
-                fromUserId: fromId,
-                url: `/profile/${fromId}`,
-                click_action: `/profile/${fromId}`
+                url: `/users/${fromId}`,
+                type: 'connection'
             },
             webpush: {
                 fcmOptions: {
-                    link: `/profile/${fromId}`
+                    link: `/users/${fromId}`
                 }
             }
         };
@@ -57,21 +71,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // Cleanup
         const tokensToRemove: Promise<any>[] = [];
-        response.responses.forEach((resp, index) => {
-            if (!resp.success && resp.error) {
-                const errorCode = resp.error.code;
-                if (errorCode === 'messaging/invalid-registration-token' ||
-                    errorCode === 'messaging/registration-token-not-registered') {
-                    tokensToRemove.push(tokensSnap.docs[index].ref.delete());
+        response.responses.forEach((resp: any, idx: number) => {
+            if (!resp.success) {
+                const error = resp.error;
+                if (error && (error.code === 'messaging/invalid-registration-token' ||
+                    error.code === 'messaging/registration-token-not-registered')) {
+                    const failedToken = tokens[idx];
+                    const tokenDoc = tokensSnapshot.docs.find((d: any) => d.data().token === failedToken);
+                    if (tokenDoc) {
+                        tokensToRemove.push(tokenDoc.ref.delete());
+                    }
                 }
             }
         });
+
         await Promise.all(tokensToRemove);
 
-        return res.status(200).json({ success: true, sentCount: response.successCount });
+        return res.status(200).json({ success: true, count: response.successCount });
 
     } catch (error: any) {
-        console.error('Send Connection Notification Error:', error);
+        console.error('Send Connection Error:', error);
         return res.status(500).json({ error: error.message });
     }
 }

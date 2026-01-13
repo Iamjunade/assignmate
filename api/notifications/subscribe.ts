@@ -1,15 +1,35 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getFirebaseAdmin } from '../_utils/firebaseAdmin';
+
+// Helper to init admin locally to avoid shared module crashes in Vercel
+const getLocalFirebaseAdmin = async () => {
+    // @ts-ignore
+    const adminModule = await import('firebase-admin');
+    const admin = adminModule.default || adminModule;
+
+    if (!admin.apps.length) {
+        const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+        if (key) {
+            const serviceAccount = JSON.parse(key);
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+            });
+        } else {
+            throw new Error("Missing Env Var: FIREBASE_SERVICE_ACCOUNT_KEY");
+        }
+    }
+    return admin;
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    let admin;
+    let admin: any;
     try {
-        admin = await getFirebaseAdmin();
+        admin = await getLocalFirebaseAdmin();
     } catch (e: any) {
+        console.error("Firebase Init Error:", e);
         return res.status(500).json({ error: `Server Config Error: ${e.message}` });
     }
 

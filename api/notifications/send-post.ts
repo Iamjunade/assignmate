@@ -1,15 +1,34 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getFirebaseAdmin } from '../_utils/firebaseAdmin';
+
+const getLocalFirebaseAdmin = async () => {
+    // @ts-ignore
+    const adminModule = await import('firebase-admin');
+    const admin = adminModule.default || adminModule;
+
+    if (!admin.apps.length) {
+        const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+        if (key) {
+            const serviceAccount = JSON.parse(key);
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+            });
+        } else {
+            throw new Error("Missing Env Var: FIREBASE_SERVICE_ACCOUNT_KEY");
+        }
+    }
+    return admin;
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    let admin;
+    let admin: any;
     try {
-        admin = await getFirebaseAdmin();
+        admin = await getLocalFirebaseAdmin();
     } catch (e: any) {
+        console.error("Firebase Init Error:", e);
         return res.status(500).json({ error: `Server Config Error: ${e.message}` });
     }
 
@@ -21,31 +40,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
         let topic = 'global_posts';
-        let title = 'New Global Discussion';
+        let body = content;
 
-        // Logic must match client-side scope
-        if (scope === 'campus' && userSchoolName) {
-            // Sanitize school name for topic
-            const sanitizedSchool = userSchoolName.replace(/[^a-zA-Z0-9]/g, '_');
+        if (scope === 'campus' && userSchool) {
+            const sanitizedSchool = userSchool.replace(/[^a-zA-Z0-9]/g, '_');
             topic = `school_${sanitizedSchool}`;
-            title = `New in ${userSchoolName}`;
+            body = `New in ${userSchoolName || 'Campus'}: ${content}`;
         }
 
-        const messagePayload: admin.messaging.Message = {
+        const messagePayload = {
             topic: topic,
             notification: {
-                title: title,
-                body: content ? (content.substring(0, 100) + (content.length > 100 ? '...' : '')) : 'New post',
+                title: scope === 'campus' ? 'Null Class Discussion' : 'New Global Discussion',
+                body: body ? (body.length > 100 ? body.substring(0, 100) + '...' : body) : 'New post shared'
             },
             data: {
-                type: 'post',
-                postId: postId,
-                url: '/community',
-                click_action: '/community'
+                url: `/community`,
+                postId: postId
             },
             webpush: {
                 fcmOptions: {
-                    link: '/community'
+                    link: `/community`
                 }
             }
         };
@@ -54,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(200).json({ success: true, messageId: response });
 
     } catch (error: any) {
-        console.error('Send Post Notification Error:', error);
+        console.error('Send Post Error:', error);
         return res.status(500).json({ error: error.message });
     }
 }
