@@ -24,7 +24,7 @@ messaging.onBackgroundMessage(function (payload) {
     icon: payload.notification.icon || '/logo.png', // Dynamic icon support
     image: payload.notification.image, // Support large images
     badge: '/badge.png',
-    data: { url: payload.data.click_action } // Link to open when clicked
+    data: { url: payload.data.url || payload.data.click_action || '/' } // Link to open when clicked
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
