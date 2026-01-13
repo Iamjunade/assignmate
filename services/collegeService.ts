@@ -35,5 +35,16 @@ export const collegeService = {
         const colleges = await collegeService.getAll();
         if (colleges.length === 0) return "IIT Bombay"; // Fallback
         return colleges[Math.floor(Math.random() * colleges.length)].name;
+    },
+
+    searchFallback: async (query: string): Promise<College[]> => {
+        try {
+            const res = await fetch(`/api/colleges/search?query=${encodeURIComponent(query)}`);
+            if (!res.ok) return [];
+            return await res.json();
+        } catch (error) {
+            console.error("Fallback search failed:", error);
+            return [];
+        }
     }
 };

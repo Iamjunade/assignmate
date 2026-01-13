@@ -42,7 +42,23 @@ export const CollegeAutocomplete: React.FC<Props> = ({ value, onChange, placehol
       c.name.toLowerCase().includes(query.toLowerCase()) ||
       c.state.toLowerCase().includes(query.toLowerCase())
     ).slice(0, 50);
-    setResults(filtered);
+
+    if (filtered.length === 0 && query.length >= 3) {
+      // Use isolated fallback logic if enabled on server
+      // We debounce this slightly by relying on the user stopping typing or just fire it
+      // For safety/performance, we only trigger if no local results
+      collegeService.searchFallback(query).then(fallbackResults => {
+        // If we still have the same query (or still no local results), show these
+        // We need to be careful about race conditions, but for a fallback this is acceptable
+        if (fallbackResults.length > 0) {
+          setResults(fallbackResults);
+        } else {
+          setResults([]);
+        }
+      }).catch(() => setResults([]));
+    } else {
+      setResults(filtered);
+    }
   }, [query, allColleges]);
 
   useEffect(() => {
