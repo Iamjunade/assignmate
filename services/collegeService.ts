@@ -1,6 +1,10 @@
 export interface College {
+    id?: string;
     name: string;
+    university?: string;
     state: string;
+    district?: string;
+    type?: string;
 }
 
 let cachedColleges: College[] | null = null;
@@ -63,8 +67,10 @@ export const collegeService = {
             // 1. Local Limits
             const localMatches = localColleges.filter(c =>
                 c.name.toLowerCase().includes(lowerQ) ||
+                (c.university && c.university.toLowerCase().includes(lowerQ)) ||
+                (c.district && c.district.toLowerCase().includes(lowerQ)) ||
                 c.state.toLowerCase().includes(lowerQ)
-            ).slice(0, 5); // Take top 5 local
+            ).slice(0, 20); // Take top 20 local
 
             // 2. Merge with Fallback (Deduplicating by name)
             const combined = [...localMatches];
@@ -77,7 +83,7 @@ export const collegeService = {
                 }
             }
 
-            return combined.slice(0, 15); // Return top 15 total
+            return combined.slice(0, 50); // Return top 50 total
 
         } catch (error) {
             console.error("Search failed:", error);

@@ -40,6 +40,8 @@ export const CollegeAutocomplete: React.FC<Props> = ({ value, onChange, placehol
     }
     const filtered = allColleges.filter(c =>
       c.name.toLowerCase().includes(query.toLowerCase()) ||
+      (c.university && c.university.toLowerCase().includes(query.toLowerCase())) ||
+      (c.district && c.district.toLowerCase().includes(query.toLowerCase())) ||
       c.state.toLowerCase().includes(query.toLowerCase())
     ).slice(0, 50);
 
@@ -120,7 +122,11 @@ export const CollegeAutocomplete: React.FC<Props> = ({ value, onChange, placehol
                 <div className="mt-0.5 min-w-[14px]"><MapPin size={14} className="text-slate-300 group-hover:text-orange-500 transition-colors" /></div>
                 <div>
                   <p className="text-sm font-bold text-slate-700 group-hover:text-orange-800 line-clamp-1">{college.name}</p>
-                  <p className="text-[10px] text-slate-400 font-medium">{college.state}</p>
+                  <p className="text-[10px] text-slate-400 font-medium">
+                    {[college.university, college.district, college.state]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </p>
                 </div>
               </button>
             ))
