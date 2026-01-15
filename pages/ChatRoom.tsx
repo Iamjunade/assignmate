@@ -344,12 +344,19 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
     const handleDeleteMessage = async (messageId: string) => {
         if (!confirm("Are you sure you want to delete this message?")) return;
+
+        // Optimistic UI Update
+        const previousMessages = [...messages];
+        setMessages(prev => prev.filter(m => m.id !== messageId));
+
         try {
             await db.deleteMessage(chatId, messageId);
             toastSuccess("Message deleted");
         } catch (error) {
             console.error(error);
             toastError("Failed to delete message");
+            // Rollback on error
+            setMessages(previousMessages);
         }
     };
 
@@ -373,7 +380,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     };
 
     const messagesByDate: { [key: string]: any[] } = {};
-    messages.forEach(m => {
+    visibleMessages.forEach(m => {
         const key = getDateKey(m.created_at);
         if (!messagesByDate[key]) messagesByDate[key] = [];
         messagesByDate[key].push(m);

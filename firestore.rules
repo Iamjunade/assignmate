@@ -2,7 +2,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- Helper Functions ---
+    /* =========================
+       COMMON HELPERS
+    ========================== */
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -11,174 +13,186 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
 
-    // --- Users Collection ---
-    // Anyone authenticated can read profiles (needed for Feed/Search)
-    // Only the owner can create/update/delete their own profile
+    /* =========================
+       USERS
+    ========================== */
     match /users/{userId} {
       allow read: if isAuthenticated();
+
       allow create, delete: if isAuthenticated() && isOwner(userId);
+
       allow update: if isAuthenticated() && (
-        isOwner(userId) || 
+        isOwner(userId) ||
         (
-          // Allow incrementing projects_completed by 1 by any auth user (for peer updates)
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['projects_completed']) &&
-          request.resource.data.projects_completed == resource.data.projects_completed + 1
+          // Controlled peer update
+          request.resource.data.diff(resource.data)
+            .affectedKeys()
+            .hasOnly(['projects_completed']) &&
+          request.resource.data.projects_completed ==
+            resource.data.projects_completed + 1
         )
       );
-      
-      // FCM Tokens Subcollection (Multi-device)
+
       match /fcm_tokens/{token} {
-          allow read, write: if isAuthenticated() && isOwner(userId);
+        allow read, write: if isAuthenticated() && isOwner(userId);
       }
     }
 
-    // ... (Chats, Requests, Connections, Notifications, FCM unchanged) ...
-
+    /* =========================
+       COMMUNITY POSTS
+    ========================== */
     match /community_posts/{postId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
-      allow update: if isAuthenticated() && (
-        resource.data.user_id == request.auth.uid || 
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'comments_count'])
-      );
-      allow delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
 
-      // Comments Subcollection
+      allow create: if isAuthenticated()
+        && request.resource.data.user_id == request.auth.uid;
+
+      allow update: if isAuthenticated() && (
+        resource.data.user_id == request.auth.uid ||
+        request.resource.data.diff(resource.data)
+          .affectedKeys()
+          .hasOnly(['likes', 'comments_count'])
+      );
+
+      allow delete: if isAuthenticated()
+        && resource.data.user_id == request.auth.uid;
+
       match /comments/{commentId} {
         allow read: if isAuthenticated();
-        allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
-        // Allow delete if: Auth is Comment Owner OR Auth is Post Owner
+
+        allow create: if isAuthenticated()
+          && request.resource.data.user_id == request.auth.uid;
+
         allow delete: if isAuthenticated() && (
           resource.data.user_id == request.auth.uid ||
-          get(/databases/$(database)/documents/community_posts/$(postId)).data.user_id == request.auth.uid
+          get(/databases/$(database)/documents/community_posts/$(postId))
+            .data.user_id == request.auth.uid
         );
       }
     }
 
-    // --- Chats Collection ---
+    /* =========================
+       CHATS
+    ========================== */
     match /chats/{chatId} {
-      // Helper to check chat participation for the PARENT chat document
+
+      // Chat participant check (parent document)
       function isChatParticipant() {
-        // Check both the participants array AND legacy poster_id/writer_id fields
         return request.auth.uid in resource.data.participants ||
-               resource.data.poster_id == request.auth.uid || 
+               resource.data.poster_id == request.auth.uid ||
                resource.data.writer_id == request.auth.uid;
       }
-      
-      // Helper for subcollections - fetches parent chat document
+
+      // Subcollection-safe participant check
       function isParentChatParticipant() {
-        let chat = get(/databases/$(database)/documents/chats/$(chatId)).data;
+        let chat = get(
+          /databases/$(database)/documents/chats/$(chatId)
+        ).data;
+
         return request.auth.uid in chat.participants ||
-               chat.poster_id == request.auth.uid || 
+               chat.poster_id == request.auth.uid ||
                chat.writer_id == request.auth.uid;
       }
 
-      // Create: Must be one of the participants
+      /* ---- Chat document ---- */
       allow create: if isAuthenticated() && (
-        request.resource.data.poster_id == request.auth.uid || 
+        request.resource.data.poster_id == request.auth.uid ||
         request.resource.data.writer_id == request.auth.uid
       );
-      
-      // Read/Update: Must be one of the participants (checking existing data)
+
       allow read, update: if isAuthenticated() && isChatParticipant();
 
-      // Messages Subcollection - MUST use isParentChatParticipant()
+      /* =========================
+         CHAT MESSAGES
+      ========================== */
       match /messages/{messageId} {
+
+        // Read: only chat members
         allow read: if isAuthenticated() && isParentChatParticipant();
-        // Allow create if participant AND (is sender OR is system message)
-        allow create: if isAuthenticated() && isParentChatParticipant() && (
-          request.resource.data.sender_id == request.auth.uid ||
-          request.resource.data.sender_id == 'system'
-        );
-        // Allow update for participants (for marking read, updating offer status)
+
+        // Create: sender OR system
+        allow create: if isAuthenticated()
+          && isParentChatParticipant()
+          && (
+            request.resource.data.sender_id == request.auth.uid ||
+            request.resource.data.sender_id == 'system'
+          );
+
+        // Update: read receipts, offer status, etc.
         allow update: if isAuthenticated() && isParentChatParticipant();
+
+        // ✅ DELETE (CRITICAL FIX)
+        allow delete: if isAuthenticated()
+          && isParentChatParticipant()
+          && request.auth.uid == resource.data.sender_id;
       }
 
-      // Files Subcollection (Metadata) - MUST use isParentChatParticipant()
+      /* =========================
+         CHAT FILE METADATA
+      ========================== */
       match /files/{fileId} {
-        allow read: if isAuthenticated() && isParentChatParticipant();
-        allow create: if isAuthenticated() && isParentChatParticipant();
+        allow read, create: if isAuthenticated() && isParentChatParticipant();
       }
     }
 
-    // --- Orders Collection (Projects/Assignments) ---
+    /* =========================
+       ORDERS / PROJECTS
+    ========================== */
     match /orders/{orderId} {
-      // Read: Participant in the order
-      allow read: if isAuthenticated() && (
-        resource.data.student_id == request.auth.uid ||
-        resource.data.poster_id == request.auth.uid ||
-        resource.data.writer_id == request.auth.uid ||
-        request.auth.uid in resource.data.participants
-      );
-      
-      // Create: Must be participant
-      allow create: if isAuthenticated() && (
-        request.resource.data.student_id == request.auth.uid ||
-        request.resource.data.poster_id == request.auth.uid ||
-        request.resource.data.writer_id == request.auth.uid ||
-        request.auth.uid in request.resource.data.participants
-      );
-      
-      // Update: Must be participant
-      allow update: if isAuthenticated() && (
-        resource.data.student_id == request.auth.uid ||
-        resource.data.poster_id == request.auth.uid ||
-        resource.data.writer_id == request.auth.uid ||
+      allow read, create, update: if isAuthenticated() && (
+        request.auth.uid == resource.data.student_id ||
+        request.auth.uid == resource.data.poster_id ||
+        request.auth.uid == resource.data.writer_id ||
         request.auth.uid in resource.data.participants
       );
     }
 
-    // --- Requests Collection (Connection Requests) ---
+    /* =========================
+       CONNECTION REQUESTS
+    ========================== */
     match /requests/{requestId} {
       allow create: if isAuthenticated();
-      // FIX: Allow update if requester (to resend) OR receiver (to accept/reject)
-      allow update: if isAuthenticated() && (
-        request.auth.uid == resource.data.toId ||
-        request.auth.uid == resource.data.fromId
-      );
-      allow read: if isAuthenticated() && (
-        resource.data.fromId == request.auth.uid || 
-        resource.data.toId == request.auth.uid
+
+      allow read, update: if isAuthenticated() && (
+        request.auth.uid == resource.data.fromId ||
+        request.auth.uid == resource.data.toId
       );
     }
 
-    // --- Connections Collection ---
+    /* =========================
+       CONNECTIONS
+    ========================== */
     match /connections/{connectionId} {
-      // Allow access if the authenticated user is in the participants array
-      allow read, update, delete: if isAuthenticated() && (request.auth.uid in resource.data.participants);
-      
-      // Create: Must be one of the participants in the new document
-      allow create: if isAuthenticated() && (request.auth.uid in request.resource.data.participants);
+      allow read, create, update, delete: if isAuthenticated()
+        && request.auth.uid in resource.data.participants;
     }
 
-    // --- Notifications ---
+    /* =========================
+       NOTIFICATIONS
+    ========================== */
     match /notifications/{notificationId} {
-      // Read: Only the receiver can read their notifications
-      allow read: if isAuthenticated() && resource.data.receiverId == request.auth.uid;
-      
-      // Create: Any authenticated user can send a notification (e.g. for chat/connection)
+      allow read, update: if isAuthenticated()
+        && resource.data.receiverId == request.auth.uid;
+
       allow create: if isAuthenticated();
-      
-      // Update: Receiver can mark as read
-      allow update: if isAuthenticated() && resource.data.receiverId == request.auth.uid;
     }
 
-    // --- Audit Logs ---
+    /* =========================
+       AUDIT / SAFETY (ADMIN)
+    ========================== */
     match /audit_logs/{logId} {
       allow create: if isAuthenticated();
-      allow read, update, delete: if false; // Admin only (backend)
+      allow read, update, delete: if false;
     }
 
-    // --- Disconnection Logs ---
     match /disconnection_logs/{logId} {
-      allow create: if request.auth != null;
-      allow read, update, delete: if false; // Admin only
+      allow create: if isAuthenticated();
+      allow read, update, delete: if false;
     }
 
-    // --- Safety Reports ---
     match /safety_reports/{reportId} {
-      allow create: if request.auth != null; // Any auth user can report
-      allow read, update, delete: if false; // Admin only
+      allow create: if isAuthenticated();
+      allow read, update, delete: if false;
     }
   }
 }
