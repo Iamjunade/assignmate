@@ -140,7 +140,8 @@ export const Landing = () => {
                                         </div>
                                         <div>
                                             <h4 className="text-base font-bold text-white">Sai Tej</h4>
-                                            <p className="text-xs text-[#E6D5B8]/70">CMR Institute</p>
+                                            <p className="text-xs text-[#E6D5B8]/70">CMR INSTITUTE OF TECHNOLOGY</p>
+                                            <p className="text-[10px] text-[#E6D5B8]/50 uppercase tracking-widest mt-0.5">Hyderabad</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
