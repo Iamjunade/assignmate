@@ -509,7 +509,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         ) : (
                                             <button
                                                 onClick={() => {
-                                                    const shareUrl = `${window.location.origin}/@${profileUser.handle || profileUser.id}`;
+                                                    const shareUrl = `${window.location.origin}/${profileUser.handle || profileUser.id}`;
                                                     shareContent(
                                                         `Check out ${profileUser.full_name}'s Profile`,
                                                         `Connect with ${profileUser.full_name} on AssignMate!`,
@@ -528,7 +528,7 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         <div className="w-full mt-4 px-2">
                                             <button
                                                 onClick={() => {
-                                                    const shareUrl = `${window.location.origin}/@${currentUser.handle || currentUser.id}`;
+                                                    const shareUrl = `${window.location.origin}/${currentUser.handle || currentUser.id}`;
                                                     shareContent(
                                                         `Check out ${currentUser.full_name}'s Profile`,
                                                         `Connect with ${currentUser.full_name} on AssignMate!`,
