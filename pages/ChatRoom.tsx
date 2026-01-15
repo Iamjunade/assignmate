@@ -101,12 +101,21 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     }, [chatId, user.id]);
 
     const handleClearChat = async () => {
-        if (!confirm("Are you sure you want to clear the entire chat history?")) return;
+        if (!confirm("Are you sure you want to clear the entire chat history? This cannot be undone.")) return;
         try {
             await db.clearChat(chatId, user.id);
-            // Manually refresh details to get the new cleared_at timestamp immediately
-            const updated = await db.getChatDetails(chatId, user.id);
-            setChatDetails(updated);
+
+            // Optimistic UI Update: Update state immediately so messages disappear
+            // This ensures the user sees the result without waiting for Firestore sync
+            const now = new Date().toISOString();
+            setChatDetails((prev: any) => ({
+                ...prev,
+                cleared_at: {
+                    ...(prev?.cleared_at || {}),
+                    [user.id]: now
+                }
+            }));
+
             toastSuccess("Chat cleared successfully");
         } catch (error) {
             console.error(error);
