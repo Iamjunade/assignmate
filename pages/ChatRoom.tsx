@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { dbService as db } from '../services/firestoreService';
 import { presence } from '../services/firebase';
-import { ArrowLeft, Paperclip, Trash2 } from 'lucide-react';
+import { ArrowLeft, Paperclip, Trash2, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserPresence } from '../components/UserPresence';
 import { Sidebar } from '../components/dashboard/Sidebar';
@@ -28,6 +28,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     const [isUploading, setIsUploading] = useState(false);
     const [showOfferModal, setShowOfferModal] = useState(false);
     const [showActions, setShowActions] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [connections, setConnections] = useState<any[]>([]);
     const [recentChats, setRecentChats] = useState<any[]>([]);
@@ -468,19 +469,49 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 >
                                     <span className="material-symbols-outlined">handshake</span>
                                 </button>
-                                <button
-                                    onClick={() => navigate(`/profile/${chatDetails?.poster_id === user.id ? chatDetails?.writer_id : chatDetails?.poster_id}`)}
-                                    className="size-10 rounded-xl bg-secondary-bg text-text-muted hover:bg-gray-200 flex items-center justify-center transition-colors"
-                                >
-                                    <span className="material-symbols-outlined">person</span>
-                                </button>
-                                <button
-                                    onClick={handleClearChat}
-                                    className="size-10 rounded-xl bg-secondary-bg text-text-muted hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors"
-                                    title="Clear Chat"
-                                >
-                                    <Trash2 size={20} />
-                                </button>
+
+
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowMenu(!showMenu)}
+                                        className="size-10 rounded-xl bg-secondary-bg text-text-muted hover:bg-gray-200 flex items-center justify-center transition-colors"
+                                    >
+                                        <MoreVertical size={20} />
+                                    </button>
+
+                                    {/* Dropdown Menu */}
+                                    {showMenu && (
+                                        <>
+                                            <div
+                                                className="fixed inset-0 z-30"
+                                                onClick={() => setShowMenu(false)}
+                                            ></div>
+                                            <div className="absolute right-0 top-12 w-48 bg-white rounded-xl shadow-lg border border-border-subtle py-1 z-40 overflow-hidden">
+                                                <button
+                                                    onClick={() => {
+                                                        setShowMenu(false);
+                                                        navigate(`/profile/${chatDetails?.poster_id === user.id ? chatDetails?.writer_id : chatDetails?.poster_id}`);
+                                                    }}
+                                                    className="w-full text-left px-4 py-3 text-sm font-medium text-text-dark hover:bg-secondary-bg flex items-center gap-2"
+                                                >
+                                                    <span className="material-symbols-outlined text-lg">person</span>
+                                                    View Profile
+                                                </button>
+                                                <div className="h-px bg-border-subtle mx-4 my-1"></div>
+                                                <button
+                                                    onClick={() => {
+                                                        setShowMenu(false);
+                                                        handleClearChat();
+                                                    }}
+                                                    className="w-full text-left px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 flex items-center gap-2"
+                                                >
+                                                    <Trash2 size={16} />
+                                                    Clear Chat
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -891,14 +922,16 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                 </aside>
 
                 {/* Offer Modal */}
-                {showOfferModal && (
-                    <OfferModal
-                        isOpen={showOfferModal}
-                        onClose={() => setShowOfferModal(false)}
-                        onSubmit={handleSubmitOffer}
-                    />
-                )}
-            </main>
-        </div>
+                {
+                    showOfferModal && (
+                        <OfferModal
+                            isOpen={showOfferModal}
+                            onClose={() => setShowOfferModal(false)}
+                            onSubmit={handleSubmitOffer}
+                        />
+                    )
+                }
+            </main >
+        </div >
     );
 };
