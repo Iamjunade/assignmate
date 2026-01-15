@@ -1148,7 +1148,6 @@ return (
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-[60] bg-[#0d0b09] flex items-center justify-center p-4 md:p-8"
                     >
-                        {/* Background Elements */}
                         <div className="absolute inset-0 overflow-hidden pointer-events-none">
                             <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[120px]"></div>
                             <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-500/10 rounded-full blur-[120px]"></div>
@@ -1163,7 +1162,8 @@ return (
                     </motion.div>
                 )}
             </AnimatePresence>
-        </main >
-    </div >
+        </main>
+    </div>
 );
 };
+
