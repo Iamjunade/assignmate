@@ -17,7 +17,7 @@ export const ai = {
             const base64Data = await fileToGenerativePart(file);
 
             const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -162,7 +162,7 @@ FINAL MESSAGE TO USER:
                     console.log(`🤖 Call AI (Attempt ${attempts + 1}/${maxAttempts}): using Key ending in ...${cleanKey.slice(-4)}`);
 
                     response = await fetch(
-                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cleanKey}`,
+                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${cleanKey}`,
                         {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
