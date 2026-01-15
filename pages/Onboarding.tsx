@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
-import { Search, PenTool, Sparkles, ArrowRight, Mail, Send, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ArrowRight, Mail, Send, CheckCircle2, BookOpen, Users, Globe } from 'lucide-react';
 import { isProfileComplete } from '../utils/profileValidation';
 import { AIProfileBuilder } from '../components/onboarding/AIProfileBuilder';
 import { GlassCard } from '../components/ui/GlassCard';
@@ -17,7 +17,11 @@ export const Onboarding = () => {
     const [loading, setLoading] = useState(false);
     const [verifying, setVerifying] = useState(false);
     const [form, setForm] = useState({ fullName: '', handle: '', school: '', bio: '' });
+
+    // Internal state for UI selection, maps to isWriter for backend
+    const [selectedGoal, setSelectedGoal] = useState('learn'); // 'learn', 'collaborate', 'community'
     const [isWriter, setIsWriter] = useState(false);
+
     const [showAI, setShowAI] = useState(true);
     const [aiData, setAiData] = useState<any>(null); // Store AI JSON
 
@@ -33,6 +37,12 @@ export const Onboarding = () => {
             }));
         }
     }, [user]);
+
+    // Update isWriter based on goal selection
+    useEffect(() => {
+        // "Collaborate" implies active contribution/writer role in original schema
+        setIsWriter(selectedGoal === 'collaborate');
+    }, [selectedGoal]);
 
     // Redirect if user is already complete or not logged in
     useEffect(() => {
@@ -95,7 +105,7 @@ export const Onboarding = () => {
             await refreshProfile();
 
             // 3. Navigate
-            success("Welcome to AssignMate!");
+            success("Welcome to the community!");
             navigate('/feed');
         } catch (e: any) {
             console.error(e);
@@ -191,8 +201,8 @@ export const Onboarding = () => {
                         <div className="mx-auto mb-6 size-16 bg-gradient-to-tr from-primary to-orange-400 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/20 rotate-3 transform hover:rotate-6 transition-transform">
                             <span className="material-symbols-outlined text-white text-4xl">school</span>
                         </div>
-                        <h1 className="text-3xl font-black text-text-main mb-2 tracking-tight">Welcome Aboard!</h1>
-                        <p className="text-secondary font-medium">Let's personalize your experience.</p>
+                        <h1 className="text-3xl font-black text-text-main mb-2 tracking-tight">Welcome to AssignMate</h1>
+                        <p className="text-secondary font-medium">Let's personalize your learning experience.</p>
                     </div>
 
                     {!aiData && (
@@ -208,7 +218,7 @@ export const Onboarding = () => {
                                 </div>
                                 <div className="text-left">
                                     <p className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-                                        Build Faster with AI
+                                        Build your learning profile with AI
                                     </p>
                                     <p className="text-[10px] text-gray-500 font-medium">Auto-generate bio & tags</p>
                                 </div>
@@ -251,9 +261,6 @@ export const Onboarding = () => {
                                 onChange={(val) => setForm({ ...form, school: val })}
                                 placeholder="Search your college..."
                                 className="w-full"
-                            // Passing styling props to match GlassInput feel if component supports it, 
-                            // otherwise wrapper handles layout. 
-                            // Assuming CollegeAutocomplete has its own internal styling matching the app.
                             />
                         </div>
 
@@ -269,7 +276,7 @@ export const Onboarding = () => {
                                         ? 'border-indigo-200 ring-4 ring-indigo-500/5'
                                         : 'border-border-light focus:border-primary'
                                         }`}
-                                    placeholder="Tell us a bit about yourself..."
+                                    placeholder="What subjects are you interested in learning or discussing? How do you usually collaborate with peers?"
                                     value={form.bio}
                                     onChange={e => setForm({ ...form, bio: e.target.value })}
                                 />
@@ -277,45 +284,72 @@ export const Onboarding = () => {
                         </div>
 
                         <div className="pt-2">
-                            <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-3 ml-1">What's your main goal?</label>
-                            <div className="grid grid-cols-2 gap-4">
+                            <label className="block text-xs font-bold text-secondary uppercase tracking-wider mb-3 ml-1">How do you want to participate?</label>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                {/* Option 1: Learn */}
                                 <button
                                     type="button"
-                                    onClick={() => setIsWriter(false)}
-                                    className={`relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${!isWriter
+                                    onClick={() => setSelectedGoal('learn')}
+                                    className={`relative p-3 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-2 ${selectedGoal === 'learn'
                                         ? 'bg-orange-50 border-orange-500 shadow-lg shadow-orange-500/10 scale-[1.02]'
                                         : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
                                         }`}
                                 >
-                                    {/* Checkmark for selected state */}
-                                    {!isWriter && (
+                                    {selectedGoal === 'learn' && (
                                         <div className="absolute top-2 right-2 text-orange-500">
-                                            <CheckCircle2 size={16} fill="currentColor" className="text-white" />
+                                            <CheckCircle2 size={14} fill="currentColor" className="text-white" />
                                         </div>
                                     )}
-                                    <div className={`p-3 rounded-full ${!isWriter ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'}`}>
-                                        <Search size={24} />
+                                    <div className={`p-2 rounded-full ${selectedGoal === 'learn' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'}`}>
+                                        <BookOpen size={20} />
                                     </div>
-                                    <span className={`text-sm font-bold ${!isWriter ? 'text-orange-900' : 'text-gray-500'}`}>Find Help</span>
+                                    <span className={`text-xs font-bold text-center ${selectedGoal === 'learn' ? 'text-orange-900' : 'text-gray-500'}`}>
+                                        Learn & Discuss Topics
+                                    </span>
                                 </button>
 
+                                {/* Option 2: Collaborate */}
                                 <button
                                     type="button"
-                                    onClick={() => setIsWriter(true)}
-                                    className={`relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${isWriter
+                                    onClick={() => setSelectedGoal('collaborate')}
+                                    className={`relative p-3 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-2 ${selectedGoal === 'collaborate'
                                         ? 'bg-primary/10 border-primary shadow-lg shadow-primary/10 scale-[1.02]'
                                         : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
                                         }`}
                                 >
-                                    {isWriter && (
+                                    {selectedGoal === 'collaborate' && (
                                         <div className="absolute top-2 right-2 text-primary">
-                                            <CheckCircle2 size={16} fill="currentColor" className="text-white" />
+                                            <CheckCircle2 size={14} fill="currentColor" className="text-white" />
                                         </div>
                                     )}
-                                    <div className={`p-3 rounded-full ${isWriter ? 'bg-primary text-[#1b140d]' : 'bg-gray-100 text-gray-400'}`}>
-                                        <PenTool size={24} />
+                                    <div className={`p-2 rounded-full ${selectedGoal === 'collaborate' ? 'bg-primary text-[#1b140d]' : 'bg-gray-100 text-gray-400'}`}>
+                                        <Users size={20} />
                                     </div>
-                                    <span className={`text-sm font-bold ${isWriter ? 'text-[#1b140d]' : 'text-gray-500'}`}>Earn Money</span>
+                                    <span className={`text-xs font-bold text-center ${selectedGoal === 'collaborate' ? 'text-[#1b140d]' : 'text-gray-500'}`}>
+                                        Collaborate on Projects
+                                    </span>
+                                </button>
+
+                                {/* Option 3: Communities */}
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedGoal('community')}
+                                    className={`relative p-3 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-2 ${selectedGoal === 'community'
+                                        ? 'bg-blue-50 border-blue-500 shadow-lg shadow-blue-500/10 scale-[1.02]'
+                                        : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
+                                        }`}
+                                >
+                                    {selectedGoal === 'community' && (
+                                        <div className="absolute top-2 right-2 text-blue-500">
+                                            <CheckCircle2 size={14} fill="currentColor" className="text-white" />
+                                        </div>
+                                    )}
+                                    <div className={`p-2 rounded-full ${selectedGoal === 'community' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
+                                        <Globe size={20} />
+                                    </div>
+                                    <span className={`text-xs font-bold text-center ${selectedGoal === 'community' ? 'text-blue-900' : 'text-gray-500'}`}>
+                                        Join Study Communities
+                                    </span>
                                 </button>
                             </div>
                         </div>
