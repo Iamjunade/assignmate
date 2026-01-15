@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { CollegeAutocomplete } from '../components/CollegeAutocomplete';
@@ -9,6 +9,7 @@ import { AIProfileBuilder } from '../components/onboarding/AIProfileBuilder';
 
 export const Onboarding = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { user, refreshProfile, resendVerification } = useAuth();
     const { error, success } = useToast();
 
@@ -23,18 +24,25 @@ export const Onboarding = () => {
     const [showAI, setShowAI] = useState(true);
     const [aiData, setAiData] = useState<any>(null); // Store AI JSON
 
-    // Initialize form with user's existing data
+    // Initialize form with user's existing data or passed state
     useEffect(() => {
         if (user) {
+            const locState = location.state || {}; // Get passed data from Auth
+
+            // Prefer: 1. Passed State -> 2. User Profile (Filtered)
+            // Filter out defaults like 'Student' or 'user_...'
+            const safeFullName = (user.full_name === 'Student' ? '' : user.full_name);
+            const safeHandle = (user.handle?.startsWith('user_') && user.handle.length > 8 ? '' : user.handle); // Only filter clear defaults
+
             setForm(prev => ({
                 ...prev,
-                fullName: user.full_name || '',
-                handle: prev.handle || user.handle || '',
-                school: prev.school || user.school || '', // Sync school from signup
-                bio: prev.bio || user.bio || ''           // Sync bio from signup
+                fullName: prev.fullName || locState.fullName || safeFullName || '',
+                handle: prev.handle || locState.handle || safeHandle || '',
+                school: prev.school || locState.school || user.school || '',
+                bio: prev.bio || locState.bio || user.bio || ''
             }));
         }
-    }, [user]);
+    }, [user, location.state]);
 
     // Update isWriter based on goal selection
     useEffect(() => {
@@ -279,10 +287,10 @@ export const Onboarding = () => {
                                     <div className="relative group">
                                         <span className="material-symbols-outlined absolute left-3 top-3 text-gray-500 text-lg group-focus-within:text-primary transition-colors">edit_note</span>
                                         <textarea
-                                            className={`w-full h-16 pl-10 pr-3 py-2.5 rounded-xl border bg-black/20 focus:bg-black/30 text-xs font-medium text-white placeholder-white/20 transition-all outline-none resize-none ${aiData
-                                                ? 'border-indigo-500/30 ring-1 ring-indigo-500/20'
-                                                : 'border-white/10 focus:border-primary focus:ring-1 focus:ring-primary/50'
-                                                }`}
+                                            className={`w - full h - 16 pl - 10 pr - 3 py - 2.5 rounded - xl border bg - black / 20 focus: bg - black / 30 text - xs font - medium text - white placeholder - white / 20 transition - all outline - none resize - none ${aiData
+                                                    ? 'border-indigo-500/30 ring-1 ring-indigo-500/20'
+                                                    : 'border-white/10 focus:border-primary focus:ring-1 focus:ring-primary/50'
+                                                } `}
                                             placeholder="Interests & collaboration style..."
                                             value={form.bio}
                                             onChange={e => setForm({ ...form, bio: e.target.value })}
@@ -298,20 +306,20 @@ export const Onboarding = () => {
                                     <button
                                         type="button"
                                         onClick={() => setSelectedGoal('learn')}
-                                        className={`relative p-2 rounded-xl border transition-all duration-300 flex flex-col items-center gap-1.5 ${selectedGoal === 'learn'
-                                            ? 'bg-primary/20 border-primary shadow-lg shadow-orange-500/10 scale-[1.02]'
-                                            : 'bg-black/20 border-white/5 hover:bg-black/40 hover:border-white/10'
-                                            }`}
+                                        className={`relative p - 2 rounded - xl border transition - all duration - 300 flex flex - col items - center gap - 1.5 ${selectedGoal === 'learn'
+                                                ? 'bg-primary/20 border-primary shadow-lg shadow-orange-500/10 scale-[1.02]'
+                                                : 'bg-black/20 border-white/5 hover:bg-black/40 hover:border-white/10'
+                                            } `}
                                     >
                                         {selectedGoal === 'learn' && (
                                             <div className="absolute top-1.5 right-1.5 text-primary">
                                                 <CheckCircle2 size={10} fill="currentColor" className="text-white" />
                                             </div>
                                         )}
-                                        <div className={`p-1.5 rounded-full ${selectedGoal === 'learn' ? 'bg-primary/20 text-primary' : 'bg-white/5 text-gray-500'}`}>
+                                        <div className={`p - 1.5 rounded - full ${selectedGoal === 'learn' ? 'bg-primary/20 text-primary' : 'bg-white/5 text-gray-500'} `}>
                                             <BookOpen size={14} />
                                         </div>
-                                        <span className={`text-[10px] font-bold text-center leading-tight ${selectedGoal === 'learn' ? 'text-primary' : 'text-gray-400'}`}>
+                                        <span className={`text - [10px] font - bold text - center leading - tight ${selectedGoal === 'learn' ? 'text-primary' : 'text-gray-400'} `}>
                                             Learn & Discuss
                                         </span>
                                     </button>
@@ -320,20 +328,20 @@ export const Onboarding = () => {
                                     <button
                                         type="button"
                                         onClick={() => setSelectedGoal('collaborate')}
-                                        className={`relative p-2 rounded-xl border transition-all duration-300 flex flex-col items-center gap-1.5 ${selectedGoal === 'collaborate'
-                                            ? 'bg-[#E6D5B8]/20 border-[#E6D5B8] shadow-lg shadow-[#E6D5B8]/10 scale-[1.02]'
-                                            : 'bg-black/20 border-white/5 hover:bg-black/40 hover:border-white/10'
-                                            }`}
+                                        className={`relative p - 2 rounded - xl border transition - all duration - 300 flex flex - col items - center gap - 1.5 ${selectedGoal === 'collaborate'
+                                                ? 'bg-[#E6D5B8]/20 border-[#E6D5B8] shadow-lg shadow-[#E6D5B8]/10 scale-[1.02]'
+                                                : 'bg-black/20 border-white/5 hover:bg-black/40 hover:border-white/10'
+                                            } `}
                                     >
                                         {selectedGoal === 'collaborate' && (
                                             <div className="absolute top-1.5 right-1.5 text-[#E6D5B8]">
                                                 <CheckCircle2 size={10} fill="currentColor" className="text-black" />
                                             </div>
                                         )}
-                                        <div className={`p-1.5 rounded-full ${selectedGoal === 'collaborate' ? 'bg-[#E6D5B8] text-black' : 'bg-white/5 text-gray-500'}`}>
+                                        <div className={`p - 1.5 rounded - full ${selectedGoal === 'collaborate' ? 'bg-[#E6D5B8] text-black' : 'bg-white/5 text-gray-500'} `}>
                                             <Users size={14} />
                                         </div>
-                                        <span className={`text-[10px] font-bold text-center leading-tight ${selectedGoal === 'collaborate' ? 'text-[#E6D5B8]' : 'text-gray-400'}`}>
+                                        <span className={`text - [10px] font - bold text - center leading - tight ${selectedGoal === 'collaborate' ? 'text-[#E6D5B8]' : 'text-gray-400'} `}>
                                             Project Collab
                                         </span>
                                     </button>
@@ -342,20 +350,20 @@ export const Onboarding = () => {
                                     <button
                                         type="button"
                                         onClick={() => setSelectedGoal('community')}
-                                        className={`relative p-2 rounded-xl border transition-all duration-300 flex flex-col items-center gap-1.5 ${selectedGoal === 'community'
-                                            ? 'bg-blue-500/20 border-blue-500 shadow-lg shadow-blue-500/10 scale-[1.02]'
-                                            : 'bg-black/20 border-white/5 hover:bg-black/40 hover:border-white/10'
-                                            }`}
+                                        className={`relative p - 2 rounded - xl border transition - all duration - 300 flex flex - col items - center gap - 1.5 ${selectedGoal === 'community'
+                                                ? 'bg-blue-500/20 border-blue-500 shadow-lg shadow-blue-500/10 scale-[1.02]'
+                                                : 'bg-black/20 border-white/5 hover:bg-black/40 hover:border-white/10'
+                                            } `}
                                     >
                                         {selectedGoal === 'community' && (
                                             <div className="absolute top-1.5 right-1.5 text-blue-500">
                                                 <CheckCircle2 size={10} fill="currentColor" className="text-white" />
                                             </div>
                                         )}
-                                        <div className={`p-1.5 rounded-full ${selectedGoal === 'community' ? 'bg-blue-500/20 text-blue-500' : 'bg-white/5 text-gray-500'}`}>
+                                        <div className={`p - 1.5 rounded - full ${selectedGoal === 'community' ? 'bg-blue-500/20 text-blue-500' : 'bg-white/5 text-gray-500'} `}>
                                             <Globe size={14} />
                                         </div>
-                                        <span className={`text-[10px] font-bold text-center leading-tight ${selectedGoal === 'community' ? 'text-blue-400' : 'text-gray-400'}`}>
+                                        <span className={`text - [10px] font - bold text - center leading - tight ${selectedGoal === 'community' ? 'text-blue-400' : 'text-gray-400'} `}>
                                             Join Communities
                                         </span>
                                     </button>

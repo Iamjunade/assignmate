@@ -23,12 +23,15 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     const [completionForm, setCompletionForm] = useState({ handle: '', school: '' });
     const [completionIsWriter, setCompletionIsWriter] = useState(false);
 
+    const submittedFormRef = React.useRef<any>(null);
+
     // ✅ FIX: Use unified isProfileComplete helper - single source of truth
     useEffect(() => {
         if (user) {
             if (!isProfileComplete(user)) {
                 // Profile incomplete - redirect to onboarding
-                navigate('/onboarding');
+                // Pass submitted form data if available to pre-fill onboarding
+                navigate('/onboarding', { state: submittedFormRef.current || {} });
             } else {
                 // Profile complete - proceed to feed or call onComplete
                 if (onComplete) {
@@ -51,6 +54,9 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        // Store form data for potential onboarding redirect
+        submittedFormRef.current = form;
 
         try {
             // Validation
