@@ -834,15 +834,12 @@ export const dbService = {
         try {
             const chatRef = doc(getDb(), 'chats', chatId);
 
-            // "Soft Clear" - we just mark the timestamp for this user
-            // We use dot notation to update a specific key in the map without overwriting
-            await updateDoc(chatRef, {
-                [`cleared_at.${userId}`]: new Date().toISOString(),
-                // Also reset unread count for this user since they cleared it
-                // We need to know if they are poster or writer, but simpler to just set both if we don't know, 
-                // OR we rely on the UI to handle unread counts. 
-                // Actually, let's strictly just hide messages for now.
-            });
+            // Use setDoc with merge to ensure 'cleared_at' map is created if it doesn't exist
+            await setDoc(chatRef, {
+                cleared_at: {
+                    [userId]: new Date().toISOString()
+                }
+            }, { merge: true });
 
         } catch (error) {
             console.error("Error clearing chat:", error);

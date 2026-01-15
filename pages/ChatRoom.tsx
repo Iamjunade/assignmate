@@ -115,9 +115,11 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     };
 
     // Filter messages based on cleared_at
-    const clearedAt = chatDetails?.cleared_at?.[user.id]
-        ? new Date(chatDetails.cleared_at[user.id]).getTime()
-        : 0;
+    const clearedAtTimestamp = chatDetails?.cleared_at?.[user.id];
+    const clearedAt = clearedAtTimestamp ? new Date(clearedAtTimestamp).getTime() : 0;
+
+    // Debug logging
+    // console.log('Chat Cleared At:', clearedAt, 'from', clearedAtTimestamp);
 
     const visibleMessages = messages.filter(m => {
         const msgTime = new Date(m.created_at).getTime();
