@@ -927,62 +927,98 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
 
                                         {activeTab === 'network' && (
                                             <div className="space-y-6">
-                                                {/* Connection Requests - Only for own profile */}
-                                                {isOwnProfile && requests.length > 0 && (
-                                                    <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light">
-                                                        <h3 className="font-bold font-display mb-4 flex items-center gap-2">
-                                                            <span className="w-2 h-2 rounded-full bg-primary"></span>
-                                                            Pending Requests
-                                                        </h3>
-                                                        <div className="space-y-3">
-                                                            {requests.map((req) => (
-                                                                <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-background-light">
-                                                                    <div className="flex items-center gap-3">
-                                                                        <Avatar src={req.fromUser?.avatar_url} alt={req.fromUser?.full_name} className="size-10 rounded-full" />
-                                                                        <div>
-                                                                            <p className="font-bold text-sm">{req.fromUser?.full_name}</p>
-                                                                            <p className="text-xs text-secondary">@{req.fromUser?.handle}</p>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="flex gap-2">
-                                                                        <button onClick={() => handleConnectionResponse(req.id, 'accepted')} className="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100"><Check size={16} /></button>
-                                                                        <button onClick={() => handleConnectionResponse(req.id, 'rejected')} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"><X size={16} /></button>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
+                                                {/* Privacy Check */}
+                                                {!isOwnProfile && connectionStatus !== 'connected' ? (
+                                                    <div className="bg-white rounded-[2rem] p-12 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center min-h-[400px]">
+                                                        <div className="bg-gray-50 p-6 rounded-full mb-6">
+                                                            <Lock size={48} className="text-gray-400" />
                                                         </div>
+                                                        <h3 className="text-xl font-bold text-slate-900 mb-2">Private Network</h3>
+                                                        <p className="text-gray-500 max-w-sm mb-8 leading-relaxed">
+                                                            You must be connected with <span className="font-bold text-slate-700">{profileUser.full_name}</span> to view their professional network and connections.
+                                                        </p>
+                                                        {connectionStatus === 'pending_sent' ? (
+                                                            <button disabled className="px-8 py-3 rounded-xl bg-gray-100 text-gray-400 font-bold cursor-not-allowed">
+                                                                Request Sent
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={handleConnect}
+                                                                disabled={loadingProfile}
+                                                                className="px-8 py-3 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:scale-105"
+                                                            >
+                                                                Connect to View
+                                                            </button>
+                                                        )}
                                                     </div>
-                                                )}
-
-                                                {/* Connections List */}
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    {connections.length > 0 ? connections.map((conn) => {
-                                                        const otherUser = conn.participants.find((p: any) => p.id !== profileUser.id);
-                                                        return (
-                                                            <div key={conn.id} className="bg-white p-4 rounded-2xl shadow-sm border border-border-light flex items-center gap-4">
-                                                                <Avatar src={otherUser?.avatar_url} alt={otherUser?.full_name} className="size-12 rounded-full" />
-                                                                <div>
-                                                                    <p className="font-bold text-text-main">{otherUser?.full_name}</p>
-                                                                    <p className="text-xs text-secondary">@{otherUser?.handle}</p>
+                                                ) : (
+                                                    <>
+                                                        {/* Connection Requests - Only for own profile */}
+                                                        {isOwnProfile && requests.length > 0 && (
+                                                            <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light">
+                                                                <h3 className="font-bold font-display mb-4 flex items-center gap-2">
+                                                                    <span className="w-2 h-2 rounded-full bg-primary"></span>
+                                                                    Pending Requests
+                                                                </h3>
+                                                                <div className="space-y-3">
+                                                                    {requests.map((req) => (
+                                                                        <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-background-light">
+                                                                            <div className="flex items-center gap-3">
+                                                                                <Avatar src={req.fromUser?.avatar_url} alt={req.fromUser?.full_name} className="size-10 rounded-full" />
+                                                                                <div>
+                                                                                    <p className="font-bold text-sm">{req.fromUser?.full_name}</p>
+                                                                                    <p className="text-xs text-secondary">@{req.fromUser?.handle}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex gap-2">
+                                                                                <button onClick={() => handleConnectionResponse(req.id, 'accepted')} className="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100"><Check size={16} /></button>
+                                                                                <button onClick={() => handleConnectionResponse(req.id, 'rejected')} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"><X size={16} /></button>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
                                                                 </div>
-                                                                <button
-                                                                    onClick={async () => {
-                                                                        const chat = await db.createChat(null, currentUser.id, otherUser.id);
-                                                                        navigate(`/chats/${chat.id}`);
-                                                                    }}
-                                                                    className="ml-auto p-2 rounded-full hover:bg-gray-100 text-secondary"
-                                                                >
-                                                                    <MessageSquare size={18} />
-                                                                </button>
                                                             </div>
-                                                        );
-                                                    }) : (
-                                                        <div className="col-span-full text-center py-12 text-secondary">
-                                                            <Users size={48} className="mx-auto mb-3 opacity-20" />
-                                                            <p>No connections yet.</p>
+                                                        )}
+
+                                                        {/* Connections List */}
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            {connections.length > 0 ? connections.map((conn) => {
+                                                                const otherUser = conn.participants.find((p: any) => p.id !== profileUser.id);
+                                                                return (
+                                                                    <div key={conn.id} className="bg-white p-4 rounded-2xl shadow-sm border border-border-light flex items-center gap-4 group hover:border-blue-100 transition-all">
+                                                                        <div onClick={() => navigate(`/profile/${otherUser?.id}`)} className="cursor-pointer">
+                                                                            <Avatar src={otherUser?.avatar_url} alt={otherUser?.full_name} className="size-12 rounded-full ring-2 ring-gray-50 group-hover:ring-blue-50 transition-all" />
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <p onClick={() => navigate(`/profile/${otherUser?.id}`)} className="font-bold text-text-main truncate cursor-pointer hover:text-blue-600 transition-colors">{otherUser?.full_name}</p>
+                                                                            <p className="text-xs text-secondary truncate">@{otherUser?.handle}</p>
+                                                                        </div>
+                                                                        {currentUser && otherUser && (
+                                                                            <button
+                                                                                onClick={async () => {
+                                                                                    const chat = await db.createChat(null, currentUser.id, otherUser.id);
+                                                                                    navigate(`/chats/${chat.id}`);
+                                                                                }}
+                                                                                className="p-2 rounded-full hover:bg-orange-50 text-gray-400 hover:text-orange-500 transition-all"
+                                                                                title="Message"
+                                                                            >
+                                                                                <MessageSquare size={18} />
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            }) : (
+                                                                <div className="col-span-full text-center py-12 text-secondary bg-white rounded-3xl border border-dashed border-gray-200">
+                                                                    <div className="bg-gray-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                                        <Users size={24} className="text-gray-400" />
+                                                                    </div>
+                                                                    <p className="font-medium text-gray-600">No connections yet.</p>
+                                                                    <p className="text-xs text-gray-400 mt-1">They are just getting started!</p>
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    )}
-                                                </div>
+                                                    </>
+                                                )}
                                             </div>
                                         )}
                                     </motion.div>
