@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { shareContent } from '../../utils/share';
 import { useAuth } from '../../contexts/AuthContext';
 import { CommunityPost, Comment } from '../../types';
 import { Avatar } from '../ui/Avatar';
@@ -119,7 +120,7 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
     };
 
     return (
-        <div className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 group">
+        <div id={post.id} className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 group">
             {/* Header */}
             <div className="flex items-start justify-between mb-4 relative">
                 <div
@@ -214,7 +215,16 @@ export const CommunityPostCard: React.FC<CommunityPostCardProps> = ({ post, onLi
                     </button>
                 </div>
 
-                <button className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-50 transition-all">
+                <button
+                    onClick={() => {
+                        shareContent(
+                            `Discussion by ${post.user_handle}`,
+                            post.content,
+                            `${window.location.origin}/community#${post.id}`
+                        ).then(res => res === 'copied' && toast('Link copied to clipboard', 'success'));
+                    }}
+                    className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-50 transition-all"
+                >
                     <Share2 size={20} />
                 </button>
             </div>
