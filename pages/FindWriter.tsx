@@ -323,8 +323,13 @@ export const FindWriter = () => {
                                                 onClick={() => handleSelectCollege(college.name)}
                                                 className="w-full text-left px-5 py-3 hover:bg-orange-50 transition-colors border-b border-slate-50 text-slate-700 hover:text-orange-700 flex items-center justify-between group"
                                             >
-                                                <div className="font-bold">{college.name}</div>
-                                                <div className="text-xs text-slate-400 font-medium group-hover:text-orange-400 flex items-center gap-1">
+                                                <div className="min-w-0 flex-1 mr-4">
+                                                    <div className="font-bold truncate">{college.name}</div>
+                                                    <div className="text-[10px] text-slate-400 font-medium group-hover:text-orange-500 truncate">
+                                                        {[college.university, college.district].filter(Boolean).join(', ')}
+                                                    </div>
+                                                </div>
+                                                <div className="text-xs text-slate-400 font-medium group-hover:text-orange-400 flex items-center gap-1 shrink-0">
                                                     <MapPin size={12} /> {college.state}
                                                 </div>
                                             </button>

@@ -1,16 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Footer } from '../components/layout/Footer';
+import { collegeService, College } from '../services/collegeService';
 
 export const Landing = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+    // Search State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [suggestions, setSuggestions] = useState<College[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+
     const handleLogin = () => navigate('/auth');
     const handleSignup = () => navigate('/auth?tab=signup');
-    const handleSearch = () => navigate('/feed');
+
+    const handleSearch = (term?: string) => {
+        const q = term || searchQuery;
+        if (user) {
+            navigate(`/peers?q=${encodeURIComponent(q)}`);
+        } else {
+            navigate(`/auth?redirect=/peers&q=${encodeURIComponent(q)}`);
+        }
+    };
+
+    // Debounced Search Effect
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(async () => {
+            if (searchQuery.length > 2) {
+                try {
+                    const results = await collegeService.search(searchQuery);
+                    setSuggestions(results.slice(0, 5));
+                    setShowSuggestions(results.length > 0);
+                } catch (e) {
+                    setSuggestions([]);
+                }
+            } else {
+                setSuggestions([]);
+                setShowSuggestions(false);
+            }
+        }, 300);
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchQuery]);
+
+    // Click outside to close suggestions
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     return (
         <div className="min-h-screen w-full font-body antialiased bg-[#0d0b09] text-[#F5F5F4] selection:bg-primary selection:text-white">
@@ -215,29 +260,54 @@ export const Landing = () => {
                         <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px]"></div>
                         <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px]"></div>
                         <h3 className="font-display text-3xl md:text-4xl font-bold text-white mb-8 relative z-10">Search your campus now</h3>
-                        <div className="relative max-w-xl mx-auto mb-8 z-10">
+                        <div className="relative max-w-xl mx-auto mb-8 z-10" ref={searchRef}>
                             <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                                 <span className="material-symbols-outlined text-[#E6D5B8]/40">search</span>
                             </div>
                             <input
                                 className="block w-full pl-14 pr-32 py-5 bg-[#2c2219] border border-white/10 rounded-xl text-white placeholder-[#E6D5B8]/30 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner"
-                                placeholder="Search for subjects (e.g. Economics, CS)"
+                                placeholder="Search for colleges (e.g. IIT, Delhi University)"
                                 type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onFocus={() => searchQuery.length > 2 && setShowSuggestions(true)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             />
-                            <button onClick={handleSearch} className="absolute right-2.5 top-2.5 bottom-2.5 bg-primary hover:bg-orange-600 text-white font-medium px-6 rounded-lg transition-colors shadow-lg">
+                            {showSuggestions && suggestions.length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-2 bg-[#221910] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 text-left">
+                                    {suggestions.map((college, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => {
+                                                setSearchQuery(college.name);
+                                                handleSearch(college.name);
+                                                setShowSuggestions(false);
+                                            }}
+                                            className="w-full px-6 py-3 text-sm text-[#E6D5B8]/90 hover:bg-white/5 hover:text-primary transition-colors flex items-center gap-3 border-b border-white/5 last:border-0"
+                                        >
+                                            <span className="material-symbols-outlined text-xs text-primary/70">school</span>
+                                            <div className="flex flex-col items-start">
+                                                <span className="font-bold truncate w-full text-left">{college.name}</span>
+                                                <span className="text-[10px] text-[#E6D5B8]/50 uppercase tracking-widest">{college.state}</span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            <button onClick={() => handleSearch()} className="absolute right-2.5 top-2.5 bottom-2.5 bg-primary hover:bg-orange-600 text-white font-medium px-6 rounded-lg transition-colors shadow-lg">
                                 Search
                             </button>
                         </div>
                         <div className="flex flex-wrap justify-center gap-3 text-xs z-10 relative">
                             <span className="text-[#E6D5B8]/40 font-bold tracking-wider py-1">POPULAR:</span>
                             {['Economics @ DU', 'CS @ IIT', 'Law @ NLU', 'BBA @ NMIMS'].map(tag => (
-                                <button key={tag} onClick={handleSearch} className="px-4 py-1.5 rounded-full bg-[#2c2219] text-[#E6D5B8]/80 hover:bg-[#3A2E24] hover:text-white transition-colors border border-white/5">{tag}</button>
+                                <button key={tag} onClick={() => handleSearch(tag)} className="px-4 py-1.5 rounded-full bg-[#2c2219] text-[#E6D5B8]/80 hover:bg-[#3A2E24] hover:text-white transition-colors border border-white/5">{tag}</button>
                             ))}
                         </div>
                     </div>
                 </div>
             </section>
+
 
             {/* How it Works Section */}
             <section className="py-32 bg-black overflow-hidden" id="how-it-works">

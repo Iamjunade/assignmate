@@ -34,11 +34,18 @@ export const Auth = ({ onComplete }: { onComplete?: () => void }) => {
                 if (onComplete) {
                     onComplete();
                 } else {
-                    navigate('/feed');
+                    const redirect = searchParams.get('redirect');
+                    const q = searchParams.get('q');
+                    if (redirect) {
+                        const target = q ? `${redirect}?q=${encodeURIComponent(q)}` : redirect;
+                        navigate(target);
+                    } else {
+                        navigate('/feed');
+                    }
                 }
             }
         }
-    }, [user, onComplete, navigate]);
+    }, [user, onComplete, navigate, searchParams]);
 
     // Handle email/password registration and login
     const handleSubmit = async (e: React.FormEvent) => {
