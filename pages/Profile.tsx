@@ -20,13 +20,15 @@ import { ActivityFeed } from '../components/profile/ActivityFeed';
 import DisconnectModal from '../components/ui/DisconnectModal';
 
 export const Profile = ({ user: currentUser }: { user: any }) => {
-    const { userId } = useParams();
+    const { userId, handle } = useParams();
     const navigate = useNavigate();
     const { refreshProfile, deleteAccount, resendVerification } = useAuth();
     const { success, error } = useToast();
 
     // 1. Determine if we are viewing our own profile
-    const isOwnProfile = !userId || (currentUser && userId === currentUser.id);
+    const isOwnProfile = (!userId && !handle) ||
+        (currentUser && userId === currentUser.id) ||
+        (currentUser && handle === currentUser.handle);
 
     // 2. State for the profile we are VIEWING
     const [profileUser, setProfileUser] = useState(isOwnProfile ? currentUser : null);
@@ -78,26 +80,39 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
             setLoadingProfile(false);
         } else {
             setLoadingProfile(true);
-            // Fetch public profile of the other user
-            db.getUserProfile(userId).then(data => {
-                if (data) {
-                    setProfileUser(data);
-                    // Check connection status
-                    if (currentUser) {
-                        db.getConnectionStatus(currentUser.id, userId).then(status => {
-                            setConnectionStatus(status as any);
-                        });
+
+            const fetchProfile = async () => {
+                try {
+                    let data = null;
+                    if (userId) {
+                        data = await db.getUserProfile(userId);
+                    } else if (handle) {
+                        data = await db.getUserByHandle(handle);
                     }
-                } else {
-                    error("User not found");
-                    navigate('/writers');
+
+                    if (data) {
+                        setProfileUser(data);
+                        // Check connection status
+                        if (currentUser) {
+                            db.getConnectionStatus(currentUser.id, data.id).then(status => {
+                                setConnectionStatus(status as any);
+                            });
+                        }
+                    } else {
+                        error("User not found");
+                        navigate('/peers');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    error("Error loading profile");
+                } finally {
+                    setLoadingProfile(false);
                 }
-                setLoadingProfile(false);
-            }).catch(() => {
-                setLoadingProfile(false);
-            });
+            };
+
+            fetchProfile();
         }
-    }, [userId, currentUser, isOwnProfile, navigate, error]);
+    }, [userId, handle, currentUser, isOwnProfile, navigate, error]);
 
     // Update state when profileUser changes
     useEffect(() => {

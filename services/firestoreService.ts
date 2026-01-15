@@ -220,6 +220,18 @@ export const dbService = {
         }
     },
 
+    getUserByHandle: async (handle: string) => {
+        try {
+            const q = query(collection(getDb(), 'users'), where('handle', '==', handle), limit(1));
+            const snap = await getDocs(q);
+            if (snap.empty) return null;
+            return { id: snap.docs[0].id, ...snap.docs[0].data() };
+        } catch (error) {
+            console.error("Error fetching user by handle:", error);
+            return null;
+        }
+    },
+
     getUsersBatch: async (userIds: string[]) => {
         const uniqueIds = Array.from(new Set(userIds)).filter(id => id);
         if (uniqueIds.length === 0) return new Map();

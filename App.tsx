@@ -210,6 +210,12 @@ function AppContent() {
             </ProtectedRoute>
           } />
 
+          <Route path="/@:handle" element={
+            <ProtectedRoute>
+              {user && <Profile user={user} />}
+            </ProtectedRoute>
+          } />
+
           {/* --- Admin Routes --- */}
           <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
