@@ -53,16 +53,25 @@ export const Feed: React.FC<FeedProps> = ({ user, onChat }) => {
 
                     // Transform raw connections to user objects for display
                     // The service returns connections where participants is an array of hydrated User objects
-                    const transformedConnections = rawConnections.map((conn: any) => {
-                        const otherUser = conn.participants.find((p: any) => p.id !== user.id);
-                        return {
-                            id: otherUser?.id || conn.id,
-                            full_name: otherUser?.full_name || otherUser?.handle || 'Unknown',
-                            handle: otherUser?.handle || 'User',
-                            avatar_url: otherUser?.avatar_url,
-                            school: otherUser?.school
-                        };
-                    });
+                    const transformedConnections = rawConnections
+                        .map((conn: any) => {
+                            const otherUser = conn.participants.find((p: any) => p.id !== user.id);
+
+                            // Filter conditions
+                            if (!otherUser) return null;
+                            if (!otherUser.full_name && !otherUser.handle) return null;
+                            if (otherUser.full_name === '?' || otherUser.handle === '?') return null;
+                            if (otherUser.full_name === 'Deleted User') return null;
+
+                            return {
+                                id: otherUser?.id || conn.id,
+                                full_name: otherUser?.full_name || otherUser?.handle || 'Unknown',
+                                handle: otherUser?.handle || 'User',
+                                avatar_url: otherUser?.avatar_url,
+                                school: otherUser?.school
+                            };
+                        })
+                        .filter((c: any) => c !== null);
                     setConnections(transformedConnections);
 
                     setRecentChats(chatsData);

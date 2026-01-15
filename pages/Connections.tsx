@@ -63,7 +63,12 @@ export const Connections = ({ user }: { user: User }) => {
         const otherUser = Array.isArray(conn.participants)
             ? conn.participants.find((p: any) => p.id !== user.id) || conn.participants[0]
             : null;
+
+        // Filter out Deleted/Invalid Users
         if (!otherUser) return false;
+        if (!otherUser.full_name && !otherUser.handle) return false;
+        if (otherUser.full_name === '?' || otherUser.handle === '?') return false;
+        if (otherUser.full_name === 'Deleted User') return false;
 
         const q = searchQuery.toLowerCase();
         return (otherUser.full_name?.toLowerCase() || '').includes(q) ||
@@ -99,8 +104,8 @@ export const Connections = ({ user }: { user: User }) => {
                                     <button
                                         onClick={() => setActiveTab('network')}
                                         className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${activeTab === 'network'
-                                                ? 'bg-white text-[#FF6B4A] shadow-lg scale-105'
-                                                : 'bg-white/20 text-white hover:bg-white/30'
+                                            ? 'bg-white text-[#FF6B4A] shadow-lg scale-105'
+                                            : 'bg-white/20 text-white hover:bg-white/30'
                                             }`}
                                     >
                                         <span className="material-symbols-outlined">diversity_3</span>
@@ -109,8 +114,8 @@ export const Connections = ({ user }: { user: User }) => {
                                     <button
                                         onClick={() => setActiveTab('pending')}
                                         className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${activeTab === 'pending'
-                                                ? 'bg-white text-[#FF6B4A] shadow-lg scale-105'
-                                                : 'bg-white/20 text-white hover:bg-white/30'
+                                            ? 'bg-white text-[#FF6B4A] shadow-lg scale-105'
+                                            : 'bg-white/20 text-white hover:bg-white/30'
                                             }`}
                                     >
                                         <span className="material-symbols-outlined">person_add</span>
