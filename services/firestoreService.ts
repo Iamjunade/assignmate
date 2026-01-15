@@ -682,6 +682,16 @@ export const dbService = {
         };
     },
 
+    listenToChatDetails: (chatId: string, callback: (details: any) => void) => {
+        return onSnapshot(doc(getDb(), 'chats', chatId), (doc) => {
+            if (doc.exists()) {
+                callback({ id: doc.id, ...doc.data() });
+            } else {
+                callback(null);
+            }
+        });
+    },
+
     createChat: async (gigId: string | null, posterId: string, writerId: string) => {
         // 1. Query for existing chat with these exact participants
         const q = query(collection(getDb(), 'chats'), where('participants', 'array-contains', posterId));
@@ -820,23 +830,18 @@ export const dbService = {
         }
     },
 
-    clearChat: async (chatId: string) => {
+    clearChat: async (chatId: string, userId: string) => {
         try {
-            const messagesRef = collection(getDb(), 'chats', chatId, 'messages');
-            const snapshot = await getDocs(messagesRef);
-
-            const batch = (await import('firebase/firestore')).writeBatch(getDb());
-            snapshot.docs.forEach((doc) => {
-                batch.delete(doc.ref);
-            });
-
-            await batch.commit();
-
-            // Optional: Update chat metadata to reflect empty state
             const chatRef = doc(getDb(), 'chats', chatId);
+
+            // "Soft Clear" - we just mark the timestamp for this user
+            // We use dot notation to update a specific key in the map without overwriting
             await updateDoc(chatRef, {
-                last_message: '',
-                updated_at: new Date().toISOString()
+                [`cleared_at.${userId}`]: new Date().toISOString(),
+                // Also reset unread count for this user since they cleared it
+                // We need to know if they are poster or writer, but simpler to just set both if we don't know, 
+                // OR we rely on the UI to handle unread counts. 
+                // Actually, let's strictly just hide messages for now.
             });
 
         } catch (error) {

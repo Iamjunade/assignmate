@@ -45,22 +45,24 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
         }
     }, [location]);
 
-    // 1. Fetch Chat Details on mount
+    // 1. Fetch Chat Details & Listen for Changes
     useEffect(() => {
-        db.getChatDetails(chatId, user.id)
-            .then((details) => {
-                if (details) {
-                    setChatDetails(details);
-                } else {
-                    toastError("Failed to load chat. Please try again.");
-                    navigate('/chats');
-                }
-            })
-            .catch((err) => {
-                console.error('[ChatRoom] Error loading chat details:', err);
-                toastError("Failed to load chat.");
-                navigate('/chats');
-            });
+        const unsubscribe = db.listenToChatDetails(chatId, (details) => {
+            if (details) {
+                setChatDetails((prev: any) => ({ ...prev, ...details }));
+            }
+        });
+
+        // Initial fetch
+        db.getChatDetails(chatId, user.id).then(setChatDetails).catch(err => {
+            console.error(err);
+            toastError("Failed to load chat");
+            navigate('/chats');
+        });
+
+        return () => {
+            if (unsubscribe && typeof unsubscribe === 'function') unsubscribe();
+        };
     }, [chatId, user.id, navigate, toastError]);
 
     // Fetch connections and recent chats for sidebar
@@ -97,6 +99,32 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
 
         return () => unsubscribe();
     }, [chatId, user.id]);
+
+    const handleClearChat = async () => {
+        if (!confirm("Are you sure you want to clear the entire chat history?")) return;
+        try {
+            await db.clearChat(chatId, user.id);
+            // Manually refresh details to get the new cleared_at timestamp immediately
+            const updated = await db.getChatDetails(chatId, user.id);
+            setChatDetails(updated);
+            toastSuccess("Chat cleared successfully");
+        } catch (error) {
+            console.error(error);
+            toastError("Failed to clear chat");
+        }
+    };
+
+    // Filter messages based on cleared_at
+    const clearedAt = chatDetails?.cleared_at?.[user.id]
+        ? new Date(chatDetails.cleared_at[user.id]).getTime()
+        : 0;
+
+    const visibleMessages = messages.filter(m => {
+        const msgTime = new Date(m.created_at).getTime();
+        return msgTime > clearedAt;
+    });
+
+
 
     // 3. Typing Indicators - depends on chatDetails
     useEffect(() => {
@@ -314,16 +342,7 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
         }
     };
 
-    const handleClearChat = async () => {
-        if (!confirm("Are you sure you want to clear the entire chat history? This cannot be undone.")) return;
-        try {
-            await db.clearChat(chatId);
-            toastSuccess("Chat cleared successfully");
-        } catch (error) {
-            console.error(error);
-            toastError("Failed to clear chat");
-        }
-    };
+
 
     const handleSwitchChat = async (otherId: string) => {
         try {
