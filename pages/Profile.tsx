@@ -509,9 +509,11 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         ) : (
                                             <button
                                                 onClick={() => {
+                                                    const shareUrl = `${window.location.origin}/@${profileUser.handle || profileUser.id}`;
                                                     shareContent(
                                                         `Check out ${profileUser.full_name}'s Profile`,
-                                                        `Connect with ${profileUser.full_name} on AssignMate!`
+                                                        `Connect with ${profileUser.full_name} on AssignMate!`,
+                                                        shareUrl
                                                     ).then(res => res === 'copied' && success('Link copied to clipboard'));
                                                 }}
                                                 className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors"
@@ -526,9 +528,11 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                         <div className="w-full mt-4 px-2">
                                             <button
                                                 onClick={() => {
+                                                    const shareUrl = `${window.location.origin}/@${currentUser.handle || currentUser.id}`;
                                                     shareContent(
                                                         `Check out ${currentUser.full_name}'s Profile`,
-                                                        `Connect with ${currentUser.full_name} on AssignMate!`
+                                                        `Connect with ${currentUser.full_name} on AssignMate!`,
+                                                        shareUrl
                                                     ).then(res => res === 'copied' && success('Link copied to clipboard'));
                                                 }}
                                                 className="w-full py-2.5 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
