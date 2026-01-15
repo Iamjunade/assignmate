@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { shareContent } from '../utils/share';
 import { dbService as db } from '../services/firestoreService';
 import {
     Camera, Edit2, X, Trash2, AlertTriangle, Check, Shield, Globe, Lock, Upload, Star,
@@ -506,13 +507,37 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
                                                 <span className="hidden group-hover:flex items-center gap-2"><X size={16} /> Disconnect</span>
                                             </button>
                                         ) : (
-                                            <button className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors">
+                                            <button
+                                                onClick={() => {
+                                                    shareContent(
+                                                        `Check out ${profileUser.full_name}'s Profile`,
+                                                        `Connect with ${profileUser.full_name} on AssignMate!`
+                                                    ).then(res => res === 'copied' && success('Link copied to clipboard'));
+                                                }}
+                                                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors"
+                                            >
                                                 <LinkIcon size={16} /> Share
                                             </button>
                                         )}
                                     </div>
 
                                     {/* Availability Status */}
+                                    {isOwnProfile && (
+                                        <div className="w-full mt-4 px-2">
+                                            <button
+                                                onClick={() => {
+                                                    shareContent(
+                                                        `Check out ${currentUser.full_name}'s Profile`,
+                                                        `Connect with ${currentUser.full_name} on AssignMate!`
+                                                    ).then(res => res === 'copied' && success('Link copied to clipboard'));
+                                                }}
+                                                className="w-full py-2.5 rounded-xl bg-gray-50 text-secondary font-bold text-sm hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <LinkIcon size={16} /> Share Profile
+                                            </button>
+                                        </div>
+                                    )}
+
                                     <div className="mt-6 pt-6 border-t border-border-light w-full flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <div className="size-2.5 rounded-full bg-green-500 animate-pulse"></div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { shareContent } from '../utils/share';
 import { dbService as db } from '../services/firestoreService';
 import {
   Clock,
@@ -37,6 +38,18 @@ export default function JobDetails() {
   const [progress, setProgress] = useState(0);
   const [updating, setUpdating] = useState(false);
   const [collaborator, setCollaborator] = useState<any>(null);
+
+  const handleShare = async () => {
+    if (!job) return;
+    const result = await shareContent(
+      `Check out this project: ${job.title}`,
+      `I found this interesting project on AssignMate: ${job.title}`
+    );
+
+    if (result === 'copied') {
+      toast('Link copied to clipboard', 'success');
+    }
+  };
 
   useEffect(() => {
     if (jobId) {
@@ -202,7 +215,10 @@ export default function JobDetails() {
                     <div className="flex justify-between items-start gap-4">
                       <h1 className="text-3xl font-bold text-[#111827] leading-tight">{job.title}</h1>
                       <div className="flex gap-2">
-                        <button className="p-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 hover:text-[#111827] transition-all">
+                        <button
+                          onClick={handleShare}
+                          className="p-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 hover:text-[#111827] transition-all"
+                        >
                           <Share2 size={18} />
                         </button>
                         <button className="p-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 hover:text-red-500 transition-all">
