@@ -93,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                     <span className="text-sm font-medium group-hover:text-text-dark transition-colors">Community</span>
                 </a>
 
-                <div className="mt-6 mb-2 px-4 text-xs font-bold text-[#E6D5B8]/40 uppercase tracking-wider">Support</div>
+                <div className="mt-6 mb-2 px-4 text-xs font-bold text-text-muted uppercase tracking-wider">Support</div>
                 <a
                     onClick={() => navigate('/help-center')}
                     className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group cursor-pointer ${isActive('/help-center') ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'hover:bg-secondary-bg text-text-muted'}`}
