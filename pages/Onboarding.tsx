@@ -185,11 +185,11 @@ export const Onboarding = () => {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-4 md:p-8 font-display relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-[#0d0b09] p-4 md:p-8 font-display relative overflow-hidden">
             {/* Ambient Background */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] translate-x-1/3 -translate-y-1/3 opacity-50"></div>
-                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[100px] -translate-x-1/3 translate-y-1/3 opacity-50"></div>
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] translate-x-1/3 -translate-y-1/3 opacity-30"></div>
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[100px] -translate-x-1/3 translate-y-1/3 opacity-30"></div>
             </div>
 
             <div className="w-full max-w-lg relative z-10">
