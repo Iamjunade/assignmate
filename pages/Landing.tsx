@@ -260,7 +260,7 @@ export const Landing = () => {
                         <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px]"></div>
                         <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px]"></div>
                         <h3 className="font-display text-3xl md:text-4xl font-bold text-white mb-8 relative z-10">Search your campus now</h3>
-                        <div className="relative max-w-xl mx-auto mb-8 z-10" ref={searchRef}>
+                        <div className="relative max-w-xl mx-auto mb-8 z-20" ref={searchRef}>
                             <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                                 <span className="material-symbols-outlined text-[#E6D5B8]/40">search</span>
                             </div>
@@ -268,30 +268,38 @@ export const Landing = () => {
                                 className="block w-full pl-14 pr-32 py-5 bg-[#2c2219] border border-white/10 rounded-xl text-white placeholder-[#E6D5B8]/30 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner"
                                 placeholder="Search for colleges (e.g. IIT, Delhi University)"
                                 type="text"
+                                spellCheck="false"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onFocus={() => searchQuery.length > 2 && setShowSuggestions(true)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             />
                             {showSuggestions && suggestions.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-2 bg-[#221910] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 text-left">
-                                    {suggestions.map((college, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => {
-                                                setSearchQuery(college.name);
-                                                handleSearch(college.name);
-                                                setShowSuggestions(false);
-                                            }}
-                                            className="w-full px-6 py-3 text-sm text-[#E6D5B8]/90 hover:bg-white/5 hover:text-primary transition-colors flex items-center gap-3 border-b border-white/5 last:border-0"
-                                        >
-                                            <span className="material-symbols-outlined text-xs text-primary/70">school</span>
-                                            <div className="flex flex-col items-start">
-                                                <span className="font-bold truncate w-full text-left">{college.name}</span>
-                                                <span className="text-[10px] text-[#E6D5B8]/50 uppercase tracking-widest">{college.state}</span>
-                                            </div>
-                                        </button>
-                                    ))}
+                                <div className="absolute top-full left-0 right-0 mt-3 bg-[#1a130e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 text-left ring-1 ring-white/5 backdrop-blur-3xl">
+                                    <div className="py-2">
+                                        {suggestions.map((college, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => {
+                                                    setSearchQuery(college.name);
+                                                    handleSearch(college.name);
+                                                    setShowSuggestions(false);
+                                                }}
+                                                className="w-full px-6 py-3.5 text-sm text-[#E6D5B8] hover:bg-white/5 hover:text-white transition-all flex items-center gap-4 group"
+                                            >
+                                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                                    <span className="material-symbols-outlined text-sm text-[#E6D5B8]/60 group-hover:text-primary transition-colors">school</span>
+                                                </div>
+                                                <div className="flex flex-col items-start gap-0.5 min-w-0">
+                                                    <span className="font-semibold truncate w-full text-left text-[15px]">{college.name}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-[#E6D5B8]/50 uppercase tracking-widest font-medium border border-white/5 group-hover:border-white/10">{college.state}</span>
+                                                        <span className="text-[10px] text-[#E6D5B8]/30">• {college.type || 'University'}</span>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                             <button onClick={() => handleSearch()} className="absolute right-2.5 top-2.5 bottom-2.5 bg-primary hover:bg-orange-600 text-white font-medium px-6 rounded-lg transition-colors shadow-lg">
