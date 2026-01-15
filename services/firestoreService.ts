@@ -1152,6 +1152,16 @@ export const dbService = {
                 likes: [],
                 comments_count: 0
             });
+
+            // Award XP (50 for new post)
+            if (postData.user_id) {
+                const { increment } = await import('firebase/firestore');
+                const userRef = doc(getDb(), 'users', postData.user_id);
+                await updateDoc(userRef, {
+                    xp: increment(50)
+                });
+            }
+
             return { id: docRef.id, ...postData };
         } catch (error) {
             console.error("Error creating community post:", error);
@@ -1240,6 +1250,18 @@ export const dbService = {
             await updateDoc(postRef, {
                 comments_count: increment(1)
             });
+
+            // Award XP (10 for comment)
+            if (user.id) {
+                const userRef = doc(getDb(), 'users', user.id);
+                try {
+                    await updateDoc(userRef, {
+                        xp: increment(10)
+                    });
+                } catch (err) {
+                    console.error("Failed to update XP for comment:", err);
+                }
+            }
 
             // NOTIFICATION LOGIC
             const senderName = user.handle || user.full_name || 'Someone';
