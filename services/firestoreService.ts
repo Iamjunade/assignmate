@@ -942,15 +942,17 @@ export const dbService = {
         // 1. Get Active Orders (using participants for bidirectional visibility)
         const q = query(
             collection(getDb(), 'orders'),
-            where('participants', 'array-contains', userId),
-            where('status', '==', 'in_progress')
-            // orderBy('deadline', 'asc') // Removed to avoid needing a complex composite index immediately
+            where('participants', 'array-contains', userId)
+            // where('status', '==', 'in_progress') // Removed to avoid missing index issue. Filter client-side.
         );
 
         const snap = await getDocs(q);
-        let activeOrders = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+        let allOrders = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
 
-        // Sort in memory (client-side) to ensure order without index
+        // Filter for active orders client-side
+        let activeOrders = allOrders.filter(o => o.status === 'in_progress');
+
+        // Sort in memory (client-side)
         activeOrders.sort((a, b) => {
             const tA = a.deadline ? new Date(a.deadline).getTime() : Infinity;
             const tB = b.deadline ? new Date(b.deadline).getTime() : Infinity;
