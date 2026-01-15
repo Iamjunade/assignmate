@@ -344,10 +344,9 @@ export const FindWriter = () => {
                     <div className="flex flex-wrap items-center justify-center gap-3 mt-6 text-xs font-medium text-slate-400">
                         <span className="uppercase tracking-wide font-bold text-slate-300">Popular Campuses:</span>
                         {[
-                            { name: 'IIT Delhi', type: 'popular' },
-                            { name: 'BITS Pilani', type: 'popular' },
-                            { name: 'Delhi University', type: 'popular' },
-                            { name: 'CMR Institute', type: 'near' }
+                            { name: 'JNTUH', type: 'popular' },
+                            { name: 'CMR Institute of Technology', type: 'popular' },
+                            { name: 'Malla Reddy Institute of Technology', type: 'popular' }
                         ].map(tag => (
                             <button
                                 key={tag.name}
