@@ -1139,29 +1139,7 @@ return (
                 userName={profileUser?.full_name || 'User'}
             />
 
-            {/* AI Builder Overlay */}
-            <AnimatePresence>
-                {showAIBuilder && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[60] bg-[#0d0b09] flex items-center justify-center p-4 md:p-8"
-                    >
-                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                            <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[120px]"></div>
-                            <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-500/10 rounded-full blur-[120px]"></div>
-                        </div>
 
-                        <div className="w-full max-w-4xl h-[90vh] relative z-10">
-                            <AIProfileBuilder
-                                onComplete={handleAIComplete}
-                                onSkip={() => setShowAIBuilder(false)}
-                            />
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </main>
     </div>
 );
