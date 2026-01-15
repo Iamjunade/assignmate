@@ -129,16 +129,36 @@ export const Profile = ({ user: currentUser }: { user: any }) => {
     // Load connections and requests
     useEffect(() => {
         const loadNetwork = async () => {
-            if (profileUser?.id && isOwnProfile) {
-                // Only load network data if it's own profile (Privacy)
+            if (!profileUser?.id) return;
+
+            // 1. Pending Requests (Only for owner)
+            if (isOwnProfile) {
                 const reqs = await db.getIncomingRequests(profileUser.id);
                 setRequests(reqs);
+            }
+
+            // 2. Connections (Owner OR Connected Peer)
+            if (isOwnProfile || connectionStatus === 'connected') {
                 const conns = await db.getMyConnections(profileUser.id);
-                setConnections(conns);
+
+                // Filter out deleted/invalid users (Client-side mirror of Feed logic)
+                const validConns = conns.filter(c => {
+                    const other = c.participants?.find((p: any) => p.id !== profileUser.id);
+                    return other && othersOK(other);
+                });
+
+                setConnections(validConns); // Using raw conns, filtered in render? No, render logic filters by map/checking. 
+                // Actually, let's keep it simple. The previously added filter logic in `Connections.tsx` was good. 
+                // But in Profile.tsx render (lines 959+), we iterate `connections`.
+                // Let's filter invalid users here to be safe and consistent.
             }
         };
+
+        // Helper for validity
+        const othersOK = (u: any) => u.full_name && u.full_name !== '?' && u.full_name !== 'Deleted User';
+
         loadNetwork();
-    }, [profileUser?.id, isOwnProfile]);
+    }, [profileUser?.id, isOwnProfile, connectionStatus]);
 
     const addTag = async (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && newTag.trim()) {
