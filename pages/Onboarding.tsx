@@ -18,7 +18,7 @@ export const Onboarding = () => {
     const [verifying, setVerifying] = useState(false);
     const [form, setForm] = useState({ fullName: '', handle: '', school: '', bio: '' });
     const [isWriter, setIsWriter] = useState(false);
-    const [showAI, setShowAI] = useState(false);
+    const [showAI, setShowAI] = useState(true);
     const [aiData, setAiData] = useState<any>(null); // Store AI JSON
 
     // Initialize form with user's existing data
@@ -266,8 +266,8 @@ export const Onboarding = () => {
                                 <span className="material-symbols-outlined absolute left-4 top-4 text-gray-400 group-focus-within:text-primary transition-colors">edit_note</span>
                                 <textarea
                                     className={`w-full h-28 pl-12 pr-4 py-3 rounded-2xl border bg-white/50 focus:bg-white focus:ring-4 focus:ring-primary/10 text-sm font-medium text-text-main placeholder-gray-400 transition-all outline-none resize-none ${aiData
-                                            ? 'border-indigo-200 ring-4 ring-indigo-500/5'
-                                            : 'border-border-light focus:border-primary'
+                                        ? 'border-indigo-200 ring-4 ring-indigo-500/5'
+                                        : 'border-border-light focus:border-primary'
                                         }`}
                                     placeholder="Tell us a bit about yourself..."
                                     value={form.bio}
@@ -283,8 +283,8 @@ export const Onboarding = () => {
                                     type="button"
                                     onClick={() => setIsWriter(false)}
                                     className={`relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${!isWriter
-                                            ? 'bg-orange-50 border-orange-500 shadow-lg shadow-orange-500/10 scale-[1.02]'
-                                            : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
+                                        ? 'bg-orange-50 border-orange-500 shadow-lg shadow-orange-500/10 scale-[1.02]'
+                                        : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
                                         }`}
                                 >
                                     {/* Checkmark for selected state */}
@@ -303,8 +303,8 @@ export const Onboarding = () => {
                                     type="button"
                                     onClick={() => setIsWriter(true)}
                                     className={`relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${isWriter
-                                            ? 'bg-primary/10 border-primary shadow-lg shadow-primary/10 scale-[1.02]'
-                                            : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
+                                        ? 'bg-primary/10 border-primary shadow-lg shadow-primary/10 scale-[1.02]'
+                                        : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
                                         }`}
                                 >
                                     {isWriter && (
