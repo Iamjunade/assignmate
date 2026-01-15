@@ -847,323 +847,323 @@ return (
                                                                 {profileUser.ai_profile ? 'Update AI Profile' : 'Complete AI Profile'}
                                                             </button>
                                                         )}
+
+                                                        <p className="text-secondary leading-relaxed">
+                                                            {profileUser.bio || "No bio added yet."}
+                                                        </p>
                                                     </div>
-                                                    <p className="text-secondary leading-relaxed">
-                                                        {profileUser.bio || "No bio added yet."}
-                                                    </p>
-                                                </div>
 
-                                            {/* AI Profile Section */}
-                                            {profileUser.ai_profile && (
-                                                <div className="bg-gradient-to-br from-violet-50 to-purple-50 p-6 rounded-2xl border border-violet-100">
-                                                    <h3 className="text-lg font-bold font-display mb-4 flex items-center gap-2 text-violet-900">
-                                                        <span className="material-symbols-outlined text-violet-600">psychology</span>
-                                                        Learning Profile
-                                                    </h3>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                        <div>
-                                                            <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">Strengths</h4>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                {profileUser.ai_profile.strengths?.map((s: string, i: number) => (
-                                                                    <span key={i} className="px-2.5 py-1 rounded-lg bg-white text-violet-700 text-xs font-bold border border-violet-100 shadow-sm">
-                                                                        {s}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">Interests</h4>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                {profileUser.ai_profile.interests?.map((s: string, i: number) => (
-                                                                    <span key={i} className="px-2.5 py-1 rounded-lg bg-white text-violet-700 text-xs font-bold border border-violet-100 shadow-sm">
-                                                                        {s}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-span-full">
-                                                            <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">Collaboration Style</h4>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                {profileUser.ai_profile.collaboration_style?.map((s: string, i: number) => (
-                                                                    <span key={i} className="px-2.5 py-1 rounded-lg bg-white text-violet-700 text-xs font-bold border border-violet-100 shadow-sm">
-                                                                        {s}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Private: Weaknesses (Only visible to owner) */}
-                                                        {isOwnProfile && profileUser.ai_profile.weaknesses && profileUser.ai_profile.weaknesses.length > 0 && (
-                                                            <div className="col-span-full pt-4 border-t border-violet-100/50">
-                                                                <div className="flex items-center gap-2 mb-2">
-                                                                    <span className="material-symbols-outlined text-violet-400 text-sm">lock</span>
-                                                                    <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider">Areas to Improve (Private)</h4>
+                                                    {/* AI Profile Section */}
+                                                    {profileUser.ai_profile && (
+                                                        <div className="bg-gradient-to-br from-violet-50 to-purple-50 p-6 rounded-2xl border border-violet-100">
+                                                            <h3 className="text-lg font-bold font-display mb-4 flex items-center gap-2 text-violet-900">
+                                                                <span className="material-symbols-outlined text-violet-600">psychology</span>
+                                                                Learning Profile
+                                                            </h3>
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                                <div>
+                                                                    <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">Strengths</h4>
+                                                                    <div className="flex flex-wrap gap-2">
+                                                                        {profileUser.ai_profile.strengths?.map((s: string, i: number) => (
+                                                                            <span key={i} className="px-2.5 py-1 rounded-lg bg-white text-violet-700 text-xs font-bold border border-violet-100 shadow-sm">
+                                                                                {s}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
                                                                 </div>
-                                                                <div className="flex flex-wrap gap-2">
-                                                                    {profileUser.ai_profile.weaknesses.map((s: string, i: number) => (
-                                                                        <span key={i} className="px-2.5 py-1 rounded-lg bg-white/50 text-violet-600/80 text-xs font-medium border border-violet-100/50 dashed border">
-                                                                            {s}
-                                                                        </span>
-                                                                    ))}
+                                                                <div>
+                                                                    <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">Interests</h4>
+                                                                    <div className="flex flex-wrap gap-2">
+                                                                        {profileUser.ai_profile.interests?.map((s: string, i: number) => (
+                                                                            <span key={i} className="px-2.5 py-1 rounded-lg bg-white text-violet-700 text-xs font-bold border border-violet-100 shadow-sm">
+                                                                                {s}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
+                                                                <div className="col-span-full">
+                                                                    <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider mb-2">Collaboration Style</h4>
+                                                                    <div className="flex flex-wrap gap-2">
+                                                                        {profileUser.ai_profile.collaboration_style?.map((s: string, i: number) => (
+                                                                            <span key={i} className="px-2.5 py-1 rounded-lg bg-white text-violet-700 text-xs font-bold border border-violet-100 shadow-sm">
+                                                                                {s}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div>
-                                                    <h3 className="text-lg font-bold font-display mb-3 flex items-center gap-2">
-                                                        <span className="material-symbols-outlined text-primary">school</span>
-                                                        Education
-                                                    </h3>
-                                                    <div className="flex items-center gap-3 p-3 rounded-xl bg-background-light">
-                                                        <div className="bg-white p-2 rounded-lg shadow-sm">
-                                                            <GraduationCap size={20} className="text-primary" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-bold text-text-main">{profileUser.school || 'University'}</p>
-                                                            <p className="text-xs text-secondary">Student</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <h3 className="text-lg font-bold font-display mb-3 flex items-center gap-2">
-                                                        <span className="material-symbols-outlined text-primary">label</span>
-                                                        Skills & Tags
-                                                    </h3>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {profileUser.tags?.map((tag: string, i: number) => (
-                                                            <span key={i} className="px-3 py-1 rounded-lg bg-orange-50 text-primary text-xs font-bold flex items-center gap-1">
-                                                                {tag}
-                                                                {isOwnProfile && (
-                                                                    <button onClick={() => removeTag(tag)} className="hover:text-red-500">
-                                                                        <X size={12} />
-                                                                    </button>
-                                                                )}
-                                                            </span>
-                                                        ))}
-                                                        {isOwnProfile && (
-                                                            <input
-                                                                type="text"
-                                                                value={newTag}
-                                                                onChange={(e) => setNewTag(e.target.value)}
-                                                                onKeyDown={addTag}
-                                                                placeholder="+ Add Tag"
-                                                                className="px-3 py-1 rounded-lg bg-gray-50 text-secondary text-xs font-medium border border-transparent focus:border-primary focus:bg-white outline-none transition-all w-24"
-                                                            />
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                                        )}
-
-                                {activeTab === 'reviews' && (
-                                    <div className="space-y-6">
-                                        {/* Activity Feed */}
-                                        <ActivityFeed
-                                            userId={profileUser.id}
-                                            userSchool={profileUser.school}
-                                            viewerSchool={currentUser?.school}
-                                        />
-                                    </div>
-                                )}
-
-                                {activeTab === 'network' && (
-                                    <div className="space-y-6">
-                                        {/* Privacy Check */}
-                                        {!isOwnProfile && connectionStatus !== 'connected' ? (
-                                            <div className="bg-white rounded-[2rem] p-12 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center min-h-[400px]">
-                                                <div className="bg-gray-50 p-6 rounded-full mb-6">
-                                                    <Lock size={48} className="text-gray-400" />
-                                                </div>
-                                                <h3 className="text-xl font-bold text-slate-900 mb-2">Private Network</h3>
-                                                <p className="text-gray-500 max-w-sm mb-8 leading-relaxed">
-                                                    You must be connected with <span className="font-bold text-slate-700">{profileUser.full_name}</span> to view their professional network and connections.
-                                                </p>
-                                                {connectionStatus === 'pending_sent' ? (
-                                                    <button disabled className="px-8 py-3 rounded-xl bg-gray-100 text-gray-400 font-bold cursor-not-allowed">
-                                                        Request Sent
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        onClick={handleConnect}
-                                                        disabled={loadingProfile}
-                                                        className="px-8 py-3 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:scale-105"
-                                                    >
-                                                        Connect to View
-                                                    </button>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <>
-                                                {/* Connection Requests - Only for own profile */}
-                                                {isOwnProfile && requests.length > 0 && (
-                                                    <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light">
-                                                        <h3 className="font-bold font-display mb-4 flex items-center gap-2">
-                                                            <span className="w-2 h-2 rounded-full bg-primary"></span>
-                                                            Pending Requests
-                                                        </h3>
-                                                        <div className="space-y-3">
-                                                            {requests.map((req) => (
-                                                                <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-background-light">
-                                                                    <div className="flex items-center gap-3">
-                                                                        <Avatar src={req.fromUser?.avatar_url} alt={req.fromUser?.full_name} className="size-10 rounded-full" />
-                                                                        <div>
-                                                                            <p className="font-bold text-sm">{req.fromUser?.full_name}</p>
-                                                                            <p className="text-xs text-secondary">@{req.fromUser?.handle}</p>
+                                                                {/* Private: Weaknesses (Only visible to owner) */}
+                                                                {isOwnProfile && profileUser.ai_profile.weaknesses && profileUser.ai_profile.weaknesses.length > 0 && (
+                                                                    <div className="col-span-full pt-4 border-t border-violet-100/50">
+                                                                        <div className="flex items-center gap-2 mb-2">
+                                                                            <span className="material-symbols-outlined text-violet-400 text-sm">lock</span>
+                                                                            <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider">Areas to Improve (Private)</h4>
+                                                                        </div>
+                                                                        <div className="flex flex-wrap gap-2">
+                                                                            {profileUser.ai_profile.weaknesses.map((s: string, i: number) => (
+                                                                                <span key={i} className="px-2.5 py-1 rounded-lg bg-white/50 text-violet-600/80 text-xs font-medium border border-violet-100/50 dashed border">
+                                                                                    {s}
+                                                                                </span>
+                                                                            ))}
                                                                         </div>
                                                                     </div>
-                                                                    <div className="flex gap-2">
-                                                                        <button onClick={() => handleConnectionResponse(req.id, 'accepted')} className="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100"><Check size={16} /></button>
-                                                                        <button onClick={() => handleConnectionResponse(req.id, 'rejected')} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"><X size={16} /></button>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {/* Connections List */}
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    {connections.length > 0 ? connections.map((conn) => {
-                                                        const otherUser = conn.participants.find((p: any) => p.id !== profileUser.id);
-                                                        return (
-                                                            <div key={conn.id} className="bg-white p-4 rounded-2xl shadow-sm border border-border-light flex items-center gap-4 group hover:border-blue-100 transition-all">
-                                                                <div onClick={() => navigate(`/profile/${otherUser?.id}`)} className="cursor-pointer">
-                                                                    <Avatar src={otherUser?.avatar_url} alt={otherUser?.full_name} className="size-12 rounded-full ring-2 ring-gray-50 group-hover:ring-blue-50 transition-all" />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p onClick={() => navigate(`/profile/${otherUser?.id}`)} className="font-bold text-text-main truncate cursor-pointer hover:text-blue-600 transition-colors">{otherUser?.full_name}</p>
-                                                                    <p className="text-xs text-secondary truncate">@{otherUser?.handle}</p>
-                                                                </div>
-                                                                {currentUser && otherUser && (
-                                                                    <button
-                                                                        onClick={async () => {
-                                                                            const chat = await db.createChat(null, currentUser.id, otherUser.id);
-                                                                            navigate(`/chats/${chat.id}`);
-                                                                        }}
-                                                                        className="p-2 rounded-full hover:bg-orange-50 text-gray-400 hover:text-orange-500 transition-all"
-                                                                        title="Message"
-                                                                    >
-                                                                        <MessageSquare size={18} />
-                                                                    </button>
                                                                 )}
                                                             </div>
-                                                        );
-                                                    }) : (
-                                                        <div className="col-span-full text-center py-12 text-secondary bg-white rounded-3xl border border-dashed border-gray-200">
-                                                            <div className="bg-gray-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                                <Users size={24} className="text-gray-400" />
-                                                            </div>
-                                                            <p className="font-medium text-gray-600">No connections yet.</p>
-                                                            <p className="text-xs text-gray-400 mt-1">They are just getting started!</p>
                                                         </div>
                                                     )}
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                        <div>
+                                                            <h3 className="text-lg font-bold font-display mb-3 flex items-center gap-2">
+                                                                <span className="material-symbols-outlined text-primary">school</span>
+                                                                Education
+                                                            </h3>
+                                                            <div className="flex items-center gap-3 p-3 rounded-xl bg-background-light">
+                                                                <div className="bg-white p-2 rounded-lg shadow-sm">
+                                                                    <GraduationCap size={20} className="text-primary" />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="font-bold text-text-main">{profileUser.school || 'University'}</p>
+                                                                    <p className="text-xs text-secondary">Student</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <h3 className="text-lg font-bold font-display mb-3 flex items-center gap-2">
+                                                                <span className="material-symbols-outlined text-primary">label</span>
+                                                                Skills & Tags
+                                                            </h3>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {profileUser.tags?.map((tag: string, i: number) => (
+                                                                    <span key={i} className="px-3 py-1 rounded-lg bg-orange-50 text-primary text-xs font-bold flex items-center gap-1">
+                                                                        {tag}
+                                                                        {isOwnProfile && (
+                                                                            <button onClick={() => removeTag(tag)} className="hover:text-red-500">
+                                                                                <X size={12} />
+                                                                            </button>
+                                                                        )}
+                                                                    </span>
+                                                                ))}
+                                                                {isOwnProfile && (
+                                                                    <input
+                                                                        type="text"
+                                                                        value={newTag}
+                                                                        onChange={(e) => setNewTag(e.target.value)}
+                                                                        onKeyDown={addTag}
+                                                                        placeholder="+ Add Tag"
+                                                                        className="px-3 py-1 rounded-lg bg-gray-50 text-secondary text-xs font-medium border border-transparent focus:border-primary focus:bg-white outline-none transition-all w-24"
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {activeTab === 'reviews' && (
+                                        <div className="space-y-6">
+                                            {/* Activity Feed */}
+                                            <ActivityFeed
+                                                userId={profileUser.id}
+                                                userSchool={profileUser.school}
+                                                viewerSchool={currentUser?.school}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {activeTab === 'network' && (
+                                        <div className="space-y-6">
+                                            {/* Privacy Check */}
+                                            {!isOwnProfile && connectionStatus !== 'connected' ? (
+                                                <div className="bg-white rounded-[2rem] p-12 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center min-h-[400px]">
+                                                    <div className="bg-gray-50 p-6 rounded-full mb-6">
+                                                        <Lock size={48} className="text-gray-400" />
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-slate-900 mb-2">Private Network</h3>
+                                                    <p className="text-gray-500 max-w-sm mb-8 leading-relaxed">
+                                                        You must be connected with <span className="font-bold text-slate-700">{profileUser.full_name}</span> to view their professional network and connections.
+                                                    </p>
+                                                    {connectionStatus === 'pending_sent' ? (
+                                                        <button disabled className="px-8 py-3 rounded-xl bg-gray-100 text-gray-400 font-bold cursor-not-allowed">
+                                                            Request Sent
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={handleConnect}
+                                                            disabled={loadingProfile}
+                                                            className="px-8 py-3 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:scale-105"
+                                                        >
+                                                            Connect to View
+                                                        </button>
+                                                    )}
                                                 </div>
-                                            </>
-                                        )}
-                                    </div>
-                                )}
-                            </motion.div>
-                        </AnimatePresence>
+                                            ) : (
+                                                <>
+                                                    {/* Connection Requests - Only for own profile */}
+                                                    {isOwnProfile && requests.length > 0 && (
+                                                        <div className="bg-white rounded-3xl p-6 shadow-soft border border-border-light">
+                                                            <h3 className="font-bold font-display mb-4 flex items-center gap-2">
+                                                                <span className="w-2 h-2 rounded-full bg-primary"></span>
+                                                                Pending Requests
+                                                            </h3>
+                                                            <div className="space-y-3">
+                                                                {requests.map((req) => (
+                                                                    <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-background-light">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <Avatar src={req.fromUser?.avatar_url} alt={req.fromUser?.full_name} className="size-10 rounded-full" />
+                                                                            <div>
+                                                                                <p className="font-bold text-sm">{req.fromUser?.full_name}</p>
+                                                                                <p className="text-xs text-secondary">@{req.fromUser?.handle}</p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex gap-2">
+                                                                            <button onClick={() => handleConnectionResponse(req.id, 'accepted')} className="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100"><Check size={16} /></button>
+                                                                            <button onClick={() => handleConnectionResponse(req.id, 'rejected')} className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"><X size={16} /></button>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Connections List */}
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        {connections.length > 0 ? connections.map((conn) => {
+                                                            const otherUser = conn.participants.find((p: any) => p.id !== profileUser.id);
+                                                            return (
+                                                                <div key={conn.id} className="bg-white p-4 rounded-2xl shadow-sm border border-border-light flex items-center gap-4 group hover:border-blue-100 transition-all">
+                                                                    <div onClick={() => navigate(`/profile/${otherUser?.id}`)} className="cursor-pointer">
+                                                                        <Avatar src={otherUser?.avatar_url} alt={otherUser?.full_name} className="size-12 rounded-full ring-2 ring-gray-50 group-hover:ring-blue-50 transition-all" />
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p onClick={() => navigate(`/profile/${otherUser?.id}`)} className="font-bold text-text-main truncate cursor-pointer hover:text-blue-600 transition-colors">{otherUser?.full_name}</p>
+                                                                        <p className="text-xs text-secondary truncate">@{otherUser?.handle}</p>
+                                                                    </div>
+                                                                    {currentUser && otherUser && (
+                                                                        <button
+                                                                            onClick={async () => {
+                                                                                const chat = await db.createChat(null, currentUser.id, otherUser.id);
+                                                                                navigate(`/chats/${chat.id}`);
+                                                                            }}
+                                                                            className="p-2 rounded-full hover:bg-orange-50 text-gray-400 hover:text-orange-500 transition-all"
+                                                                            title="Message"
+                                                                        >
+                                                                            <MessageSquare size={18} />
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        }) : (
+                                                            <div className="col-span-full text-center py-12 text-secondary bg-white rounded-3xl border border-dashed border-gray-200">
+                                                                <div className="bg-gray-50 size-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                                    <Users size={24} className="text-gray-400" />
+                                                                </div>
+                                                                <p className="font-medium text-gray-600">No connections yet.</p>
+                                                                <p className="text-xs text-gray-400 mt-1">They are just getting started!</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
                     </div>
                 </div>
             </div>
-    </div>
 
-                {/* Delete Account Modal */ }
-                <AnimatePresence>
-                    {showDeleteModal && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
-                            >
-                                <div className="text-center mb-6">
-                                    <div className="size-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <AlertTriangle size={32} className="text-red-600" />
-                                    </div>
-                                    <h2 className="text-2xl font-bold text-text-main mb-2">Delete Account?</h2>
-                                    <p className="text-secondary text-sm">
-                                        This action is permanent and cannot be undone. All your data, chats, and earnings will be wiped.
-                                    </p>
+            {/* Delete Account Modal */}
+            <AnimatePresence>
+                {showDeleteModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+                        >
+                            <div className="text-center mb-6">
+                                <div className="size-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <AlertTriangle size={32} className="text-red-600" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-text-main mb-2">Delete Account?</h2>
+                                <p className="text-secondary text-sm">
+                                    This action is permanent and cannot be undone. All your data, chats, and earnings will be wiped.
+                                </p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-secondary uppercase mb-2">
+                                        Type "DELETE" to confirm
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={deleteConfirmInput}
+                                        onChange={(e) => setDeleteConfirmInput(e.target.value)}
+                                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 font-bold text-center tracking-widest focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all"
+                                        placeholder="DELETE"
+                                    />
                                 </div>
 
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-secondary uppercase mb-2">
-                                            Type "DELETE" to confirm
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={deleteConfirmInput}
-                                            onChange={(e) => setDeleteConfirmInput(e.target.value)}
-                                            className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 font-bold text-center tracking-widest focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all"
-                                            placeholder="DELETE"
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button
-                                            onClick={() => setShowDeleteModal(false)}
-                                            className="py-3 rounded-xl font-bold text-secondary hover:bg-gray-50 transition-colors"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            onClick={handleFinalDelete}
-                                            disabled={deleteConfirmInput !== 'DELETE'}
-                                            className="py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-red-500/30"
-                                        >
-                                            Delete Forever
-                                        </button>
-                                    </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="py-3 rounded-xl font-bold text-secondary hover:bg-gray-50 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleFinalDelete}
+                                        disabled={deleteConfirmInput !== 'DELETE'}
+                                        className="py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-red-500/30"
+                                    >
+                                        Delete Forever
+                                    </button>
                                 </div>
-                            </motion.div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            <DisconnectModal
+                isOpen={showDisconnectModal}
+                onClose={() => setShowDisconnectModal(false)}
+                onConfirm={handleDisconnect}
+                userName={profileUser?.full_name || 'User'}
+            />
+
+            {/* AI Builder Overlay */}
+            <AnimatePresence>
+                {showAIBuilder && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[60] bg-[#0d0b09] flex items-center justify-center p-4 md:p-8"
+                    >
+                        {/* Background Elements */}
+                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                            <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[120px]"></div>
+                            <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-500/10 rounded-full blur-[120px]"></div>
                         </div>
-                    )}
-                </AnimatePresence>
 
-                <DisconnectModal
-                    isOpen={showDisconnectModal}
-                    onClose={() => setShowDisconnectModal(false)}
-                    onConfirm={handleDisconnect}
-                    userName={profileUser?.full_name || 'User'}
-                />
-
-{/* AI Builder Overlay */ }
-<AnimatePresence>
-    {showAIBuilder && (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-[#0d0b09] flex items-center justify-center p-4 md:p-8"
-        >
-            {/* Background Elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[120px]"></div>
-                <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-500/10 rounded-full blur-[120px]"></div>
-            </div>
-
-            <div className="w-full max-w-4xl h-[90vh] relative z-10">
-                <AIProfileBuilder
-                    onComplete={handleAIComplete}
-                    onSkip={() => setShowAIBuilder(false)}
-                />
-            </div>
-        </motion.div>
-    )}
-</AnimatePresence>
-            </main >
-        </div >
-    );
+                        <div className="w-full max-w-4xl h-[90vh] relative z-10">
+                            <AIProfileBuilder
+                                onComplete={handleAIComplete}
+                                onSkip={() => setShowAIBuilder(false)}
+                            />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </main >
+    </div >
+);
 };
