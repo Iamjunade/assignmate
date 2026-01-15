@@ -211,9 +211,12 @@ function AppContent() {
           } />
 
           <Route path="/@:handle" element={
-            <ProtectedRoute>
-              {user && <Profile user={user} />}
-            </ProtectedRoute>
+            <Profile user={user} />
+          } />
+
+          {/* Optional @ for profile links */}
+          <Route path="/:handle" element={
+            <Profile user={user} />
           } />
 
           {/* --- Admin Routes --- */}
