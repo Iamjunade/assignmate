@@ -811,6 +811,40 @@ export const dbService = {
         if (count > 0) await batch.commit();
     },
 
+    deleteMessage: async (chatId: string, messageId: string) => {
+        try {
+            await deleteDoc(doc(getDb(), 'chats', chatId, 'messages', messageId));
+        } catch (error) {
+            console.error("Error deleting message:", error);
+            throw error;
+        }
+    },
+
+    clearChat: async (chatId: string) => {
+        try {
+            const messagesRef = collection(getDb(), 'chats', chatId, 'messages');
+            const snapshot = await getDocs(messagesRef);
+
+            const batch = (await import('firebase/firestore')).writeBatch(getDb());
+            snapshot.docs.forEach((doc) => {
+                batch.delete(doc.ref);
+            });
+
+            await batch.commit();
+
+            // Optional: Update chat metadata to reflect empty state
+            const chatRef = doc(getDb(), 'chats', chatId);
+            await updateDoc(chatRef, {
+                last_message: '',
+                updated_at: new Date().toISOString()
+            });
+
+        } catch (error) {
+            console.error("Error clearing chat:", error);
+            throw error;
+        }
+    },
+
     listenToMessages: (chatId: string, callback: (messages: any[]) => void) => {
         const q = query(
             collection(getDb(), 'chats', chatId, 'messages'),

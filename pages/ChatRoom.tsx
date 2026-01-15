@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { dbService as db } from '../services/firestoreService';
 import { presence } from '../services/firebase';
-import { ArrowLeft, Paperclip } from 'lucide-react';
+import { ArrowLeft, Paperclip, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserPresence } from '../components/UserPresence';
 import { Sidebar } from '../components/dashboard/Sidebar';
@@ -303,6 +303,28 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
         else navigate('/chats');
     };
 
+    const handleDeleteMessage = async (messageId: string) => {
+        if (!confirm("Are you sure you want to delete this message?")) return;
+        try {
+            await db.deleteMessage(chatId, messageId);
+            toastSuccess("Message deleted");
+        } catch (error) {
+            console.error(error);
+            toastError("Failed to delete message");
+        }
+    };
+
+    const handleClearChat = async () => {
+        if (!confirm("Are you sure you want to clear the entire chat history? This cannot be undone.")) return;
+        try {
+            await db.clearChat(chatId);
+            toastSuccess("Chat cleared successfully");
+        } catch (error) {
+            console.error(error);
+            toastError("Failed to clear chat");
+        }
+    };
+
     const handleSwitchChat = async (otherId: string) => {
         try {
             // createChat handles "get existing or create new" logic internally
@@ -415,6 +437,13 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 >
                                     <span className="material-symbols-outlined">person</span>
                                 </button>
+                                <button
+                                    onClick={handleClearChat}
+                                    className="size-10 rounded-xl bg-secondary-bg text-text-muted hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors"
+                                    title="Clear Chat"
+                                >
+                                    <Trash2 size={20} />
+                                </button>
                             </div>
                         </div>
 
@@ -491,8 +520,17 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                                     initial={{ opacity: 0, y: 5 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     key={m.id || `${dateKey}-${i}`}
-                                                    className={`w-full flex ${isMe ? 'justify-end' : 'justify-start'} ${isSequence ? '' : 'mt-2'}`}
+                                                    className={`w-full flex ${isMe ? 'justify-end' : 'justify-start'} ${isSequence ? '' : 'mt-2'} group relative`}
                                                 >
+                                                    {isMe && (
+                                                        <button
+                                                            onClick={() => handleDeleteMessage(m.id)}
+                                                            className="opacity-0 group-hover:opacity-100 absolute top-1/2 -translate-y-1/2 -left-8 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
+                                                            title="Delete message"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    )}
                                                     <div className={`flex flex-col gap-0.5 max-w-[85%] md:max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
                                                         <div className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                                                             {!isMe && (
