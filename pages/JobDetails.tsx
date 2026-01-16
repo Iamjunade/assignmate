@@ -417,8 +417,8 @@ export default function JobDetails() {
                   </div>
                   <div className="grid grid-cols-2 gap-4 pt-2">
                     <div className="space-y-1">
-                      <p className="text-[10px] text-gray-400 font-bold uppercase">Jobs</p>
-                      <p className="text-sm font-bold text-[#111827]">{collaborator?.jobs_posted || 0}</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase">Level</p>
+                      <p className="text-sm font-bold text-[#111827]">{Math.floor((collaborator?.xp || 0) / 100) + 1}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-[10px] text-gray-400 font-bold uppercase">Completed</p>
