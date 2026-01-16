@@ -1387,6 +1387,7 @@ export const dbService = {
     },
 
     respondToOffer: async (chatId: string, messageId: string, userId: string, status: 'accepted' | 'rejected') => {
+        console.log('[respondToOffer] Starting...', { chatId, messageId, userId, status });
 
         const msgRef = doc(getDb(), 'chats', chatId, 'messages', messageId);
 
@@ -1396,7 +1397,7 @@ export const dbService = {
             'offer.responded_at': new Date().toISOString(),
             'offer.responded_by': userId
         });
-
+        console.log('[respondToOffer] Message status updated to:', status);
 
         // 2. If Accepted, Create Order/Project
         if (status === 'accepted') {
@@ -1406,46 +1407,67 @@ export const dbService = {
                 const msgData = msgSnap.data();
                 const offer = msgData?.offer;
 
-
-
                 if (!offer) {
                     console.error('[respondToOffer] No offer data found in message');
                     return;
                 }
+                console.log('[respondToOffer] Offer data:', offer);
 
-                // Fetch Chat Details to identify Student vs Writer
+                // Fetch Chat Details to identify participants
                 const chatRef = doc(getDb(), 'chats', chatId);
                 const chatSnap = await getDoc(chatRef);
                 const chatData = chatSnap.data();
-
-
 
                 if (!chatData) {
                     console.error('[respondToOffer] No chat data found');
                     return;
                 }
+                console.log('[respondToOffer] Chat data:', {
+                    participants: chatData.participants,
+                    poster_id: chatData.poster_id,
+                    writer_id: chatData.writer_id
+                });
+
+                // Build participants array with defensive fallbacks
+                let participants: string[] = [];
+                if (chatData.participants && Array.isArray(chatData.participants) && chatData.participants.length >= 2) {
+                    participants = chatData.participants;
+                } else if (chatData.poster_id && chatData.writer_id) {
+                    participants = [chatData.poster_id, chatData.writer_id];
+                } else {
+                    // Last resort: use the sender and responder
+                    const senderId = msgData?.sender_id;
+                    if (senderId && userId && senderId !== userId) {
+                        participants = [senderId, userId];
+                    } else {
+                        console.error('[respondToOffer] Could not determine participants');
+                        return;
+                    }
+                }
+
+                console.log('[respondToOffer] Final participants:', participants);
 
                 const orderData = {
                     title: offer.title || 'Untitled Project',
                     description: offer.description || '',
                     budget: offer.budget || 0,
                     amount: offer.budget || 0,
-                    deadline: offer.deadline,
+                    deadline: offer.deadline || null,
                     status: 'in_progress',
-                    student_id: chatData.poster_id,
-                    writer_id: chatData.writer_id,
+                    student_id: chatData.poster_id || participants[0],
+                    writer_id: chatData.writer_id || participants[1],
                     created_at: new Date().toISOString(),
-                    participants: chatData.participants || [chatData.poster_id, chatData.writer_id],
+                    participants: participants,
                     chat_id: chatId
                 };
 
-
+                console.log('[respondToOffer] Creating order with data:', orderData);
 
                 const orderRef = await addDoc(collection(getDb(), 'orders'), orderData);
-
+                console.log('[respondToOffer] Order created successfully with ID:', orderRef.id);
 
             } catch (error) {
-                console.error("Error creating project from offer:", error);
+                console.error("[respondToOffer] Error creating project from offer:", error);
                 throw error;
             }
         }
