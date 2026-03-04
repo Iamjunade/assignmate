@@ -1,7 +1,7 @@
 import { sendEmailVerification } from 'firebase/auth';
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { auth as firebaseAuth, presence } from '../services/firebase';
-import { userApi } from '../services/firestoreService';
+import { userApi, dbService } from '../services/firestoreService';
 import { notificationService } from '../services/notificationService';
 import { User } from '../types';
 
@@ -70,6 +70,9 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
           is_incomplete: typedProfile.is_incomplete ?? false
         } as User);
         presence.init(userId);
+
+        // ✅ Update last_active timestamp for accurate online status
+        dbService.updateProfile(userId, { last_active: new Date().toISOString() }).catch(console.error);
       } else {
         // ✅ ISSUE 3 FIX: Don't use invalid defaults like 'Student' or 'Not Specified'
         // Use empty strings which will correctly trigger the onboarding flow

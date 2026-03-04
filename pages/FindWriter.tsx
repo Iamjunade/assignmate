@@ -154,7 +154,14 @@ export const FindWriter = () => {
         } else if (activeFilter === 'verified') {
             result = result.filter(u => u.is_verified === 'verified');
         } else if (activeFilter === 'online') {
-            result = result.filter(u => u.is_online);
+            // Filter for users active in the last 24 hours
+            const now = new Date().getTime();
+            result = result.filter(u => {
+                if (!u.last_active) return false;
+                const lastActive = new Date(u.last_active).getTime();
+                const hoursDiff = (now - lastActive) / (1000 * 60 * 60);
+                return hoursDiff <= 24;
+            });
         } else if (activeFilter === 'network') {
             result = result.filter(u => u.id && connectionIds.has(u.id));
         }
@@ -452,12 +459,23 @@ export const FindWriter = () => {
 
 // Peer Card Component
 const PeerCard = ({ peer, onNavigate }: { peer: User, onNavigate: () => void }) => {
+    // Check if user was active in the last 24 hours
+    const isRecentlyActive = () => {
+        if (!peer.last_active) return false;
+        const lastActive = new Date(peer.last_active);
+        const now = new Date();
+        const hoursDiff = (now.getTime() - lastActive.getTime()) / (1000 * 60 * 60);
+        return hoursDiff <= 24;
+    };
+
+    const showGreenDot = isRecentlyActive();
+
     return (
         <div className="bg-white rounded-[1.5rem] p-5 shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] border border-slate-100 hover:border-orange-100 hover:shadow-[0_8px_25px_-4px_rgba(255,107,74,0.1)] transition-all duration-300 group flex flex-col h-full">
             <div className="flex items-start gap-4 mb-4">
                 <div className="relative shrink-0">
                     <Avatar src={peer.avatar_url} alt={peer.full_name || peer.handle} className="size-14 rounded-full ring-2 ring-white shadow-sm" />
-                    {peer.is_online ?
+                    {showGreenDot ?
                         <div className="absolute bottom-0 right-0 size-3.5 bg-green-500 border-2 border-white rounded-full"></div> :
                         <div className="absolute bottom-0 right-0 size-3.5 bg-slate-300 border-2 border-white rounded-full"></div>
                     }

@@ -28,6 +28,7 @@ export interface User {
   response_time?: number; // in minutes
   languages?: string[];
   is_online?: boolean;
+  last_active?: string; // ISO timestamp - when user was last active
   is_verified?: 'pending' | 'verified' | 'rejected' | 'none';
   id_card_url?: string;
   ai_profile?: AIProfile; // Optional AI-generated profile
