@@ -8,6 +8,7 @@ export const Landing = () => {
 
     // ── State ──────────────────────────────────────────────
     const [notifyEmail, setNotifyEmail] = useState('');
+    const [notifyCollege, setNotifyCollege] = useState('');
     const [emailSubmitted, setEmailSubmitted] = useState(false);
     const [emailError, setEmailError] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -35,7 +36,8 @@ export const Landing = () => {
     const handleNotifySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const email = notifyEmail.trim().toLowerCase();
-        if (!email) return;
+        const college = notifyCollege.trim();
+        if (!email || !college) return;
 
         setSubmitting(true);
         setEmailError('');
@@ -43,12 +45,14 @@ export const Landing = () => {
         try {
             await addDoc(collection(db, 'waitlist'), {
                 email,
+                college,
                 subscribed_at: serverTimestamp(),
                 source: 'landing_page',
             });
 
             setEmailSubmitted(true);
             setNotifyEmail('');
+            setNotifyCollege('');
             setTimeout(() => setEmailSubmitted(false), 6000);
         } catch (err: any) {
             console.error('Waitlist signup error:', err);
@@ -152,31 +156,42 @@ export const Landing = () => {
                             {emailSubmitted ? (
                                 <div className="flex items-center justify-center gap-3 py-4 px-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold text-sm">
                                     <span className="material-symbols-outlined text-lg">check_circle</span>
-                                    You're on the list! We'll notify you at launch.
+                                    You're on the list! We'll see you on launch day!
                                 </div>
                             ) : (
                                 <>
-                                    <form onSubmit={handleNotifySubmit} className="flex flex-col sm:flex-row gap-3">
-                                        <input
-                                            type="email"
-                                            required
-                                            placeholder="your@email.com"
-                                            value={notifyEmail}
-                                            onChange={(e) => setNotifyEmail(e.target.value)}
-                                            disabled={submitting}
-                                            className="flex-1 px-5 py-3.5 bg-[#0a0908] border border-white/[0.08] rounded-xl text-white placeholder-[#E6D5B8]/25 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all text-sm disabled:opacity-50"
-                                        />
+                                    <form onSubmit={handleNotifySubmit} className="flex flex-col gap-3">
+                                        <div className="flex flex-col sm:flex-row gap-3">
+                                            <input
+                                                type="email"
+                                                required
+                                                placeholder="your@email.com"
+                                                value={notifyEmail}
+                                                onChange={(e) => setNotifyEmail(e.target.value)}
+                                                disabled={submitting}
+                                                className="flex-1 px-5 py-3.5 bg-[#0a0908] border border-white/[0.08] rounded-xl text-white placeholder-[#E6D5B8]/25 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all text-sm disabled:opacity-50"
+                                            />
+                                            <input
+                                                type="text"
+                                                required
+                                                placeholder="Your full college name"
+                                                value={notifyCollege}
+                                                onChange={(e) => setNotifyCollege(e.target.value)}
+                                                disabled={submitting}
+                                                className="flex-1 px-5 py-3.5 bg-[#0a0908] border border-white/[0.08] rounded-xl text-white placeholder-[#E6D5B8]/25 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all text-sm disabled:opacity-50"
+                                            />
+                                        </div>
                                         <button
                                             type="submit"
                                             disabled={submitting}
-                                            className="px-7 py-3.5 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl shadow-[0_0_30px_rgba(255,107,0,0.2)] hover:shadow-[0_0_50px_rgba(255,107,0,0.35)] transition-all transform hover:-translate-y-0.5 whitespace-nowrap text-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+                                            className="w-full px-7 py-3.5 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl shadow-[0_0_30px_rgba(255,107,0,0.2)] hover:shadow-[0_0_50px_rgba(255,107,0,0.35)] transition-all transform hover:-translate-y-0.5 whitespace-nowrap text-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
                                         >
                                             {submitting ? (
                                                 <>
                                                     <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                                     Saving...
                                                 </>
-                                            ) : 'Notify Me'}
+                                            ) : 'Join the Waitlist'}
                                         </button>
                                     </form>
                                     {emailError && (

@@ -254,10 +254,12 @@ service cloud.firestore {
        WAITLIST (Pre-Launch)
     ========================== */
     match /waitlist/{entryId} {
-      // Anyone can subscribe (no auth required), must include email
-      allow create: if request.resource.data.keys().hasAll(['email'])
+      // Anyone can subscribe (no auth required), must include email and college
+      allow create: if request.resource.data.keys().hasAll(['email', 'college'])
         && request.resource.data.email is string
-        && request.resource.data.email.size() > 0;
+        && request.resource.data.email.size() > 0
+        && request.resource.data.college is string
+        && request.resource.data.college.size() > 0;
 
       // No read/update/delete from client
       allow read, update, delete: if false;
