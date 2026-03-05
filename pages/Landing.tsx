@@ -9,6 +9,39 @@ export const Landing = () => {
     const { user } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+    // Launching Soon State
+    const [notifyEmail, setNotifyEmail] = useState('');
+    const [emailSubmitted, setEmailSubmitted] = useState(false);
+    const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+    // Countdown Timer – April 1, 2026
+    useEffect(() => {
+        const launchDate = new Date('2026-04-01T00:00:00').getTime();
+        const tick = () => {
+            const now = Date.now();
+            const diff = Math.max(0, launchDate - now);
+            setCountdown({
+                days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+                minutes: Math.floor((diff / (1000 * 60)) % 60),
+                seconds: Math.floor((diff / 1000) % 60),
+            });
+        };
+        tick();
+        const interval = setInterval(tick, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleNotifySubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (notifyEmail.trim()) {
+            // TODO: Integrate with backend / Firebase to store email
+            setEmailSubmitted(true);
+            setNotifyEmail('');
+            setTimeout(() => setEmailSubmitted(false), 5000);
+        }
+    };
+
     // Search State
     const [searchQuery, setSearchQuery] = useState('');
     const [suggestions, setSuggestions] = useState<College[]>([]);
@@ -207,6 +240,80 @@ export const Landing = () => {
                 </div>
             </section>
 
+            {/* ===== LAUNCHING SOON SECTION ===== */}
+            <section className="relative py-20 lg:py-28 overflow-hidden bg-black">
+                {/* Background effects */}
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] via-transparent to-transparent pointer-events-none" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary opacity-[0.06] blur-[150px] rounded-full pointer-events-none" />
+
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+                    {/* Badge */}
+                    <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-8 animate-pulse">
+                        <span className="material-symbols-outlined text-sm">rocket_launch</span>
+                        Launching April 2026
+                    </div>
+
+                    <h2 className="font-display text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
+                        Something Big is <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-400">Coming</span>
+                    </h2>
+                    <p className="text-lg text-[#E6D5B8]/60 mb-12 max-w-xl mx-auto font-light leading-relaxed">
+                        We're building the future of campus collaboration. Be the first to experience it.
+                    </p>
+
+                    {/* Countdown Timer */}
+                    <div className="flex justify-center gap-4 sm:gap-6 mb-14">
+                        {[
+                            { value: countdown.days, label: 'Days' },
+                            { value: countdown.hours, label: 'Hours' },
+                            { value: countdown.minutes, label: 'Minutes' },
+                            { value: countdown.seconds, label: 'Seconds' },
+                        ].map((unit) => (
+                            <div key={unit.label} className="flex flex-col items-center">
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#2c2219] border border-white/10 flex items-center justify-center shadow-[0_10px_30px_-5px_rgba(0,0,0,0.5)] mb-2 relative overflow-hidden group hover:border-primary/30 transition-colors">
+                                    <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent" />
+                                    <span className="font-display text-2xl sm:text-3xl font-bold text-white relative z-10">
+                                        {String(unit.value).padStart(2, '0')}
+                                    </span>
+                                </div>
+                                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#E6D5B8]/40">{unit.label}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Get Notified Form */}
+                    <div className="max-w-lg mx-auto">
+                        <p className="text-sm font-semibold text-[#E6D5B8]/70 mb-4 flex items-center justify-center gap-2">
+                            <span className="material-symbols-outlined text-primary text-lg">notifications_active</span>
+                            Get Notified First
+                        </p>
+                        {emailSubmitted ? (
+                            <div className="flex items-center justify-center gap-3 py-5 px-6 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 font-semibold animate-[fadeIn_0.3s_ease-out]">
+                                <span className="material-symbols-outlined">check_circle</span>
+                                You're on the list! We'll notify you at launch.
+                            </div>
+                        ) : (
+                            <form onSubmit={handleNotifySubmit} className="flex flex-col sm:flex-row gap-3">
+                                <input
+                                    type="email"
+                                    required
+                                    placeholder="Enter your email address"
+                                    value={notifyEmail}
+                                    onChange={(e) => setNotifyEmail(e.target.value)}
+                                    className="flex-1 px-5 py-4 bg-[#2c2219] border border-white/10 rounded-xl text-white placeholder-[#E6D5B8]/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-inner text-sm"
+                                />
+                                <button
+                                    type="submit"
+                                    className="px-8 py-4 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl shadow-[0_0_25px_rgba(255,107,0,0.2)] hover:shadow-[0_0_50px_rgba(255,107,0,0.35)] transition-all transform hover:-translate-y-0.5 whitespace-nowrap"
+                                >
+                                    Notify Me
+                                </button>
+                            </form>
+                        )}
+                        <p className="text-[11px] text-[#E6D5B8]/30 mt-4">No spam, ever. Just a single launch-day notification.</p>
+                    </div>
+                </div>
+            </section>
+
             {/* Trust Badges Section */}
             <div className="border-y border-white/5 bg-[#2c2219]/30 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -397,23 +504,43 @@ export const Landing = () => {
                 </div>
             </section>
 
-            {/* CTA Section */}
+            {/* CTA – Get Notified Section */}
             <section className="py-24 px-4 bg-black">
                 <div className="max-w-5xl mx-auto rounded-[3rem] bg-[#2c2219] relative overflow-hidden text-center py-24 px-8 shadow-2xl border border-white/5">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#1a130e] to-transparent opacity-90"></div>
                     <div className="absolute top-0 right-0 w-96 h-96 bg-primary opacity-10 blur-[100px] rounded-full"></div>
                     <div className="absolute bottom-0 left-0 w-80 h-80 bg-orange-900 opacity-20 blur-[100px] rounded-full"></div>
                     <div className="relative z-10 max-w-2xl mx-auto">
-                        <h2 className="text-4xl md:text-6xl font-bold text-white mb-8">Ready to learn together?</h2>
-                        <p className="text-[#E6D5B8]/70 text-lg mb-12 font-light max-w-xl mx-auto">Join India's free, student learning community. Share knowledge, build understanding, and grow together today.</p>
-                        <div className="flex flex-col sm:flex-row justify-center gap-5">
-                            <button onClick={handleSignup} className="px-10 py-4 bg-primary text-white font-bold rounded-xl shadow-[0_0_20px_rgba(255,107,0,0.15)] hover:shadow-[0_0_40px_rgba(255,107,0,0.3)] hover:bg-orange-600 transition-all transform hover:-translate-y-1">
-                                Join Your Campus
-                            </button>
-                            <button onClick={handleLogin} className="px-10 py-4 bg-transparent border border-white/20 text-white font-bold rounded-xl hover:bg-white/10 transition-all">
-                                Start Contributing
-                            </button>
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-8">
+                            <span className="material-symbols-outlined text-sm">schedule</span>
+                            April 2026
                         </div>
+                        <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">Don't miss the launch</h2>
+                        <p className="text-[#E6D5B8]/70 text-lg mb-10 font-light max-w-xl mx-auto">Be among the first students to join AssignMate. Drop your email and we'll let you know the moment we go live.</p>
+                        {emailSubmitted ? (
+                            <div className="flex items-center justify-center gap-3 py-5 px-6 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 font-semibold max-w-md mx-auto">
+                                <span className="material-symbols-outlined">check_circle</span>
+                                You're on the list! We'll notify you at launch.
+                            </div>
+                        ) : (
+                            <form onSubmit={handleNotifySubmit} className="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto">
+                                <input
+                                    type="email"
+                                    required
+                                    placeholder="your@email.com"
+                                    value={notifyEmail}
+                                    onChange={(e) => setNotifyEmail(e.target.value)}
+                                    className="flex-1 px-5 py-4 bg-black border border-white/10 rounded-xl text-white placeholder-[#E6D5B8]/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-inner text-sm"
+                                />
+                                <button
+                                    type="submit"
+                                    className="px-8 py-4 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl shadow-[0_0_25px_rgba(255,107,0,0.2)] hover:shadow-[0_0_50px_rgba(255,107,0,0.35)] transition-all transform hover:-translate-y-0.5 whitespace-nowrap"
+                                >
+                                    Notify Me
+                                </button>
+                            </form>
+                        )}
+                        <p className="text-[11px] text-[#E6D5B8]/30 mt-4">No spam. Just one email on launch day.</p>
                     </div>
                 </div>
             </section>
