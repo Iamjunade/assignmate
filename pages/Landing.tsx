@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../services/firebase';
 
 export const Landing = () => {
     const navigate = useNavigate();
@@ -7,6 +9,8 @@ export const Landing = () => {
     // ── State ──────────────────────────────────────────────
     const [notifyEmail, setNotifyEmail] = useState('');
     const [emailSubmitted, setEmailSubmitted] = useState(false);
+    const [emailError, setEmailError] = useState('');
+    const [submitting, setSubmitting] = useState(false);
     const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
     // ── Countdown Timer – April 1, 2026 ───────────────────
@@ -27,14 +31,30 @@ export const Landing = () => {
         return () => clearInterval(interval);
     }, []);
 
-    // ── Email Submit ──────────────────────────────────────
-    const handleNotifySubmit = (e: React.FormEvent) => {
+    // ── Email Submit → Firestore ──────────────────────────
+    const handleNotifySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (notifyEmail.trim()) {
-            // TODO: Wire to Firebase / backend
+        const email = notifyEmail.trim().toLowerCase();
+        if (!email) return;
+
+        setSubmitting(true);
+        setEmailError('');
+
+        try {
+            await addDoc(collection(db, 'waitlist'), {
+                email,
+                subscribed_at: serverTimestamp(),
+                source: 'landing_page',
+            });
+
             setEmailSubmitted(true);
             setNotifyEmail('');
             setTimeout(() => setEmailSubmitted(false), 6000);
+        } catch (err: any) {
+            console.error('Waitlist signup error:', err);
+            setEmailError('Something went wrong. Please try again.');
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -135,22 +155,34 @@ export const Landing = () => {
                                     You're on the list! We'll notify you at launch.
                                 </div>
                             ) : (
-                                <form onSubmit={handleNotifySubmit} className="flex flex-col sm:flex-row gap-3">
-                                    <input
-                                        type="email"
-                                        required
-                                        placeholder="your@email.com"
-                                        value={notifyEmail}
-                                        onChange={(e) => setNotifyEmail(e.target.value)}
-                                        className="flex-1 px-5 py-3.5 bg-[#0a0908] border border-white/[0.08] rounded-xl text-white placeholder-[#E6D5B8]/25 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all text-sm"
-                                    />
-                                    <button
-                                        type="submit"
-                                        className="px-7 py-3.5 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl shadow-[0_0_30px_rgba(255,107,0,0.2)] hover:shadow-[0_0_50px_rgba(255,107,0,0.35)] transition-all transform hover:-translate-y-0.5 whitespace-nowrap text-sm"
-                                    >
-                                        Notify Me
-                                    </button>
-                                </form>
+                                <>
+                                    <form onSubmit={handleNotifySubmit} className="flex flex-col sm:flex-row gap-3">
+                                        <input
+                                            type="email"
+                                            required
+                                            placeholder="your@email.com"
+                                            value={notifyEmail}
+                                            onChange={(e) => setNotifyEmail(e.target.value)}
+                                            disabled={submitting}
+                                            className="flex-1 px-5 py-3.5 bg-[#0a0908] border border-white/[0.08] rounded-xl text-white placeholder-[#E6D5B8]/25 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all text-sm disabled:opacity-50"
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={submitting}
+                                            className="px-7 py-3.5 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl shadow-[0_0_30px_rgba(255,107,0,0.2)] hover:shadow-[0_0_50px_rgba(255,107,0,0.35)] transition-all transform hover:-translate-y-0.5 whitespace-nowrap text-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+                                        >
+                                            {submitting ? (
+                                                <>
+                                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                                    Saving...
+                                                </>
+                                            ) : 'Notify Me'}
+                                        </button>
+                                    </form>
+                                    {emailError && (
+                                        <p className="text-red-400 text-xs mt-3">{emailError}</p>
+                                    )}
+                                </>
                             )}
                             <p className="text-[10px] text-[#E6D5B8]/25 mt-5">No spam — just a single notification on launch day.</p>
                         </div>

@@ -249,5 +249,18 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow read, update, delete: if false;
     }
+
+    /* =========================
+       WAITLIST (Pre-Launch)
+    ========================== */
+    match /waitlist/{entryId} {
+      // Anyone can subscribe (no auth required), must include email
+      allow create: if request.resource.data.keys().hasAll(['email'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 0;
+
+      // No read/update/delete from client
+      allow read, update, delete: if false;
+    }
   }
 }
