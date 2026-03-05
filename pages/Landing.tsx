@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../services/firebase';
+import { collegeService, College } from '../services/collegeService';
 
 export const Landing = () => {
     const navigate = useNavigate();
@@ -9,10 +10,38 @@ export const Landing = () => {
     // ── State ──────────────────────────────────────────────
     const [notifyEmail, setNotifyEmail] = useState('');
     const [notifyCollege, setNotifyCollege] = useState('');
+    const [suggestions, setSuggestions] = useState<College[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+
     const [emailSubmitted, setEmailSubmitted] = useState(false);
     const [emailError, setEmailError] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+    // ── College Search Effect ─────────────────────────────
+    useEffect(() => {
+        if (!notifyCollege || notifyCollege.length < 2) {
+            setSuggestions([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            const results = await collegeService.search(notifyCollege);
+            setSuggestions(results);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [notifyCollege]);
+
+    // Click outside to close suggestions
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // ── Countdown Timer – April 1, 2026 ───────────────────
     useEffect(() => {
@@ -171,15 +200,43 @@ export const Landing = () => {
                                                 disabled={submitting}
                                                 className="flex-1 px-5 py-3.5 bg-[#0a0908] border border-white/[0.08] rounded-xl text-white placeholder-[#E6D5B8]/25 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all text-sm disabled:opacity-50"
                                             />
-                                            <input
-                                                type="text"
-                                                required
-                                                placeholder="Your full college name"
-                                                value={notifyCollege}
-                                                onChange={(e) => setNotifyCollege(e.target.value)}
-                                                disabled={submitting}
-                                                className="flex-1 px-5 py-3.5 bg-[#0a0908] border border-white/[0.08] rounded-xl text-white placeholder-[#E6D5B8]/25 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all text-sm disabled:opacity-50"
-                                            />
+                                            <div className="flex-1 relative" ref={searchRef}>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    placeholder="Your full college name"
+                                                    value={notifyCollege}
+                                                    onChange={(e) => {
+                                                        setNotifyCollege(e.target.value);
+                                                        setShowSuggestions(true);
+                                                    }}
+                                                    onFocus={() => {
+                                                        if (notifyCollege.length >= 2) setShowSuggestions(true);
+                                                    }}
+                                                    disabled={submitting}
+                                                    className="w-full px-5 py-3.5 bg-[#0a0908] border border-white/[0.08] rounded-xl text-white placeholder-[#E6D5B8]/25 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all text-sm disabled:opacity-50"
+                                                />
+                                                {showSuggestions && suggestions.length > 0 && (
+                                                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#121212] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 max-h-60 overflow-y-auto">
+                                                        {suggestions.map((college, idx) => (
+                                                            <button
+                                                                type="button"
+                                                                key={idx}
+                                                                className="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
+                                                                onClick={() => {
+                                                                    setNotifyCollege(college.name);
+                                                                    setShowSuggestions(false);
+                                                                }}
+                                                            >
+                                                                <div className="font-semibold text-sm text-[#E6D5B8]">{college.name}</div>
+                                                                <div className="text-xs text-[#E6D5B8]/50 mt-0.5">
+                                                                    {college.state} {college.type ? `• ${college.type}` : ''}
+                                                                </div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                         <button
                                             type="submit"
