@@ -6,3 +6,4 @@ if (!admin.apps.length) {
 
 export * from "./onboarding";
 export * from "./notifications";
+export * from "./waitlist";
