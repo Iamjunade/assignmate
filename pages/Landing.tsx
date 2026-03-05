@@ -1,20 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { Footer } from '../components/layout/Footer';
-import { collegeService, College } from '../services/collegeService';
 
 export const Landing = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    // Launching Soon State
+    // ── State ──────────────────────────────────────────────
     const [notifyEmail, setNotifyEmail] = useState('');
     const [emailSubmitted, setEmailSubmitted] = useState(false);
     const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
-    // Countdown Timer – April 1, 2026
+    // ── Countdown Timer – April 1, 2026 ───────────────────
     useEffect(() => {
         const launchDate = new Date('2026-04-01T00:00:00').getTime();
         const tick = () => {
@@ -32,523 +27,218 @@ export const Landing = () => {
         return () => clearInterval(interval);
     }, []);
 
+    // ── Email Submit ──────────────────────────────────────
     const handleNotifySubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (notifyEmail.trim()) {
-            // TODO: Integrate with backend / Firebase to store email
+            // TODO: Wire to Firebase / backend
             setEmailSubmitted(true);
             setNotifyEmail('');
-            setTimeout(() => setEmailSubmitted(false), 5000);
+            setTimeout(() => setEmailSubmitted(false), 6000);
         }
     };
 
-    // Search State
-    const [searchQuery, setSearchQuery] = useState('');
-    const [suggestions, setSuggestions] = useState<College[]>([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const searchRef = useRef<HTMLDivElement>(null);
-
-    const handleLogin = () => navigate('/auth');
-    const handleSignup = () => navigate('/auth?tab=signup');
-
-    const handleSearch = (term?: string) => {
-        const q = term || searchQuery;
-        if (user) {
-            navigate(`/peers?q=${encodeURIComponent(q)}`);
-        } else {
-            navigate(`/auth?redirect=/peers&q=${encodeURIComponent(q)}`);
-        }
-    };
-
-    // Debounced Search Effect
-    useEffect(() => {
-        const delayDebounceFn = setTimeout(async () => {
-            if (searchQuery.length > 2) {
-                try {
-                    const results = await collegeService.search(searchQuery);
-                    setSuggestions(results.slice(0, 5));
-                    setShowSuggestions(results.length > 0);
-                } catch (e) {
-                    setSuggestions([]);
-                }
-            } else {
-                setSuggestions([]);
-                setShowSuggestions(false);
-            }
-        }, 300);
-        return () => clearTimeout(delayDebounceFn);
-    }, [searchQuery]);
-
-    // Click outside to close suggestions
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-                setShowSuggestions(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
+    // ── Render ─────────────────────────────────────────────
     return (
-        <div className="min-h-screen w-full font-body antialiased bg-[#0d0b09] text-[#F5F5F4] selection:bg-primary selection:text-white">
-            {/* Navbar */}
-            <nav className="fixed w-full z-50 transition-all duration-300 bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-20">
-                        <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-[0_0_20px_rgba(255,107,0,0.15)]">
-                                <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
-                            </div>
-                            <span className="font-display font-bold text-xl tracking-tight text-white">AssignMate</span>
+        <div className="min-h-screen w-full font-body antialiased bg-[#0a0908] text-[#F5F5F4] selection:bg-primary selection:text-white overflow-hidden relative">
+
+            {/* ── Ambient Background Blobs ── */}
+            <div className="pointer-events-none fixed inset-0 z-0">
+                <div className="absolute top-[-10%] right-[-5%] w-[700px] h-[700px] bg-primary/[0.06] blur-[180px] rounded-full" />
+                <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-orange-900/[0.08] blur-[150px] rounded-full" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-primary/[0.02] blur-[200px] rounded-full" />
+            </div>
+
+            {/* ── Minimal Navbar ── */}
+            <nav className="relative z-20 w-full">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
+                        <div className="w-10 h-10 rounded-xl overflow-hidden shadow-[0_0_20px_rgba(255,107,0,0.15)]">
+                            <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
                         </div>
-                        <div className="hidden md:flex items-center space-x-8">
-                            <a className="text-sm font-medium text-[#E6D5B8]/80 hover:text-primary transition-colors" href="#how-it-works">How it Works</a>
-                            <a className="text-sm font-medium text-[#E6D5B8]/80 hover:text-primary transition-colors" href="#safety">Trust & Safety</a>
-                            <a className="text-sm font-medium text-[#E6D5B8]/80 hover:text-primary transition-colors" href="#contributors">For Contributors</a>
-                            <div className="h-4 w-px bg-white/10 mx-2"></div>
-                            {user ? (
-                                <div className="flex items-center gap-6">
-                                    <button
-                                        onClick={() => navigate('/feed')}
-                                        className="text-sm font-medium text-white hover:text-primary transition-colors"
-                                    >
-                                        Dashboard
-                                    </button>
-                                    <button
-                                        onClick={() => navigate('/profile')}
-                                        className="block w-10 h-10 rounded-full border border-white/10 p-0.5 hover:border-primary transition-colors cursor-pointer overflow-hidden group"
-                                    >
-                                        <img
-                                            src={user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || 'User')}&background=random`}
-                                            alt={user.full_name}
-                                            className="w-full h-full rounded-full object-cover group-hover:scale-105 transition-transform"
-                                        />
-                                    </button>
-                                </div>
-                            ) : (
-                                <>
-                                    <button onClick={handleLogin} className="text-sm font-medium text-white hover:text-primary transition-colors">Login</button>
-                                    <button onClick={handleSignup} className="bg-primary hover:bg-orange-600 text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-[0_0_20px_rgba(255,107,0,0.15)] hover:shadow-[0_0_40px_rgba(255,107,0,0.3)] transform hover:-translate-y-0.5">
-                                        Join Now
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                        <div className="md:hidden flex items-center">
-                            <button className="text-gray-300 hover:text-white focus:outline-none" onClick={() => setMobileMenuOpen(true)}>
-                                <span className="material-symbols-outlined text-2xl">menu</span>
-                            </button>
-                        </div>
+                        <span className="font-display font-bold text-xl tracking-tight text-white">AssignMate</span>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-6 text-sm text-[#E6D5B8]/50">
+                        <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
+                        <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
                     </div>
                 </div>
             </nav>
 
-            {/* Mobile Menu */}
-            {mobileMenuOpen && (
-                <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center gap-8 p-8">
-                    <button className="absolute top-6 right-6 text-white" onClick={() => setMobileMenuOpen(false)}>
-                        <span className="material-symbols-outlined text-3xl">close</span>
-                    </button>
-                    <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-white">How it Works</a>
-                    <a href="#safety" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-white">Trust & Safety</a>
-                    {user ? (
-                        <>
-                            <button onClick={() => navigate('/feed')} className="text-xl font-bold text-primary">Dashboard</button>
-                            <button onClick={() => navigate('/profile')} className="text-xl font-bold text-white">My Profile</button>
-                        </>
-                    ) : (
-                        <>
-                            <button onClick={handleLogin} className="text-xl font-bold text-primary">Login</button>
-                            <button onClick={handleSignup} className="px-8 py-3 rounded-full bg-primary text-white font-bold text-lg w-full max-w-xs">Join Now</button>
-                        </>
-                    )}
-                </div>
-            )}
-
-            {/* Hero Section */}
-            <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden bg-black">
-                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-[#2c2219] opacity-40 blur-[100px] rounded-full pointer-events-none"></div>
-                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-[#2c2219] opacity-30 blur-[100px] rounded-full pointer-events-none"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary opacity-[0.03] blur-[120px] rounded-full pointer-events-none"></div>
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-                        <div className="max-w-2xl">
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#2c2219] border border-[#3d3025] text-[#E6D5B8] text-xs font-semibold uppercase tracking-wider mb-8 shadow-sm">
-                                <span className="material-symbols-outlined text-sm text-primary">verified_user</span>
-                                100% Free & Campus Verified
-                            </div>
-                            <h1 className="font-display text-5xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1] mb-8">
-                                Learn Together. <br />
-                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-400">Grow Together.</span>
-                            </h1>
-                            <p className="text-lg text-[#E6D5B8]/80 mb-10 leading-relaxed max-w-lg font-light">
-                                Join a free, ID-verified community where students explain concepts, share knowledge, and build understanding together in a secure environment.
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-4 mb-12">
-                                <button onClick={handleSignup} className="px-8 py-4 bg-primary text-white font-semibold rounded-xl shadow-[0_0_20px_rgba(255,107,0,0.15)] hover:shadow-[0_0_40px_rgba(255,107,0,0.3)] hover:bg-orange-600 transition-all transform hover:-translate-y-1">
-                                    Explore Topics
-                                </button>
-                                <button onClick={handleSignup} className="px-8 py-4 bg-transparent border border-white/20 text-white font-semibold rounded-xl hover:bg-white/5 hover:border-white/30 transition-all">
-                                    Become a Contributor
-                                </button>
-                            </div>
-                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-[#2c2219]/30 border border-white/5 w-fit backdrop-blur-sm">
-                                <div className="flex -space-x-3">
-                                    {[1, 2, 3].map(i => (
-                                        <img key={i} alt="Student" className="w-10 h-10 rounded-full border-2 border-[#2c2219] object-cover" src={`https://i.pravatar.cc/150?img=${i + 10}`} />
-                                    ))}
-                                    <div className="w-10 h-10 rounded-full border-2 border-[#2c2219] bg-black flex items-center justify-center text-xs font-bold text-[#E6D5B8]">+2k</div>
-                                </div>
-                                <p className="text-sm text-[#E6D5B8]/80">Trusted by <strong className="text-white">10,000+ students</strong> across IITs & DU</p>
-                            </div>
-                        </div>
-
-                        {/* Hero Card */}
-                        <div className="relative group">
-                            <div className="absolute inset-0 bg-primary rounded-3xl blur-[80px] opacity-20 group-hover:opacity-30 transition-opacity duration-500"></div>
-                            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-[#2c2219]">
-                                <img alt="Students Collaborating" className="w-full h-auto object-cover opacity-90 group-hover:opacity-100 transition-all duration-700" src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1600" />
-                                <div className="absolute bottom-6 left-6 right-6 bg-black/90 backdrop-blur-xl p-5 rounded-2xl border border-white/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.5)] flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="relative">
-                                            <img alt="User" className="w-12 h-12 rounded-full object-cover border-2 border-[#2c2219]" src="https://i.pravatar.cc/150?img=12" />
-                                            <div className="absolute -bottom-1 -right-1 bg-green-500 w-3.5 h-3.5 rounded-full border-2 border-black"></div>
-                                        </div>
-                                        <div>
-                                            <h4 className="text-base font-bold text-white">Sai Tej</h4>
-                                            <p className="text-xs text-[#E6D5B8]/70">CMR INSTITUTE OF TECHNOLOGY</p>
-                                            <p className="text-[10px] text-[#E6D5B8]/50 uppercase tracking-widest mt-0.5">Hyderabad</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-[10px] text-[#E6D5B8]/50 uppercase tracking-widest font-semibold mb-1">Contribution Score</p>
-                                        <div className="flex items-center justify-end gap-1.5 text-primary font-bold">
-                                            <span className="material-symbols-outlined text-lg">local_fire_department</span>
-                                            <span className="text-xl">4.9</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="absolute top-6 right-6 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 shadow-lg">
-                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                    <span className="text-xs font-medium text-white/90">Status: Active</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ===== LAUNCHING SOON SECTION ===== */}
-            <section className="relative py-20 lg:py-28 overflow-hidden bg-black">
-                {/* Background effects */}
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] via-transparent to-transparent pointer-events-none" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary opacity-[0.06] blur-[150px] rounded-full pointer-events-none" />
-
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            {/* ── Hero ── */}
+            <section className="relative z-10 pt-10 sm:pt-16 lg:pt-20 pb-6">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     {/* Badge */}
-                    <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-8 animate-pulse">
+                    <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-[0.15em] mb-10 animate-pulse">
                         <span className="material-symbols-outlined text-sm">rocket_launch</span>
                         Launching April 2026
                     </div>
 
-                    <h2 className="font-display text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
-                        Something Big is <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-400">Coming</span>
-                    </h2>
-                    <p className="text-lg text-[#E6D5B8]/60 mb-12 max-w-xl mx-auto font-light leading-relaxed">
-                        We're building the future of campus collaboration. Be the first to experience it.
-                    </p>
+                    <h1 className="font-display text-5xl sm:text-6xl lg:text-8xl font-extrabold tracking-tight text-white leading-[1.05] mb-6">
+                        The Future of{' '}
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-orange-400 to-amber-300">
+                            Campus Learning
+                        </span>
+                    </h1>
 
-                    {/* Countdown Timer */}
-                    <div className="flex justify-center gap-4 sm:gap-6 mb-14">
+                    <p className="text-base sm:text-lg lg:text-xl text-[#E6D5B8]/60 max-w-2xl mx-auto font-light leading-relaxed mb-16">
+                        India's first ID-verified, hyper-local student collaboration platform.
+                        Connect with campus peers, share knowledge, and grow together — all for free.
+                    </p>
+                </div>
+            </section>
+
+            {/* ── Countdown Timer ── */}
+            <section className="relative z-10 pb-16">
+                <div className="max-w-3xl mx-auto px-4 text-center">
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#E6D5B8]/30 mb-8">Countdown to Launch</p>
+                    <div className="flex justify-center gap-3 sm:gap-5 mb-6">
                         {[
                             { value: countdown.days, label: 'Days' },
                             { value: countdown.hours, label: 'Hours' },
-                            { value: countdown.minutes, label: 'Minutes' },
-                            { value: countdown.seconds, label: 'Seconds' },
+                            { value: countdown.minutes, label: 'Min' },
+                            { value: countdown.seconds, label: 'Sec' },
                         ].map((unit) => (
                             <div key={unit.label} className="flex flex-col items-center">
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#2c2219] border border-white/10 flex items-center justify-center shadow-[0_10px_30px_-5px_rgba(0,0,0,0.5)] mb-2 relative overflow-hidden group hover:border-primary/30 transition-colors">
+                                <div className="w-[72px] h-[72px] sm:w-[88px] sm:h-[88px] rounded-2xl bg-[#161310] border border-white/[0.06] flex items-center justify-center mb-2 relative overflow-hidden group hover:border-primary/20 transition-all duration-300 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6)]">
                                     <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent" />
-                                    <span className="font-display text-2xl sm:text-3xl font-bold text-white relative z-10">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <span className="font-display text-3xl sm:text-4xl font-bold text-white relative z-10 tabular-nums">
                                         {String(unit.value).padStart(2, '0')}
                                     </span>
                                 </div>
-                                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#E6D5B8]/40">{unit.label}</span>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Get Notified Form */}
-                    <div className="max-w-lg mx-auto">
-                        <p className="text-sm font-semibold text-[#E6D5B8]/70 mb-4 flex items-center justify-center gap-2">
-                            <span className="material-symbols-outlined text-primary text-lg">notifications_active</span>
-                            Get Notified First
-                        </p>
-                        {emailSubmitted ? (
-                            <div className="flex items-center justify-center gap-3 py-5 px-6 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 font-semibold animate-[fadeIn_0.3s_ease-out]">
-                                <span className="material-symbols-outlined">check_circle</span>
-                                You're on the list! We'll notify you at launch.
-                            </div>
-                        ) : (
-                            <form onSubmit={handleNotifySubmit} className="flex flex-col sm:flex-row gap-3">
-                                <input
-                                    type="email"
-                                    required
-                                    placeholder="Enter your email address"
-                                    value={notifyEmail}
-                                    onChange={(e) => setNotifyEmail(e.target.value)}
-                                    className="flex-1 px-5 py-4 bg-[#2c2219] border border-white/10 rounded-xl text-white placeholder-[#E6D5B8]/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-inner text-sm"
-                                />
-                                <button
-                                    type="submit"
-                                    className="px-8 py-4 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl shadow-[0_0_25px_rgba(255,107,0,0.2)] hover:shadow-[0_0_50px_rgba(255,107,0,0.35)] transition-all transform hover:-translate-y-0.5 whitespace-nowrap"
-                                >
-                                    Notify Me
-                                </button>
-                            </form>
-                        )}
-                        <p className="text-[11px] text-[#E6D5B8]/30 mt-4">No spam, ever. Just a single launch-day notification.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* Trust Badges Section */}
-            <div className="border-y border-white/5 bg-[#2c2219]/30 backdrop-blur-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                    <p className="text-center text-xs font-bold text-[#E6D5B8]/40 uppercase tracking-[0.2em] mb-8">Campus Verified & Trusted By</p>
-                    <div className="flex flex-wrap justify-center gap-10 md:gap-20 opacity-60 hover:opacity-100 transition-opacity duration-500">
-                        {[
-                            { icon: 'verified', title: 'UniVerify' },
-                            { icon: 'badge', title: 'ID Check' },
-                            { icon: 'menu_book', title: 'Open Learning' },
-                            { icon: 'diversity_3', title: 'Peer Support' },
-                        ].map((item, i) => (
-                            <div key={i} className="flex items-center gap-2 text-[#E6D5B8]">
-                                <span className="material-symbols-outlined text-primary text-2xl">{item.icon}</span>
-                                <span className="font-semibold text-base">{item.title}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Why AssignMate Section */}
-            <section className="py-32 relative bg-black" id="safety">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center max-w-3xl mx-auto mb-20">
-                        <h2 className="font-display text-3xl md:text-5xl font-bold text-white mb-6">Why AssignMate is a Community</h2>
-                        <p className="text-[#E6D5B8]/60 text-lg font-light leading-relaxed">We serve the isolated professional with open-sourced networking and support, transforming how students connect.</p>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {[
-                            { icon: 'verified_user', title: 'Community Trust', desc: "Every peer is ID-verified. Look for the blue tick before you connect. No fake profiles, just real students." },
-                            { icon: 'hub', title: 'Campus Matching', desc: "Find seniors from your specific university (e.g., DU, IIT) who know exactly what your curriculum demands." },
-                            { icon: 'school', title: 'Collaborative Learning', desc: "It's not just about the work—it's about learning. Connect, discuss, and grow your network together." },
-                        ].map((card, i) => (
-                            <div key={i} className="group p-10 rounded-3xl bg-[#2c2219] border border-[#3d3025] hover:border-primary/30 transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,107,0,0.15)] hover:-translate-y-2 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10 transition-opacity group-hover:opacity-100 opacity-0"></div>
-                                <div className="w-16 h-16 rounded-2xl bg-[#3A2E24] flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                                    <span className="material-symbols-outlined text-3xl text-primary">{card.icon}</span>
-                                </div>
-                                <h3 className="font-display text-xl font-bold text-white mb-4">{card.title}</h3>
-                                <p className="text-[#E6D5B8]/60 leading-relaxed text-sm">{card.desc}</p>
+                                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.15em] text-[#E6D5B8]/30">{unit.label}</span>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Search Section */}
-            <section className="py-24 bg-[#2c2219] relative overflow-hidden">
-                <div className="max-w-4xl mx-auto px-4 relative z-10">
-                    <div className="bg-black rounded-[2rem] p-10 md:p-14 text-center shadow-2xl border border-white/5 relative overflow-hidden group">
-                        <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px]"></div>
-                        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px]"></div>
-                        <h3 className="font-display text-3xl md:text-4xl font-bold text-white mb-8 relative z-10">Search your campus now</h3>
-                        <div className="relative max-w-xl mx-auto mb-8 z-20" ref={searchRef}>
-                            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                <span className="material-symbols-outlined text-[#E6D5B8]/40">search</span>
+            {/* ── Get Notified First ── */}
+            <section className="relative z-10 pb-24">
+                <div className="max-w-xl mx-auto px-4 text-center">
+                    <div className="bg-[#141110] rounded-3xl border border-white/[0.06] p-8 sm:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
+                        <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/[0.06] rounded-full blur-[60px]" />
+                        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-900/[0.08] rounded-full blur-[60px]" />
+
+                        <div className="relative z-10">
+                            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
+                                <span className="material-symbols-outlined text-primary text-2xl">notifications_active</span>
                             </div>
-                            <input
-                                className="block w-full pl-14 pr-32 py-5 bg-[#2c2219] border border-white/10 rounded-xl text-white placeholder-[#E6D5B8]/30 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-inner"
-                                placeholder="Search for colleges (e.g. IIT, Delhi University)"
-                                type="text"
-                                spellCheck="false"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                onFocus={() => searchQuery.length > 2 && setShowSuggestions(true)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                            />
-                            {showSuggestions && suggestions.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-3 bg-[#1a130e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 text-left ring-1 ring-white/5 backdrop-blur-3xl">
-                                    <div className="py-2">
-                                        {suggestions.map((college, idx) => (
-                                            <button
-                                                key={idx}
-                                                onClick={() => {
-                                                    setSearchQuery(college.name);
-                                                    handleSearch(college.name);
-                                                    setShowSuggestions(false);
-                                                }}
-                                                className="w-full px-6 py-3.5 text-sm text-[#E6D5B8] hover:bg-white/5 hover:text-white transition-all flex items-center gap-4 group"
-                                            >
-                                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                                                    <span className="material-symbols-outlined text-sm text-[#E6D5B8]/60 group-hover:text-primary transition-colors">school</span>
-                                                </div>
-                                                <div className="flex flex-col items-start gap-0.5 min-w-0">
-                                                    <span className="font-semibold truncate w-full text-left text-[15px]">{college.name}</span>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-[#E6D5B8]/50 uppercase tracking-widest font-medium border border-white/5 group-hover:border-white/10">{college.state}</span>
-                                                        <span className="text-[10px] text-[#E6D5B8]/30">• {college.type || 'University'}</span>
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
+
+                            <h3 className="font-display text-xl sm:text-2xl font-bold text-white mb-2">Get Notified First</h3>
+                            <p className="text-sm text-[#E6D5B8]/50 mb-8">Be among the first to experience AssignMate when we launch.</p>
+
+                            {emailSubmitted ? (
+                                <div className="flex items-center justify-center gap-3 py-4 px-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold text-sm">
+                                    <span className="material-symbols-outlined text-lg">check_circle</span>
+                                    You're on the list! We'll notify you at launch.
                                 </div>
+                            ) : (
+                                <form onSubmit={handleNotifySubmit} className="flex flex-col sm:flex-row gap-3">
+                                    <input
+                                        type="email"
+                                        required
+                                        placeholder="your@email.com"
+                                        value={notifyEmail}
+                                        onChange={(e) => setNotifyEmail(e.target.value)}
+                                        className="flex-1 px-5 py-3.5 bg-[#0a0908] border border-white/[0.08] rounded-xl text-white placeholder-[#E6D5B8]/25 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all text-sm"
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="px-7 py-3.5 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl shadow-[0_0_30px_rgba(255,107,0,0.2)] hover:shadow-[0_0_50px_rgba(255,107,0,0.35)] transition-all transform hover:-translate-y-0.5 whitespace-nowrap text-sm"
+                                    >
+                                        Notify Me
+                                    </button>
+                                </form>
                             )}
-                            <button onClick={() => handleSearch()} className="absolute right-2.5 top-2.5 bottom-2.5 bg-primary hover:bg-orange-600 text-white font-medium px-6 rounded-lg transition-colors shadow-lg">
-                                Search
-                            </button>
-                        </div>
-                        <div className="flex flex-wrap justify-center gap-3 text-xs z-10 relative">
-                            <span className="text-[#E6D5B8]/40 font-bold tracking-wider py-1">POPULAR:</span>
-                            {['Economics @ DU', 'CS @ IIT', 'Law @ NLU', 'BBA @ NMIMS'].map(tag => (
-                                <button key={tag} onClick={() => handleSearch(tag)} className="px-4 py-1.5 rounded-full bg-[#2c2219] text-[#E6D5B8]/80 hover:bg-[#3A2E24] hover:text-white transition-colors border border-white/5">{tag}</button>
-                            ))}
+                            <p className="text-[10px] text-[#E6D5B8]/25 mt-5">No spam — just a single notification on launch day.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-
-            {/* How it Works Section */}
-            <section className="py-32 bg-black overflow-hidden" id="how-it-works">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col lg:flex-row gap-20">
-                        <div className="lg:w-1/3 lg:sticky lg:top-32 h-fit">
-                            <h2 className="font-display text-4xl lg:text-5xl font-bold text-white mb-8">How it works</h2>
-                            <p className="text-lg text-[#E6D5B8]/60 mb-10 leading-relaxed font-light">
-                                Five steps to secure, collaborative learning with your verified campus community. Simplicity meets security.
-                            </p>
-                            <a className="inline-flex items-center text-primary font-semibold hover:text-orange-400 transition-colors gap-2 group text-lg" href="#">
-                                Learn more about safety
-                                <span className="material-symbols-outlined text-xl transform group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                            </a>
-                        </div>
-                        <div className="lg:w-2/3 relative">
-                            <div className="absolute left-[2.25rem] top-8 bottom-8 w-px bg-gradient-to-b from-primary via-white/10 to-transparent"></div>
-                            <div className="space-y-16">
-                                {[
-                                    { num: 1, icon: 'help_outline', title: 'Ask or explore questions', desc: "Post your doubts or browse existing discussions on topics you're studying within your university curriculum." },
-                                    { num: 2, icon: 'person_search', title: 'Find contributors in your area', desc: "Connect with verified peers who excel in subjects you need help understanding using our smart matching." },
-                                    { num: 3, icon: 'forum', title: 'Collaborate openly', desc: "Discuss concepts, share explanations, and work through problems together via secure escrow and chat." },
-                                    { num: 4, icon: 'construction', title: 'Build understanding', desc: "Improve explanations together until clarity is achieved. Quality is our standard, not just an afterthought." },
-                                    { num: 5, icon: 'military_tech', title: 'Earn contribution credibility', desc: "Build your reputation as a top contributor and strengthen your campus network for future opportunities." },
-                                ].map((step, i) => (
-                                    <div key={i} className="relative flex gap-10 group">
-                                        <div className={`flex-shrink-0 w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold relative z-10 transition-colors shadow-[0_10px_30px_-5px_rgba(0,0,0,0.5)] ${step.num === 1 ? 'bg-primary text-white shadow-[0_0_20px_rgba(255,107,0,0.15)] group-hover:scale-105' : 'bg-[#2c2219] border border-white/10 text-white group-hover:border-primary group-hover:text-primary'}`}>
-                                            {step.num}
-                                        </div>
-                                        <div className="pt-3">
-                                            <h4 className="font-display text-2xl font-bold text-white mb-3 flex items-center gap-3">
-                                                <span className="material-symbols-outlined text-primary text-xl">{step.icon}</span>
-                                                {step.title}
-                                            </h4>
-                                            <p className="text-[#E6D5B8]/60 leading-relaxed max-w-lg">{step.desc}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Testimonials Section */}
-            <section className="py-32 bg-[#2c2219] relative" id="contributors">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-20">
-                        <h2 className="font-display text-4xl font-bold text-white mb-6">Success Stories from Students</h2>
-                        <div className="flex items-center justify-center gap-2 text-primary">
-                            {[1, 2, 3, 4].map(i => (
-                                <span key={i} className="material-symbols-outlined text-2xl">star</span>
-                            ))}
-                            <span className="material-symbols-outlined text-2xl">star_half</span>
-                            <span className="text-white font-bold ml-3 text-lg">4.9/5 Average Rating</span>
-                        </div>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-8">
+            {/* ── Feature Teasers ── */}
+            <section className="relative z-10 pb-24">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-[#E6D5B8]/30 mb-12">What to Expect</p>
+                    <div className="grid sm:grid-cols-3 gap-5">
                         {[
-                            { name: 'Priya S.', school: 'Delhi University', quote: "The pressure is real, but AssignMate helped me tackle it. Found a senior from my own college who guided me through the complex topics of Microeconomics." },
-                            { name: 'Arjun M.', school: 'BITS Pilani', quote: "Finding verified peers from my own college was a game-changer. The explanations I got helped me truly understand the concepts for my finals." },
-                            { name: 'Vikram R.', school: 'IIT Madras', quote: "As a contributor, I love helping juniors understand complex topics. Teaching others has deepened my own understanding while earning extra." },
-                        ].map((t, i) => (
-                            <div key={i} className="bg-black p-10 rounded-3xl border border-white/5 relative hover:border-primary/20 transition-colors shadow-lg">
-                                <span className="material-symbols-outlined text-6xl text-[#2c2219] absolute top-6 right-6 opacity-50">format_quote</span>
-                                <p className="text-[#E6D5B8]/80 italic font-serif leading-relaxed text-lg mb-10 relative z-10">
-                                    "{t.quote}"
-                                </p>
-                                <div className="flex items-center gap-4 border-t border-white/5 pt-6">
-                                    <img alt={t.name} className="w-14 h-14 rounded-full object-cover border-2 border-primary" src={`https://i.pravatar.cc/150?img=${i + 25}`} />
-                                    <div>
-                                        <h5 className="text-base font-bold text-white">{t.name}</h5>
-                                        <p className="text-[11px] uppercase font-bold tracking-widest text-primary">{t.school}</p>
-                                    </div>
+                            {
+                                icon: 'verified_user',
+                                title: 'Campus Verified',
+                                desc: 'Every student is ID-verified with their college credentials. No fake profiles — just real peers.',
+                            },
+                            {
+                                icon: 'hub',
+                                title: 'Smart Matching',
+                                desc: 'Find seniors and peers from your exact university who know your curriculum inside out.',
+                            },
+                            {
+                                icon: 'shield',
+                                title: 'Secure & Free',
+                                desc: '100% free for students. End-to-end encrypted chats with built-in trust & safety systems.',
+                            },
+                        ].map((feature, i) => (
+                            <div
+                                key={i}
+                                className="group p-7 sm:p-8 rounded-2xl bg-[#141110] border border-white/[0.05] hover:border-primary/20 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,107,0,0.06)] relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/[0.03] rounded-full blur-2xl -mr-8 -mt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-300">
+                                    <span className="material-symbols-outlined text-xl text-primary">{feature.icon}</span>
                                 </div>
+                                <h4 className="font-display text-base font-bold text-white mb-2">{feature.title}</h4>
+                                <p className="text-sm text-[#E6D5B8]/45 leading-relaxed">{feature.desc}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* CTA – Get Notified Section */}
-            <section className="py-24 px-4 bg-black">
-                <div className="max-w-5xl mx-auto rounded-[3rem] bg-[#2c2219] relative overflow-hidden text-center py-24 px-8 shadow-2xl border border-white/5">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#1a130e] to-transparent opacity-90"></div>
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-primary opacity-10 blur-[100px] rounded-full"></div>
-                    <div className="absolute bottom-0 left-0 w-80 h-80 bg-orange-900 opacity-20 blur-[100px] rounded-full"></div>
-                    <div className="relative z-10 max-w-2xl mx-auto">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-8">
-                            <span className="material-symbols-outlined text-sm">schedule</span>
-                            April 2026
+            {/* ── Bottom CTA ── */}
+            <section className="relative z-10 pb-16">
+                <div className="max-w-3xl mx-auto px-4 text-center">
+                    <div className="py-12 px-6 rounded-3xl bg-gradient-to-b from-[#161310] to-[#0e0c0a] border border-white/[0.04] relative overflow-hidden">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                        <p className="text-[#E6D5B8]/40 text-sm font-light mb-3">Trusted by students across</p>
+                        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-semibold text-[#E6D5B8]/60">
+                            <span>IITs</span>
+                            <span className="text-primary/40">•</span>
+                            <span>NITs</span>
+                            <span className="text-primary/40">•</span>
+                            <span>Delhi University</span>
+                            <span className="text-primary/40">•</span>
+                            <span>BITS</span>
+                            <span className="text-primary/40">•</span>
+                            <span>NLUs</span>
+                            <span className="text-primary/40">•</span>
+                            <span>500+ colleges</span>
                         </div>
-                        <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">Don't miss the launch</h2>
-                        <p className="text-[#E6D5B8]/70 text-lg mb-10 font-light max-w-xl mx-auto">Be among the first students to join AssignMate. Drop your email and we'll let you know the moment we go live.</p>
-                        {emailSubmitted ? (
-                            <div className="flex items-center justify-center gap-3 py-5 px-6 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 font-semibold max-w-md mx-auto">
-                                <span className="material-symbols-outlined">check_circle</span>
-                                You're on the list! We'll notify you at launch.
-                            </div>
-                        ) : (
-                            <form onSubmit={handleNotifySubmit} className="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto">
-                                <input
-                                    type="email"
-                                    required
-                                    placeholder="your@email.com"
-                                    value={notifyEmail}
-                                    onChange={(e) => setNotifyEmail(e.target.value)}
-                                    className="flex-1 px-5 py-4 bg-black border border-white/10 rounded-xl text-white placeholder-[#E6D5B8]/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-inner text-sm"
-                                />
-                                <button
-                                    type="submit"
-                                    className="px-8 py-4 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl shadow-[0_0_25px_rgba(255,107,0,0.2)] hover:shadow-[0_0_50px_rgba(255,107,0,0.35)] transition-all transform hover:-translate-y-0.5 whitespace-nowrap"
-                                >
-                                    Notify Me
-                                </button>
-                            </form>
-                        )}
-                        <p className="text-[11px] text-[#E6D5B8]/30 mt-4">No spam. Just one email on launch day.</p>
                     </div>
                 </div>
             </section>
 
-            {/* Footer */}
-            {/* Footer */}
-            <Footer />
+            {/* ── Minimal Footer ── */}
+            <footer className="relative z-10 border-t border-white/[0.04] py-8">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-md overflow-hidden">
+                            <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
+                        </div>
+                        <span className="text-xs text-[#E6D5B8]/30">© 2026 AssignMate Private Limited</span>
+                    </div>
+                    <div className="flex items-center gap-5 text-xs text-[#E6D5B8]/30">
+                        <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
+                        <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
+                        <a href="/community-guidelines" className="hover:text-primary transition-colors">Guidelines</a>
+                        <a href="mailto:support@assignmate.com" className="hover:text-primary transition-colors flex items-center gap-1">
+                            <span className="material-symbols-outlined text-xs">mail</span>
+                            Contact
+                        </a>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 };
-

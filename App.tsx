@@ -253,8 +253,9 @@ function AppContent() {
             </GlassLayout>
           }>
             <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<Auth onComplete={() => navigate('/feed')} />} />
-            <Route path="/onboarding" element={<Onboarding />} />
+            {/* Pre-launch: disable auth & onboarding */}
+            <Route path="/auth" element={<Navigate to="/" replace />} />
+            <Route path="/onboarding" element={<Navigate to="/" replace />} />
 
             {/* New Public Pages */}
             <Route path="/safety" element={<Safety />} />
