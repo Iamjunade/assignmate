@@ -79,6 +79,13 @@ export const Landing = () => {
                 source: 'landing_page',
             });
 
+            // Fire the welcome email via Vercel serverless function in the background
+            fetch('/api/waitlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, college }),
+            }).catch(console.error);
+
             setEmailSubmitted(true);
             setNotifyEmail('');
             setNotifyCollege('');
