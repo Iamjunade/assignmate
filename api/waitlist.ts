@@ -40,11 +40,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         `;
 
         const data = await resend.emails.send({
-            from: 'Junaid at AssignMate <founders@assignmate.com>', // User needs a verified domain for Resend to use this, or fallback to onboarding@resend.dev
+            from: 'Junaid at AssignMate <founders@assignmate.live>',
             to: [email],
             subject: 'Welcome to the AssignMate Waitlist 🚀',
             html: htmlContent,
-            reply_to: 'founders@assignmate.com' // Adjust as needed
+            replyTo: 'founders@assignmate.live'
         });
 
         return res.status(200).json(data);
