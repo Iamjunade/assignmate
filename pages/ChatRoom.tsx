@@ -388,31 +388,31 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
     });
 
     return (
-        <div className="bg-background text-text-dark antialiased h-screen supports-[height:100dvh]:h-[100dvh] overflow-hidden flex selection:bg-primary/20 font-display">
+        <div className="bg-background/50 text-text-dark antialiased h-screen supports-[height:100dvh]:h-[100dvh] overflow-hidden flex selection:bg-primary/20 font-display">
             <Sidebar user={user} />
             <main className="flex-1 flex h-full overflow-hidden relative">
-                <div className="flex-1 flex flex-col h-full overflow-hidden">
-                    <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-white lg:rounded-tl-3xl shadow-soft lg:border-l lg:border-t border-border-subtle">
+                <div className="flex-1 flex flex-col h-full overflow-hidden p-0 lg:p-4 lg:pl-0">
+                    <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-white/80 backdrop-blur-xl lg:rounded-3xl shadow-xl border border-white z-10">
                         {/* Chat Header */}
-                        <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-border-subtle bg-white z-10 sticky top-0">
+                        <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-white/50 bg-white/40 backdrop-blur-md z-20 sticky top-0 shadow-sm">
                             <div className="flex items-center gap-3 md:gap-4">
-                                <button onClick={handleBack} className="p-2 -ml-2 text-text-muted hover:bg-secondary-bg rounded-full transition-colors">
+                                <button onClick={handleBack} className="p-2 -ml-2 text-text-muted hover:bg-white hover:shadow-sm rounded-xl transition-all">
                                     <ArrowLeft size={22} />
                                 </button>
                                 {chatDetails ? (
                                     <div className="flex items-center gap-3 md:gap-4">
                                         {/* Clickable avatar - navigates to profile */}
                                         <div
-                                            className="relative cursor-pointer hover:opacity-80 transition-opacity"
+                                            className="relative cursor-pointer hover:scale-105 transition-transform"
                                             onClick={() => navigate(`/profile/${chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id}`)}
                                         >
                                             <Avatar
                                                 src={chatDetails.other_avatar}
                                                 alt={chatDetails.other_handle}
-                                                className="size-11 md:size-12 rounded-full shadow-sm border-2 border-white"
+                                                className="size-11 md:size-12 rounded-full shadow-sm border-2 border-white object-cover bg-gray-50"
                                                 fallback={chatDetails.other_handle?.charAt(0)}
                                             />
-                                            <div className="absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5">
+                                            <div className="absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5 shadow-sm">
                                                 <UserPresence userId={chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id} size={12} showLastSeen={false} />
                                             </div>
                                         </div>
@@ -420,22 +420,22 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                             <div className="flex items-center gap-2">
                                                 {/* Clickable handle - navigates to profile */}
                                                 <h2
-                                                    className="text-base md:text-lg font-bold text-text-dark leading-tight cursor-pointer hover:text-primary transition-colors"
+                                                    className="text-base md:text-lg font-black text-text-dark leading-tight cursor-pointer hover:text-primary transition-colors"
                                                     onClick={() => navigate(`/profile/${chatDetails.poster_id === user.id ? chatDetails.writer_id : chatDetails.poster_id}`)}
                                                 >
                                                     {chatDetails.other_handle}
                                                 </h2>
                                                 {chatDetails.other_verified === 'verified' && (
-                                                    <span className="material-symbols-outlined text-blue-500 text-base" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                                    <span className="material-symbols-outlined text-blue-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                                 )}
                                             </div>
-                                            <p className="text-xs font-medium text-text-muted flex items-center gap-1">
+                                            <p className="text-xs font-medium text-secondary flex items-center gap-1 mt-0.5">
                                                 {isOtherTyping ? (
                                                     <span className="text-primary font-bold flex items-center gap-1">
                                                         <span className="flex gap-0.5">
                                                             <span className="size-1.5 bg-primary rounded-full animate-bounce"></span>
-                                                            <span className="size-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
-                                                            <span className="size-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                                                            <span className="size-1.5 bg-primary/80 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
+                                                            <span className="size-1.5 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
                                                         </span>
                                                         typing...
                                                     </span>
@@ -447,34 +447,38 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-4">
-                                        <div className="size-12 bg-secondary-bg rounded-full animate-pulse"></div>
+                                        <div className="size-12 bg-gray-200 rounded-full animate-pulse border-2 border-white shadow-sm"></div>
                                         <div className="space-y-2">
-                                            <div className="h-4 w-32 bg-secondary-bg rounded animate-pulse"></div>
-                                            <div className="h-3 w-24 bg-secondary-bg rounded animate-pulse"></div>
+                                            <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+                                            <div className="h-3 w-24 bg-gray-100 rounded animate-pulse"></div>
                                         </div>
                                     </div>
                                 )}
                             </div>
                             <div className="flex items-center gap-2">
-                                <button
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                     onClick={handleCreateOffer}
-                                    className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white text-sm font-bold hover:shadow-lg hover:scale-[1.02] transition-all"
+                                    className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all border border-orange-400"
                                 >
-                                    <span className="material-symbols-outlined text-lg">handshake</span>
+                                    <span className="material-symbols-outlined text-[20px]">handshake</span>
                                     Collaborate
-                                </button>
-                                <button
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
                                     onClick={handleCreateOffer}
-                                    className="md:hidden size-10 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white flex items-center justify-center shadow-md"
+                                    className="md:hidden size-11 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white flex items-center justify-center shadow-md border border-orange-400"
                                 >
-                                    <span className="material-symbols-outlined">handshake</span>
-                                </button>
+                                    <span className="material-symbols-outlined text-[22px]">handshake</span>
+                                </motion.button>
 
 
                                 <div className="relative">
                                     <button
                                         onClick={() => setShowMenu(!showMenu)}
-                                        className="size-10 rounded-xl bg-secondary-bg text-text-muted hover:bg-gray-200 flex items-center justify-center transition-colors"
+                                        className="size-11 rounded-xl bg-gray-50 text-secondary hover:bg-gray-100 flex items-center justify-center transition-colors border border-transparent hover:border-border-light"
                                     >
                                         <MoreVertical size={20} />
                                     </button>
@@ -516,22 +520,25 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                         </div>
 
                         {/* Messages Stream */}
-                        <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col bg-gradient-to-b from-secondary-bg/50 to-white">
+                        <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col bg-gradient-to-b from-orange-50/30 to-[#fafafa] relative isolate">
+                            {/* Decorative background blur */}
+                            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10 animate-pulse" style={{ animationDuration: '8s' }}></div>
+
                             {/* Security Banner */}
-                            <div className="flex justify-center w-full mb-6">
-                                <div className="bg-white border border-border-subtle px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
-                                    <span className="material-symbols-outlined text-green-500 text-base">verified_user</span>
-                                    <p className="text-[11px] text-text-muted font-medium">Messages are encrypted & payments held securely</p>
-                                </div>
+                            <div className="flex justify-center w-full mb-8">
+                                <MotionDiv initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white/80 backdrop-blur border border-green-100 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
+                                    <span className="material-symbols-outlined text-green-500 text-[18px]">verified_user</span>
+                                    <p className="text-[11px] text-green-700 font-bold uppercase tracking-wider">Secure Connection</p>
+                                </MotionDiv>
                             </div>
 
                             {/* Messages grouped by date */}
                             {Object.entries(messagesByDate).map(([dateKey, dayMessages]) => (
                                 <div key={dateKey}>
                                     {/* Date Divider */}
-                                    <div className="flex items-center justify-center my-3">
-                                        <div className="bg-white border border-border-subtle px-4 py-1.5 rounded-full">
-                                            <span className="text-xs font-bold text-text-muted">{formatDateDivider(dayMessages[0].created_at)}</span>
+                                    <div className="flex items-center justify-center my-6">
+                                        <div className="bg-white/60 backdrop-blur-md border border-gray-100 px-4 py-1.5 rounded-full shadow-sm">
+                                            <span className="text-[10px] font-black uppercase tracking-wider text-secondary">{formatDateDivider(dayMessages[0].created_at)}</span>
                                         </div>
                                     </div>
 
@@ -575,9 +582,9 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                             // Render System Message
                                             if (isSystem) {
                                                 return (
-                                                    <MotionDiv initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={m.id || i} className="flex justify-center my-4">
-                                                        <div className={`px-4 py-2 rounded-2xl text-center max-w-sm shadow-sm ${m.text?.includes('✅') ? 'bg-green-50 border border-green-100' : m.text?.includes('❌') ? 'bg-red-50 border border-red-100' : 'bg-blue-50 border border-blue-100'}`}>
-                                                            <p className={`text-sm font-medium ${m.text?.includes('✅') ? 'text-green-700' : m.text?.includes('❌') ? 'text-red-600' : 'text-blue-700'}`}>{m.text || m.content}</p>
+                                                    <MotionDiv initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} key={m.id || i} className="flex justify-center my-6">
+                                                        <div className={`px-5 py-3 rounded-2xl text-center max-w-sm shadow-sm backdrop-blur-md ${m.text?.includes('✅') ? 'bg-green-50/80 border border-green-200/50' : m.text?.includes('❌') ? 'bg-red-50/80 border border-red-200/50' : 'bg-blue-50/80 border border-blue-200/50'}`}>
+                                                            <p className={`text-sm font-bold ${m.text?.includes('✅') ? 'text-green-800' : m.text?.includes('❌') ? 'text-red-700' : 'text-blue-800'}`}>{m.text || m.content}</p>
                                                         </div>
                                                     </MotionDiv>
                                                 )
@@ -616,10 +623,13 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                                                 </div>
                                                             )}
 
-                                                            <div className={`px-4 py-2.5 shadow-sm text-[15px] leading-relaxed break-words whitespace-pre-wrap ${isMe
-                                                                ? 'bg-gradient-to-br from-primary to-orange-500 text-white rounded-2xl rounded-br-md'
-                                                                : 'bg-white text-text-dark rounded-2xl rounded-bl-md border border-border-subtle'
+                                                            <div className={`px-4 py-2.5 shadow-sm text-[15px] leading-relaxed break-words whitespace-pre-wrap transition-all relative ${isMe
+                                                                ? `bg-gradient-to-br from-primary to-orange-500 text-white border border-orange-400 group-hover:shadow-md ${isSequence ? 'rounded-2xl rounded-tr-md' : 'rounded-2xl rounded-br-sm'}`
+                                                                : `bg-white text-text-dark border-gray-100 group-hover:shadow-md ${isSequence ? 'rounded-2xl rounded-tl-md' : 'rounded-2xl rounded-bl-sm'} border`
                                                                 }`}>
+
+                                                                {/* Optional subtle inner highlight for me messages */}
+                                                                {isMe && <div className="absolute inset-x-0 top-0 h-[1px] bg-white/20 rounded-t-2xl"></div>}
 
                                                                 {/* Dynamic Rendering based on Message Type */}
                                                                 {m.type === 'image' ? (
@@ -636,23 +646,23 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                                                         href={m.fileUrl}
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
-                                                                        className={`flex items-center gap-2 ${isMe ? 'text-white hover:text-white/80' : 'text-primary hover:text-primary/80'}`}
+                                                                        className={`flex items-center gap-2 font-medium bg-black/10 px-3 py-2 rounded-xl transition-colors ${isMe ? 'text-white hover:bg-black/20' : 'text-primary hover:bg-primary/10'}`}
                                                                     >
-                                                                        <span className="material-symbols-outlined text-lg">attach_file</span>
-                                                                        <span className="underline">{m.text}</span>
+                                                                        <span className="material-symbols-outlined text-[20px]">description</span>
+                                                                        <span className="underline decoration-white/50 underline-offset-2">{m.text}</span>
                                                                     </a>
                                                                 ) : (
-                                                                    <p className="text-sm">{m.text || m.content}</p>
+                                                                    <p className="font-medium text-sm md:text-[15px]">{m.text || m.content}</p>
                                                                 )}
 
                                                             </div>
                                                         </div>
 
                                                         {!isSequence && (
-                                                            <span className={`text-[10px] font-medium flex items-center gap-1 mt-1 ${isMe ? 'text-text-muted mr-1' : 'text-text-muted ml-9'}`}>
+                                                            <span className={`text-[10px] font-bold flex items-center gap-1 mt-1 opacity-70 ${isMe ? 'text-text-muted mr-1' : 'text-text-muted ml-9'}`}>
                                                                 {formatTime(m.created_at)}
                                                                 {isMe && (
-                                                                    <span className={`material-symbols-outlined text-xs ${m.readBy && m.readBy.length > 1 ? 'text-blue-500' : 'text-gray-400'}`}>
+                                                                    <span className={`material-symbols-outlined text-[14px] ${m.readBy && m.readBy.length > 1 ? 'text-blue-500' : 'text-gray-400'}`}>
                                                                         {m.readBy && m.readBy.length > 1 ? 'done_all' : 'check'}
                                                                     </span>
                                                                 )}
@@ -675,10 +685,10 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                         exit={{ opacity: 0, y: 10 }}
                                         className="flex items-center gap-2 ml-9 mb-4"
                                     >
-                                        <div className="bg-white px-4 py-3 rounded-2xl border border-border-subtle flex items-center gap-1">
-                                            <span className="size-2 bg-gray-400 rounded-full animate-bounce"></span>
-                                            <span className="size-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
-                                            <span className="size-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                                        <div className="bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-gray-100 flex items-center gap-1.5 shadow-sm">
+                                            <span className="size-2 bg-primary/60 rounded-full animate-bounce"></span>
+                                            <span className="size-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
+                                            <span className="size-2 bg-primary/20 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
                                         </div>
                                     </MotionDiv>
                                 )}
@@ -687,10 +697,10 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                         </div>
 
                         {/* Input Area */}
-                        <div className="p-3 md:p-4 bg-white border-t border-border-subtle z-20">
+                        <div className="bg-white/80 backdrop-blur-md border-t border-white/50 z-20 p-3 pb-safe">
                             <form
                                 onSubmit={send}
-                                className="relative bg-secondary-bg rounded-2xl border border-border-subtle focus-within:border-primary/40 focus-within:shadow-lg focus-within:shadow-primary/5 transition-all"
+                                className="relative bg-gray-50/80 rounded-[28px] border border-gray-200/60 focus-within:border-primary/30 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-primary/5 transition-all shadow-inner overflow-hidden"
                             >
                                 <input
                                     type="file"
@@ -701,11 +711,11 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 />
 
                                 {/* Text Input */}
-                                <div className="px-4 py-3">
+                                <div className="px-5 py-3 pt-4">
                                     <textarea
                                         ref={textareaRef}
-                                        className="w-full bg-transparent border-none p-0 text-text-dark placeholder-text-muted focus:ring-0 resize-none max-h-32 text-[15px] leading-relaxed outline-none"
-                                        placeholder="Type a message..."
+                                        className="w-full bg-transparent border-none p-0 text-text-main placeholder-secondary font-medium focus:ring-0 resize-none max-h-32 text-sm sm:text-[15px] leading-relaxed outline-none customized-scrollbar"
+                                        placeholder="Type your message..."
                                         rows={1}
                                         value={text}
                                         onChange={handleTextChange}
@@ -719,20 +729,20 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                 </div>
 
                                 {/* Action Bar */}
-                                <div className="flex items-center justify-between px-3 py-2 border-t border-border-subtle/50">
+                                <div className="flex items-center justify-between px-3 md:px-4 py-2 mb-1">
                                     {/* Left Actions */}
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-1.5">
                                         <button
                                             type="button"
                                             onClick={() => fileInputRef.current?.click()}
                                             disabled={isUploading}
-                                            className="size-9 rounded-lg text-text-muted hover:text-primary hover:bg-white flex items-center justify-center transition-all disabled:opacity-50"
+                                            className="size-10 rounded-full text-secondary hover:text-primary hover:bg-white flex items-center justify-center transition-all disabled:opacity-50 hover:shadow-sm"
                                             title="Attach file"
                                         >
                                             {isUploading ? (
-                                                <span className="material-symbols-outlined text-lg animate-spin">refresh</span>
+                                                <span className="material-symbols-outlined text-[20px] animate-spin">refresh</span>
                                             ) : (
-                                                <Paperclip size={18} />
+                                                <Paperclip size={18} strokeWidth={2.5} />
                                             )}
                                         </button>
                                         <button
@@ -748,19 +758,19 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                                     }, 100);
                                                 }
                                             }}
-                                            className="size-9 rounded-lg text-text-muted hover:text-primary hover:bg-white flex items-center justify-center transition-all"
+                                            className="size-10 rounded-full text-secondary hover:text-primary hover:bg-white flex items-center justify-center transition-all hover:shadow-sm"
                                             title="Send image"
                                         >
-                                            <span className="material-symbols-outlined text-lg">image</span>
+                                            <span className="material-symbols-outlined text-[20px]">image</span>
                                         </button>
                                         <div className="relative">
                                             <button
                                                 type="button"
                                                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                                className={`size-9 rounded-lg hover:text-primary hover:bg-white flex items-center justify-center transition-all ${showEmojiPicker ? 'text-primary bg-white shadow-sm' : 'text-text-muted'}`}
+                                                className={`size-10 rounded-full flex items-center justify-center transition-all hover:shadow-sm ${showEmojiPicker ? 'text-primary bg-white shadow-sm ring-1 ring-border-light' : 'text-secondary hover:text-primary hover:bg-white'}`}
                                                 title="Emoji"
                                             >
-                                                <span className="material-symbols-outlined text-lg">mood</span>
+                                                <span className="material-symbols-outlined text-[20px]">mood</span>
                                             </button>
 
                                             {/* Emoji Picker Popover */}
@@ -790,19 +800,19 @@ export const ChatRoom = ({ user, chatId, onBack }: { user: any, chatId: string, 
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                             type="submit"
-                                            className="h-9 px-5 rounded-xl bg-gradient-to-r from-primary to-orange-500 text-white font-bold text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
+                                            className="h-10 px-6 rounded-full bg-gradient-to-r from-primary to-orange-500 text-white font-bold text-sm flex items-center gap-2 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all border border-orange-400"
                                         >
                                             <span>Send</span>
-                                            <span className="material-symbols-outlined text-base">send</span>
+                                            <span className="material-symbols-outlined text-[18px]">send</span>
                                         </MotionButton>
                                     ) : (
                                         <button
                                             type="button"
-                                            className="h-9 px-5 rounded-xl bg-gray-100 text-gray-400 font-bold text-sm flex items-center gap-2 cursor-not-allowed"
                                             disabled
+                                            className="h-10 px-5 rounded-full bg-gray-200/60 text-gray-400 font-bold text-sm flex items-center gap-2 transition-all cursor-not-allowed"
                                         >
                                             <span>Send</span>
-                                            <span className="material-symbols-outlined text-base">send</span>
+                                            <span className="material-symbols-outlined text-[18px]">send</span>
                                         </button>
                                     )}
                                 </div>
