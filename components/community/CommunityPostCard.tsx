@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { shareContent } from '../../utils/share';
-import { useAuth } from '../../contexts/AuthContext';
-import { CommunityPost, Comment } from '../../types';
+import { useAuth } from '@/contexts/AuthContext';
+import { CommunityPost, Comment } from '@/types';
 import { Avatar } from '../ui/Avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { Heart, MessageSquare, Share2, MoreHorizontal, CheckCircle, Trash2, Send, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { dbService as db } from '../../services/firestoreService';
-import { useToast } from '../../contexts/ToastContext';
+import { dbService as db } from '@/services/firestoreService';
+import { useToast } from '@/contexts/ToastContext';
 
 interface CommunityPostCardProps {
     post: CommunityPost;

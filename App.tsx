@@ -78,6 +78,22 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [devMode, setDevMode] = useState(() => localStorage.getItem('dev_mode') === 'true');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const devParam = params.get('dev');
+    if (devParam === 'true') {
+      localStorage.setItem('dev_mode', 'true');
+      setDevMode(true);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (devParam === 'false') {
+      localStorage.removeItem('dev_mode');
+      setDevMode(false);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   // Initialize FCM Token Management
   useFcmToken();
 
@@ -253,9 +269,9 @@ function AppContent() {
             </GlassLayout>
           }>
             <Route path="/" element={<Landing />} />
-            {/* Pre-launch: disable auth & onboarding */}
-            <Route path="/auth" element={<Navigate to="/" replace />} />
-            <Route path="/onboarding" element={<Navigate to="/" replace />} />
+            {/* Pre-launch: disable auth & onboarding unless in dev mode */}
+            <Route path="/auth" element={devMode ? <Auth /> : <Navigate to="/" replace />} />
+            <Route path="/onboarding" element={devMode ? <Onboarding /> : <Navigate to="/" replace />} />
 
             {/* New Public Pages */}
             <Route path="/safety" element={<Safety />} />

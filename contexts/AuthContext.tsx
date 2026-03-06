@@ -62,6 +62,14 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       if (profile) {
         // Cast profile to User type for proper property access
         const typedProfile = profile as User;
+
+        // ✅ FIX: Sync avatar_url from Google Auth if missing in Firestore
+        if (!typedProfile.avatar_url && fbUser.photoURL) {
+          typedProfile.avatar_url = fbUser.photoURL;
+          // Fire and forget update to Firestore to persist it
+          dbService.updateProfile(userId, { avatar_url: fbUser.photoURL }).catch(console.error);
+        }
+
         setUser({
           ...typedProfile,
           email: fbUser.email || typedProfile.email || '',
@@ -266,7 +274,7 @@ export const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
     logout,
     refreshProfile,
     deleteAccount,
-    resetPassword: firebaseAuth.resetPassword,
+    resetPassword,
     resendVerification
   };
 

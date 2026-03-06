@@ -99,6 +99,8 @@ export const Landing = () => {
     };
 
     // ── Render ─────────────────────────────────────────────
+    const isDevMode = localStorage.getItem('dev_mode') === 'true';
+
     return (
         <div className="min-h-screen w-full font-body antialiased bg-[#0a0908] text-[#F5F5F4] selection:bg-primary selection:text-white overflow-hidden relative">
 
@@ -329,6 +331,19 @@ export const Landing = () => {
                     </div>
                 </div>
             </section>
+
+            {/* ── Developer Bypass Button ── */}
+            {isDevMode && (
+                <div className="fixed bottom-6 right-6 z-50">
+                    <button
+                        onClick={() => navigate('/auth')}
+                        className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-sm font-bold rounded-xl shadow-[0_4px_20px_rgba(124,58,237,0.3)] hover:shadow-[0_4px_25px_rgba(124,58,237,0.5)] transition-all hover:-translate-y-1 transform border border-white/10"
+                    >
+                        <span className="material-symbols-outlined text-lg">code</span>
+                        Developer Mode: Enter App
+                    </button>
+                </div>
+            )}
 
             {/* ── Minimal Footer ── */}
             <footer className="relative z-10 border-t border-white/[0.04] py-8">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, Send, Star } from 'lucide-react';
 import { Avatar } from '../ui/Avatar';
 

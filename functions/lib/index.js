@@ -20,4 +20,5 @@ if (!admin.apps.length) {
 }
 __exportStar(require("./onboarding"), exports);
 __exportStar(require("./notifications"), exports);
+__exportStar(require("./waitlist"), exports);
 //# sourceMappingURL=index.js.map
