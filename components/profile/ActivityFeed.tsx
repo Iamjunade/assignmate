@@ -66,7 +66,12 @@ export const ActivityFeed = ({ userId, userSchool, viewerSchool }: ActivityFeedP
     return (
         <div className="space-y-4">
             {visiblePosts.map(post => (
-                <CommunityPostCard key={post.id} post={post} />
+                <CommunityPostCard
+                    key={post.id}
+                    post={post}
+                    onLike={() => { }}
+                    onDelete={() => { }}
+                />
             ))}
         </div>
     );

@@ -34,6 +34,16 @@ export interface User {
   ai_profile?: AIProfile; // Optional AI-generated profile
 }
 
+export interface Notification {
+  id: string;
+  senderName: string;
+  content: string;
+  type?: string;
+  chatId?: string;
+  timestamp: any;
+  read?: boolean;
+}
+
 export interface AIProfile {
   strengths: string[];
   weaknesses: string[];

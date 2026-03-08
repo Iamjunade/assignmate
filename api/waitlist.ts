@@ -26,21 +26,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6; color: #333;">
                 <h2 style="color: #f97316;">Welcome to AssignMate! 🚀</h2>
                 <p>Hi there,</p>
-                <p>I'm Junaid, the founder of AssignMate. I wanted to personally reach out and say <strong>thank you</strong> for joining our waitlist!</p>
+                <p>We're the team behind AssignMate, and we wanted to personally reach out and say <strong>thank you</strong> for joining our waitlist!</p>
                 <p>We are building India's first hyper-local student collaboration network, and we're thrilled to have students from ${collegeName} jumping on board early.</p>
                 <p>We're working day and night to get everything perfect for our April 2026 launch. In the meantime, I have one quick favor to ask:</p>
-                <p><strong>Reply to this email and let me know the #1 struggle you face with academics or finding peers on your campus right now.</strong></p>
-                <p>I read every single reply, and it helps us build exactly what you need.</p>
+                <p><strong>Reply to this email and let us know the #1 struggle you face with academics or finding peers on your campus right now.</strong></p>
+                <p>We read every single reply, and it helps us build exactly what you need.</p>
                 <br/>
                 <p>Stay tuned for updates!</p>
                 <p>Best,<br/>
-                <strong>Junaid Pasha</strong><br/>
-                Founder, AssignMate</p>
+                <strong>Team AssignMate</strong></p>
             </div>
         `;
 
         const data = await resend.emails.send({
-            from: 'Junaid at AssignMate <founders@assignmate.live>',
+            from: 'AssignMate <founders@assignmate.live>',
             to: [email],
             subject: 'Welcome to the AssignMate Waitlist 🚀',
             html: htmlContent,

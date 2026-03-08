@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { dbService as db } from '../services/firestoreService';
 import { GlassCard } from '../components/ui/GlassCard';
-import { 
-  Briefcase, 
-  Clock, 
-  CheckCircle2, 
-  DollarSign, 
+import {
+  Briefcase,
+  Clock,
+  CheckCircle2,
+  DollarSign,
   Star,
   Trophy,
   TrendingUp,
@@ -44,7 +44,7 @@ export default function WriterDashboard() {
 
   const stats = [
     { label: 'Active Jobs', value: activeJobs.filter(j => j.status === 'in_progress').length, icon: Briefcase, color: 'text-blue-500' },
-    { label: 'Total Earned', value: `$${user?.total_earnings || 0}`, icon: DollarSign, color: 'text-green-500' },
+    { label: 'Total Earned', value: `$${user?.total_earned || 0}`, icon: DollarSign, color: 'text-green-500' },
     { label: 'Rating', value: `${user?.rating || '5.0'}`, icon: Star, color: 'text-amber-500' },
     { label: 'Completed', value: activeJobs.filter(j => j.status === 'completed').length, icon: CheckCircle2, color: 'text-purple-500' },
   ];
@@ -63,7 +63,7 @@ export default function WriterDashboard() {
               <p className="text-slate-400">You have {activeJobs.filter(j => j.status === 'in_progress').length} active projects today.</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => navigate('/projects')}
             className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white border border-slate-800 px-6 py-3 rounded-xl font-semibold transition-all"
           >
@@ -105,8 +105,8 @@ export default function WriterDashboard() {
               </div>
             ) : activeJobs.length > 0 ? (
               activeJobs.map((job) => (
-                <GlassCard 
-                  key={job.id} 
+                <GlassCard
+                  key={job.id}
                   className="p-6 border-slate-800/50 hover:border-slate-700/50 transition-colors cursor-pointer group"
                   onClick={() => navigate(`/workroom/${job.id}`)}
                 >
@@ -141,7 +141,7 @@ export default function WriterDashboard() {
                           <span>{job.progress || 0}%</span>
                         </div>
                         <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
-                          <div 
+                          <div
                             className="h-full bg-gradient-to-r from-red-500 to-purple-600 transition-all duration-500"
                             style={{ width: `${job.progress || 0}%` }}
                           />
@@ -168,7 +168,7 @@ export default function WriterDashboard() {
                   <h3 className="text-lg font-medium text-white">No active jobs</h3>
                   <p className="text-sm text-slate-400">Submit proposals to start earning today.</p>
                 </div>
-                <button 
+                <button
                   onClick={() => navigate('/projects')}
                   className="text-red-400 font-semibold hover:text-red-300 transition-colors"
                 >

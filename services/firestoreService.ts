@@ -629,6 +629,45 @@ export const dbService = {
             await batch.commit();
         }
     },
+
+    getProjectsByHirer: async (hirerId: string) => {
+        try {
+            const q = query(collection(getDb(), 'projects'), where('hirer_id', '==', hirerId));
+            const snap = await getDocs(q);
+            return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (error) {
+            console.error("Error fetching projects:", error);
+            return [];
+        }
+    },
+
+    getAllTalent: async (filter: string = 'all') => {
+        try {
+            const q = query(collection(getDb(), 'users'), where('is_writer', '==', true));
+            const snap = await getDocs(q);
+            let talent = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            if (filter === 'verified') {
+                talent = talent.filter((t: any) => t.is_verified === 'verified');
+            }
+            return talent;
+        } catch (error) {
+            console.error("Error fetching all talent:", error);
+            return [];
+        }
+    },
+
+    getJobsByWriter: async (writerId: string) => {
+        try {
+            const q = query(collection(getDb(), 'orders'), where('writer_id', '==', writerId));
+            const snap = await getDocs(q);
+            return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (error) {
+            console.error("Error fetching jobs by writer:", error);
+            return [];
+        }
+    },
+
     // --- CHAT SYSTEM ---
     getChats: async (userId: string) => {
         try {

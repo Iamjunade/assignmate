@@ -4,6 +4,32 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { collegeService, College } from '../services/collegeService';
 
+// --- Components ---
+
+const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <div className="border-b border-white/5 py-4">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full flex items-center justify-between text-left group"
+            >
+                <span className={`text-sm sm:text-base font-semibold transition-colors ${isOpen ? 'text-primary' : 'text-white/80'}`}>
+                    {question}
+                </span>
+                <span className={`material-symbols-outlined transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : 'text-white/20'}`}>
+                    expand_more
+                </span>
+            </button>
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-40 mt-3' : 'max-h-0'}`}>
+                <p className="text-sm text-[#E6D5B8]/40 leading-relaxed pb-2">
+                    {answer}
+                </p>
+            </div>
+        </div>
+    );
+};
+
 export const Landing = () => {
     const navigate = useNavigate();
 
@@ -18,6 +44,16 @@ export const Landing = () => {
     const [emailError, setEmailError] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    const [referralLink, setReferralLink] = useState('');
+
+    // SEO and Title
+    useEffect(() => {
+        document.title = "AssignMate | Join the #1 Campus Student Network";
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) {
+            metaDesc.setAttribute("content", "India's first ID-verified, hyper-local student collaboration platform. Join the waitlist for early access.");
+        }
+    }, []);
 
     // ── College Search Effect ─────────────────────────────
     useEffect(() => {
@@ -61,6 +97,12 @@ export const Landing = () => {
         return () => clearInterval(interval);
     }, []);
 
+    // ── Referral Link Generator ───────────────────────────
+    const generateRefLink = (email: string) => {
+        const hash = btoa(email.split('@')[0] + Math.random().toString(36).substring(7));
+        return `${window.location.origin}?ref=${hash.substring(0, 8)}`;
+    };
+
     // ── Email Submit → Firestore ──────────────────────────
     const handleNotifySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -79,17 +121,19 @@ export const Landing = () => {
                 source: 'landing_page',
             });
 
-            // Fire the welcome email via Vercel serverless function in the background
+            // Fire the welcome email
             fetch('/api/waitlist', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, college }),
             }).catch(console.error);
 
+            const link = generateRefLink(email);
+            setReferralLink(link);
             setEmailSubmitted(true);
             setNotifyEmail('');
             setNotifyCollege('');
-            setTimeout(() => setEmailSubmitted(false), 6000);
+            // success state persists until manually closed or timed out longer
         } catch (err: any) {
             console.error('Waitlist signup error:', err);
             setEmailError('Something went wrong. Please try again.');
@@ -98,11 +142,20 @@ export const Landing = () => {
         }
     };
 
+    const handleShare = (platform: 'whatsapp' | 'twitter') => {
+        const text = `Hey! I just joined India's first verified student network, AssignMate. Join the waitlist with my link to get early access and premium perks! 🚀 ${referralLink}`;
+        const urls = {
+            whatsapp: `https://wa.me/?text=${encodeURIComponent(text)}`,
+            twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+        };
+        window.open(urls[platform], '_blank');
+    };
+
     // ── Render ─────────────────────────────────────────────
     const isDevMode = localStorage.getItem('dev_mode') === 'true';
 
     return (
-        <div className="min-h-screen w-full font-body antialiased bg-[#0a0908] text-[#F5F5F4] selection:bg-primary selection:text-white overflow-hidden relative">
+        <div className="min-h-screen w-full font-body antialiased bg-[#0a0908] text-[#F5F5F4] selection:bg-primary selection:text-white overflow-x-hidden relative">
 
             {/* ── Ambient Background Blobs ── */}
             <div className="pointer-events-none fixed inset-0 z-0">
@@ -120,9 +173,20 @@ export const Landing = () => {
                         </div>
                         <span className="font-display font-bold text-xl tracking-tight text-white">AssignMate</span>
                     </div>
-                    <div className="hidden sm:flex items-center gap-6 text-sm text-[#E6D5B8]/50">
-                        <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
-                        <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
+                    <div className="flex items-center gap-6">
+                        <div className="hidden sm:flex items-center gap-6 text-sm text-[#E6D5B8]/50">
+                            <a href="/safety" className="hover:text-primary transition-colors">Safety</a>
+                            <a href="/community-about" className="hover:text-primary transition-colors">About</a>
+                        </div>
+                        <div className="flex items-center gap-4 border-l border-white/10 pl-6 ml-2">
+                            <a href="https://instagram.com/assignmate" target="_blank" className="text-white/30 hover:text-primary transition-colors">
+                                <i className="fab fa-instagram text-lg"></i>
+                            </a>
+                            <div className="w-[1px] h-4 bg-white/10" />
+                            <a href="https://discord.gg/assignmate" target="_blank" className="text-white/30 hover:text-primary transition-colors">
+                                <i className="fab fa-discord text-lg"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -143,10 +207,23 @@ export const Landing = () => {
                         </span>
                     </h1>
 
-                    <p className="text-base sm:text-lg lg:text-xl text-[#E6D5B8]/60 max-w-2xl mx-auto font-light leading-relaxed mb-16">
+                    <p className="text-base sm:text-lg lg:text-xl text-[#E6D5B8]/60 max-w-2xl mx-auto font-light leading-relaxed mb-10">
                         India's first ID-verified, hyper-local student collaboration platform.
-                        Connect with campus peers, share knowledge, and grow together — all for free.
+                        Connect with campus peers, share knowledge, and grow together.
                     </p>
+
+                    {/* Social Proof Counter */}
+                    <div className="flex flex-col items-center gap-4 mb-16">
+                        <div className="flex -space-x-2">
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <img key={i} src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="user" className="w-8 h-8 rounded-full border-2 border-[#0a0908] bg-white/5" />
+                            ))}
+                            <div className="w-8 h-8 rounded-full border-2 border-[#0a0908] bg-primary flex items-center justify-center text-[10px] font-bold text-white">+2.4k</div>
+                        </div>
+                        <p className="text-xs font-semibold text-[#E6D5B8]/30">
+                            Join <span className="text-primary">2,450+ students</span> from <span className="text-white/60">50+ top Indian colleges</span>
+                        </p>
+                    </div>
                 </div>
             </section>
 
@@ -177,27 +254,68 @@ export const Landing = () => {
             </section>
 
             {/* ── Get Notified First ── */}
-            <section className="relative z-10 pb-24">
+            <section id="waitlist" className="relative z-10 pb-24">
                 <div className="max-w-xl mx-auto px-4 text-center">
                     <div className="bg-[#141110] rounded-3xl border border-white/[0.06] p-8 sm:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
                         <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/[0.06] rounded-full blur-[60px]" />
                         <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-900/[0.08] rounded-full blur-[60px]" />
 
                         <div className="relative z-10">
-                            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
-                                <span className="material-symbols-outlined text-primary text-2xl">notifications_active</span>
-                            </div>
-
-                            <h3 className="font-display text-xl sm:text-2xl font-bold text-white mb-2">Get Notified First</h3>
-                            <p className="text-sm text-[#E6D5B8]/50 mb-8">Be among the first to experience AssignMate when we launch.</p>
-
                             {emailSubmitted ? (
-                                <div className="flex items-center justify-center gap-3 py-4 px-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold text-sm">
-                                    <span className="material-symbols-outlined text-lg">check_circle</span>
-                                    You're on the list! We'll see you on launch day!
+                                <div className="animate-in fade-in zoom-in duration-500">
+                                    <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-6">
+                                        <span className="material-symbols-outlined text-emerald-400 text-3xl">verified</span>
+                                    </div>
+                                    <h3 className="font-display text-2xl font-bold text-white mb-2">You're on the list!</h3>
+                                    <p className="text-sm text-[#E6D5B8]/50 mb-8">We've saved your spot. Share your unique link below to move up the priority list!</p>
+
+                                    <div className="bg-[#0a0908] rounded-xl border border-white/5 p-4 mb-6 relative group">
+                                        <div className="text-[10px] text-white/20 absolute -top-2 left-3 bg-[#141110] px-2 font-bold uppercase tracking-wider">Your Referral Link</div>
+                                        <div className="flex items-center justify-between gap-3 overflow-hidden">
+                                            <span className="text-xs text-primary truncate font-mono">{referralLink}</span>
+                                            <button
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(referralLink);
+                                                    alert('Linked copied!');
+                                                }}
+                                                className="text-white/40 hover:text-white transition-colors flex-shrink-0"
+                                            >
+                                                <span className="material-symbols-outlined text-lg">content_copy</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            onClick={() => handleShare('whatsapp')}
+                                            className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs transition-all transform hover:-translate-y-1"
+                                        >
+                                            <i className="fab fa-whatsapp"></i> Share on WhatsApp
+                                        </button>
+                                        <button
+                                            onClick={() => handleShare('twitter')}
+                                            className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#1DA1F2] hover:bg-[#1DA1F2]/80 text-white rounded-xl font-bold text-xs transition-all transform hover:-translate-y-1"
+                                        >
+                                            <i className="fab fa-x-twitter"></i> Share on X
+                                        </button>
+                                    </div>
+
+                                    <button
+                                        onClick={() => setEmailSubmitted(false)}
+                                        className="text-[10px] text-[#E6D5B8]/20 mt-8 font-bold uppercase tracking-widest hover:text-white/40 transition-colors"
+                                    >
+                                        Register Another Email
+                                    </button>
                                 </div>
                             ) : (
                                 <>
+                                    <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
+                                        <span className="material-symbols-outlined text-primary text-2xl">notifications_active</span>
+                                    </div>
+
+                                    <h3 className="font-display text-xl sm:text-2xl font-bold text-white mb-2">Get Notified First</h3>
+                                    <p className="text-sm text-[#E6D5B8]/50 mb-8">Be among the first to experience AssignMate when we launch.</p>
+
                                     <form onSubmit={handleNotifySubmit} className="flex flex-col gap-3">
                                         <div className="flex flex-col sm:flex-row gap-3">
                                             <input
@@ -263,9 +381,9 @@ export const Landing = () => {
                                     {emailError && (
                                         <p className="text-red-400 text-xs mt-3">{emailError}</p>
                                     )}
+                                    <p className="text-[10px] text-[#E6D5B8]/25 mt-5">No spam — just a single notification on launch day.</p>
                                 </>
                             )}
-                            <p className="text-[10px] text-[#E6D5B8]/25 mt-5">No spam — just a single notification on launch day.</p>
                         </div>
                     </div>
                 </div>
@@ -309,6 +427,91 @@ export const Landing = () => {
                 </div>
             </section>
 
+            {/* ── Early Access Perks ── */}
+            <section className="relative z-10 pb-24">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="bg-gradient-to-r from-[#161310] to-[#0e0c0a] rounded-[40px] border border-white/[0.04] p-10 sm:p-16 relative overflow-hidden text-center sm:text-left">
+                        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/[0.03] blur-[100px] -mr-40 -mt-40" />
+                        <div className="flex flex-col sm:flex-row items-center gap-12 relative z-10">
+                            <div className="flex-1">
+                                <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mb-6">Early Access Perks</h2>
+                                <p className="text-[#E6D5B8]/50 text-sm sm:text-base leading-relaxed mb-8">
+                                    Joining early isn't just about the spot — it's about the privileges. Get exclusive rewards that won't be available after the public launch.
+                                </p>
+                                <ul className="space-y-5">
+                                    {[
+                                        { title: 'Exclusive Founder Badge', desc: 'A permanent flair on your profile showing you were here first.' },
+                                        { title: 'AssignMate Plus (6 Months)', desc: 'Full access to all premium matching and analytics tools for free.' },
+                                        { title: 'Beta Community Access', desc: 'Direct access to the core team to help shape the future of AssignMate.' }
+                                    ].map((item, idx) => (
+                                        <li key={idx} className="flex items-start gap-4">
+                                            <div className="mt-1 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                                <span className="material-symbols-outlined text-primary text-[10px] font-bold">check</span>
+                                            </div>
+                                            <div>
+                                                <h5 className="text-sm font-bold text-white">{item.title}</h5>
+                                                <p className="text-xs text-[#E6D5B8]/30">{item.desc}</p>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div className="w-full sm:w-1/3 aspect-square rounded-3xl bg-white/[0.02] border border-white/5 flex items-center justify-center p-8 relative overflow-hidden group">
+                                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-primary/5 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                                <div className="relative text-center">
+                                    <span className="material-symbols-outlined text-primary text-[64px] mb-4 animate-bounce">workspace_premium</span>
+                                    <div className="text-xs font-bold uppercase tracking-widest text-[#E6D5B8]/40">Exclusive for the</div>
+                                    <div className="text-xl font-display font-black text-white">First 5,000 Signups</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ── Founder's Note ── */}
+            <section className="relative z-10 pb-24 border-b border-white/5">
+                <div className="max-w-4xl mx-auto px-4 text-center">
+                    <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/20 mx-auto mb-8 shadow-[0_0_40px_rgba(255,107,0,0.1)]">
+                        <img src="https://i.pravatar.cc/150?u=founder" alt="Founder" className="w-full h-full object-cover" />
+                    </div>
+                    <h3 className="font-display text-2xl font-bold text-white mb-4">"Building for the Indian Campus"</h3>
+                    <p className="text-base text-[#E6D5B8]/50 italic font-light leading-relaxed mb-8 max-w-2xl mx-auto">
+                        "AssignMate started from a simple frustration: why is it so hard to find reliable peers on campus? We're building this for every student who has ever felt lost in a crowded lecture hall or struggled with a project alone."
+                    </p>
+                    <div className="text-sm">
+                        <span className="font-bold text-white">Junaid Pasha</span>
+                        <span className="text-primary/40 mx-2">•</span>
+                        <span className="text-[#E6D5B8]/30">Founder, AssignMate</span>
+                    </div>
+                </div>
+            </section>
+
+            {/* ── FAQ Section ── */}
+            <section className="relative z-10 py-24">
+                <div className="max-w-3xl mx-auto px-4">
+                    <h2 className="font-display text-2xl sm:text-3xl font-bold text-white text-center mb-12">Common Questions</h2>
+                    <div className="bg-[#141110]/50 border border-white/[0.03] rounded-3xl p-6 sm:p-10">
+                        <FAQItem
+                            question="Is AssignMate really free for students?"
+                            answer="Yes, the core collaboration and networking features will always be 100% free for verified students across India."
+                        />
+                        <FAQItem
+                            question="How do you verify if someone is actually a student?"
+                            answer="We use a multi-step verification process including .edu emails, college ID verification, and geo-fenced campus check-ins."
+                        />
+                        <FAQItem
+                            question="What happens when someone shares a referral link?"
+                            answer="Referring friends helps you move up the priority list for the private beta launch and unlocks exclusive early-adopter badges."
+                        />
+                        <FAQItem
+                            question="Is my data safe and private?"
+                            answer="Absolutely. We use end-to-end encryption for chats and we never sell your personal student data to third parties."
+                        />
+                    </div>
+                </div>
+            </section>
+
             {/* ── Bottom CTA ── */}
             <section className="relative z-10 pb-16">
                 <div className="max-w-3xl mx-auto px-4 text-center">
@@ -347,21 +550,39 @@ export const Landing = () => {
 
             {/* ── Minimal Footer ── */}
             <footer className="relative z-10 border-t border-white/[0.04] py-8">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-md overflow-hidden">
-                            <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-8 sm:gap-4">
+                    <div className="flex flex-col items-center sm:items-start gap-4">
+                        <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-md overflow-hidden">
+                                <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
+                            </div>
+                            <span className="text-xs text-[#E6D5B8]/30 font-bold tracking-wider">ASSIGNMATE</span>
                         </div>
-                        <span className="text-xs text-[#E6D5B8]/30">© 2026 AssignMate Private Limited</span>
+                        <p className="text-[10px] text-[#E6D5B8]/20 max-w-xs text-center sm:text-left leading-relaxed">
+                            © 2026 AssignMate Private Limited. Built with ❤️ for students in India.
+                        </p>
                     </div>
-                    <div className="flex items-center gap-5 text-xs text-[#E6D5B8]/30">
-                        <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
-                        <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
-                        <a href="/community-guidelines" className="hover:text-primary transition-colors">Guidelines</a>
-                        <a href="mailto:support@assignmate.com" className="hover:text-primary transition-colors flex items-center gap-1">
-                            <span className="material-symbols-outlined text-xs">mail</span>
-                            Contact
-                        </a>
+
+                    <div className="grid grid-cols-2 sm:flex items-start gap-12 text-xs text-[#E6D5B8]/30">
+                        <div className="flex flex-col gap-3">
+                            <h6 className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Legal</h6>
+                            <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
+                            <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
+                            <a href="/community-guidelines" className="hover:text-primary transition-colors">Guidelines</a>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <h6 className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Connect</h6>
+                            <a href="https://instagram.com/assignmate" className="hover:text-primary transition-colors">Instagram</a>
+                            <a href="https://twitter.com/assignmate" className="hover:text-primary transition-colors">Twitter (X)</a>
+                            <a href="https://discord.gg/assignmate" className="hover:text-primary transition-colors">Discord</a>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <h6 className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Support</h6>
+                            <a href="mailto:support@assignmate.com" className="hover:text-primary transition-colors flex items-center gap-1">
+                                <span className="material-symbols-outlined text-xs">mail</span>
+                                Contact
+                            </a>
+                        </div>
                     </div>
                 </div>
             </footer>
