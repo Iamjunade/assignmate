@@ -81,7 +81,7 @@ export const Landing = () => {
 
     // ── Countdown Timer – April 1, 2026 ───────────────────
     useEffect(() => {
-        const launchDate = new Date('2026-04-01T00:00:00').getTime();
+        const launchDate = new Date('2026-05-20T00:00:00').getTime();
         const tick = () => {
             const now = Date.now();
             const diff = Math.max(0, launchDate - now);
@@ -197,7 +197,7 @@ export const Landing = () => {
                     {/* Badge */}
                     <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-[0.15em] mb-10 animate-pulse">
                         <span className="material-symbols-outlined text-sm">rocket_launch</span>
-                        Launching April 2026
+                        Launching May 20, 2026
                     </div>
 
                     <h1 className="font-display text-5xl sm:text-6xl lg:text-8xl font-extrabold tracking-tight text-white leading-[1.05] mb-6">

@@ -45,7 +45,7 @@ exports.onWaitlistSignup = functions.firestore
                     <p>Hi there,</p>
                     <p>I'm Junaid, the founder of AssignMate. I wanted to personally reach out and say <strong>thank you</strong> for joining our waitlist!</p>
                     <p>We are building India's first hyper-local student collaboration network, and we're thrilled to have students from ${college} jumping on board early.</p>
-                    <p>We're working day and night to get everything perfect for our April 2026 launch. In the meantime, I have one quick favor to ask:</p>
+                    <p>We're working day and night to get everything perfect for our May 20, 2026 launch. In the meantime, I have one quick favor to ask:</p>
                     <p><strong>Reply to this email and let me know the #1 struggle you face with academics or finding peers on your campus right now.</strong></p>
                     <p>I read every single reply, and it helps us build exactly what you need.</p>
                     <br/>
