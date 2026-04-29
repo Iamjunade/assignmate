@@ -3,7 +3,8 @@ const CONFIG = {
     ENABLED: process.env.ENABLE_COLLEGE_FALLBACK === 'true',
     API_URL: process.env.COLLEGE_API_URL || 'https://indian-colleges-list.vercel.app/api/institutions',
     CACHE_TTL_MS: 1000 * 60 * 60, // 1 hour
-    FALLBACK_COLLECTION: 'colleges_fallback'
+    FALLBACK_COLLECTION: 'colleges_fallback',
+    CACHE_MAX_ENTRIES: 2000
 };
 
 // --- TYPES ---
@@ -46,6 +47,10 @@ const cache = {
         return entry.data;
     },
     set: (query: string, data: College[]): void => {
+        if (memoryCache.size >= CONFIG.CACHE_MAX_ENTRIES) {
+            const firstKey = memoryCache.keys().next().value;
+            if (firstKey) memoryCache.delete(firstKey);
+        }
         memoryCache.set(query.toLowerCase(), { data, timestamp: Date.now() });
     }
 };
@@ -174,17 +179,18 @@ const apiClient = {
 // --- MAIN SEARCH FUNCTION ---
 export const searchCollegeFallback = async (query: string): Promise<College[]> => {
     if (!CONFIG.ENABLED) return [];
-    if (!query || query.length < 3) return [];
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery || normalizedQuery.length < 3) return [];
 
     // 1. Check Cache
-    const cachedResult = cache.get(query);
+    const cachedResult = cache.get(normalizedQuery);
     if (cachedResult) return cachedResult;
 
     // 2. Check Fallback DB
     try {
-        const dbResult = await ingestion.searchInFallback(query);
+        const dbResult = await ingestion.searchInFallback(normalizedQuery);
         if (dbResult && dbResult.length > 0) {
-            cache.set(query, dbResult);
+            cache.set(normalizedQuery, dbResult);
             return dbResult;
         }
     } catch (e) {
@@ -192,10 +198,10 @@ export const searchCollegeFallback = async (query: string): Promise<College[]> =
     }
 
     // 3. Ext API
-    const apiResult = await apiClient.fetchColleges(query);
+    const apiResult = await apiClient.fetchColleges(normalizedQuery);
     if (apiResult && apiResult.length > 0) {
         ingestion.saveToFallbackOnly(apiResult).catch(() => { });
-        cache.set(query, apiResult);
+        cache.set(normalizedQuery, apiResult);
         return apiResult;
     }
 
