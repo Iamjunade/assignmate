@@ -9,20 +9,20 @@ import { collegeService, College } from '../services/collegeService';
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-        <div className="border-b border-indigo-500/10 py-5">
+        <div className="border-b border-white/5 py-4">
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full flex items-center justify-between text-left group"
             >
-                <span className={`text-sm sm:text-base font-semibold tracking-wide transition-colors ${isOpen ? 'text-indigo-400' : 'text-slate-300 group-hover:text-white'}`}>
+                <span className={`text-sm sm:text-base font-semibold transition-colors ${isOpen ? 'text-primary' : 'text-white/80'}`}>
                     {question}
                 </span>
-                <span className={`material-symbols-outlined transition-transform duration-500 ${isOpen ? 'rotate-180 text-indigo-400' : 'text-slate-600 group-hover:text-slate-400'}`}>
+                <span className={`material-symbols-outlined transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : 'text-white/20'}`}>
                     expand_more
                 </span>
             </button>
-            <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-40 mt-4 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <p className="text-sm text-slate-400 leading-relaxed pb-2 font-light">
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-40 mt-3' : 'max-h-0'}`}>
+                <p className="text-sm text-[#E6D5B8]/40 leading-relaxed pb-2">
                     {answer}
                 </p>
             </div>
@@ -48,10 +48,10 @@ export const Landing = () => {
 
     // SEO and Title
     useEffect(() => {
-        document.title = "AssignMate | The AssignMate Network - Students Helping Students";
+        document.title = "AssignMate | Join the #1 Campus Student Network";
         const metaDesc = document.querySelector('meta[name="description"]');
         if (metaDesc) {
-            metaDesc.setAttribute("content", "Join the AssignMate Network - a movement of students helping students. Find academic support, hackathon teams, and build meaningful connections across campuses.");
+            metaDesc.setAttribute("content", "India's first ID-verified, hyper-local student collaboration platform. Join the waitlist for early access.");
         }
     }, []);
 
@@ -79,7 +79,7 @@ export const Landing = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // ── Countdown Timer ───────────────────
+    // ── Countdown Timer – April 1, 2026 ───────────────────
     useEffect(() => {
         const launchDate = new Date('2026-05-20T00:00:00').getTime();
         const tick = () => {
@@ -118,7 +118,7 @@ export const Landing = () => {
                 email,
                 college,
                 subscribed_at: serverTimestamp(),
-                source: 'metaminds_landing',
+                source: 'landing_page',
             });
 
             // Fire the welcome email
@@ -133,16 +133,17 @@ export const Landing = () => {
             setEmailSubmitted(true);
             setNotifyEmail('');
             setNotifyCollege('');
+            // success state persists until manually closed or timed out longer
         } catch (err: any) {
             console.error('Waitlist signup error:', err);
-            setEmailError('Systems overloaded. Please try connecting again.');
+            setEmailError('Something went wrong. Please try again.');
         } finally {
             setSubmitting(false);
         }
     };
 
     const handleShare = (platform: 'whatsapp' | 'twitter') => {
-        const text = `I just secured my early access to METAMINDS. The next era of intelligent dashboards and connected communities is here. Join my grid: ${referralLink}`;
+        const text = `Hey! I just joined India's first verified student network, AssignMate. Join the waitlist with my link to get early access and premium perks! 🚀 ${referralLink}`;
         const urls = {
             whatsapp: `https://wa.me/?text=${encodeURIComponent(text)}`,
             twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
@@ -154,39 +155,36 @@ export const Landing = () => {
     const isDevMode = localStorage.getItem('dev_mode') === 'true';
 
     return (
-        <div className="min-h-screen w-full font-body antialiased bg-[#030108] text-slate-200 selection:bg-indigo-500/50 selection:text-white overflow-x-hidden relative">
+        <div className="min-h-screen w-full font-body antialiased bg-[#0a0908] text-[#F5F5F4] selection:bg-primary selection:text-white overflow-x-hidden relative">
 
-            {/* ── Ambient Background & Grid ── */}
-            <div className="fixed inset-0 z-0 pointer-events-none w-full h-full" 
-                 style={{ 
-                     backgroundImage: 'linear-gradient(to right, rgba(99, 102, 241, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(99, 102, 241, 0.03) 1px, transparent 1px)', 
-                     backgroundSize: '40px 40px' 
-                 }}>
-                <div className="absolute top-[-20%] right-[-10%] w-[900px] h-[900px] bg-indigo-600/[0.07] blur-[150px] rounded-full mix-blend-screen" />
-                <div className="absolute bottom-[-10%] left-[-10%] w-[700px] h-[700px] bg-cyan-500/[0.05] blur-[120px] rounded-full mix-blend-screen" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[600px] bg-blue-900/[0.04] blur-[200px] rounded-[100%]" />
+            {/* ── Ambient Background Blobs ── */}
+            <div className="pointer-events-none fixed inset-0 z-0">
+                <div className="absolute top-[-10%] right-[-5%] w-[700px] h-[700px] bg-primary/[0.06] blur-[180px] rounded-full" />
+                <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-orange-900/[0.08] blur-[150px] rounded-full" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-primary/[0.02] blur-[200px] rounded-full" />
             </div>
 
-            {/* ── Minimalist Geometric Navbar ── */}
-            <nav className="relative z-20 w-full border-b border-white/[0.02] bg-black/20 backdrop-blur-md">
-                <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-                    <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
-                        <div className="w-8 h-8 rounded shrink-0 bg-gradient-to-br from-indigo-500 to-cyan-400 rotate-45 flex items-center justify-center group-hover:rotate-90 transition-all duration-700 shadow-[0_0_20px_rgba(99,102,241,0.3)]">
-                            <div className="w-3 h-3 bg-black transform -rotate-45" />
+            {/* ── Minimal Navbar ── */}
+            <nav className="relative z-20 w-full">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
+                        <div className="w-10 h-10 rounded-xl overflow-hidden shadow-[0_0_20px_rgba(255,107,0,0.15)]">
+                            <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
                         </div>
-                        <span className="font-display font-black text-xl tracking-[0.15em] text-white ml-2">ASSIGNMATE</span>
+                        <span className="font-display font-bold text-xl tracking-tight text-white">AssignMate</span>
                     </div>
-                    <div className="flex items-center gap-8 text-xs font-semibold tracking-widest text-slate-400">
-                        <div className="hidden sm:flex gap-8">
-                            <a href="#values" className="hover:text-cyan-400 transition-colors uppercase">Values</a>
-                            <a href="#access" className="hover:text-indigo-400 transition-colors uppercase">Join</a>
+                    <div className="flex items-center gap-6">
+                        <div className="hidden sm:flex items-center gap-6 text-sm text-[#E6D5B8]/50">
+                            <a href="/safety" className="hover:text-primary transition-colors">Safety</a>
+                            <a href="/community-about" className="hover:text-primary transition-colors">About</a>
                         </div>
-                        <div className="flex items-center gap-4 border-l border-white/10 pl-8">
-                            <a href="#" className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white transition-all text-sm">
-                                <i className="fab fa-x-twitter"></i>
+                        <div className="flex items-center gap-4 border-l border-white/10 pl-6 ml-2">
+                            <a href="https://instagram.com/assignmate" target="_blank" className="text-white/30 hover:text-primary transition-colors">
+                                <i className="fab fa-instagram text-lg"></i>
                             </a>
-                            <a href="#" className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white transition-all text-sm">
-                                <i className="fab fa-discord"></i>
+                            <div className="w-[1px] h-4 bg-white/10" />
+                            <a href="https://discord.gg/assignmate" target="_blank" className="text-white/30 hover:text-primary transition-colors">
+                                <i className="fab fa-discord text-lg"></i>
                             </a>
                         </div>
                     </div>
@@ -194,237 +192,196 @@ export const Landing = () => {
             </nav>
 
             {/* ── Hero ── */}
-            <section className="relative z-10 pt-24 pb-16 overflow-hidden">
-                <div className="max-w-5xl mx-auto px-6 text-center">
-                    
-                    {/* Glowing Pill */}
-                    <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[10px] font-black uppercase tracking-[0.3em] mb-12 shadow-[0_0_30px_rgba(99,102,241,0.2)]">
-                        <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                        The AssignMate Network
+            <section className="relative z-10 pt-10 sm:pt-16 lg:pt-20 pb-6">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    {/* Badge */}
+                    <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-[0.15em] mb-10 animate-pulse">
+                        <span className="material-symbols-outlined text-sm">rocket_launch</span>
+                        Launching May 20, 2026
                     </div>
 
-                    <h1 className="font-display text-5xl sm:text-7xl lg:text-[7rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-slate-600 leading-[0.95] mb-8 pb-2 drop-shadow-2xl">
-                        More Than Just <br className="hidden sm:block" />
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-cyan-400 to-indigo-500 filter drop-shadow-[0_0_40px_rgba(99,102,241,0.4)]">
-                            Classmates.
+                    <h1 className="font-display text-5xl sm:text-6xl lg:text-8xl font-extrabold tracking-tight text-white leading-[1.05] mb-6">
+                        The Future of{' '}
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-orange-400 to-amber-300">
+                            Campus Learning
                         </span>
                     </h1>
 
-                    <p className="text-base sm:text-xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed mb-16 tracking-wide">
-                        We are a movement of students helping students. We believe that knowledge grows when shared, and no one should have to struggle alone.
+                    <p className="text-base sm:text-lg lg:text-xl text-[#E6D5B8]/60 max-w-2xl mx-auto font-light leading-relaxed mb-10">
+                        India's first ID-verified, hyper-local student collaboration platform.
+                        Connect with campus peers, share knowledge, and grow together.
                     </p>
-                </div>
-            </section>
 
-            {/* ── Sub-level Stats ── */}
-            <div className="relative z-10 max-w-4xl mx-auto px-6 pb-20">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl">
-                    <div className="bg-[#05030d] p-6 text-center">
-                        <div className="text-3xl font-black text-white font-mono flex justify-center items-baseline gap-1">
-                            10,000<span className="text-indigo-400 text-lg">+</span>
+                    {/* Social Proof Counter */}
+                    <div className="flex flex-col items-center gap-4 mb-16">
+                        <div className="flex -space-x-2">
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <img key={i} src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="user" className="w-8 h-8 rounded-full border-2 border-[#0a0908] bg-white/5" />
+                            ))}
+                            <div className="w-8 h-8 rounded-full border-2 border-[#0a0908] bg-primary flex items-center justify-center text-[10px] font-bold text-white">+2.4k</div>
                         </div>
-                        <div className="text-[10px] text-slate-500 uppercase tracking-widest mt-2 font-bold">Active Students</div>
-                    </div>
-                    <div className="bg-[#05030d] p-6 text-center shadow-[inset_0_0_40px_rgba(99,102,241,0.05)]">
-                        <div className="text-3xl font-black text-white font-mono flex justify-center items-baseline gap-1">
-                            50<span className="text-cyan-400 text-lg">+</span>
-                        </div>
-                        <div className="text-[10px] text-slate-500 uppercase tracking-widest mt-2 font-bold">Campuses</div>
-                    </div>
-                    <div className="bg-[#05030d] p-6 text-center">
-                        <div className="text-3xl font-black text-white font-mono flex justify-center items-baseline gap-1">
-                            25k<span className="text-indigo-400 text-lg">+</span>
-                        </div>
-                        <div className="text-[10px] text-slate-500 uppercase tracking-widest mt-2 font-bold">Queries Solved</div>
-                    </div>
-                    <div className="bg-[#05030d] p-6 text-center shadow-[inset_0_0_40px_rgba(6,182,212,0.05)]">
-                        <div className="text-3xl font-black text-white font-mono flex justify-center items-baseline gap-1">
-                            2 hrs
-                        </div>
-                        <div className="text-[10px] text-slate-500 uppercase tracking-widest mt-2 font-bold">Avg Response Time</div>
-                    </div>
-                </div>
-            </div>
-
-            {/* ── Our Values ── */}
-            <section id="values" className="relative z-10 py-20">
-                <div className="max-w-6xl mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <h2 className="font-display text-4xl sm:text-5xl font-black text-white mb-6">Our Values</h2>
-                        <p className="text-lg text-slate-400 max-w-2xl mx-auto">The principles that guide every interaction on our platform.</p>
-                    </div>
-                    
-                    <div className="grid md:grid-cols-3 gap-8">
-                        <div className="bg-[#070514]/50 backdrop-blur-xl rounded-2xl border border-indigo-500/10 p-8 text-center hover:border-indigo-500/30 transition-all duration-300">
-                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(99,102,241,0.3)]">
-                                <span className="material-symbols-outlined text-white text-2xl">favorite</span>
-                            </div>
-                            <h3 className="font-display text-2xl font-black text-white mb-4">Empathy First</h3>
-                            <p className="text-slate-400 leading-relaxed">We understand the pressure of academics. Kindness and patience are our default settings.</p>
-                        </div>
-                        
-                        <div className="bg-[#070514]/50 backdrop-blur-xl rounded-2xl border border-cyan-500/10 p-8 text-center hover:border-cyan-500/30 transition-all duration-300">
-                            <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(6,182,212,0.3)]">
-                                <span className="material-symbols-outlined text-white text-2xl">group_work</span>
-                            </div>
-                            <h3 className="font-display text-2xl font-black text-white mb-4">Active Collaboration</h3>
-                            <p className="text-slate-400 leading-relaxed">Don't just copy. Understand. Explain. Discuss. True learning happens in the exchange.</p>
-                        </div>
-                        
-                        <div className="bg-[#070514]/50 backdrop-blur-xl rounded-2xl border border-indigo-500/10 p-8 text-center hover:border-indigo-500/30 transition-all duration-300">
-                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(99,102,241,0.3)]">
-                                <span className="material-symbols-outlined text-white text-2xl">diversity_3</span>
-                            </div>
-                            <h3 className="font-display text-2xl font-black text-white mb-4">Inclusive Growth</h3>
-                            <p className="text-slate-400 leading-relaxed">From IITs to local colleges, talent is everywhere. We bridge the gap between institutions.</p>
-                        </div>
+                        <p className="text-xs font-semibold text-[#E6D5B8]/30">
+                            Join <span className="text-primary">2,450+ students</span> from <span className="text-white/60">50+ top Indian colleges</span>
+                        </p>
                     </div>
                 </div>
             </section>
 
-            {/* ── Registration / Terminal Input ── */}
-            <section id="access" className="relative z-10 pb-32">
-                <div className="max-w-2xl mx-auto px-6 text-center">
-                    <div className="bg-[#070514]/80 backdrop-blur-3xl rounded-[2rem] border border-indigo-500/20 p-8 sm:p-14 shadow-[0_20px_80px_-15px_rgba(99,102,241,0.4)] relative overflow-hidden group">
-                        
-                        {/* Terminal Glow */}
-                        <div className="absolute top-0 right-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
-                        
-                        <div className="absolute -top-32 -right-32 w-64 h-64 bg-indigo-600/[0.15] rounded-full blur-[80px]" />
-                        <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-cyan-600/[0.15] rounded-full blur-[80px]" />
+            {/* ── Countdown Timer ── */}
+            <section className="relative z-10 pb-16">
+                <div className="max-w-3xl mx-auto px-4 text-center">
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#E6D5B8]/30 mb-8">Countdown to Launch</p>
+                    <div className="flex justify-center gap-3 sm:gap-5 mb-6">
+                        {[
+                            { value: countdown.days, label: 'Days' },
+                            { value: countdown.hours, label: 'Hours' },
+                            { value: countdown.minutes, label: 'Min' },
+                            { value: countdown.seconds, label: 'Sec' },
+                        ].map((unit) => (
+                            <div key={unit.label} className="flex flex-col items-center">
+                                <div className="w-[72px] h-[72px] sm:w-[88px] sm:h-[88px] rounded-2xl bg-[#161310] border border-white/[0.06] flex items-center justify-center mb-2 relative overflow-hidden group hover:border-primary/20 transition-all duration-300 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6)]">
+                                    <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <span className="font-display text-3xl sm:text-4xl font-bold text-white relative z-10 tabular-nums">
+                                        {String(unit.value).padStart(2, '0')}
+                                    </span>
+                                </div>
+                                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.15em] text-[#E6D5B8]/30">{unit.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ── Get Notified First ── */}
+            <section id="waitlist" className="relative z-10 pb-24">
+                <div className="max-w-xl mx-auto px-4 text-center">
+                    <div className="bg-[#141110] rounded-3xl border border-white/[0.06] p-8 sm:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
+                        <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/[0.06] rounded-full blur-[60px]" />
+                        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-900/[0.08] rounded-full blur-[60px]" />
 
                         <div className="relative z-10">
                             {emailSubmitted ? (
-                                <div className="animate-in fade-in zoom-in duration-700">
-                                    <div className="w-20 h-20 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(6,182,212,0.2)]">
-                                        <span className="material-symbols-outlined text-cyan-400 text-4xl">fingerprint</span>
+                                <div className="animate-in fade-in zoom-in duration-500">
+                                    <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-6">
+                                        <span className="material-symbols-outlined text-emerald-400 text-3xl">verified</span>
                                     </div>
-                                    <h3 className="font-display text-3xl font-black text-white mb-3">ACCESS GRANTED</h3>
-                                    <p className="text-sm text-slate-400 mb-10 tracking-wide font-light">Welcome to the AssignMate Network. Ready to find your people?</p>
+                                    <h3 className="font-display text-2xl font-bold text-white mb-2">You're on the list!</h3>
+                                    <p className="text-sm text-[#E6D5B8]/50 mb-8">We've saved your spot. Share your unique link below to move up the priority list!</p>
 
-                                    <div className="bg-black/50 rounded-2xl border border-white/5 p-5 mb-8 relative font-mono text-left">
-                                        <div className="text-[9px] text-indigo-400 absolute -top-2 left-4 bg-[#070514] px-2 font-bold uppercase tracking-[0.2em]">Propagation Link</div>
-                                        <div className="flex items-center justify-between gap-4">
-                                            <span className="text-sm text-cyan-300 truncate">{referralLink}</span>
+                                    <div className="bg-[#0a0908] rounded-xl border border-white/5 p-4 mb-6 relative group">
+                                        <div className="text-[10px] text-white/20 absolute -top-2 left-3 bg-[#141110] px-2 font-bold uppercase tracking-wider">Your Referral Link</div>
+                                        <div className="flex items-center justify-between gap-3 overflow-hidden">
+                                            <span className="text-xs text-primary truncate font-mono">{referralLink}</span>
                                             <button
                                                 onClick={() => {
                                                     navigator.clipboard.writeText(referralLink);
+                                                    alert('Linked copied!');
                                                 }}
-                                                className="text-slate-500 hover:text-white transition-colors bg-white/5 p-2 rounded shrink-0 hover:bg-white/10"
+                                                className="text-white/40 hover:text-white transition-colors flex-shrink-0"
                                             >
-                                                <span className="material-symbols-outlined text-sm">content_copy</span>
+                                                <span className="material-symbols-outlined text-lg">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                                    <div className="flex items-center gap-3">
                                         <button
-                                            onClick={() => navigate('/feed')}
-                                            className="w-full flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-indigo-500 to-cyan-400 text-white hover:from-indigo-600 hover:to-cyan-500 rounded-xl font-bold text-sm uppercase tracking-widest transition-all shadow-[0_0_30px_rgba(99,102,241,0.3)]"
+                                            onClick={() => handleShare('whatsapp')}
+                                            className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs transition-all transform hover:-translate-y-1"
                                         >
-                                            Launch Dashboard
+                                            <i className="fab fa-whatsapp"></i> Share on WhatsApp
                                         </button>
                                         <button
-                                            onClick={() => navigate('/community-guidelines')}
-                                            className="w-full flex items-center justify-center gap-3 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-sm uppercase tracking-widest transition-all border border-white/20"
+                                            onClick={() => handleShare('twitter')}
+                                            className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#1DA1F2] hover:bg-[#1DA1F2]/80 text-white rounded-xl font-bold text-xs transition-all transform hover:-translate-y-1"
                                         >
-                                            Read Guidelines
+                                            <i className="fab fa-x-twitter"></i> Share on X
                                         </button>
                                     </div>
 
                                     <button
                                         onClick={() => setEmailSubmitted(false)}
-                                        className="text-[10px] text-slate-600 mt-10 font-bold uppercase tracking-[0.3em] hover:text-slate-300 transition-colors"
+                                        className="text-[10px] text-[#E6D5B8]/20 mt-8 font-bold uppercase tracking-widest hover:text-white/40 transition-colors"
                                     >
-                                        Join Another Friend
+                                        Register Another Email
                                     </button>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="w-16 h-16 rounded-2xl bg-black border border-indigo-500/30 flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(99,102,241,0.2)]">
-                                        <span className="material-symbols-outlined text-indigo-400 text-3xl">api</span>
+                                    <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
+                                        <span className="material-symbols-outlined text-primary text-2xl">notifications_active</span>
                                     </div>
 
-                                    <h3 className="font-display text-2xl sm:text-3xl font-black text-white mb-3 tracking-tight">JOIN THE MOVEMENT</h3>
-                                    <p className="text-sm text-slate-400 mb-10 font-light tracking-wide">Ready to find your people? Whether you need help with Calculus or want to find a hackathon team, your community is here.</p>
+                                    <h3 className="font-display text-xl sm:text-2xl font-bold text-white mb-2">Get Notified First</h3>
+                                    <p className="text-sm text-[#E6D5B8]/50 mb-8">Be among the first to experience AssignMate when we launch.</p>
 
-                                    <form onSubmit={handleNotifySubmit} className="flex flex-col gap-4">
-                                        <input
-                                            type="email"
-                                            required
-                                            placeholder="identity@domain.com"
-                                            value={notifyEmail}
-                                            onChange={(e) => setNotifyEmail(e.target.value)}
-                                            disabled={submitting}
-                                            className="w-full px-6 py-4 bg-black/60 border border-indigo-500/20 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-400 focus:border-cyan-400 transition-all text-sm font-mono disabled:opacity-50"
-                                        />
-                                        <div className="relative" ref={searchRef}>
+                                    <form onSubmit={handleNotifySubmit} className="flex flex-col gap-3">
+                                        <div className="flex flex-col sm:flex-row gap-3">
                                             <input
-                                                type="text"
+                                                type="email"
                                                 required
-                                                placeholder="Affiliated Institution (Sector)"
-                                                value={notifyCollege}
-                                                onChange={(e) => {
-                                                    setNotifyCollege(e.target.value);
-                                                    setShowSuggestions(true);
-                                                }}
-                                                onFocus={() => {
-                                                    if (notifyCollege.length >= 2) setShowSuggestions(true);
-                                                }}
+                                                placeholder="your@email.com"
+                                                value={notifyEmail}
+                                                onChange={(e) => setNotifyEmail(e.target.value)}
                                                 disabled={submitting}
-                                                className="w-full px-6 py-4 bg-black/60 border border-indigo-500/20 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-400 focus:border-cyan-400 transition-all text-sm font-mono disabled:opacity-50"
+                                                className="flex-1 px-5 py-3.5 bg-[#0a0908] border border-white/[0.08] rounded-xl text-white placeholder-[#E6D5B8]/25 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all text-sm disabled:opacity-50"
                                             />
-                                            {showSuggestions && suggestions.length > 0 && (
-                                                <div className="absolute top-full left-0 right-0 mt-3 bg-[#0a0f1d] border border-indigo-500/30 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden z-50 max-h-60 overflow-y-auto custom-scrollbar">
-                                                    {suggestions.map((college, idx) => (
-                                                        <button
-                                                            type="button"
-                                                            key={idx}
-                                                            className="w-full text-left px-5 py-4 hover:bg-indigo-500/10 transition-colors border-b border-white/5 last:border-0 relative font-mono group"
-                                                            onClick={() => {
-                                                                setNotifyCollege(college.name);
-                                                                setShowSuggestions(false);
-                                                            }}
-                                                        >
-                                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                            <div className="font-bold text-xs text-slate-300">{college.name}</div>
-                                                            <div className="text-[10px] text-slate-600 mt-1 uppercase tracking-widest">
-                                                                {college.state}
-                                                            </div>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
+                                            <div className="flex-1 relative" ref={searchRef}>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    placeholder="Your full college name"
+                                                    value={notifyCollege}
+                                                    onChange={(e) => {
+                                                        setNotifyCollege(e.target.value);
+                                                        setShowSuggestions(true);
+                                                    }}
+                                                    onFocus={() => {
+                                                        if (notifyCollege.length >= 2) setShowSuggestions(true);
+                                                    }}
+                                                    disabled={submitting}
+                                                    className="w-full px-5 py-3.5 bg-[#0a0908] border border-white/[0.08] rounded-xl text-white placeholder-[#E6D5B8]/25 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all text-sm disabled:opacity-50"
+                                                />
+                                                {showSuggestions && suggestions.length > 0 && (
+                                                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#121212] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 max-h-60 overflow-y-auto">
+                                                        {suggestions.map((college, idx) => (
+                                                            <button
+                                                                type="button"
+                                                                key={idx}
+                                                                className="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
+                                                                onClick={() => {
+                                                                    setNotifyCollege(college.name);
+                                                                    setShowSuggestions(false);
+                                                                }}
+                                                            >
+                                                                <div className="font-semibold text-sm text-[#E6D5B8]">{college.name}</div>
+                                                                <div className="text-xs text-[#E6D5B8]/50 mt-0.5">
+                                                                    {college.state} {college.type ? `• ${college.type}` : ''}
+                                                                </div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        
                                         <button
                                             type="submit"
                                             disabled={submitting}
-                                            className="group relative w-full px-8 py-4 bg-indigo-600 hover:bg-cyan-500 font-bold rounded-xl overflow-hidden transition-colors duration-500 mt-2"
+                                            className="w-full px-7 py-3.5 bg-primary hover:bg-orange-600 text-white font-bold rounded-xl shadow-[0_0_30px_rgba(255,107,0,0.2)] hover:shadow-[0_0_50px_rgba(255,107,0,0.35)] transition-all transform hover:-translate-y-0.5 whitespace-nowrap text-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
                                         >
-                                            <div className="absolute inset-0 bg-white/20 mix-blend-overlay w-0 group-hover:w-full transition-all duration-700 ease-out" />
-                                            <div className="relative flex items-center justify-center gap-3 text-white text-xs uppercase tracking-[0.2em]">
-                                                {submitting ? (
-                                                    <span className="flex items-center gap-2">
-                                                        <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                        Processing...
-                                                    </span>
-                                                ) : (
-                                                    <>
-                                                        Initialize Connection
-                                                        <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">
-                                                            east
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </div>
+                                            {submitting ? (
+                                                <>
+                                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                                    Saving...
+                                                </>
+                                            ) : 'Join the Waitlist'}
                                         </button>
                                     </form>
-
                                     {emailError && (
-                                        <p className="text-red-400 text-xs mt-4 font-mono">{emailError}</p>
+                                        <p className="text-red-400 text-xs mt-3">{emailError}</p>
                                     )}
-                                    <p className="text-[9px] text-slate-500 mt-6 uppercase tracking-widest font-bold">Encrypted End-to-End • Zero Analytics</p>
+                                    <p className="text-[10px] text-[#E6D5B8]/25 mt-5">No spam — just a single notification on launch day.</p>
                                 </>
                             )}
                         </div>
@@ -432,101 +389,200 @@ export const Landing = () => {
                 </div>
             </section>
 
-            {/* ── Core Systems ── */}
-            <section id="vision" className="relative z-10 pb-32">
-                <div className="max-w-6xl mx-auto px-6">
-                    <p className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-indigo-500 mb-12 flex items-center justify-center gap-4">
-                        <span className="w-12 h-px bg-indigo-500/30" />
-                        Core Modules
-                        <span className="w-12 h-px bg-indigo-500/30" />
-                    </p>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* ── Feature Teasers ── */}
+            <section className="relative z-10 pb-24">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-[#E6D5B8]/30 mb-12">What to Expect</p>
+                    <div className="grid sm:grid-cols-3 gap-5">
                         {[
                             {
-                                icon: 'dashboard',
-                                title: 'The Dashboard',
-                                desc: 'Advanced analytics, high-frequency synchronization, and hyper-personalized insights for every individual node in network.',
-                                color: 'indigo'
+                                icon: 'verified_user',
+                                title: 'Campus Verified',
+                                desc: 'Every student is ID-verified with their college credentials. No fake profiles — just real peers.',
                             },
                             {
-                                icon: 'device_hub',
-                                title: 'Community Graph',
-                                desc: 'Interact with peers across sectors seamlessly. Engineered for instantaneous knowledge transfer and real-time collaboration.',
-                                color: 'cyan'
+                                icon: 'hub',
+                                title: 'Smart Matching',
+                                desc: 'Find seniors and peers from your exact university who know your curriculum inside out.',
                             },
                             {
-                                icon: 'search_insights',
-                                title: 'Deep Search',
-                                desc: 'Locate resources, profiles, and critical intelligence across the global database with zero-latency querying engines.',
-                                color: 'purple'
+                                icon: 'shield',
+                                title: 'Secure & Free',
+                                desc: '100% free for students. End-to-end encrypted chats with built-in trust & safety systems.',
                             },
                         ].map((feature, i) => (
                             <div
                                 key={i}
-                                className="group p-8 rounded-3xl bg-[#090714] border border-white/[0.04] hover:border-indigo-500/30 transition-all duration-500 relative overflow-hidden flex flex-col items-start"
+                                className="group p-7 sm:p-8 rounded-2xl bg-[#141110] border border-white/[0.05] hover:border-primary/20 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,107,0,0.06)] relative overflow-hidden"
                             >
-                                <div className={`absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none
-                                    ${feature.color === 'indigo' ? 'bg-indigo-500' : feature.color === 'cyan' ? 'bg-cyan-500' : 'bg-purple-500'}`} 
-                                />
-                                <div className="w-12 h-12 rounded-xl bg-black border border-white/10 flex items-center justify-center mb-6 shadow-inner relative z-10">
-                                    <span className={`material-symbols-outlined text-2xl text-${feature.color}-400`}>{feature.icon}</span>
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/[0.03] rounded-full blur-2xl -mr-8 -mt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-300">
+                                    <span className="material-symbols-outlined text-xl text-primary">{feature.icon}</span>
                                 </div>
-                                <h4 className="font-display tracking-tight text-xl font-bold text-white mb-3 relative z-10">{feature.title}</h4>
-                                <p className="text-sm text-slate-400 font-light leading-relaxed relative z-10">{feature.desc}</p>
+                                <h4 className="font-display text-base font-bold text-white mb-2">{feature.title}</h4>
+                                <p className="text-sm text-[#E6D5B8]/45 leading-relaxed">{feature.desc}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* ── FAQ Protocol ── */}
-            <section className="relative z-10 py-24 bg-gradient-to-b from-transparent via-[#05030d] to-transparent">
-                <div className="max-w-3xl mx-auto px-6">
-                    <h2 className="font-display text-3xl font-black text-white text-center mb-12 tracking-tight">SYSTEM INQUIRIES</h2>
-                    <div className="bg-[#030108] border border-white/5 rounded-3xl p-8 sm:p-12 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
+            {/* ── Early Access Perks ── */}
+            <section className="relative z-10 pb-24">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="bg-gradient-to-r from-[#161310] to-[#0e0c0a] rounded-[40px] border border-white/[0.04] p-10 sm:p-16 relative overflow-hidden text-center sm:text-left">
+                        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/[0.03] blur-[100px] -mr-40 -mt-40" />
+                        <div className="flex flex-col sm:flex-row items-center gap-12 relative z-10">
+                            <div className="flex-1">
+                                <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mb-6">Early Access Perks</h2>
+                                <p className="text-[#E6D5B8]/50 text-sm sm:text-base leading-relaxed mb-8">
+                                    Joining early isn't just about the spot — it's about the privileges. Get exclusive rewards that won't be available after the public launch.
+                                </p>
+                                <ul className="space-y-5">
+                                    {[
+                                        { title: 'Exclusive Founder Badge', desc: 'A permanent flair on your profile showing you were here first.' },
+                                        { title: 'AssignMate Plus (6 Months)', desc: 'Full access to all premium matching and analytics tools for free.' },
+                                        { title: 'Beta Community Access', desc: 'Direct access to the core team to help shape the future of AssignMate.' }
+                                    ].map((item, idx) => (
+                                        <li key={idx} className="flex items-start gap-4">
+                                            <div className="mt-1 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                                <span className="material-symbols-outlined text-primary text-[10px] font-bold">check</span>
+                                            </div>
+                                            <div>
+                                                <h5 className="text-sm font-bold text-white">{item.title}</h5>
+                                                <p className="text-xs text-[#E6D5B8]/30">{item.desc}</p>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div className="w-full sm:w-1/3 aspect-square rounded-3xl bg-white/[0.02] border border-white/5 flex items-center justify-center p-8 relative overflow-hidden group">
+                                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-primary/5 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                                <div className="relative text-center">
+                                    <span className="material-symbols-outlined text-primary text-[64px] mb-4 animate-bounce">workspace_premium</span>
+                                    <div className="text-xs font-bold uppercase tracking-widest text-[#E6D5B8]/40">Exclusive for the</div>
+                                    <div className="text-xl font-display font-black text-white">First 5,000 Signups</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ── Founder's Note ── */}
+            <section className="relative z-10 pb-24 border-b border-white/5">
+                <div className="max-w-4xl mx-auto px-4 text-center">
+                    <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/20 mx-auto mb-8 shadow-[0_0_40px_rgba(255,107,0,0.1)]">
+                        <img src="https://i.pravatar.cc/150?u=founder" alt="Founder" className="w-full h-full object-cover" />
+                    </div>
+                    <h3 className="font-display text-2xl font-bold text-white mb-4">"Building for the Indian Campus"</h3>
+                    <p className="text-base text-[#E6D5B8]/50 italic font-light leading-relaxed mb-8 max-w-2xl mx-auto">
+                        "AssignMate started from a simple frustration: why is it so hard to find reliable peers on campus? We're building this for every student who has ever felt lost in a crowded lecture hall or struggled with a project alone."
+                    </p>
+                    <div className="text-sm">
+                        <span className="font-bold text-white">Junaid Pasha</span>
+                        <span className="text-primary/40 mx-2">•</span>
+                        <span className="text-[#E6D5B8]/30">Founder, AssignMate</span>
+                    </div>
+                </div>
+            </section>
+
+            {/* ── FAQ Section ── */}
+            <section className="relative z-10 py-24">
+                <div className="max-w-3xl mx-auto px-4">
+                    <h2 className="font-display text-2xl sm:text-3xl font-bold text-white text-center mb-12">Common Questions</h2>
+                    <div className="bg-[#141110]/50 border border-white/[0.03] rounded-3xl p-6 sm:p-10">
                         <FAQItem
-                            question="What is the METAMINDS architecture?"
-                            answer="It's a next-generation platform fusing individual productivity dashboards with massive, high-speed community networks."
+                            question="Is AssignMate really free for students?"
+                            answer="Yes, the core collaboration and networking features will always be 100% free for verified students across India."
                         />
                         <FAQItem
-                            question="Are the branches isolated?"
-                            answer="The Dashboard (Sai Tej Segment) and Community (Saif Segment) are developed independently but merge into a single, cohesive engine for the end user."
+                            question="How do you verify if someone is actually a student?"
+                            answer="We use a multi-step verification process including .edu emails, college ID verification, and geo-fenced campus check-ins."
                         />
                         <FAQItem
-                            question="What happens during initialization?"
-                            answer="Early adopters gain immediate access to beta-level APIs, premium node status, and an unmetered connection to the foundation layer."
+                            question="What happens when someone shares a referral link?"
+                            answer="Referring friends helps you move up the priority list for the private beta launch and unlocks exclusive early-adopter badges."
                         />
+                        <FAQItem
+                            question="Is my data safe and private?"
+                            answer="Absolutely. We use end-to-end encryption for chats and we never sell your personal student data to third parties."
+                        />
+                    </div>
+                </div>
+            </section>
+
+            {/* ── Bottom CTA ── */}
+            <section className="relative z-10 pb-16">
+                <div className="max-w-3xl mx-auto px-4 text-center">
+                    <div className="py-12 px-6 rounded-3xl bg-gradient-to-b from-[#161310] to-[#0e0c0a] border border-white/[0.04] relative overflow-hidden">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                        <p className="text-[#E6D5B8]/40 text-sm font-light mb-3">Trusted by students across</p>
+                        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-semibold text-[#E6D5B8]/60">
+                            <span>IITs</span>
+                            <span className="text-primary/40">•</span>
+                            <span>NITs</span>
+                            <span className="text-primary/40">•</span>
+                            <span>Delhi University</span>
+                            <span className="text-primary/40">•</span>
+                            <span>BITS</span>
+                            <span className="text-primary/40">•</span>
+                            <span>NLUs</span>
+                            <span className="text-primary/40">•</span>
+                            <span>500+ colleges</span>
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* ── Developer Bypass Button ── */}
             {isDevMode && (
-                <div className="fixed bottom-8 left-8 z-50">
+                <div className="fixed bottom-6 right-6 z-50">
                     <button
                         onClick={() => navigate('/auth')}
-                        className="flex items-center gap-3 px-6 py-4 bg-white hover:bg-slate-200 text-black text-xs font-black uppercase tracking-[0.2em] rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all transform hover:scale-105"
+                        className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-sm font-bold rounded-xl shadow-[0_4px_20px_rgba(124,58,237,0.3)] hover:shadow-[0_4px_25px_rgba(124,58,237,0.5)] transition-all hover:-translate-y-1 transform border border-white/10"
                     >
-                        <span className="material-symbols-outlined text-lg">admin_panel_settings</span>
-                        Dev Overide
+                        <span className="material-symbols-outlined text-lg">code</span>
+                        Developer Mode: Enter App
                     </button>
                 </div>
             )}
 
-            {/* ── Footer Terminal ── */}
-            <footer className="relative z-10 border-t border-white/[0.05] py-10 bg-black">
-                <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-3">
-                        <div className="w-5 h-5 bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center">
-                            <div className="w-1 h-1 bg-black" />
+            {/* ── Minimal Footer ── */}
+            <footer className="relative z-10 border-t border-white/[0.04] py-8">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-8 sm:gap-4">
+                    <div className="flex flex-col items-center sm:items-start gap-4">
+                        <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-md overflow-hidden">
+                                <img src="/logo.png" alt="AssignMate" className="w-full h-full object-cover" />
+                            </div>
+                            <span className="text-xs text-[#E6D5B8]/30 font-bold tracking-wider">ASSIGNMATE</span>
                         </div>
-                        <span className="text-[10px] text-slate-500 font-bold tracking-[0.3em] uppercase">METAMINDS CORE VER 1.0.0</span>
+                        <p className="text-[10px] text-[#E6D5B8]/20 max-w-xs text-center sm:text-left leading-relaxed">
+                            © 2026 AssignMate Private Limited. Built with ❤️ for students in India.
+                        </p>
                     </div>
 
-                    <div className="flex gap-6 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
-                        <a href="/terms" className="hover:text-indigo-400 transition-colors">Protocols</a>
-                        <a href="/privacy" className="hover:text-cyan-400 transition-colors">Telemetry Privacy</a>
+                    <div className="grid grid-cols-2 sm:flex items-start gap-12 text-xs text-[#E6D5B8]/30">
+                        <div className="flex flex-col gap-3">
+                            <h6 className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Legal</h6>
+                            <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
+                            <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
+                            <a href="/community-guidelines" className="hover:text-primary transition-colors">Guidelines</a>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <h6 className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Connect</h6>
+                            <a href="https://instagram.com/assignmate" className="hover:text-primary transition-colors">Instagram</a>
+                            <a href="https://twitter.com/assignmate" className="hover:text-primary transition-colors">Twitter (X)</a>
+                            <a href="https://discord.gg/assignmate" className="hover:text-primary transition-colors">Discord</a>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <h6 className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Support</h6>
+                            <a href="mailto:support@assignmate.com" className="hover:text-primary transition-colors flex items-center gap-1">
+                                <span className="material-symbols-outlined text-xs">mail</span>
+                                Contact
+                            </a>
+                        </div>
                     </div>
                 </div>
             </footer>
